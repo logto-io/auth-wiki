@@ -25,9 +25,9 @@ The [OAuth Device Authorization Flow](https://www.rfc-editor.org/rfc/rfc8628), a
 
 Ignoring the QR code sign-in variant, let’s focus on the standard OAuth 2.0 device flow. There are two types of devices involved:
 
-### **Device code display device**
+### Device code display device
 
-This is the input-limited device or headless application where the user needs to authorize access. It displays the [Device code](/#what-does-device-flow-workflow-look-like) and [Verification URL](/#what-does-device-flow-workflow-look-like), guiding the user on how to proceed.
+This is the input-limited device or headless application where the user needs to authorize access. It displays the [device code and verification URI](#what-does-device-flow-workflow-look-like), guiding the user on how to proceed.
 
 The basic UI is:
 
@@ -51,10 +51,10 @@ Following the instructions on the sign-in target device, the user will:
 
 Here are some established products’ device flow Verification URLs for your testing:
 
-- Log in to [Youtube on smart TVs](https://www.youtube.com/watch?v=yTcuazSy5Cs): [youtube.com/activate](http://youtube.com/activate)
-- Log in to Disney+ on smart TV: [disneyplus.com/begin](http://disneyplus.com/begin)
-- Log in to [Shopify on Samsun Galaxy Watch](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html): [spotify.com/pair](https://www.notion.so/d1143f2ff2f341cf81612f8ab7131278?pvs=21)
-- Log in to [Zoom on meeting devices](https://developers.zoom.us/blog/device-authorization/): [zoom.us/oauth_device](http://zoom.us/oauth_device)
+- Log in to [Youtube on smart TVs](https://www.youtube.com/watch?v=yTcuazSy5Cs): [youtube.com/activate](https://youtube.com/activate)
+- Log in to Disney+ on smart TV: [disneyplus.com/begin](https://disneyplus.com/begin)
+- Log in to [Shopify on Samsun Galaxy Watch](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html): [spotify.com/pair](https://spotify.com/pair)
+- Log in to [Zoom on meeting devices](https://developers.zoom.us/blog/device-authorization/): [zoom.us/oauth_device](https://zoom.us/oauth_device)
 - Log in to [GitHub CLI](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow): [github.com/login/device](https://github.com/login/device)
 - Utilize [Google device flow](https://www.oauth.com/oauth2-servers/device-flow/user-flow/): https://www.google.com/device
 
@@ -71,7 +71,7 @@ First, you should understand the parameters of device authorization response, wh
 | `expires_in`                           | The lifetime in seconds of the "device_code" and "user_code".                                                                                                                  |
 | `interval`                             | The minimum amount of time in seconds that the client SHOULD wait between polling requests to the token endpoint.  If no value is provided, clients MUST use 5 as the default. |
 
-```jsx
+```json
 {
     "device_code": "GmRhmhcxhwAzkoEqiMEg_DnyEysNkuNhszIySk9eS",
     "user_code": "WDJBMJHT",
