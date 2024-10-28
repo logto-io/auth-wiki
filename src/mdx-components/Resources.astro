@@ -1,0 +1,78 @@
+---
+import ogs from "open-graph-scraper";
+
+type Props = {
+  /**
+   * The external URLs of the resources to be displayed in the section.
+   */
+  urls: string[];
+};
+
+const { urls } = Astro.props;
+
+if (urls.length === 0) {
+  throw new Error('The "urls" prop must contain at least one URL.');
+}
+
+const results = await Promise.all(
+  urls.map(async (url) => {
+    const { result, error } = await ogs({ url });
+    if (error) {
+      throw new Error(`Failed to fetch Open Graph data for ${url}: ${error}`);
+    }
+
+    if (!result.ogTitle) {
+      throw new Error(
+        `The Open Graph data for ${url} does not contain a title.`,
+      );
+    }
+
+    return { url, result };
+  }),
+);
+---
+
+<aside>
+  <h2>Resources and references</h2>
+  {
+    results.map(({ url, result }) => (
+      <a href={url} class="resource" target="_blank" rel="noopener">
+        <h3>{result.ogTitle}</h3>
+        {result.ogDescription && <p>{result.ogDescription}</p>}
+      </a>
+    ))
+  }
+</aside>
+
+<style>
+  body a.resource {
+    display: block;
+    text-decoration: none;
+    border-radius: 16px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.18);
+    margin-block-start: 16px;
+    transition: background-color 0.2s ease-in-out;
+  }
+  body a.resource:hover {
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.24);
+  }
+  body a.resource h3 {
+    color: #55ccff;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-block: 0 20px;
+  }
+  body a.resource p {
+    margin-block: 8px 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

@@ -12,6 +12,10 @@ type Props = {
 };
 
 const { slugs } = Astro.props;
+
+if (slugs.length === 0) {
+  throw new Error('The "slugs" prop must contain at least one slug.');
+}
 ---
 
 <h2>See also</h2>
