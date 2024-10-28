@@ -1,11 +1,20 @@
 ---
 import ogs from "open-graph-scraper";
 
+/** Type to override the default metadata for the page. */
+type UrlMetadata = {
+  url: string;
+  result: {
+    ogTitle: string;
+    ogDescription?: string;
+  };
+};
+
 type Props = {
   /**
    * The external URLs of the resources to be displayed in the section.
    */
-  urls: string[];
+  urls: (string | UrlMetadata)[];
 };
 
 const { urls } = Astro.props;
@@ -16,6 +25,10 @@ if (urls.length === 0) {
 
 const results = await Promise.all(
   urls.map(async (url) => {
+    if (typeof url === "object") {
+      return url;
+    }
+
     const { result, error } = await ogs({ url });
     if (error) {
       throw new Error(`Failed to fetch Open Graph data for ${url}: ${error}`);
