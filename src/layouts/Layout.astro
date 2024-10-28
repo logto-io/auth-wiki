@@ -1,3 +1,11 @@
+---
+type Props = {
+  title?: string;
+};
+
+const { title } = Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -6,7 +14,7 @@
       name="description"
       content="Auth Wiki is a comprehensive collection of articles, tutorials, and resources about authentication and authorization. Learn about OAuth 2.0, OpenID Connect, SAML, and more."
     />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link
       rel="icon"
@@ -17,18 +25,18 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <meta name="generator" content={Astro.generator} />
-    <title>
-      Auth.wiki - All you need to know about authentication and authorization
-    </title>
+    <title>{title ? `${title} · Auth Wiki` : "Auth Wiki"}</title>
     <style>
       /* Load fonts */
       @import url("https://fonts.googleapis.com/css2?family=Cantata+One&display=swap");
     </style>
   </head>
+
   <body>
     <slot />
   </body>
 </html>
+
 <style is:global>
   :root {
     --text-color: #fff;
