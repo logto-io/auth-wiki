@@ -14,7 +14,7 @@ const { title } = Astro.props;
       name="description"
       content="Auth Wiki is a comprehensive collection of articles, tutorials, and resources about authentication and authorization. Learn about OAuth 2.0, OpenID Connect, SAML, and more."
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link
       rel="icon"
@@ -40,6 +40,18 @@ const { title } = Astro.props;
 <style is:global>
   :root {
     --text-color: #fff;
+    --content-max-width: 1280px;
+    --content-padding: 40px;
+  }
+  @media (max-width: 810px) {
+    :root {
+      --content-padding: 24px;
+    }
+  }
+  @media (max-width: 420px) {
+    :root {
+      --content-padding: 16px;
+    }
   }
   * {
     box-sizing: border-box;

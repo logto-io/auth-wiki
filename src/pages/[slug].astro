@@ -36,7 +36,7 @@ if (!Content) {
   <FancyHr />
   <main>
     <article>
-      <BackgroundCells class="background-grid" />
+      <BackgroundCells class="background-cells" />
       <div class="metadata">
         <Tags data={tags} />
         <h1>{title}</h1>
@@ -71,15 +71,20 @@ if (!Content) {
 <style>
   article {
     margin: 0 auto;
-    padding: 0 40px;
-    max-width: 1280px;
+    padding: 0 var(--content-padding);
+    max-width: var(--content-max-width);
     position: relative;
   }
-  .background-grid {
+  .background-cells {
     position: absolute;
     z-index: -1;
     right: 12px;
     top: 100px;
+  }
+  @media (max-width: 810px) {
+    .background-cells {
+      display: none;
+    }
   }
   div.metadata {
     display: flex;
