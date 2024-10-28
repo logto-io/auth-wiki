@@ -1,23 +1,30 @@
 ---
 import { Icon } from "astro-icon/components";
 
-if (
-  !/^https:\/\//.test(Astro.props.href) &&
-  !Astro.props.href.startsWith("#") // TODO: Add support for anchor links
-) {
+const isExternal = /^https:\/\//.test(Astro.props.href);
+const isAnchor = Astro.props.href.startsWith("#");
+
+if (!isExternal && !isAnchor) {
   throw new Error(
-    `The URL "${Astro.props.href}" must be an external HTTPS URL.`,
+    `The href "${Astro.props.href}" must be an external HTTPS URL or an anchor.`,
   );
 }
 ---
 
 <span>
-  <Icon name="external-link" />
-  <a target="_blank" rel="noopener" {...Astro.props}><slot /></a>
+  {isExternal &&
+    <Icon name="external-link" />
+    <a target="_blank" rel="noopener" {...Astro.props}><slot /></a>
+  }
+  {isAnchor &&
+    <Icon name="hyperlink" />
+    <a {...Astro.props}><slot /></a>
+  }
 </span>
 
 <style>
-  [data-icon="external-link"] {
+  [data-icon="external-link"],
+  [data-icon="hyperlink"] {
     vertical-align: sub;
     height: 1.1em;
     color: rgb(158, 120, 255);

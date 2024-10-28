@@ -59,16 +59,16 @@ Request parameters are as follows:
 
 ```bash
 curl -X GET "https://authorization-server.com/auth" \
--d "response_type=code" \
--d "client_id=YOUR_APPLICATION_ID" \
--d "redirect_uri=https://yourapp.com/callback" \
--d "scope=openid profile email" \
--d "state=RANDOM_STRING_FOR_STATE"
+  -d "response_type=code" \
+  -d "client_id=YOUR_APPLICATION_ID" \
+  -d "redirect_uri=https://yourapp.com/callback" \
+  -d "scope=openid profile email" \
+  -d "state=RANDOM_STRING_FOR_STATE"
 ```
 
 A typical successful response:
 
-```
+```http
 HTTP/1.1 302 Found
 Location: https://yourapp.com/callback?
   code=YOUR_AUTHORIZATION_CODE
@@ -85,11 +85,11 @@ The client is expected to obtain and process the `code` with a subsequent token 
 
 ```bash
 curl -X POST "https://authorization-server.com/token" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "client_id=YOUR_CLIENT_ID" \
--d "code=YOUR_AUTHORIZATION_CODE" \
--d "redirect_uri=https://yourapp.com/callback" \
--d "grant_type=authorization_code" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "code=YOUR_AUTHORIZATION_CODE" \
+  -d "redirect_uri=https://yourapp.com/callback" \
+  -d "grant_type=authorization_code" \
 ```
 
 ## Benefits

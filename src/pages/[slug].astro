@@ -151,8 +151,6 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
     position: relative;
     background-color: black;
     min-height: 50vh;
-    font-size: 18px;
-    line-height: 1.8;
     color: rgba(255, 255, 255, 0.8);
   }
   nav.toc {
@@ -188,6 +186,8 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
   .main-body {
     flex: 1;
     overflow: hidden;
+    font-size: 18px;
+    line-height: 1.8;
   }
   .main-body :global(h2) {
     color: #fff;
@@ -229,15 +229,79 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
   .main-body :global(img) {
     max-width: 100%;
   }
+  .main-body :global(:not(pre) code) {
+    font-size: 85%;
+    padding: 0.2em 0.4em;
+    background-color: #f7f8f829;
+    border-radius: 4px;
+    border: 1px solid #f7f8f824;
+    color: #f7f8f8;
+  }
   .main-body :global(pre) {
     padding: 24px;
-    margin: 0.5em 0;
+    margin-block: 1em;
     overflow: auto;
     border-radius: 16px;
-    font:
-      400 14px / 20px "Fira Code",
-      "Roboto Mono",
-      monospace;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .main-body :global(table) {
+    font-size: 14px;
+    line-height: 20px;
+    color: #f7f8f8;
+    border-spacing: 0;
+    margin-block: 1em;
+  }
+  .main-body :global(thead),
+  .main-body :global(tbody) {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .main-body :global(td) {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+  .main-body :global(th),
+  .main-body :global(td) {
+    padding: 10px 12px;
+  }
+  /* Render table border radius */
+  .main-body :global(tr:first-child th:first-child) {
+    border-top-left-radius: 8px;
+  }
+  .main-body :global(tr:first-child th:last-child) {
+    border-top-right-radius: 8px;
+  }
+  .main-body :global(tr:last-child td:first-child) {
+    border-bottom-left-radius: 8px;
+  }
+  .main-body :global(tr:last-child td:last-child) {
+    border-bottom-right-radius: 8px;
+  }
+  /* Render table border for preciesly 1px without overlapping between cells */
+  .main-body :global(th),
+  .main-body :global(td) {
+    border-style: solid;
+    border-width: 0 1px 1px 0;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .main-body :global(tr:first-child th) {
+    border-top-width: 1px;
+  }
+  .main-body :global(th:first-child),
+  .main-body :global(td:first-child) {
+    border-left-width: 1px;
+  }
+  .main-body :global(blockquote) {
+    margin-inline: 0;
+    margin-block: 20px;
+    padding: 12px 24px 12px 20px;
+    font-size: 16px;
+    border-left: 4px solid #a9acac;
+    border-radius: 4px;
+    background-color: #f7f8f820;
+    color: #f7f8f8;
+  }
+  .main-body :global(blockquote p) {
+    margin-block: 0;
   }
   @media (max-width: 999px) {
     div.content {
