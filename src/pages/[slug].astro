@@ -12,6 +12,7 @@ import Ref from "../mdx-components/Ref.astro";
 import SeeAlso from "../mdx-components/SeeAlso.astro";
 import Resources from "../mdx-components/Resources.astro";
 import TextLink from "../mdx-components/TextLink.astro";
+import ShareButton from "../components/ShareButton.astro";
 
 export async function getStaticPaths() {
   return articles.map(({ slug, ...rest }) => {
@@ -51,6 +52,15 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
         <p class="description">
           {description}
         </p>
+        <aside class="share">
+          <span>Share</span>
+          <div>
+            <ShareButton type="x" title={title} />
+            <ShareButton type="reddit" title={title} />
+            <ShareButton type="linked-in" title={title} />
+            <ShareButton type="hacker-news" title={title} />
+          </div>
+        </aside>
       </div>
       <div class="content">
         <nav class="toc">
@@ -119,6 +129,20 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
     margin: 0 auto;
     text-align: start;
   }
+  aside.share {
+    margin-block: 20px;
+    display: flex;
+    align-items: center;
+    color: #a9acac;
+    gap: 24px;
+    font-weight: 600;
+  }
+  aside.share div {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+  }
   div.content {
     display: flex;
     gap: 48px;
@@ -130,11 +154,6 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
     font-size: 18px;
     line-height: 1.8;
     color: rgba(255, 255, 255, 0.8);
-  }
-  @media screen and (max-width: 999px) {
-    nav.toc {
-      display: none;
-    }
   }
   nav.toc {
     margin-block-start: 40px;
@@ -219,5 +238,13 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
       400 14px / 20px "Fira Code",
       "Roboto Mono",
       monospace;
+  }
+  @media (max-width: 999px) {
+    div.content {
+      margin-top: 40px;
+    }
+    nav.toc {
+      display: none;
+    }
   }
 </style>

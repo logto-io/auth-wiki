@@ -1,0 +1,65 @@
+---
+import { Icon } from "astro-icon/components";
+import { type buildShareUrlMap } from "../utils/share";
+
+type Props = {
+  /**
+   * The type of share button to render. It must be a valid key of the `buildShareUrlMap` object
+   * and it must can be loaded from the `astro-icon` package.
+   * @see {@link https://astroicon.dev/} for more information.
+   */
+  type: keyof typeof buildShareUrlMap;
+  /**
+   * The title of the page to share.
+   */
+  title: string;
+};
+
+const { type, title } = Astro.props;
+---
+
+<astro-share data-type={type} data-title={title}>
+  <button>
+    <Icon name={type} />
+  </button>
+</astro-share>
+
+<style>
+  button {
+    border: none;
+    background: none;
+    padding: 0;
+    display: block;
+    vertical-align: middle;
+    cursor: pointer;
+    height: 20px;
+  }
+
+  button svg {
+    width: 20px;
+    height: 20px;
+  }
+</style>
+
+<script>
+  // Astro doesn't provide syntax sugar for passing frontmatter variables to scripts.
+  // https://docs.astro.build/en/guides/client-side-scripts/#pass-frontmatter-variables-to-scripts
+  import { buildShareUrlMap } from "../utils/share";
+
+  class AstroShare extends HTMLElement {
+    connectedCallback() {
+      const type = this.dataset.type;
+      const title = this.dataset.title ?? document.title;
+      const button = this.querySelector("button");
+      const buildUrl = type && buildShareUrlMap[type];
+
+      if (button && buildUrl) {
+        button?.addEventListener("click", () => {
+          window.open(buildUrl(window.location.href, title));
+        });
+      }
+    }
+  }
+
+  customElements.define("astro-share", AstroShare);
+</script>
