@@ -1,0 +1,165 @@
+---
+title: JSON Web Token (JWT)
+tags: [authentication, authorization, jwt]
+description: JSON Web Token (JWT) is an open standard defined in RFC 7519 that enables secure communication between two parties. It is compact, URL-safe, and self-contained, making it ideal for transmitting authentication and authorization data between services.
+---
+
+## What is a JSON Web Token (JWT)?
+
+JSON Web Token (JWT) is widely used in modern web applications and open standards such as OpenID Connect, facilitating authentication and authorization. While the official [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) serves as an essential reference, it will be challenging for beginners to understand. In this article, we'll focus on the core concepts of JWT and present them in straightforward language with examples.
+
+## Why do we need JWT?
+
+Nowadays, it's pretty common to use JSON to exchange data between two parties. Consider a JSON object representing a user:
+
+```json
+{
+  "sub": "foo",
+  "name": "John Doe"
+}
+```
+
+> `sub` is short for "subject", which is a [standard claim](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims) in OpenID Connect to represent the user identifier (user ID).
+
+How can we guarantee the **integrity** of this JSON object? In other words, how can we make sure that the data is not tampered with during the transmission? A common solution is to use digital signatures. For example, we can use [public-key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography): the server signs the JSON object with its private key, and the client can verify the signature with the server's public key.
+
+In a nutshell, JWT offers a standardized approach to representing the JSON object and its signature.
+
+> JWT can also be used to encrypt the JSON object, but it's not the focus of this article.
+
+## The format of JWT
+
+Since there are many algorithms for creating digital signatures, it's necessary to specify the algorithm used for JWT signing. This is accomplished by constructing a JSON object:
+
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+> `alg` is short for "algorithm", and `typ` is short for "type".
+
+Typically, `typ` is set to `JWT` in uppercase. For our example, `alg` is `HS256`, which stands for [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC) (we'll explain it soon), and indicates we're using this algorithm to create the signature.
+
+Now, we have all the ingredients for a JWT:
+
+- Header JSON: Algorithm and type
+- Payload JSON: The actual data
+- Signature: The signature encompassing the header and payload
+
+However, certain characters like spaces and line breaks are not friendly to network transmission. Therefore, the header and payload need to be **Base64URL-encoded**. The typical JWT looks like this:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+> The `.` serves as the delimiter.
+
+Let's put everything together and create a JWT:
+
+### Header
+
+JSON: `{"alg":"HS256","typ":"JWT"}`
+
+Base64URL encoded: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`
+
+### Payload
+
+JSON: `{"sub":"foo","name":"John Doe"}`
+
+Base64URL encoded: `eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ`
+
+### Signature
+
+In HMAC-SHA256, the signature is created with a secret:
+
+```
+HMAC-SHA256(base64Url(header) + "." + base64Url(payload), secret)
+```
+
+For instance, with the secret as `some-great-secret`, the signature becomes: `XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g`.
+
+### JWT
+
+The final JWT is:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g
+```
+
+This valid JWT can be verified by any party possessing the secret.
+
+## Choose the signing algorithm
+
+As mentioned earlier, there are various algorithms to create digital signatures. We used `HS256` as an example, but it may not be strong enough since the secret must be shared between the parties (e.g. the client and the server).
+
+In real-world scenarios, clients may include public applications like React apps that cannot keep the secret safe. Consequently, the preferred approach involves utilizing public-key cryptography (i.e. asymmetric cryptography) for signing the JWT. Let's start with the most popular algorithm: [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem).
+
+### RSA
+
+RSA, an asymmetric algorithm, uses a pair of keys: a public key and a private key. The public key is used to verify the signature, while the private key is used for signing.
+
+The header JSON for RSA looks like this:
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+```
+
+> `RS256` stands for RSA-SHA256, which means the signature is created with the RSA algorithm and SHA256 hash function. You can also use `RS384` and `RS512` to create signatures with SHA384 and SHA512 hash functions, respectively.
+
+The signature is created with the private key:
+
+```
+RSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+Again, we can assemble these parts to create a JWT, and the final JWT looks like this:
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+Now, the client can verify the signature without knowing the private key.
+
+### ECDSA
+
+Although RSA is widely adopted, it suffers from larger signature sizes, sometimes surpassing the combined size of the header and payload. The Elliptic Curve Digital Signature Algorithm (ECDSA) is another asymmetric algorithm that can create more compact signatures and is more performant.
+
+To generate a private key for ECDSA, we need to choose a curve. This is out of the scope of this article, but you can find more information [here](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Elliptic_Curve_Digital_Signature_Algorithm).
+
+The header JSON for ECDSA looks like this:
+
+```json
+{
+  "alg": "ES256",
+  "typ": "JWT"
+}
+```
+
+> `ES256` stands for ECDSA-SHA256, which means the signature is created with the ECDSA algorithm and SHA256 hash function. You can also use `ES384` and `ES512` to create signatures with SHA384 and SHA512 hash functions, respectively.
+
+The signature is created with the private key:
+
+```
+ECDSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+The final JWT retains the same structure as RSA but with a significantly shorter signature:
+
+```
+eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+## Verify the JWT
+
+Verifying a JWT is straightforward as the reverse process of creating a JWT:
+
+1. Split the JWT into three parts (header, payload, and signature) using the `.` delimiter.
+2. Decode the header and payload with Base64URL.
+3. Verify the signature with the algorithm specified in the header and the public key (for asymmetric algorithms).
+
+There are many libraries that are available to assist with JWT verification, such as [jose](https://github.com/panva/jose) for Node.js and web browsers.
