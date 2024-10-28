@@ -11,6 +11,7 @@ import Img from "../mdx-components/Img.astro";
 import Ref from "../mdx-components/Ref.astro";
 import SeeAlso from "../mdx-components/SeeAlso.astro";
 import Resources from "../mdx-components/Resources.astro";
+import TextLink from "../mdx-components/TextLink.astro";
 
 export async function getStaticPaths() {
   return articles.map(({ slug, ...rest }) => {
@@ -67,7 +68,9 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
           </ul>
         </nav>
         <div class="main-body">
-          <Content components={{ img: Img, Ref, SeeAlso, Resources }} />
+          <Content
+            components={{ a: TextLink, img: Img, Ref, SeeAlso, Resources }}
+          />
         </div>
       </div>
     </article>
