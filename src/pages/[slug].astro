@@ -32,6 +32,10 @@ const {
 if (!Content) {
   return Astro.redirect("/404");
 }
+
+if (getHeadings().some(({ depth }) => depth === 1)) {
+  throw new Error("The article must not contain a top-level heading.");
+}
 ---
 
 <Layout title={title} description={description}>
