@@ -1,0 +1,33 @@
+---
+import { articles } from "../libraries/articles";
+import Ref from "./Ref.astro";
+
+type Props = {
+  /**
+   * The internal slugs of the articles to be displayed in the "See also" section.
+   * They must be valid slugs of articles loaded in the site.
+   * @see {@link articles} for the list of available articles.
+   */
+  slugs: string[];
+};
+
+const { slugs } = Astro.props;
+---
+
+<h2>See also</h2>
+<ul class="list">
+  {
+    slugs.map((slug) => (
+      <li>
+        <Ref slug={slug} />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  body ul.list {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+</style>
