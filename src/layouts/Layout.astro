@@ -1,20 +1,34 @@
 ---
+import { AstroSeo } from "@astrolib/seo";
+
 type Props = {
   title?: string;
   description?: string;
 };
 
-const { title, description } = Astro.props;
+const { props } = Astro;
+
+const title = props.title ? `${props.title} · Auth Wiki` : "Auth Wiki";
+const description =
+  props.description ??
+  "Auth Wiki is a comprehensive collection of articles, tutorials, and resources about authentication and authorization. Learn about OAuth 2.0, OpenID Connect, SAML, and more.";
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="description"
-      content={description ??
-        "Auth Wiki is a comprehensive collection of articles, tutorials, and resources about authentication and authorization. Learn about OAuth 2.0, OpenID Connect, SAML, and more."}
+    <AstroSeo
+      title={title}
+      description={description}
+      canonical={canonical}
+      openGraph={{
+        title,
+        description,
+        url: canonical,
+        site_name: "Auth Wiki",
+      }}
     />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -27,11 +41,7 @@ const { title, description } = Astro.props;
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title ? `${title} · Auth Wiki` : "Auth Wiki"}</title>
-    <style>
-      /* Load fonts */
-      @import url("https://fonts.googleapis.com/css2?family=Cantata+One&display=swap");
-    </style>
+    <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
 
   <body>

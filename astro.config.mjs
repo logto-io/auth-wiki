@@ -1,10 +1,15 @@
 import { defineConfig } from 'astro/config';
 import rehypeMermaid from 'rehype-mermaid';
 import { rehypeShiki } from '@astrojs/markdown-remark';
+import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://auth.wiki',
+  build: {
+    format: 'file',
+  },
   markdown: {
     rehypePlugins: [
       [rehypeMermaid, { mermaidConfig: { theme: 'dark' } }],
@@ -12,5 +17,5 @@ export default defineConfig({
     ],
     syntaxHighlight: false
   },
-  integrations: [mdx({})]
+  integrations: [mdx(), sitemap()]
 });
