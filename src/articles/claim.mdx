@@ -1,0 +1,72 @@
+---
+title: Claim
+tags: [oauth 2.0, oidc]
+description: A claim in JSON Web Token (JWT) is a name-value pair that conveys specific information. In a wider context, a claim can be any name-value pair that represents information.
+---
+
+## What is a claim?
+
+A claim is a name-value pair that conveys specific information. For example, in a JSON object:
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+In this example, `sub` is a claim that represents the subject identifier with the value `foo`, and `email` is a claim that represents the email address with the value `foo@bar.com`.
+
+> We use *subject* instead of *user* because without a clear definition, the subject (`sub`) can represent a user, device, or any entity.
+
+### Uses of claims
+
+Claims are widely used in various contexts, such as:
+
+- <Ref slug="jwt" />: In a JWT, claims are used to represent information about the token, such as the issuer (`iss`), subject (`sub`), and expiration time (`exp`).
+- <Ref slug="openid-connect" />: In OIDC, claims are used to represent user information in the <Ref slug="id-token" /> and <Ref slug="userinfo-endpoint" />, such as the user's email address (`email`), name (`name`), and profile picture (`picture`).
+
+### Standard claims
+
+In JWT and OIDC, there are standard claims defined by the specifications. Some common standard claims include:
+
+- **`iss`**: The issuer of the token. For example, if the <Ref slug="authorization-server" /> that issued the token is `https://example.com`, in most cases the `iss` claim will be the same (`https://example.com`).
+- **`sub`**: The subject of the token. It represents the entity the token is about. For example, in an ID token, the `sub` claim usually represents the user identifier.
+- **`aud`**: The audience of the token. It indicates the recipients that the token is intended for. For example, if the token is intended for accessing an API at `https://api.example.com`, the `aud` claim will be the same (`https://api.example.com`).
+- **`exp`**: The expiration time of the token. It indicates when the token should no longer be accepted for processing.
+- **`nbf`**: The "not before" time of the token. It indicates when the token should start being accepted for processing.
+- **`iat`**: The issued-at time of the token. It indicates when the token was issued.
+- **`jti`**: The JWT ID of the token. It provides a unique identifier for the token.
+
+OIDC also defines additional standard claims for user information. See [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims) in the OIDC specification for more details.
+
+### Custom claims
+
+In addition to standard claims, you can define custom claims to represent application-specific information. For example, you can include a `role` claim to represent the user's role in the application.
+
+Custom claims can be namespaced with [Uniform Resource Identifiers (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) to avoid conflicts with other claims. For example:
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+In this example, the `role` claim is namespaced with `https://example.com/claims/` to ensure uniqueness. Alternatively, you can define your own [Uniform Resource Name (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) for custom claims:
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+In this example, the `role` claim is namespaced with `urn:example:claims:`.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

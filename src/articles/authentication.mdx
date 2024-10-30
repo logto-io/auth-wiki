@@ -1,0 +1,56 @@
+---
+title: Authentication
+tags: [authentication]
+description: Authentication is the process of verifying the identity ownership (e.g. user or service). It is the foundation of identity and access management (IAM) systems and is essential for securing applications and services.
+---
+
+## What is authentication?
+
+> **TL;DR**: Authentication answers the question "Which identity do you own?"
+
+Here are some typical examples of authentication:
+
+- Username and password sign-in
+- Social login (e.g., Sign in with Google)
+- <Ref slug="machine-to-machine" /> authentication (e.g., API keys)
+
+We did not use the phrase "Who are you?" because:
+
+- In the realm of <Ref slug="iam" />, authentication is about verifying the ownership of an identity, not identifying the person or entity. For example, when one of your family members use your credentials to sign in to your account, they are not you, but the identity to the system is the same.
+- The identity can be a user, a service, or a device. For example, a service may authenticate itself to another service using API keys.
+
+### Difference between authentication and authorization
+
+These two terms are often confused, but they are fundamentally different: <Ref slug="authorization" /> answers the question "What can you do?". Additionally, authentication is a prerequisite for authorization because the system needs to know the identity before deciding what actions it can perform.
+
+## Authentication factors
+
+Authentication can be performed using one or more factors. Here are some common factors:
+
+- **Knowledge factor**: Something you know (e.g., password, PIN)
+- **Possession factor**: Something you have (e.g., smartphone, security token)
+- **Inherence factor**: Something you are (e.g., fingerprint, facial recognition)
+
+<Ref slug="mfa" /> is a common practice that combines multiple factors to increase security. For example, when you sign in to your bank account, you may need to provide a password (knowledge factor) and a one-time code from an authenticator app (possession factor).
+
+<Ref slug="passkey" /> is a modern authentication factor that can combine multiple factors and is resistant to phishing attacks.
+
+## Authentication frameworks (protocols)
+
+Instead of building a homegrown authentication system, it is recommended to use established frameworks and protocols as they have been battle-tested and reviewed by security experts. There are various authentication frameworks and protocols that define how authentication should be performed. Two common ones are:
+
+- <Ref slug="openid-connect" />: An identity layer built on top of <Ref slug="oauth-2.0" /> that adds authentication capabilities. It is relatively modern and widely used for new applications.
+- <Ref slug="saml" />: A protocol for exchanging authentication and authorization data between parties. It is commonly used in enterprise environments.
+
+The choice of framework depends on your use case and requirements. For new applications, OIDC is recommended due to its modern design and support for <Ref slug="jwt" />.
+
+However, directly working with these protocols can still be complex and time-consuming. Both protocols have steep learning curves and require careful implementation to ensure security. Instead, using an <Ref slug="identity-provider" /> that supports or are built on these protocols can greatly simplify the authentication process. A good identity provider will also provide additional features like <Ref slug="mfa" /> and <Ref slug="single-sign-on" /> for your future needs.
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

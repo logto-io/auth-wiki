@@ -1,0 +1,50 @@
+---
+title: Authorization
+tags: [authorization]
+description: Authorization is the process of determining what actions an identity can perform on a resource. It is a fundamental security mechanism to define and enforce access policies.
+---
+
+## What is authorization?
+
+> **TL;DR**: Authorization answers the question "What can you do?"
+
+Authorization is a decision-making process that determines whether an identity (user, service, or device) has the necessary permissions to perform a specific action on a resource. Let's take a look at some examples:
+
+- In an online document editor, a user can share a document with others.
+- In a cloud storage service, a service can read and write files in a specific folder.
+- In a smart home system, a device can turn on the lights in the living room.
+
+All these examples involve an identity (subject) performing an action on a resource. Of course, authorization can also fail, such as when a user tries to delete a file they don't have permission to access.
+
+The basic model for authorization is simple: If **identity** performs **action** on **resource**, then **accept** or **deny**.
+
+### Difference between authentication and authorization
+
+Authentication and authorization are often confused, but they are fundamentally different: <Ref slug="authentication" /> answers the question "Which identity do you own?". Additionally, in most cases, authorization happens after authentication because the system needs to know the identity before making access decisions.
+
+### Difference between authorization and access control
+
+Authorization is a subset of access control. Access control is the broader concept that includes authorization and other restrictions on access management. In other words, access control is a general term that describes the selective restriction of access to resources, while authorization is specifically about the decision-making process.
+
+## How does authorization work?
+
+Authorization is typically implemented using <Ref slug="access-control" headingId="access-control-models" />. They define how permissions are assigned and enforced in a system.
+
+## Authorization frameworks (protocols)
+
+While <Ref slug="oauth-2.0" /> is a very popular framework for authorization, it's worth noting that OAuth 2.0 does not define which access control model to use. Instead, it focuses on the delegation of authorization and the issuance of access tokens.
+
+That said, OAuth 2.0 is suitable for third-party authorization scenarios where a user grants permission to a client to access their resources. For example, when you sign in to a website using your Google account, you are authorizing the website to access your Google profile.
+
+If you are dealing with first-party authorization (e.g., within your application or organization), you may need to implement an access control model such as <Ref slug="rbac" /> or <Ref slug="abac" />. The combination of <Ref slug="openid-connect" /> and access control models can provide a solid foundation for both authentication and authorization.
+
+Instead of building a homegrown authorization system, it is recommended to use an <Ref slug="identity-provider" /> that offers authentication and authorization capabilities. A good identity provider will handle the complexity of access control and provide a secure and scalable solution for your applications.
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>
