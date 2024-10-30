@@ -1,0 +1,81 @@
+---
+title: Refresh token
+tags: [oauth 2.0, oidc]
+description: A refresh token is a long-lived credential used to obtain new access tokens without requiring the user to re-authenticate. It is used to maintain user sessions and provide a better user experience.
+---
+
+## What is a refresh token?
+
+A refresh token is a long-lived credential, typically a random string, that is used to obtain new <Ref slug="access-token">access tokens</Ref> without requiring the user to re-authenticate. In the context of OAuth 2.0 and OpenID Connect (OIDC), <Ref slug="authorization-server">authorization servers</Ref> may issue refresh tokens to clients (applications) when the client requests offline access.
+
+While the [OAuth 2.0 RFC](https://datatracker.ietf.org/doc/html/rfc6749#section-1.5) defines the high-level lifecycle of a refresh token, the implementation details may vary across authorization servers and clients. We'll explore them in the subsequent sections.
+
+## How does a refresh token work?
+
+Here's a simplified example using a refresh token:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Authorization Server
+    participant Resource Server
+
+    Client->>Authorization Server: Request access token with refresh token
+    Authorization Server->>Client: Issue new access token
+    Client->>Resource Server: Access protected resource with new access token
+    Resource Server->>Client: Send response
+```
+
+As the sequence diagram illustrates, the use of a refresh token needs to be supported by both the client and the authorization server:
+
+- The client should store the refresh token securely and use it to request new access tokens when the current one expires.
+- The authorization server should validate the refresh token and issue a new access token when the client presents a valid refresh token.
+
+The refresh token is not meant to be shared with the <Ref slug="resource-server" />. Access tokens are the only tokens that the resource server should check for authorization.
+
+## Security considerations
+
+Since refresh tokens are long-lived (e.g., days, weeks) and can be used to obtain new access tokens without user interaction, they pose a higher security risk than access tokens (e.g., minutes, hours). The use of refresh tokens should be carefully considered and implemented to mitigate potential security threats. Here are some best practices to consider:
+
+### Secure storage
+
+Securely store refresh tokens on the client-side to prevent unauthorized access. Such storage mechanisms include:
+
+- **HTTP-only cookies**: Store tokens in HTTP-only cookies to prevent client-side JavaScript from accessing them.
+- **Encrypted storage**: Use secure storages like Keychain (iOS) or KeyStore (Android) on mobile devices, or encrypted databases on web applications.
+
+### Token rotation
+
+While refresh tokens can be long-lived, rotating them periodically or based on certain conditions (e.g., after a successful token exchange) can significantly reduce the risk of unauthorized access. The exact rotation strategy may vary based on the application's security requirements and the authorization server's capabilities.
+
+Here are two common token rotation strategies:
+
+- **Time-based rotation**: Rotate refresh tokens after a certain period (e.g., every 7 days).
+- **Event-based rotation**: Rotate refresh tokens after specific events (e.g., successful token exchange, password change).
+
+These strategies are often combined with the session TTL (time-to-live) to ensure that after a certain period of time, regardless of the refresh token's validity, the user must re-authenticate.
+
+### Private (trusted) client
+
+It's a good practice to limit the use of refresh tokens to <Ref slug="client" headingId="private-clients">private (trusted) clients</Ref>.
+
+- Public clients (e.g., single-page applications) expose the source code to the client-side, making it easier for attackers to extract and abuse refresh tokens. Usually, more secure mechanisms like <Ref slug="pkce" /> and refresh token rotation are used for public clients if refresh tokens are nessessary to use.
+- Private clients, on the other hand, run on a secure server environment where the source code and environment are not exposed to the client-side. Refresh tokens can be used more securely in such environments.
+
+### Token revocation
+
+Since refresh tokens are usually <Ref slug="opaque-token">opaque tokens</Ref> (i.e., have no meaning to the client) and must be validated by the authorization server, the authorization server can easily implement token revocation mechanisms to invalidate refresh tokens when necessary. This can be useful in scenarios like user logout, account compromise, or token misuse.
+
+<SeeAlso slugs={["access-token", "id-token", "jwt", "opaque-token"]} />
+
+<Resources urls={[
+  "https://blog.logto.io/understanding-refresh-token-rotation",
+  "https://blog.logto.io/understanding-tokens-in-oidc",
+  {
+    url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+    result: {
+      ogTitle: "Refresh Token in OAuth 2.0",
+      ogDescription: "Refresh tokens are credentials used to obtain access tokens."
+    },
+  },
+]} />
