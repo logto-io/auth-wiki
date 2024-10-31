@@ -55,9 +55,9 @@ Here are two common token rotation strategies:
 
 These strategies are often combined with the session TTL (time-to-live) to ensure that after a certain period of time, regardless of the refresh token's validity, the user must re-authenticate.
 
-### Private (trusted) client
+### Client type
 
-It's a good practice to limit the use of refresh tokens to <Ref slug="client" headingId="private-clients">private (trusted) clients</Ref>.
+It's a good practice to limit the use of refresh tokens to <Ref slug="client" headingId="private-clients">private (confidential) clients</Ref>.
 
 - Public clients (e.g., single-page applications) expose the source code to the client-side, making it easier for attackers to extract and abuse refresh tokens. Usually, more secure mechanisms like <Ref slug="pkce" /> and refresh token rotation are used for public clients if refresh tokens are nessessary to use.
 - Private clients, on the other hand, run on a secure server environment where the source code and environment are not exposed to the client-side. Refresh tokens can be used more securely in such environments.
