@@ -6,13 +6,26 @@ description: A refresh token is a long-lived credential used to obtain new acces
 
 ## What is a refresh token?
 
-A refresh token is a long-lived credential, typically a random string, that is used to obtain new <Ref slug="access-token">access tokens</Ref> without requiring the user to re-authenticate. In the context of OAuth 2.0 and OpenID Connect (OIDC), <Ref slug="authorization-server">authorization servers</Ref> may issue refresh tokens to clients (applications) when the client requests offline access.
+A refresh token is a long-lived credential, typically a random string, that is used to obtain new <Ref slug="access-token">access tokens</Ref> without requiring the user to re-authenticate. In the context of OAuth 2.0 and OpenID Connect (OIDC), <Ref slug="authorization-server">authorization servers</Ref> may issue refresh tokens to clients (applications) when the client requests <Ref slug="offline-access" />.
 
 While the [OAuth 2.0 RFC](https://datatracker.ietf.org/doc/html/rfc6749#section-1.5) defines the high-level lifecycle of a refresh token, the implementation details may vary across authorization servers and clients. We'll explore them in the subsequent sections.
 
 ## How does a refresh token work?
 
-Here's a simplified example using a refresh token:
+A refresh token is typically issued alongside an access token when the client requests <Ref slug="offline-access" />. The industry norm to request offline access is to include the `offline_access` scope in the <Ref slug="authorization-request" />, while <Ref slug="openid-connect" /> officially defines the `offline_access` scope for this purpose (available in the <Ref slug="authentication-request" />).
+
+Here's a non-normative example of an authorization request that includes the `offline_access` scope:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20offline_access
+  &state=abc123
+  &nonce=123456 HTTP/1.1
+```
+
+Once the client receives the refresh token, it can use it to request new access tokens when the current access token expires. Here's a simplified example using a refresh token:
 
 ```mermaid
 sequenceDiagram
@@ -20,7 +33,7 @@ sequenceDiagram
     participant Authorization Server
     participant Resource Server
 
-    Client->>Authorization Server: Request access token with refresh token
+    Client->>Authorization Server: Send token request with refresh token
     Authorization Server->>Client: Issue new access token
     Client->>Resource Server: Access protected resource with new access token
     Resource Server->>Client: Send response
@@ -28,10 +41,24 @@ sequenceDiagram
 
 As the sequence diagram illustrates, the use of a refresh token needs to be supported by both the client and the authorization server:
 
-- The client should store the refresh token securely and use it to request new access tokens when the current one expires.
+- The client should store the refresh token securely and use it in the <Ref slug="token-request" /> to obtain a new access token.
 - The authorization server should validate the refresh token and issue a new access token when the client presents a valid refresh token.
 
 The refresh token is not meant to be shared with the <Ref slug="resource-server" />. Access tokens are the only tokens that the resource server should check for authorization.
+
+Here's a non-normative example of a token request using a refresh token:
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token
+  &refresh_token=YOUR_REFRESH_TOKEN
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &scope=openid%20profile%20email
+```
 
 ## Security considerations
 
@@ -71,6 +98,12 @@ Since refresh tokens are usually <Ref slug="opaque-token">opaque tokens</Ref> (i
 <Resources urls={[
   "https://blog.logto.io/understanding-refresh-token-rotation",
   "https://blog.logto.io/understanding-tokens-in-oidc",
+  {
+    url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+    result: {
+      ogTitle: "Offline Access in OpenID Connect Core 1.0",
+    }
+  },
   {
     url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
     result: {
