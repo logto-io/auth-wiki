@@ -8,19 +8,36 @@ type Props = {
    * @see {@link articles} for the list of available articles.
    */
   slug: string;
+  /**
+   * The optional heading ID to link to. If the article has no heading with the given ID, an error
+   * will be thrown.
+   */
+  headingId?: string;
 };
 
-const { slug } = Astro.props;
+const { slug, headingId } = Astro.props;
 const found = articles.find((article) => article.slug === slug);
 
 if (!found) {
   throw new Error(`The article with slug "${slug}" was not found.`);
 }
+
+const heading = found
+  .getHeadings()
+  .find((heading) => heading.slug === headingId);
+
+if (headingId && !heading) {
+  throw new Error(
+    `The heading with ID "${headingId}" was not found in the article with slug "${slug}".`,
+  );
+}
 ---
 
 <span>
   <Icon name="document" />
-  <a href={`/${slug}`}>{found.frontmatter.title}</a>
+  <a href={`/${slug}${heading ? `#${headingId}` : ""}`}>
+    <slot>{heading?.text ?? found.frontmatter.title}</slot>
+  </a>
 </span>
 
 <style>
@@ -28,5 +45,8 @@ if (!found) {
     vertical-align: sub;
     height: 1.1em;
     color: rgb(158, 120, 255);
+  }
+  a {
+    display: inline-block;
   }
 </style>

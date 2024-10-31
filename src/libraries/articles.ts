@@ -18,8 +18,13 @@ export const articles = rawArticles.map<Article>(([key, article]) => {
     throw new Error("Article Content is not a function");
   }
 
-  const frontmatter = zFrontmatter.parse(article.frontmatter);
+  const result = zFrontmatter.safeParse(article.frontmatter);
 
+  if (!result.success) {
+    throw new Error(`Invalid frontmatter in ${key}: ${result.error.message}`);
+  }
+
+  const { data: frontmatter } = result;
   return {
     slug: frontmatter.slug ?? path.basename(key, '.mdx'),
     frontmatter,
