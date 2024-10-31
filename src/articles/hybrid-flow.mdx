@@ -47,6 +47,18 @@ sequenceDiagram
     end
 ```
 
+Here's a non-normative example of a hybrid flow authentication request:
+
+```http
+GET /authorize?response_type=code%20id_token
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email
+  &nonce=123456
+  &state=abc123 HTTP/1.1
+Host: your-openid-provider.com
+```
+
 ### Key parameters in a hybrid flow authentication request
 
 The hybrid flow authentication request includes the following key parameters:
