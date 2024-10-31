@@ -16,6 +16,9 @@ export default defineConfig({
       [rehypeMermaid, { mermaidConfig: { theme: 'dark' } }],
       [rehypeShiki, { theme: 'one-dark-pro' }]
     ],
+    remarkRehype: {
+      footnoteLabelTagName: 'span',
+    },
     syntaxHighlight: false
   },
   integrations: [mdx(), sitemap(), icon()]

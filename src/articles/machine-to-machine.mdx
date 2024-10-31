@@ -41,7 +41,7 @@ With the challenges in mind, there are several common approaches in the industry
 
 ### 1. API keys
 
-API keys are a simple way to authenticate services. Each service can have one or more API keys, which are used for authentication (and sometimes authorization). You may see some services asking you to provide an API key in the request header, such as `X-API-Key: your-api-key`.
+<Ref slug="api-key">API keys</Ref> are a simple way to authenticate services. Each service can have one or more API keys, which are used for authentication (and sometimes authorization). You may see some services asking you to provide an API key in the request header, such as `X-API-Key: your-api-key`.
 
 A non-normative example of how API keys work:
 
@@ -72,7 +72,7 @@ Disadvantages:
 
 ### 2. OAuth client credentials
 
-OAuth (or OIDC, since OpenID Connect is based on OAuth 2.0) client credentials is a more advanced way to authenticate services. It's based on the OAuth 2.0 framework, which is widely used for user authentication and authorization. With OAuth client credentials, a service can obtain an access token by presenting its client ID and client secret to the authorization server.
+OAuth (or OIDC, since OpenID Connect is based on OAuth 2.0) <Ref slug="client-credentials-flow" /> is a more advanced way to authenticate services. It's based on the OAuth 2.0 framework, which is widely used for user authentication and authorization. With OAuth client credentials, a service can obtain an access token by presenting its client ID and client secret to the authorization server.
 
 A non-normative example of how OAuth client credentials work:
 
@@ -138,3 +138,5 @@ Disadvantages:
 - The client certificate needs to be updated regularly.
 - More technical knowledge is required to manage client certificates properly.
 - The other service may not support mTLS, meaning you need to have a fallback mechanism.
+
+<SeeAlso slugs={["api-key", "client-credentials-flow", "jwt"]} />
