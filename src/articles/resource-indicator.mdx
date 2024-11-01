@@ -1,5 +1,120 @@
 ---
 title: Resource indicator
 tags: [oauth 2.0]
-description: A resource indicator is a URI that represents...
+description: Resource indicator in OAuth 2.0 is an extension parameter defined in RFC 8707 that allows clients to specify the resource server's location in the authorization request. It provides a scalable way to handle multiple resource servers in a single authorization server.
 ---
+
+## What is a resource indicator?
+
+A resource indicator, as defined in the OAuth 2.0 extension [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707), is a parameter that allows clients to specify the URI of the resource server in the <Ref slug="authorization-request" /> (or <Ref slug="authentication-request" /> in <Ref slug="openid-connect" />) and <Ref slug="token-request" />. The resource indicator is used to indicate the location of the resource server that the client wants to access.
+
+> [!Note]
+> Resource indicator is an extension parameter that is not part of the core OAuth 2.0 specification. Please check your <Ref slug="authorization-server" /> documentation to see if it supports this parameter.
+
+## How do resource indicators work?
+
+To better understand how resource indicators work, let's consider a scenario where a <Ref slug="client" /> wants to access multiple <Ref slug="resource-server">resource servers</Ref> using a single authorization server.
+
+### 1. Register resource servers
+
+Normally, the developer needs to register each resource server with the authorization server to make them available for the client. The actual registration process may vary depending on the authorization server implementation. The feature name might be different, such as "API resources" or just "resources".
+
+Let's assume the client wants to access two resource servers: `https://api.example.com` and `https://api.another.com`, and they have been registered with the authorization server.
+
+### 2. Define scopes for each resource server
+
+Unlike traditional OAuth 2.0 flows, where the <Ref slug="scope">scopes</Ref> are shared across all resource servers, the resource indicator extension allows the client to specify the scopes for each resource server. This should also be part of the registration process. Let's assume the resource servers have the following scopes:
+
+| Resource Server           | Scopes           |
+|---------------------------|------------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. Include resource indicators in the authorization request
+
+To notify the authorization server that we want to use the resource indicator extension, the client should include the `resource` parameter in the authorization request.
+
+Here's a non-normative example of an authorization request that includes a resource indicator:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+In this example, the client includes the `resource` parameter with the encoded value `https%3A%2F%2Fapi.example.com` to indicate the resource server's location (`https://api.example.com`).
+
+You may notice that we also include some predefined scopes, such as `openid`, along with the resource-specific scopes. The authorization server should validate the scopes and filter out other scopes that are not associated with the requested resource server. This is called **downscoping**.
+
+Here's the table of the actual four scopes that the client is expected to receive:
+
+| Resource Server           | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                       |
+
+The beauty of the resource indicator is that the client can request multiple resource servers in a single authorization request by repeating the `resource` parameter. Let's take a look at another example:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+In this example, the client requests access to both `https://api.example.com` and `https://api.another.com` with the respective scopes. The authorization server should validate the scopes for each resource server, that is to say, to do a **Cartesian product** of the scopes and the resource servers. The result should be:
+
+| Resource Server           | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`              |
+| `https://api.another.com` | `read`, `delete`             |
+
+There are seven valid scopes in total for this authorization request.
+
+### 4. Include resource indicators in the token request
+
+Once the client receives the authorization code, it can exchange it for an access token with a **single** resource indicator, if needed. For example:
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+The `resource` parameter in the token request is optional. If the client includes it, the authorization server should validate the resource indicator against the scopes associated with the current grant; otherwise, the authorization server should fall back to the global scopes (for example, <Ref slug="openid-connect" /> scopes).
+
+> [!Note]
+> The authorization server should always apply <Ref slug="access-control" /> to ensure that the issued access token is valid and has been properly downscoped based on the current grant context.
+
+You may wondering how to handle multiple resource servers in the grant. Since the authorization code is one-time use, the client can use other grants, such as the <Ref slug="refresh-token" /> grant, to obtain access tokens for other resource servers.
+
+## Why do we need resource indicators?
+
+As you can see from the examples above, the resource indicator extension provides a scalable way to handle multiple resource servers without messing up the <Ref slug="scope">scopes</Ref> worrying about scope conflicts. It is a powerful feature that provides more flexibility for clients to access resources from different resource servers.
+
+It's worth noting that the resource indicator extension is not a part of the core OAuth 2.0 specification. Make sure your authorization server supports this extension before using it in your application.
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

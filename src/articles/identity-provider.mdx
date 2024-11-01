@@ -1,20 +1,20 @@
 ---
 title: Identity provider (IdP)
-tags: [oidc]
+tags: [authentication, authorization]
 description: Identity provider (IdP) is a service that manages identities. Modern identity providers support OpenID Connect (OIDC) for authentication and OAuth 2.0 for authorization.
 ---
 
 ## What is an identity provider (IdP)?
 
-In the realm of <Ref slug="iam" />, an identity provider (IdP) is the central service for managing identities. It is responsible for authenticating users, issuing identity tokens, and providing user information to relying parties (e.g., applications, services, APIs).
+In the realm of <Ref slug="iam" />, an identity provider (IdP) is the central service for managing identities. It is responsible for authenticating users, issuing identity tokens, and providing user information to <Ref slug="service-provider">service providers</Ref> (e.g., applications, services, APIs).
 
 ```mermaid
 graph LR
     IdP[Identity Provider]
-    RP["Relying Party<br />(Application, Service, API)"]
-    IdP -->|Authenticates users| RP
-    IdP -->|Issues tokens| RP
-    IdP -->|Provides user information| RP
+    SP["Service Provider<br />(Application, Service, API)"]
+    IdP -->|Authenticates users| SP
+    IdP -->|Issues tokens| SP
+    IdP -->|Provides user information| SP
 ```
 
 In addtion to <Ref slug="authentication" />, modern identity providers are also responsible for <Ref slug="authorization" /> (enforcing <Ref slug="access-control" /> policies) and supporting advanced features like <Ref slug="single-sign-on" /> and <Ref slug="multi-tenancy" />.
@@ -52,8 +52,8 @@ Due to the complexity and criticality of identity management, modern application
 
 ```mermaid
 graph LR
-    IdP[Identity Provider] <--> RP1[Relying Party 1]
-    IdP <--> RP2[Relying Party 2]
+    IdP[Identity Provider] <--> SP1[Service Provider 1]
+    IdP <--> SP2[Service Provider 2]
 ```
 
 ## Identity provider features
@@ -62,15 +62,16 @@ Modern identity providers offer a wide range of features to support various use 
 
 - <Ref slug="authentication" />: Verify the identity of users using various methods (e.g., username/password, social login, <Ref slug="mfa" />).
 - <Ref slug="authorization" />: Enforce access control policies and manage user permissions (e.g., <Ref slug="rbac" />, <Ref slug="abac" />).
-- **User management**: Create, update, and delete user accounts and profiles; provide user data to relying parties.
+- **User management**: Create, update, and delete user accounts and profiles; provide user data to <Ref slug="service-provider">service providers</Ref>.
 - **Token management**: Issue and manage identity tokens (e.g., ID token, access token, refresh token).
 - <Ref slug="single-sign-on" />: Enable users to authenticate once and access multiple applications.
 - <Ref slug="multi-tenancy" />: Support multiple organizations or tenants with isolated user data and configurations.
 
-<SeeAlso slugs={["iam", "openid-connect", "oauth-2.0", "saml"]} />
+<SeeAlso slugs={["service-provider", "iam", "openid-connect", "oauth-2.0"]} />
 
 <Resources
   urls={[
+    "https://blog.logto.io/secure-cloud-apps-with-oauth-and-openid-connect",
     "https://blog.logto.io/incorporate-identity-solution",
     "https://blog.logto.io/centralized-identity-system"
   ]}
