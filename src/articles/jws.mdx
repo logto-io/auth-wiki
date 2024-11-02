@@ -1,0 +1,136 @@
+---
+title: JSON Web Signature (JWS)
+tags: [oidc, jose]
+description: JSON Web Signature (JWS) is a standard way to sign and verify data in JSON format. It is often used to ensure the integrity and authenticity of JSON Web Tokens (JWTs) in OpenID Connect (OIDC).
+---
+
+## What is JSON Web Signature (JWS)?
+
+JSON Web Signature (JWS) defines a standard method for signing and verifying data in JSON format. It is widely used in modern applications and open standards such as <Ref slug="openid-connect" /> to ensure the integrity and authenticity of transmitted data.
+
+JWS is particularly useful when working with <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref>. For instance, an <Ref slug="id-token" /> or <Ref slug="access-token" /> can be signed using JWS and verified by the recipient without making another network request.
+
+## How does JWS work?
+
+JWS uses cryptographic algorithms to sign the data and produce a signature. There are two main concepts in JWS: the JWS header and JWS serialization.
+
+### JWS header
+
+JWS has a header that contains important metadata about the signing algorithm and key management. Some common attributes in a JWS header include:
+
+- `alg` (Algorithm): The cryptographic algorithm used for signing the data.
+- `typ` (Type): The type of token, such as JWT.
+- `kid` (Key ID): A unique identifier for the key used to sign the data.
+- `jku` (JWK Set URL): The URL where the <Ref slug="jwk" headingId="json-web-key-set-jwks" /> is located.
+
+For a detailed list of JWS header attributes, refer to [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4).
+
+### JWS serialization
+
+JWS has two serialization formats: compact and JSON. Each format has its own way of representing the signed data.
+
+#### Compact serialization
+
+In the compact serialization, the JWS is represented as a string with three Base64URL-encoded parts separated by dots (`.`). The three parts are:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+Each part has a specific purpose:
+
+- `header`: Metadata about the signing algorithm and key management in Base64URL-encoded format.
+- `payload`: The data being signed in Base64URL-encoded format.
+- `signature`: The cryptographic signature of the header and payload.
+
+> [!Note]
+> No unprotected header is included in the compact serialization.
+
+For example, a JWS may look like this:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+After decoding the Base64URL-encoded parts, the JWS consists of the following:
+
+- Header: `{"alg":"HS256","typ":"JWT"}`
+- Payload: `{"sub":"1234567890","name":"Alice"}`
+- Signature: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+The header specifies that the JWS is signed using the HMAC-SHA256 algorithm (`HS256`) and the type of token is JWT (`typ: "JWT"`) in JSON format. The payload contains basic user information, such as the subject (`sub`) and name (`name`).
+
+The signature is calculated by:
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  secret
+)
+```
+
+According to the JWS header, the HMAC-SHA256 algorithm is used in the `Hash` function, where the `secret` is the a shared secret key `top-secret` in this case.
+
+For a detailed example of how JWS works with JWT, refer to the <Ref slug="signing-key" /> article.
+
+#### JSON serialization
+
+JSON serialization provides a more structured way to represent the JWS. The JWS is represented as a JSON object with the following properties:
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: The Base64URL-encoded payload. This is the data being signed.
+- `signatures`: An array of signature objects, each containing the protected header, header, and signature.
+
+  Each signature object may include:
+
+  - `protected`: The Base64URL-encoded protected header (`header` in compact serialization).
+  - `header`: The unprotected header in JSON format. The header is not included in the signature.
+  - `signature`: The cryptographic signature of the header and payload (`signature` in compact serialization).
+
+For example, a JWS in JSON serialization may look like this:
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+In the above example, there are two signatures (`signatures` array) for the same payload. Each signature object contains the protected header, header, and signature.
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

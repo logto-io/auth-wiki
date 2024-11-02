@@ -1,5 +1,149 @@
 ---
 title: Signing key
 tags: [oidc]
-description: A signing key...
+description: A signing key is a cryptographic key used to sign and verify JSON Web Tokens in OpenID Connect (OIDC). It is used to ensure the integrity and authenticity of the tokens issued by the OpenID provider.
 ---
+
+## What is a signing key?
+
+In the context of <Ref slug="openid-connect" />, a **signing key**, usually an asymmetric key pair, is used to sign and verify <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref>. OpenID providers use signing keys to sign tokens like <Ref slug="id-token">ID tokens</Ref> and <Ref slug="access-token">access tokens</Ref> to ensure their integrity and authenticity.
+
+While the concept of signing keys can be boarder, we'll focus on how they are used in OIDC to secure tokens. Other use cases include signing emails, documents, and software packages, can derive from the same principles.
+
+## Example: ID token signing
+
+When a user authenticates with an OpenID provider, the provider issues an ID token that contains user information (<Ref slug="claim">claims</Ref>) and is signed by the provider's signing key. Since the ID token is a JWT, it consists of three parts: header, payload, and signature.
+
+### 1. Header
+
+Let's say the header is:
+
+```json
+{
+  "alg": "ES384",
+  "typ": "JWT"
+}
+```
+
+The JSON indicates that the ID token is signed using the [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) algorithm with the P-384 curve. The `typ` field specifies the type of token is JWT.
+
+### 2. Payload
+
+The payload contains basic user information:
+
+```json
+{
+  "sub": "1234567890",
+  "name": "Alice"
+}
+```
+
+The `sub` claim is the user's unique identifier, and `name` is their display name.
+
+### 3. Sign the token
+
+According to the JWT format, the header and payload should be Base64URL-encoded and concatenated with a `.` for signing:
+
+```
+{{header}}.{{payload}}
+```
+
+In this case, the value would be:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0
+```
+
+Let's assume that the OpenID provider use the following private key to sign the token:
+
+```
+-----BEGIN PRIVATE KEY-----
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDBW9PDXInlNT2hjOtQr
+g4pkVkyJsKia33dHrsbOG4Z77pfYN7SYZCHh9YdLXTTKinehZANiAAQX/FB1s6Gj
+YnDSGCY08PRUAQ8CCRCt8Ph/VDHfLj1xSbrjp8wFf0NjH7jcfNebpV1fvu4XKbP3
+Ro7h0G6elN1TMsVECJPv4ieDNkYOsgT4UboJypC5E/rmvrlJTMM6Y/k=
+-----END PRIVATE KEY-----
+```
+
+To sign the token, the OpenID provider needs to use the private key to generate a signature by:
+
+```
+signature = sign(header + '.' + payload, private_key)
+```
+
+Then the Base64URL-encoded signature is:
+
+```
+Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+### 4. Assemble the JWT
+
+Finally, the OpenID provider assembles the JWT by concatenating the header, payload, and signature with `.`:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+In this case, the ID token would be:
+
+```
+eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+The ID token is now ready to be sent to the <Ref slug="client" /> for further processing.
+
+### 5. Verify the token
+
+When the client receives the ID token, it can verify the signature using the OpenID provider's public key. Usually, the public key is made available through the <Ref slug="openid-connect-discovery" /> endpoint (`jwks_uri`) in the format of a <Ref slug="jwk" headingId="json-web-key-set-jwks" />.
+
+For this example, the public key is:
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx+43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+And the corresponding JWK value is:
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+Now, the client can verify the signature by using the public key.
+
+## Choose the right algorithm
+
+There are various algorithms available for signing JWTs:
+
+- **Symmetric algorithms**: HMAC with SHA-family (e.g., HS256, HS384, HS512) is a symmetric algorithm that uses the same key for both signing and verifying. It's not recommended for most cases as the secret key needs to be shared between parties.
+- **Asymmetric algorithms**: RSA (e.g., RS256, RS384, RS512) and ECDSA (e.g., ES256, ES384, ES512) are asymmetric algorithms that use a pair of keys: a private key for signing and a public key for verifying.
+  - RSA is widely used and supported by many libraries and platforms. However, it has a way larger key size and signature size compared to ECDSA.
+  - ECDSA is more performant and generates smaller signatures, making it a better choice for constrained environments. Since it's less common, ensure that your platform supports it.
+
+> ECDSA should be the preferred choice for new applications due to its performance and security benefits.
+
+## Other signing key scenarios
+
+While the example above focuses on ID tokens in OIDC, the signing key concept is widely used in various scenarios, such as signing emails, documents, and software packages. The key principles remain the same:
+
+- For symmetric keys, the same key is used for both signing and verifying. This is suitable for scenarios where the parties can securely share the key, or there's a single entity responsible for both signing and verifying.
+- For asymmetric keys, a private key is used for signing, and a corresponding public key is used for verifying. This is suitable for most scenarios where the signing and verifying parties are different entities.
+
+<SeeAlso slugs={["jwt", "jws", "jwk", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/introduction-to-ec-and-rsa-signing-algorithms-in-jwt",
+    "https://tools.ietf.org/html/rfc7515",
+    "https://tools.ietf.org/html/rfc7517",
+  ]}
+/>

@@ -1,5 +1,113 @@
 ---
 title: Attribute-based access control (ABAC)
 tags: [authorization]
-description: Attribute-based access control (ABAC) is an access control model...
+description: Attribute-based access control (ABAC) is an access control model that uses attributes (such as user roles, resource properties, and environmental conditions) to make access control decisions. It is a flexible and dynamic way to manage access to protected resources.
 ---
+
+## What is attribute-based access control (ABAC)?
+
+ABAC is an <Ref slug="access-control" /> model that uses attributes to make access control decisions. These attributes can include various factors, such as:
+
+- User attributes: e.g., roles, department, location, etc.
+- Resource attributes: e.g., sensitivity level, owner, type, etc.
+- Environmental attributes: e.g., time of access, location, device, etc.
+
+By evaluating these attributes and running them through a set of rules, ABAC can determine whether a subject (e.g., user, service) should be granted access to a resource. This approach allows for fine-grained access control and dynamic policy enforcement based on the context.
+
+## How does ABAC work?
+
+ABAC uses a policy-based approach to access control. A typical ABAC policy consists of:
+
+- **Subject**: The entity requesting access (e.g., user, service, device).
+- **Action**: The operation being performed on the resource (e.g., read, write, delete).
+- **Resource**: The entity being accessed (e.g., file, database, API).
+- **Environment**: The context in which the access is requested (e.g., time, location, device).
+- **Attributes**: The properties of the subject, resource, and environment that are evaluated to make access decisions.
+- **Policies**: A set of rules that define the conditions under which access is granted or denied.
+
+ABAC policies are more complex than traditional access control models like <Ref slug="rbac" />. On the other hand, ABAC provides more flexibility and granularity in access control decisions.
+
+### Example of ABAC policies
+
+For example, a system has several ABAC policies:
+
+1. **Policy 1**: Allow access if:
+
+    - (Subject) Subject role is `manager`.
+    - (Attribute) Resource sensitivity level is `high`.
+    - (Environment) Location is `internal`.
+    - (Action) Any action.
+    - (Environment) Time is between 9 AM and 5 PM (office hours).
+
+2. **Policy 2**: Deny access if:
+
+    - (Subject) Subject role is not `manager`.
+    - (Attribute) Resource sensitivity level is `high`.
+    - (Environment) Any location.
+    - (Action) Any action.
+    - (Environment) Any time.
+
+3. **Policy 3**: Allow access if:
+
+    - (Subject) Subject role is `employee` or `manager`.
+    - (Attribute) Resource sensitivity level is `low`.
+    - (Environment) Any location.
+    - (Action) `read` action.
+    - (Environment) Any time.
+
+The policy evaluation engine will check these policies in order, and the first policy that matches the conditions will determine the access decision. Meanwhile, a default deny policy is enforced if no other policies match.
+
+Let's go through some scenarios to understand how ABAC works:
+
+> **Scenario 1**. A user wants to access (perform `read` action) a high sensitivity level document (resource) outside of the office (environment). The user has the role of `manager` stored in the system.
+  
+**Decision**: Access is denied because the user is outside the office (location is not `internal`).
+
+> **Scenario 2**. A user wants to access (perform `read` action) a high sensitivity level document (resource) during office hours (environment) in the office network (location=`internal`). The user has the role of `manager`.
+
+**Decision**: Access is granted because all conditions in Policy 1 are met.
+
+> **Scenario 3**. All conditions in scenarios 2 are the same, but the user has the role of `employee` instead of `manager`.
+
+**Decision**: Access is denied because the user's role does not match the conditions in Policy 1.
+
+> **Scenario 4**. A user wants to access (perform `read` action) a low sensitivity level document (resource). The user has the role of `employee`.
+
+**Decision**: Access is granted because all conditions in Policy 3 are met.
+
+> **Scenario 5**. A user wants to delete (perform `delete` action) a low sensitivity level document (resource). The user has the role of `employee`.
+
+**Decision**: Access is denied because there is no policy that allows the `delete` action on low sensitivity level documents.
+
+You may notice that not all attributes are required in every policy. This flexibility allows for a more dynamic and context-aware access control mechanism.
+
+## Implementation considerations
+
+While ABAC provides a powerful way to manage access control, it also comes with some implementation considerations:
+
+- System complexity: ABAC policies can become complex as the number of attributes and rules increases. Proper policy management and testing are more time-consuming than simpler access control models.
+- Performance: Evaluating complex ABAC policies can impact system performance. Caching and optimization techniques can help mitigate this issue.
+- Policy conflicts: Conflicting policies can lead to unpredictable access decisions. Regular policy review and conflict resolution should be part of the policy management process.
+
+## ABAC vs. RBAC
+
+Comparing ABAC with <Ref slug="rbac" /> can help you understand the differences between the two models:
+
+|                       | RBAC                               | ABAC                                     |
+|-----------------------|------------------------------------|------------------------------------------|
+| Access control policy | Based on roles                     | Based on attributes                      |
+| Granularity           | Coarse-grained                     | Fine-grained                             |
+| Flexibility           | Limited                            | Highly flexible                          |
+| Complexity            | Simpler                            | More complex                             |
+| Performance impact    | Minimal                            | Can be significant                       |
+| Access management     | Role management                    | Policy management                        |
+| Best for              | Well-defined permission structures | Dynamic and context-aware access control |
+
+<SeeAlso slugs={["access-control", "rbac", "authorization"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/rbac-and-abac",
+    "https://csrc.nist.gov/publications/detail/sp/800-162/final",
+  ]}
+/>

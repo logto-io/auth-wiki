@@ -45,7 +45,7 @@ Request parameters are as follows:
 - **scope**: REQUIRED. This value specifies a set of resources the user is requesting from the authorization server. E.g., `openid profile email`.
 - **response_type**: REQUIRED. The value must be `code` to indicate that the application expects an authorization code.
 - **redirect_uri**: REQUIRED. The URI to which the authentication response will be sent, and should exactly match the redirect URI the client pre-registered at the authorization server.
-- **state**: RECOMMENDED. An opaque value used to maintain state between the request and callback. It is also used to prevent CSRF attacks.
+- **state**: RECOMMENDED. An opaque value used to maintain state between the request and callback. It is also used to prevent <Ref slug="csrf" /> attacks.
 - **nonce**: OPTIONAL. A random string used to associate a client session with an ID token and to mitigate replay attacks.
 - **prompt**: OPTIONAL. Space-delimited, case-sensitive list of string values that specifies whether the authorization server prompts the end-user for re-authentication and consent. The defined values are:
   - **none**: The authorization server MUST NOT display any authentication or consent user interface pages. An error is returned if an end-user is not already authenticated or the client does not have pre-configured consent for the requested Claims or does not fulfill other conditions for processing the request. The error code will typically be `login_required`, `interaction_required`. This can be used as a method to check for existing authentication and/or consent.
