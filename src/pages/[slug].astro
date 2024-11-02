@@ -13,6 +13,7 @@ import SeeAlso from "../mdx-components/SeeAlso.astro";
 import Resources from "../mdx-components/Resources.astro";
 import TextLink from "../mdx-components/TextLink.astro";
 import Share from "../components/Share.astro";
+import { Icon } from "astro-icon/components";
 
 export async function getStaticPaths() {
   return articles.map(({ slug, ...rest }) => {
@@ -28,6 +29,7 @@ type Props = Article;
 const {
   frontmatter: { title, description, tags },
   getHeadings,
+  basename,
   Content,
 } = Astro.props;
 
@@ -52,7 +54,18 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
         <p class="description">
           {description}
         </p>
-        <Share title={title} />
+        <div class="actions">
+          <Share title={title} />
+          <a
+            class="edit"
+            href={`https://github.com/logto-io/auth-wiki/edit/master/src/articles/${basename}.mdx`}
+            target="_blank"
+            rel="noopener"
+          >
+            <Icon name="github" />
+            <span>Edit on GitHub</span>
+          </a>
+        </div>
       </div>
       <div class="content">
         <nav class="toc">
@@ -120,6 +133,35 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
   div.metadata {
     margin: 0 auto;
     text-align: start;
+  }
+  div.actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    column-gap: 32px;
+  }
+  div.actions a.edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.16);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    transition: background-color 0.2s ease-in-out;
+    text-wrap: nowrap;
+  }
+  div.actions a.edit:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  div.actions a.edit :global(svg) {
+    width: 16px;
+    height: auto;
   }
   div.content {
     display: flex;

@@ -25,8 +25,10 @@ export const articles = rawArticles.map<Article>(([key, article]) => {
   }
 
   const { data: frontmatter } = result;
+  const basename = path.basename(key, '.mdx');
   return {
-    slug: frontmatter.slug ?? path.basename(key, '.mdx'),
+    slug: frontmatter.slug ?? basename,
+    basename,
     frontmatter,
     getHeadings: () => zHeading.array().parse(typeof article.getHeadings === 'function' && article.getHeadings()),
     Content: article.Content,

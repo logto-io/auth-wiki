@@ -1,0 +1,46 @@
+---
+type Props = astroHTML.JSX.AnchorHTMLAttributes;
+---
+
+<a {...Astro.props}>
+  <slot />
+</a>
+
+<style>
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.08);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  a:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  a :global(svg) {
+    height: 20px;
+    width: auto;
+    margin-inline-end: -2px;
+  }
+  @media (max-width: 810px) {
+    a {
+      font-size: 12px;
+      line-height: 16px;
+      padding: 6px 10px;
+    }
+
+    a :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+</style>

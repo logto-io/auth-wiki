@@ -18,8 +18,14 @@ export const zHeading = z.object({
 export type Heading = z.infer<typeof zHeading>;
 
 export type Article = {
+  /** 
+   * The URL-friendly slug of the article. If not provided in the frontmatter, it will be the
+   * basename of the file. 
+   */
   slug: string;
   frontmatter: Frontmatter;
+  /** The basename of the file, without the `.mdx` extension. */
+  basename: string;
   getHeadings: () => Heading[];
   Content: Function;
 }

@@ -1,13 +1,25 @@
 ---
+import { Icon } from "astro-icon/components";
 import Logo from "./Logo.astro";
 import ByLogto from "./ByLogto.astro";
+import SolidA from "./SolidA.astro";
 ---
 
 <div class="topbar">
-  <a href="/" aria-label="Go to homepage">
+  <a class="home" href="/" aria-label="Go to homepage">
     <Logo />
   </a>
-  <ByLogto />
+  <div class="actions">
+    <SolidA
+      href="https://github.com/logto-io/auth-wiki"
+      target="_blank"
+      rel="noopener"
+    >
+      <Icon name="github" />
+      <span>GitHub</span>
+    </SolidA>
+    <ByLogto />
+  </div>
 </div>
 <style>
   .topbar {
@@ -19,9 +31,13 @@ import ByLogto from "./ByLogto.astro";
     padding: 12px var(--content-padding);
     height: 70px;
   }
-  .topbar a {
+  .topbar a.home {
     display: flex;
     align-items: center;
     text-decoration: none;
+  }
+  .topbar .actions {
+    display: flex;
+    gap: 12px;
   }
 </style>
