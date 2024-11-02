@@ -12,7 +12,7 @@ import Ref from "../mdx-components/Ref.astro";
 import SeeAlso from "../mdx-components/SeeAlso.astro";
 import Resources from "../mdx-components/Resources.astro";
 import TextLink from "../mdx-components/TextLink.astro";
-import ShareButton from "../components/ShareButton.astro";
+import Share from "../components/Share.astro";
 
 export async function getStaticPaths() {
   return articles.map(({ slug, ...rest }) => {
@@ -52,15 +52,7 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
         <p class="description">
           {description}
         </p>
-        <aside class="share">
-          <span>Share</span>
-          <div>
-            <ShareButton type="x" title={title} />
-            <ShareButton type="reddit" title={title} />
-            <ShareButton type="linked-in" title={title} />
-            <ShareButton type="hacker-news" title={title} />
-          </div>
-        </aside>
+        <Share title={title} />
       </div>
       <div class="content">
         <nav class="toc">
@@ -128,20 +120,6 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
   div.metadata {
     margin: 0 auto;
     text-align: start;
-  }
-  aside.share {
-    margin-block: 20px;
-    display: flex;
-    align-items: center;
-    color: #a9acac;
-    gap: 24px;
-    font-weight: 600;
-  }
-  aside.share div {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-    justify-content: center;
   }
   div.content {
     display: flex;

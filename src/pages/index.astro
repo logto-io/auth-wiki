@@ -5,6 +5,7 @@ import Topbar from "../components/Topbar.astro";
 import { articles } from "../libraries/articles";
 import Footer from "../components/Footer.astro";
 import BackgroundBanner from "../components/BackgroundBanner.astro";
+import Share from "../components/Share.astro";
 
 const sections = articles
   .slice()
@@ -38,6 +39,7 @@ const sections = articles
         authentication, authorization, and identity management. Work with
         open-standards like OpenID Connect, OAuth 2.0, and SAML 2.0.
       </p>
+      <Share title="Auth Wiki" />
     </header>
     <div class="content">
       {
@@ -72,6 +74,9 @@ const sections = articles
       font-size: 20px;
       line-height: 36px;
       margin: 0;
+    }
+    header :global(aside.share) {
+      margin-block-start: 40px;
     }
     main {
       max-width: var(--content-max-width);

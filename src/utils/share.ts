@@ -3,12 +3,10 @@ export const linkedInShareUrl = 'https://www.linkedin.com/sharing/share-offsite/
 export const hackerNewsShareUrl = 'https://news.ycombinator.com/submitlink';
 export const redditShareUrl = 'https://www.reddit.com/web/submit/';
 
-const getShareText = (title: string) => `🤔 Check out this article on auth.wiki: ${title}`;
-
 export const buildTwitterShareUrl = (url: string, title: string) => {
   const shareUrl = new URL(twitterShareUrl);
   shareUrl.searchParams.set('url', url);
-  shareUrl.searchParams.set('text', getShareText(title));
+  shareUrl.searchParams.set('text', title);
 
   return shareUrl.href;
 };

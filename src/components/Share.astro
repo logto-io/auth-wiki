@@ -1,0 +1,36 @@
+---
+import ShareButton from "../components/ShareButton.astro";
+
+type Props = {
+  title: string;
+};
+
+const { title } = Astro.props;
+---
+
+<aside class="share">
+  <span>Share</span>
+  <div>
+    <ShareButton type="x" title={title} />
+    <ShareButton type="reddit" title={title} />
+    <ShareButton type="linked-in" title={title} />
+    <ShareButton type="hacker-news" title={title} />
+  </div>
+</aside>
+
+<style>
+  aside.share {
+    margin-block: 20px;
+    display: flex;
+    align-items: center;
+    color: #a9acac;
+    gap: 24px;
+    font-weight: 600;
+  }
+  aside.share div {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
