@@ -2,19 +2,30 @@
 
 A comprehensive collection of articles, tutorials, and resources about authentication and authorization. Learn about OAuth 2.0, OpenID Connect, SAML, and more.
 
-## Crontributing
+## Contributing
 
-Missing entry? Found a typo? Please don't hesitate to [create an issue](https://github.com/logto-io/auth-wiki/issues/new) or submit a pull request.
+We welcome contributions from everyone! Whether you’ve found a typo, want to suggest a new entry, or improve existing content, your help is appreciated.
 
-### Edit on GitHub
+### How to contribute
 
-The content is located in [src/articles](./src/articles). You can find the file and click the edit button (the pencil icon) in the top right corner to start editing.
+1. **Report issues**: If you spot any errors or have suggestions, please [create an issue](https://github.com/logto-io/auth-wiki/issues/new).
 
-### Local development
+2. **Edit directly**: The content resides in [src/articles](./src/articles). To make changes:
+   - Navigate to the desired file.
+   - Click the **edit** button (pencil icon) in the top right corner.
+   - Make your edits and submit a pull request.
 
-Auth Wiki uses PNPM and Astro. To start local development:
+### Running locally
+
+Auth Wiki uses PNPM and Astro. To preview your changes locally:
 
 ```bash
 pnpm install
 pnpm dev
 ```
+
+### Tips for contributors
+
+- Ensure your writing is clear and concise.
+- Maintain consistent formatting and adhere to the existing structure.
+- Reference credible sources where appropriate.
