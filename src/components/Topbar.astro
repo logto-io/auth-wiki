@@ -16,7 +16,7 @@ import SolidA from "./SolidA.astro";
       rel="noopener"
     >
       <Icon name="github" />
-      <span>GitHub</span>
+      <span class="github">GitHub</span>
     </SolidA>
     <ByLogto />
   </div>
@@ -32,6 +32,7 @@ import SolidA from "./SolidA.astro";
     align-items: center;
     padding: 12px var(--content-padding);
     height: 70px;
+    column-gap: 12px;
   }
   .topbar a.home {
     display: flex;
@@ -41,5 +42,13 @@ import SolidA from "./SolidA.astro";
   .topbar .actions {
     display: flex;
     gap: 12px;
+  }
+  @media (max-width: 500px) {
+    .topbar .actions {
+      gap: 8px;
+    }
+    span.github {
+      display: none;
+    }
   }
 </style>
