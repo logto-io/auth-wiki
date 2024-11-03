@@ -13,8 +13,8 @@ export default defineConfig({
   },
   markdown: {
     rehypePlugins: [
-      [rehypeMermaid, { mermaidConfig: { theme: 'dark' } }],
-      [rehypeShiki, { theme: 'one-dark-pro' }]
+      [rehypeMermaid, { dark: true, strategy: 'img-svg' }],
+      [rehypeShiki, { themes: { light: 'one-light', dark: 'one-dark-pro' } }]
     ],
     remarkRehype: {
       footnoteLabelTagName: 'span',

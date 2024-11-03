@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import { type buildShareUrlMap } from "../utils/share";
+import { shareTitleMap, type buildShareUrlMap } from "../utils/share";
 
 type Props = {
   /**
@@ -19,7 +19,7 @@ const { type, title } = Astro.props;
 ---
 
 <astro-share data-type={type} data-title={title}>
-  <button>
+  <button title={shareTitleMap[type] ?? "Share"}>
     <Icon name={type} />
   </button>
 </astro-share>
@@ -35,9 +35,10 @@ const { type, title } = Astro.props;
     height: 20px;
   }
 
-  button svg {
+  button :global(svg) {
     width: 20px;
     height: 20px;
+    color: #f7f7f8;
   }
 </style>
 

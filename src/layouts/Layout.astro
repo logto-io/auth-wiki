@@ -45,8 +45,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <script
       defer
       data-domain="auth.wiki"
-      src="https://plausible.io/js/script.outbound-links.js"
-    ></script>
+      src="https://plausible.io/js/script.outbound-links.js"></script>
   </head>
 
   <body>
@@ -56,9 +55,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 
 <style is:global>
   :root {
-    --text-color: #fff;
     --content-max-width: 1280px;
     --content-padding: 40px;
+    --color-background: #f3f3f3;
+    --color-text: #191c1d;
+    --color-link: #4300da;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background: #040407;
+      --color-text: #fff;
+      --color-link: rgb(158, 120, 255);
+    }
   }
   @media (max-width: 810px) {
     :root {
@@ -89,10 +97,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
       "System Default";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: auto;
-    background: #040407;
+    background: var(--color-background);
   }
   body {
-    color: var(--text-color);
+    color: var(--color-text);
     margin: 0;
     padding: 0;
   }
@@ -115,5 +123,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
   h5,
   h6 {
     margin-block: 0;
+  }
+  /* Updated from https://shiki.style/guide/dual-themes#query-based-dark-mode */
+  @media (prefers-color-scheme: dark) {
+    .astro-code,
+    .astro-code span {
+      color: var(--shiki-dark) !important;
+      background-color: var(--shiki-dark-bg) !important;
+    }
   }
 </style>

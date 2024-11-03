@@ -16,6 +16,7 @@ const {
   <p>
     {description}
   </p>
+  <hr />
   <a href={`/${slug}`}>Learn more</a>
 </section>
 
@@ -23,16 +24,9 @@ const {
   section {
     color: var(--color-text);
     text-decoration: none;
-    box-shadow: 0px 20px 40px 0px rgba(0, 0, 0, 0.1);
-    background-color: rgba(255, 255, 255, 0.04);
-    background: radial-gradient(
-        50% 50% at 50% 50%,
-        rgba(255, 255, 255, 0.04) 0%,
-        rgba(255, 255, 255, 0.04) 100%
-      )
-      rgba(255, 255, 255, 0.04);
+    background-color: #fff;
     border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    border: 1px solid #e5e1ec;
     align-items: flex-start;
     display: flex;
     flex-direction: column;
@@ -53,17 +47,25 @@ const {
     font-weight: 700;
   }
   p {
+    flex-grow: 1;
     font-size: 16px;
     line-height: 28px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--color-text);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  hr {
+    margin-block: 4px;
+    border: none;
+    height: 1px;
+    width: 100%;
+    background-color: #e5e1ec;
+  }
   a {
-    color: rgb(158, 120, 255);
+    color: #ad4ffc;
     font-size: 16px;
     font-weight: 500;
     text-decoration: none;
@@ -74,6 +76,27 @@ const {
   @media (max-width: 810px) {
     section {
       padding: 28px 24px;
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    section {
+      background-color: rgba(255, 255, 255, 0.04);
+      background: radial-gradient(
+          50% 50% at 50% 50%,
+          rgba(255, 255, 255, 0.04) 0%,
+          rgba(255, 255, 255, 0.04) 100%
+        )
+        rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    p {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    hr {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+    a {
+      color: var(--color-link);
     }
   }
 </style>

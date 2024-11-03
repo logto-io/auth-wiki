@@ -32,21 +32,24 @@ const sections = articles
   <Topbar />
   <main>
     <header>
-      <BackgroundBanner />
-      <h1><span class="purple">Auth</span> Wiki</h1>
-      <ul>
-        <li>OpenID Connect</li>
-        <li>OAuth 2.0</li>
-        <li>SAML</li>
-      </ul>
-      <p>
-        Explore and find clear definitions of key glossaries related to
-        authentication, authorization, and identity management. Work with
-        open-standards like <a href="/openid-connect">OpenID Connect</a>, <a
-          href="/oauth-2.0">OAuth 2.0</a
-        >, and <a href="/saml">SAML</a>.
-      </p>
-      <Share title="Auth Wiki" />
+      <div class="background"></div>
+      <div class="metadata">
+        <BackgroundBanner />
+        <h1><span class="purple">Auth</span> Wiki</h1>
+        <ul>
+          <li>OpenID Connect</li>
+          <li>OAuth 2.0</li>
+          <li>SAML</li>
+        </ul>
+        <p>
+          Explore and find clear definitions of key glossaries related to
+          authentication, authorization, and identity management. Work with
+          open-standards like <a href="/openid-connect">OpenID Connect</a>, <a
+            href="/oauth-2.0">OAuth 2.0</a
+          >, and <a href="/saml">SAML</a>.
+        </p>
+        <Share title="Auth Wiki" />
+      </div>
     </header>
     <div class="content">
       {
@@ -74,7 +77,18 @@ const sections = articles
     }
     header {
       position: relative;
+    }
+    header div.background {
+      z-index: -1;
+      position: absolute;
+      inset: -100px 0 0;
+      background: linear-gradient(180deg, #310085 0%, rgb(187, 62, 250) 125%);
+    }
+    header div.metadata {
+      position: relative;
       padding: var(--content-padding);
+      max-width: var(--content-max-width);
+      margin: 0 auto;
     }
     header ul {
       display: flex;
@@ -101,7 +115,7 @@ const sections = articles
       margin: 0;
     }
     header p a {
-      color: #cabeff;
+      color: #f1e8ff;
       text-decoration: none;
     }
     header p a:hover {
@@ -111,20 +125,15 @@ const sections = articles
     header :global(aside.share) {
       margin-block-start: 40px;
     }
-    main {
-      max-width: var(--content-max-width);
-      margin: 0 auto;
-    }
     h1 {
-      margin-block-start: 200px;
+      margin-block-start: 120px;
       margin-block-end: var(--content-padding);
       font-size: 92px;
       line-height: 100px;
-    }
-    h1 span.purple {
-      color: #ad4ffc;
+      color: #fff;
     }
     h2 {
+      color: #944694;
       font-family: "Cantata One", "Cantata One Placeholder", serif;
       font-size: 40px;
       font-weight: 400;
@@ -134,12 +143,14 @@ const sections = articles
     p {
       font-size: 16px;
       line-height: 26px;
-      color: rgba(255, 255, 255, 0.7);
+      color: #fff;
     }
     div.content {
       position: relative;
       height: min-content;
+      margin: 0 auto;
       padding: 0 var(--content-padding);
+      max-width: var(--content-max-width);
     }
     div.cards {
       margin: 0 auto;
@@ -158,6 +169,23 @@ const sections = articles
       }
       div.cards {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+    @media (prefers-color-scheme: dark) {
+      h1 span.purple {
+        color: #ad4ffc;
+      }
+      h2 {
+        color: var(--color-text);
+      }
+      p {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      header div.background {
+        display: none;
+      }
+      header p a {
+        color: #cabeff;
       }
     }
   </style>

@@ -38,3 +38,10 @@ export const buildShareUrlMap: Readonly<Record<string, (url: string, title: stri
   'hacker-news': buildHackerNewsShareUrl,
   reddit: buildRedditShareUrl,
 })
+
+export const shareTitleMap: Readonly<Record<string, string>> = Object.freeze({
+  x: 'Share on X',
+  'linked-in': 'Share on LinkedIn',
+  'hacker-news': 'Share on HackerNews',
+  reddit: 'Share on Reddit',
+});

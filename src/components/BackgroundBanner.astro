@@ -13,37 +13,20 @@ import banner from "../assets/banner.svg";
   div.background {
     z-index: -1;
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
   }
   div.grid {
     width: 300%;
     height: 100vw;
     background-position: 30px 30px;
     background-size: 60px 60px;
-    background-image: linear-gradient(90deg, #0e0e0e 1px, transparent 0),
-      linear-gradient(180deg, #0e0e0e 1px, transparent 0);
+    background-image: linear-gradient(90deg, #ffffff0c 1px, transparent 0),
+      linear-gradient(180deg, #ffffff0c 1px, transparent 0);
     perspective: 100vw;
     transform: translateX(-50%) translateY(-75%) rotateX(50deg) rotateZ(45deg);
   }
   div.eclipse {
-    position: absolute;
-    bottom: -200px;
-    left: -180px;
-    width: 1000px;
-    height: 1000px;
-    -webkit-filter: blur(100px);
-    filter: blur(100px);
-    background: linear-gradient(
-      180deg,
-      rgba(173, 79, 252, 0) 0%,
-      rgb(173, 79, 252) 122%
-    );
-    opacity: 0.2;
-    border-radius: 100%;
+    display: none;
   }
   img {
     position: absolute;
@@ -51,6 +34,7 @@ import banner from "../assets/banner.svg";
     right: -50vw;
     width: 150%;
     height: auto;
+    opacity: 0.65;
   }
   @media (max-width: 1099px) {
     img {
@@ -61,4 +45,28 @@ import banner from "../assets/banner.svg";
     img {
       display: none;
     }
+  }
+  @media (prefers-color-scheme: dark) {
+    div.grid {
+      background-image: linear-gradient(90deg, #0d0d0d 1px, transparent 0),
+        linear-gradient(180deg, #0d0d0d 1px, transparent 0);
+    }
+    div.eclipse {
+      display: block;
+      position: absolute;
+      bottom: -200px;
+      left: -180px;
+      width: 1000px;
+      height: 1000px;
+      -webkit-filter: blur(100px);
+      filter: blur(100px);
+      background: linear-gradient(
+        180deg,
+        rgba(173, 79, 252, 0) 0%,
+        rgb(173, 79, 252) 122%
+      );
+      opacity: 0.2;
+      border-radius: 100%;
+    }
+  }
 </style>

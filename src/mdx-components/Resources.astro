@@ -63,16 +63,16 @@ const results = await Promise.all(
     text-decoration: none;
     border-radius: 16px;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(0, 0, 0, 0.04);
     margin-block-start: 16px;
     transition: background-color 0.2s ease-in-out;
   }
   body a.resource:hover {
     text-decoration: none;
-    background-color: rgba(255, 255, 255, 0.24);
+    background-color: rgba(0, 0, 0, 0.06);
   }
   body a.resource h3 {
-    color: #55ccff;
+    color: #00b2ff;
     font-size: 14px;
     font-weight: 600;
     line-height: 1.4;
@@ -80,12 +80,26 @@ const results = await Promise.all(
   }
   body a.resource p {
     margin-block: 8px 0;
-    color: rgba(255, 255, 255, 0.7);
+    color: #333;
     font-size: 14px;
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  @media (prefers-color-scheme: dark) {
+    body a.resource {
+      background-color: rgba(255, 255, 255, 0.18);
+    }
+    body a.resource:hover {
+      background-color: rgba(255, 255, 255, 0.24);
+    }
+    body a.resource h3 {
+      color: #55ccff;
+    }
+    body a.resource p {
+      color: rgba(255, 255, 255, 0.7);
+    }
   }
 </style>
