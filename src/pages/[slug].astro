@@ -17,6 +17,8 @@ import { getEntry } from "astro:content";
 import { defaultLocale, getLocale } from "astro-i18n-aut";
 
 export async function getStaticPaths() {
+  // Only the default locale is needed for generating paths. Other locales will be handled by
+  // `astro-i18n-aut`.
   const terms = await getCollection("terms", (entry) =>
     entry.slug.startsWith(`${defaultLocale}/`),
   );

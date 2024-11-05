@@ -17,38 +17,44 @@ type Props = {
 };
 
 const locale = getLocale(Astro.url);
-const { slug, headingId } = Astro.props;
+const { slug: rawSlug, headingId } = Astro.props;
 const getEntryWithFallback = async () => {
-  const entry = await getEntry("terms", `${locale}/${slug}`);
+  const entry = await getEntry("terms", `${locale}/${rawSlug}`);
   if (entry) {
     return entry;
   }
 
   if (locale !== defaultLocale) {
-    const fallbackEntry = await getEntry("terms", `${defaultLocale}/${slug}`);
+    const fallbackEntry = await getEntry(
+      "terms",
+      `${defaultLocale}/${rawSlug}`,
+    );
     if (fallbackEntry) {
       return fallbackEntry;
     }
   }
 
   throw new Error(
-    `The article with slug "${locale}/${slug}" was not found in both current and fallback locales.`,
+    `The article with slug "${rawSlug}" was not found in both ${locale} and ${defaultLocale} locales.`,
   );
 };
 const entry = await getEntryWithFallback();
 const headings = await entry.render().then(({ headings }) => headings);
 const heading = headings.find((heading) => heading.slug === headingId);
+const slug = entry.slug.startsWith(`${defaultLocale}/`)
+  ? entry.slug.slice(defaultLocale.length + 1)
+  : entry.slug;
 
 if (headingId && !heading) {
   throw new Error(
-    `The heading with ID "${headingId}" was not found in the article with slug "${slug}".`,
+    `The heading with ID "${headingId}" was not found in the article with slug "${entry.slug}".`,
   );
 }
 ---
 
 <span>
   <Icon name="document" />
-  <a href={`/${entry.slug}${heading ? `#${headingId}` : ""}`}>
+  <a href={`/${slug}${heading ? `#${headingId}` : ""}`}>
     <slot>{heading?.text ?? entry.data.title}</slot>
   </a>
 </span>

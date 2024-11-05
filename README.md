@@ -10,7 +10,7 @@ We welcome contributions from everyone! Whether you’ve found a typo, want to s
 
 1. **Report issues**: If you spot any errors or have suggestions, please [create an issue](https://github.com/logto-io/auth-wiki/issues/new).
 
-2. **Edit directly**: The content resides in [src/articles](./src/articles). To make changes:
+2. **Edit directly**: The content resides in [src/content](./src/content). To make changes:
    - Navigate to the desired file.
    - Click the **edit** button (pencil icon) in the top right corner.
    - Make your edits and submit a pull request.

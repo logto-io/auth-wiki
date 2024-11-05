@@ -1,4 +1,5 @@
 ---
+import { defaultLocale } from "astro-i18n-aut";
 import type { CollectionEntry } from "astro:content";
 
 type Props = {
@@ -6,9 +7,12 @@ type Props = {
 };
 
 const {
-  slug,
+  slug: rawSlug,
   data: { title, description },
 } = Astro.props.entry;
+const slug = rawSlug.startsWith(`${defaultLocale}/`)
+  ? rawSlug.slice(defaultLocale.length + 1)
+  : rawSlug;
 ---
 
 <section>
