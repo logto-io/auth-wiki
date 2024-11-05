@@ -1,7 +1,7 @@
 ---
 title: Client
 tags: [oauth 2.0, oidc]
-description: In OAuth 2.0 and OpenID Connect (OIDC), a client is an application that requests authentication or authorization on behalf of a user or itself. Clients can be public or private (confidential), and they use different grant types to obtain tokens.
+description: In OAuth 2.0 and OpenID Connect (OIDC), a client is an application that requests authentication or authorization on behalf of a user or itself. Clients can be public or confidential (private), and they use different grant types to obtain tokens.
 ---
 
 ## What is a client?
@@ -10,7 +10,7 @@ A client, in the context of <Ref slug="oauth-2.0" /> and <Ref slug="openid-conne
 
 > "Client" and "application" are often used interchangeably in the context of <Ref slug="iam" />.
 
-There are multiple categorizations of clients based on their capabilities and trust levels, but to the frameworks, a significant distinction is between public and private clients. It affects how the client can obtain tokens and the grant types it can use.
+There are multiple categorizations of clients based on their capabilities and trust levels, but to the frameworks, a significant distinction is between public and confidential clients. It affects how the client can obtain tokens and the grant types it can use.
 
 ### Public clients
 
@@ -22,9 +22,9 @@ Public clients are applications that cannot cannot keep its credentials confiden
 
 You may argue that mobile and desktop apps have secure storage capabilities, but most of frameworks consider them public clients because they are distributed to end-users and it's assumed that the end-users can access the credentials.
 
-### Private clients
+### Confidential clients
 
-Private (confidential) clients are applications that can confidentially store sensitive information without exposing it to resource owners (end-users). Examples of private clients include:
+Confidential (private) clients are applications that can confidentially store sensitive information without exposing it to resource owners (end-users). Examples of confidential clients include:
 
 - Web servers
 - Backend services
@@ -65,7 +65,7 @@ sequenceDiagram
     Authorization Server->>Client: Respond with access token
 ```
 
-The authorization server will validate the client credentials and issue an access token if the client is authorized. Since the client needs to send the client secret, it's important to use the client credentials flow only for private clients.
+The authorization server will validate the client credentials and issue an access token if the client is authorized. Since the client needs to send the client secret, it's important to use the client credentials flow only for confidential clients.
 
 ## Security considerations
 
@@ -74,7 +74,7 @@ The authorization server will validate the client credentials and issue an acces
 The client type (public or private) affects the security considerations for the client.
 
 - Public clients should not use the client credentials flow because they cannot securely store the client secret. Instead, the <Ref slug="authorization-code-flow" /> with <Ref slug="pkce" /> is recommended for public clients to authenticate users.
-- Private clients can use the client credentials flow for machine-to-machine communication. They should securely store the client secret and use it only in secure environments.
+- Confidential clients can use the client credentials flow for machine-to-machine communication. They should securely store the client secret and use it only in secure environments.
 
 ### Token storage
 

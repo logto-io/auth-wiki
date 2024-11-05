@@ -71,7 +71,7 @@ Securely store refresh tokens on the client-side to prevent unauthorized access.
 - **HTTP-only cookies**: Store tokens in HTTP-only cookies to prevent client-side JavaScript from accessing them.
 - **Encrypted storage**: Use secure storages like Keychain (iOS) or KeyStore (Android) on mobile devices, or encrypted databases on web applications.
 
-### Token rotation
+### Refresh token rotation
 
 While refresh tokens can be long-lived, rotating them periodically or based on certain conditions (e.g., after a successful token exchange) can significantly reduce the risk of unauthorized access. The exact rotation strategy may vary based on the application's security requirements and the authorization server's capabilities.
 
@@ -80,14 +80,18 @@ Here are two common token rotation strategies:
 - **Time-based rotation**: Rotate refresh tokens after a certain period (e.g., every 7 days).
 - **Event-based rotation**: Rotate refresh tokens after specific events (e.g., successful token exchange, password change).
 
-These strategies are often combined with the session TTL (time-to-live) to ensure that after a certain period of time, regardless of the refresh token's validity, the user must re-authenticate.
+When a refresh token is rotated, the previous refresh token should be invalidated to prevent its reuse. These strategies are often combined with the session TTL (time-to-live) to ensure that after a certain period of time, regardless of the refresh token's validity, the user must re-authenticate.
+
+### Sender-constrained refresh tokens
+
+Sender-constrained refresh tokens are a security mechanism to bind the refresh token to the client that requested it, in case of the client is not a <Ref slug="client" headingId="confidential-clients">confidential client</Ref>. Common methods are [DPoP](https://datatracker.ietf.org/doc/html/rfc9449) and [mTLS](https://datatracker.ietf.org/doc/html/rfc8705).
 
 ### Client type
 
-It's a good practice to limit the use of refresh tokens to <Ref slug="client" headingId="private-clients">private (confidential) clients</Ref>.
+It's a good practice to limit the use of refresh tokens to <Ref slug="client" headingId="confidential-clients">confidential (private) clients</Ref>.
 
 - Public clients (e.g., single-page applications) expose the source code to the client-side, making it easier for attackers to extract and abuse refresh tokens. Usually, more secure mechanisms like <Ref slug="pkce" /> and refresh token rotation are used for public clients if refresh tokens are nessessary to use.
-- Private clients, on the other hand, run on a secure server environment where the source code and environment are not exposed to the client-side. Refresh tokens can be used more securely in such environments.
+- Confidential clients, on the other hand, run on a secure server environment where the source code and environment are not exposed to the client-side. Refresh tokens can be used more securely in such environments.
 
 ### Token revocation
 
