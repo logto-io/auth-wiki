@@ -14,17 +14,22 @@ import Share from "../components/Share.astro";
 import { Icon } from "astro-icon/components";
 import { getCollection } from "astro:content";
 import { getEntry } from "astro:content";
+import { defaultLocale, getLocale } from "astro-i18n-aut";
 
 export async function getStaticPaths() {
-  const terms = await getCollection("terms");
+  const terms = await getCollection("terms", (entry) =>
+    entry.slug.startsWith(`${defaultLocale}/`),
+  );
   return terms.map(({ slug }) => {
+    const [_, ...rest] = slug.split("/");
     return {
-      params: { slug },
+      params: { slug: rest.join("/") },
     };
   });
 }
 
-const entry = await getEntry("terms", Astro.params.slug);
+const locale = getLocale(Astro.url);
+const entry = await getEntry("terms", `${locale}/${Astro.params.slug}`);
 
 if (!entry) {
   return Astro.redirect("/404");

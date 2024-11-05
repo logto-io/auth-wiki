@@ -29,6 +29,10 @@ const results = await Promise.all(
       return url;
     }
 
+    if (process.env.SKIP_RESOURCE_FETCH) {
+      return { url, result: { ogTitle: url } };
+    }
+
     const { result, error } = await ogs({ url });
     if (error) {
       throw new Error(`Failed to fetch Open Graph data for ${url}: ${error}`);

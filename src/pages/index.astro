@@ -6,8 +6,25 @@ import Footer from "../components/Footer.astro";
 import BackgroundBanner from "../components/BackgroundBanner.astro";
 import Share from "../components/Share.astro";
 import { getCollection } from "astro:content";
+import { defaultLocale, getLocale } from "astro-i18n-aut";
 
-const entries = await getCollection("terms");
+const locale = getLocale(Astro.url);
+const defaultEntries = await getCollection("terms", (entry) =>
+  entry.slug.startsWith(`${defaultLocale}/`),
+);
+const localizedEntries = await getCollection("terms", (entry) =>
+  entry.slug.startsWith(`${locale}/`),
+);
+
+const entries = defaultEntries.map((entry) => {
+  const [_, ...rest] = entry.slug.split("/");
+  const entrySlug = rest.join("/");
+  const localizedEntry = localizedEntries.find(
+    ({ slug }) => slug === `${locale}/${entrySlug}`,
+  );
+  return localizedEntry ?? entry;
+});
+
 const sections = entries
   .slice()
   .sort((a, b) => a.data.title.localeCompare(b.data.title))

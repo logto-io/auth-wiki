@@ -4,6 +4,14 @@ import { rehypeShiki } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import icon from "astro-icon";
+import { i18n, filterSitemapByDefaultLocale } from "astro-i18n-aut/integration";
+
+export const defaultLocale = 'en';
+const locales = Object.freeze({
+  en: 'en',
+  es: 'es',
+  zh: 'zh-Hans',
+});
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,6 +19,7 @@ export default defineConfig({
   build: {
     format: 'file',
   },
+  trailingSlash: 'never',
   markdown: {
     rehypePlugins: [
       [rehypeMermaid, { dark: true, strategy: 'img-svg' }],
@@ -21,5 +30,20 @@ export default defineConfig({
     },
     syntaxHighlight: false
   },
-  integrations: [mdx(), sitemap(), icon()]
+  integrations: [
+    i18n({
+      locales,
+      defaultLocale,
+      exclude: ['pages/*.ts']
+    }),
+    mdx(),
+    sitemap({
+      i18n: {
+        locales,
+        defaultLocale,
+      },
+      filter: filterSitemapByDefaultLocale({ defaultLocale }),
+    }),
+    icon()
+  ]
 });
