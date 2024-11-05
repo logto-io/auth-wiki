@@ -1,12 +1,14 @@
 ---
-import type { Article } from "../types";
+import type { CollectionEntry } from "astro:content";
 
-type Props = Article;
+type Props = {
+  entry: CollectionEntry<"terms">;
+};
 
 const {
   slug,
-  frontmatter: { title, description },
-} = Astro.props;
+  data: { title, description },
+} = Astro.props.entry;
 ---
 
 <section>

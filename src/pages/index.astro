@@ -2,17 +2,18 @@
 import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
 import Topbar from "../components/Topbar.astro";
-import { articles } from "../libraries/articles";
 import Footer from "../components/Footer.astro";
 import BackgroundBanner from "../components/BackgroundBanner.astro";
 import Share from "../components/Share.astro";
+import { getCollection } from "astro:content";
 
-const sections = articles
+const entries = await getCollection("terms");
+const sections = entries
   .slice()
-  .sort((a, b) => a.frontmatter.title.localeCompare(b.frontmatter.title))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title))
   .reduce(
     (acc, article) => {
-      const firstLetter = article.frontmatter.title[0]?.toUpperCase();
+      const firstLetter = article.data.title[0]?.toUpperCase();
 
       if (!firstLetter) {
         return acc;
@@ -24,7 +25,7 @@ const sections = articles
       acc[firstLetter].push(article);
       return acc;
     },
-    {} as Record<string, typeof articles>,
+    {} as Record<string, typeof entries>,
   );
 ---
 
@@ -53,12 +54,12 @@ const sections = articles
     </header>
     <div class="content">
       {
-        Object.entries(sections).map(([letter, articles]) => (
+        Object.entries(sections).map(([letter, entries]) => (
           <section>
             <h2>{letter}</h2>
             <div class="cards">
-              {articles.map((article) => (
-                <Card {...article} />
+              {entries.map((entry) => (
+                <Card entry={entry} />
               ))}
             </div>
           </section>

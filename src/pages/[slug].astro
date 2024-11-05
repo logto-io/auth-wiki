@@ -2,8 +2,6 @@
 import Layout from "../layouts/Layout.astro";
 import Tags from "../components/Tags.astro";
 import Topbar from "../components/Topbar.astro";
-import { type Article } from "../types";
-import { articles } from "../libraries/articles";
 import Footer from "../components/Footer.astro";
 import BackgroundCells from "../components/BackgroundCells.astro";
 import FancyHr from "../components/FancyHr.astro";
@@ -14,30 +12,28 @@ import Resources from "../mdx-components/Resources.astro";
 import TextLink from "../mdx-components/TextLink.astro";
 import Share from "../components/Share.astro";
 import { Icon } from "astro-icon/components";
+import { getCollection } from "astro:content";
+import { getEntry } from "astro:content";
 
 export async function getStaticPaths() {
-  return articles.map(({ slug, ...rest }) => {
+  const terms = await getCollection("terms");
+  return terms.map(({ slug }) => {
     return {
       params: { slug },
-      props: rest,
     };
   });
 }
 
-type Props = Article;
+const entry = await getEntry("terms", Astro.params.slug);
 
-const {
-  frontmatter: { title, description, tags },
-  getHeadings,
-  basename,
-  Content,
-} = Astro.props;
-
-if (!Content) {
+if (!entry) {
   return Astro.redirect("/404");
 }
 
-if (getHeadings().some(({ depth }) => depth === 1)) {
+const { title, description, tags } = entry.data;
+const { headings, Content } = await entry.render();
+
+if (headings.some(({ depth }) => depth === 1)) {
   throw new Error("The article must not contain a top-level heading.");
 }
 ---
@@ -60,7 +56,7 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
             <Share title={title} />
             <a
               class="edit"
-              href={`https://github.com/logto-io/auth-wiki/edit/master/src/articles/${basename}.mdx`}
+              href={`https://github.com/logto-io/auth-wiki/edit/master/src/content/${entry.collection}/${entry.slug}.mdx`}
               target="_blank"
               rel="noopener"
             >
@@ -75,7 +71,7 @@ if (getHeadings().some(({ depth }) => depth === 1)) {
           <h2>Table of Contents</h2>
           <ul>
             {
-              getHeadings()
+              headings
                 .filter(({ depth }) => depth < 3)
                 .map(({ slug, text }) => (
                   <li>

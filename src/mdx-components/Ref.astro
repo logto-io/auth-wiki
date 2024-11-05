@@ -1,11 +1,11 @@
 ---
-import { articles } from "../libraries/articles";
+import { getEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
 
 type Props = {
   /**
    * The internal slug of the reference. It must be a valid slug of an article loaded in the site.
-   * @see {@link articles} for the list of available articles.
+   * @see 'terms' collection in the 'src/content' directory.
    */
   slug: string;
   /**
@@ -16,15 +16,14 @@ type Props = {
 };
 
 const { slug, headingId } = Astro.props;
-const found = articles.find((article) => article.slug === slug);
+const entry = await getEntry("terms", slug);
 
-if (!found) {
+if (!entry) {
   throw new Error(`The article with slug "${slug}" was not found.`);
 }
 
-const heading = found
-  .getHeadings()
-  .find((heading) => heading.slug === headingId);
+const headings = await entry.render().then(({ headings }) => headings);
+const heading = headings.find((heading) => heading.slug === headingId);
 
 if (headingId && !heading) {
   throw new Error(
@@ -36,7 +35,7 @@ if (headingId && !heading) {
 <span>
   <Icon name="document" />
   <a href={`/${slug}${heading ? `#${headingId}` : ""}`}>
-    <slot>{heading?.text ?? found.frontmatter.title}</slot>
+    <slot>{heading?.text ?? entry.data.title}</slot>
   </a>
 </span>
 
