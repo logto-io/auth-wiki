@@ -9,7 +9,6 @@ import { i18n, filterSitemapByDefaultLocale } from "astro-i18n-aut/integration";
 export const defaultLocale = 'en';
 const locales = Object.freeze({
   en: 'en',
-  es: 'es',
   zh: 'zh-Hans',
 });
 
