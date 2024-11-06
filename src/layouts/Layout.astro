@@ -1,5 +1,6 @@
 ---
 import { AstroSeo } from "@astrolib/seo";
+import { getLocale } from "astro-i18n-aut";
 
 type Props = {
   title?: string;
@@ -8,6 +9,7 @@ type Props = {
 
 const { props } = Astro;
 
+const locale = getLocale(Astro.url);
 const title = props.title ? `${props.title} · Auth Wiki` : "Auth Wiki";
 const description =
   props.description ??
@@ -16,7 +18,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <AstroSeo
