@@ -19,7 +19,14 @@ const locale = getLocale(Astro.url);
 const phrases = getPhrases(locale);
 const title = props.title ? `${props.title} · Auth Wiki` : "Auth Wiki";
 const description = props.description ?? phrases.site.description;
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// Needs to remove the file extension from the URL since Astro will add it in production when
+// build format is set to "file".
+const canonical = new URL(
+  Astro.url.pathname.endsWith(".html")
+    ? Astro.url.pathname.slice(0, -5)
+    : Astro.url.pathname,
+  Astro.site,
+).href;
 ---
 
 <!doctype html>
