@@ -1,0 +1,136 @@
+---
+title: JSON 웹 서명 (JSON Web Signature, JWS)
+tags: [oidc, jose]
+description: JSON 웹 서명 (JWS)은 JSON 형식으로 데이터를 서명하고 검증하는 표준 방법입니다. 주로 OpenID Connect (OIDC)에서 JSON 웹 토큰 (JWT)의 무결성과 신뢰성을 보장하는 데 사용됩니다.
+---
+
+## JSON 웹 서명 (JWS)이란 무엇인가요?
+
+JSON 웹 서명 (JWS)은 JSON 형식으로 데이터를 서명하고 검증하는 표준 방법을 정의합니다. 이는 전송된 데이터의 무결성과 신뢰성을 보장하기 위해 현대적인 애플리케이션과 <Ref slug="openid-connect" />와 같은 개방형 표준에서 널리 사용됩니다.
+
+JWS는 특히 <Ref slug="jwt">JSON 웹 토큰 (JWT)</Ref>과 작업할 때 유용합니다. 예를 들어, <Ref slug="id-token" />이나 <Ref slug="access-token" />을 JWS로 서명하고 수신자가 추가로 네트워크 요청을 하지 않고 검증할 수 있습니다.
+
+## JWS는 어떻게 작동하나요?
+
+JWS는 암호화 알고리즘을 사용하여 데이터를 서명하고 서명을 생성합니다. JWS에는 두 가지 주요 개념이 있습니다: JWS 헤더와 JWS 직렬화.
+
+### JWS 헤더
+
+JWS는 서명 알고리즘과 키 관리에 대한 중요한 메타데이터를 포함하는 헤더를 가집니다. JWS 헤더의 일반적인 속성은 다음과 같습니다:
+
+- `alg` (Algorithm): 데이터를 서명하는 데 사용되는 암호화 알고리즘.
+- `typ` (Type): 토큰의 유형, 예를 들어 JWT.
+- `kid` (Key ID): 데이터를 서명하는 데 사용된 키의 고유 식별자.
+- `jku` (JWK Set URL): <Ref slug="jwk" headingId="json-web-key-set-jwks" />이 위치한 URL.
+
+JWS 헤더 속성에 대한 자세한 목록은 [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4)를 참조하세요.
+
+### JWS 직렬화
+
+JWS에는 두 가지 직렬화 형식이 있습니다: compact과 JSON입니다. 각 형식은 서명된 데이터를 표현하는 자체 방법을 가지고 있습니다.
+
+#### Compact 직렬화
+
+Compact 직렬화에서는 JWS가 점 (`.`)으로 구분된 세 개의 Base64URL로 인코딩된 부분으로 나타납니다. 세 부분은 다음과 같습니다:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+각 부분은 특정 목적을 가집니다:
+
+- `header`: Base64URL로 인코딩된 서명 알고리즘과 키 관리에 대한 메타데이터.
+- `payload`: Base64URL로 인코딩된 서명된 데이터.
+- `signature`: 헤더와 페이로드의 암호화 서명.
+
+> [!Note]
+> Compact 직렬화에는 보호되지 않은 헤더가 포함되지 않습니다.
+
+예를 들어, JWS는 다음과 같이 보일 수 있습니다:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+Base64URL로 인코딩된 부분을 디코딩하면 JWS는 다음으로 구성됩니다:
+
+- Header: `{"alg":"HS256","typ":"JWT"}`
+- Payload: `{"sub":"1234567890","name":"Alice"}`
+- Signature: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+헤더는 JWS가 HMAC-SHA256 알고리즘 (`HS256`)을 사용하여 서명되었으며, 토큰의 유형이 JWT (`typ: "JWT"`)임을 JSON 형식으로 지정합니다. 페이로드는 사용자에 대한 기본 정보를 포함하며, 예를 들어, 주체 (`sub`)와 이름 (`name`)을 포함합니다.
+
+서명은 다음을 통해 계산됩니다:
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  secret
+)
+```
+
+JWS 헤더에 따르면 `Hash` 함수에서 HMAC-SHA256 알고리즘이 사용되며, 이 경우 `secret`은 공유 비밀 키 `top-secret`입니다.
+
+JWT와 JWS가 작동하는 자세한 예시는 <Ref slug="signing-key" /> 문서를 참조하세요.
+
+#### JSON 직렬화
+
+JSON 직렬화는 JWS를 표현하는 더 구조화된 방법을 제공합니다. JWS는 다음 속성을 가진 JSON 객체로 표현됩니다:
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: Base64URL로 인코딩된 페이로드. 이것이 서명된 데이터입니다.
+- `signatures`: 각 보호된 헤더, 헤더, 및 서명을 포함하는 서명 객체의 배열.
+
+  각 서명 객체는 다음을 포함할 수 있습니다:
+
+  - `protected`: Base64URL로 인코딩된 보호된 헤더 (compact 직렬화의 `header`).
+  - `header`: JSON 형식의 보호되지 않은 헤더. 이 헤더는 서명에 포함되지 않습니다.
+  - `signature`: 헤더와 페이로드의 암호화 서명 (compact 직렬화의 `signature`).
+
+예를 들어, JSON 직렬화의 JWS는 다음과 같이 보일 수 있습니다:
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+위의 예에서는 동일한 페이로드에 대해 두 개의 서명 (`signatures` 배열)이 있습니다. 각 서명 객체는 보호된 헤더, 헤더, 및 서명을 포함합니다.
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

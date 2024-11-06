@@ -1,0 +1,167 @@
+---
+title: JSON 웹 토큰 (JSON Web Token, JWT)
+tags: [oidc, jose]
+description: JSON 웹 토큰 (JWT)은 양 당사자 간의 안전한 통신을 가능하게 하는 RFC 7519에서 정의된 개방형 표준입니다. 이는 컴팩트하고, URL 안전하며, 자체 포함되어 있어 서비스 간 인증 (Authentication) 및 권한 부여 (Authorization) 데이터를 전송하기에 이상적입니다.
+---
+
+## JSON 웹 토큰 (JWT)이란?
+
+JSON 웹 토큰 (JWT)은 현대 웹 애플리케이션과 OpenID Connect와 같은 개방형 표준에서 인증 (Authentication) 및 권한 부여 (Authorization)를 촉진하는 데 널리 사용됩니다. 공식 [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519)은 중요한 참조 문서이긴 하지만, 초보자에게는 이해하기 어려울 수 있습니다. 이 기사에서는 JWT의 핵심 개념에 중점을 두고 이를 간단한 언어와 예제를 통해 설명하겠습니다.
+
+## 왜 JWT가 필요한가?
+
+오늘날에는 JSON을 사용하여 두 당사자 간에 데이터를 교환하는 것이 상당히 일반적입니다. 사용자를 나타내는 JSON 객체를 고려해 보세요:
+
+```json
+{
+  "sub": "foo",
+  "name": "John Doe"
+}
+```
+
+> `sub`는 "subject"의 약자로, 사용자의 식별자 (사용자 ID)를 나타내기 위한 OpenID Connect의 [표준 클레임](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims)입니다.
+
+이 JSON 객체의 **무결성**을 어떻게 보장할 수 있을까요? 즉, 데이터가 전송 중에 변조되지 않았음을 어떻게 확인할 수 있을까요? 일반적인 해결책은 디지털 서명을 사용하는 것입니다. 예를 들어, [공개 키 암호화](https://en.wikipedia.org/wiki/Public-key_cryptography)를 사용할 수 있습니다. 서버는 개인 키로 JSON 객체에 서명하고, 클라이언트는 서버의 공개 키로 서명을 검증할 수 있습니다.
+
+요컨대, JWT는 JSON 객체와 그 서명을 나타내는 표준화된 방법을 제공합니다.
+
+> JWT는 또한 JSON 객체를 암호화하는 데 사용할 수 있지만, 이는 이 기사에서 다루는 대상이 아닙니다.
+
+## JWT의 형식
+
+디지털 서명을 생성하는 여러 알고리즘이 있기 때문에, JWT 서명에 사용된 알고리즘을 명시할 필요가 있습니다. 이는 다음과 같이 JSON 객체를 구성하여 수행됩니다:
+
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+> `alg`는 "algorithm"의 약자이고, `typ`는 "type"의 약자입니다.
+
+일반적으로 `typ`는 대문자로 `JWT`로 설정됩니다. 예시에서 `alg`는 `HS256`이며, 이는 [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC)을 의미하고, 이 알고리즘을 사용하여 서명을 생성함을 나타냅니다.
+
+이제 JWT를 구성하는 모든 요소가 준비되었습니다:
+
+- 헤더 JSON: 알고리즘 및 타입
+- 페이로드 JSON: 실제 데이터
+- 서명: 헤더와 페이로드를 포함하는 서명
+
+그러나 공백 및 줄 바꿈 문자와 같은 특정 문자는 네트워크 전송에 친숙하지 않습니다. 따라서 헤더와 페이로드는 **Base64URL-인코딩**되어야 합니다. 일반적인 JWT는 다음과 같습니다:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+> `.`는 구분자로 사용됩니다.
+
+모든 것을 결합하여 JWT를 생성해 보겠습니다:
+
+### 헤더
+
+JSON: `{"alg":"HS256","typ":"JWT"}`
+
+Base64URL 인코딩: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`
+
+### 페이로드
+
+JSON: `{"sub":"foo","name":"John Doe"}`
+
+Base64URL 인코딩: `eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ`
+
+### 서명
+
+HMAC-SHA256에서는 비밀 키로 서명을 생성합니다:
+
+```
+HMAC-SHA256(base64Url(header) + "." + base64Url(payload), secret)
+```
+
+예를 들어, 비밀 키가 `some-great-secret`일 때, 서명은 다음과 같습니다: `XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g`.
+
+### JWT
+
+최종 JWT는 다음과 같습니다:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g
+```
+
+이 유효한 JWT는 비밀 키를 보유한 모든 당사자가 인증할 수 있습니다.
+
+## 서명 알고리즘 선택
+
+앞서 언급한 바와 같이 디지털 서명을 생성하는 다양한 알고리즘이 있습니다. `HS256`을 예로 사용했지만, 비밀 키가 당사자 간에 공유되어야 하기 때문에 충분히 강력하지 않을 수 있습니다 (예: 클라이언트와 서버).
+
+실제 시나리오에서는 비밀 키를 안전하게 유지할 수 없는 React 앱과 같은 공공 애플리케이션이 클라이언트에 포함될 수 있습니다. 따라서 JWT 서명에 대해 공개 키 암호화 (즉, 비대칭 암호화)를 사용하는 것이 선호됩니다. 가장 인기 있는 알고리즘 중 하나인 [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem)부터 시작해 보겠습니다.
+
+### RSA
+
+비대칭 알고리즘인 RSA는 공개 키와 개인 키 쌍을 사용합니다. 공개 키는 서명을 검증하는 데 사용되고, 개인 키는 서명에 사용됩니다.
+
+RSA 헤더 JSON은 다음과 같습니다:
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+```
+
+> `RS256`은 RSA-SHA256을 의미하며, 이는 RSA 알고리즘과 SHA256 해시 함수를 사용하여 서명을 생성함을 의미합니다. `RS384` 및 `RS512`를 사용하여 각각 SHA384 및 SHA512 해시 함수를 사용하는 서명을 생성할 수도 있습니다.
+
+서명은 개인 키로 생성됩니다:
+
+```
+RSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+다시 한 번, 이러한 구성 요소들을 조합하여 JWT를 생성할 수 있으며, 최종 JWT는 다음과 같은 모양을 가집니다:
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+이제 클라이언트는 개인 키를 알지 않고도 서명을 검증할 수 있습니다.
+
+### ECDSA
+
+RSA가 널리 사용되기는 하지만, 때때로 서명 크기가 헤더와 페이로드의 결합된 크기를 초과하여 더 큰 서명 크기라는 단점이 있습니다. 타원 곡선 디지털 서명 알고리즘 (ECDSA)은 더 컴팩트한 서명을 생성할 수 있으며, 성능이 더 우수한 다른 비대칭 알고리즘입니다.
+
+ECDSA에 대해 개인 키를 생성하려면 곡선을 선택해야 합니다. 이는 이 기사에서 다룰 주제는 아니지만, [여기](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Elliptic_Curve_Digital_Signature_Algorithm)에서 더 많은 정보를 찾을 수 있습니다.
+
+ECDSA 헤더 JSON은 다음과 같습니다:
+
+```json
+{
+  "alg": "ES256",
+  "typ": "JWT"
+}
+```
+
+> `ES256`은 ECDSA-SHA256을 의미하며, 이는 ECDSA 알고리즘과 SHA256 해시 함수를 사용하여 서명을 생성함을 의미합니다. `ES384` 및 `ES512`를 사용하여 각각 SHA384 및 SHA512 해시 함수를 사용하는 서명을 생성할 수도 있습니다.
+
+서명은 개인 키로 생성됩니다:
+
+```
+ECDSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+최종 JWT는 RSA와 동일한 구조를 유지하지만 서명이 상당히 짧습니다:
+
+```
+eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+## JWT 검증
+
+JWT를 검증하는 것은 JWT를 생성하는 역방향 과정으로 간단합니다:
+
+1. `.` 구분자를 사용하여 JWT를 세 부분 (헤더, 페이로드, 서명)으로 분리합니다.
+2. 헤더와 페이로드를 Base64URL로 디코딩합니다.
+3. 헤더에 지정된 알고리즘과 공개 키 (비대칭 알고리즘의 경우)를 사용하여 서명을 검증합니다.
+
+Node.js 및 웹 브라우저용으로 [jose](https://github.com/panva/jose)와 같은 JWT 검증을 도와주는 많은 라이브러리가 있습니다.
+
+<SeeAlso slugs={['opaque-token', 'id-token', 'access-token']} />

@@ -1,0 +1,56 @@
+---
+title: 인증 (Authentication)
+tags: [authentication]
+description: "인증 (Authentication)은 ID 소유권(예: 사용자 또는 서비스)을 검증하는 과정입니다. 이는 ID 및 접근 관리 (IAM) 시스템의 기반이며 애플리케이션 및 서비스를 보호하는 데 필수적입니다."
+---
+
+## 인증 (Authentication)이란 무엇인가?
+
+> **요약**: 인증 (Authentication)은 "어떤 ID를 소유하고 있습니까?"라는 질문에 답합니다.
+
+다음은 인증 (Authentication)의 몇 가지 일반적인 예입니다:
+
+- 사용자 이름과 비밀번호로 로그인
+- 소셜 로그인 (예: Google로 로그인)
+- <Ref slug="machine-to-machine" /> 인증 (Authentication) (예: API 키)
+
+"당신은 누구인가?"라는 표현을 사용하지 않은 이유는 다음과 같습니다:
+
+- <Ref slug="iam" />의 영역에서 인증 (Authentication)은 ID의 소유권을 확인하는 것이지, 사람이나 개체를 식별하는 것이 아닙니다. 예를 들어, 가족 구성원이 귀하의 자격 증명을 사용하여 귀하의 계정에 로그인할 때, 그들은 당신이 아니지만 시스템에 대한 ID는 동일합니다.
+- ID는 사용자, 서비스 또는 장치일 수 있습니다. 예를 들어, 서비스가 API 키를 사용하여 다른 서비스에 자신을 인증 (Authentication)할 수 있습니다.
+
+### 인증 (Authentication)과 권한 부여 (Authorization)의 차이
+
+이 두 용어는 종종 혼동되지만 근본적으로 다릅니다: <Ref slug="authorization" />는 "무엇을 할 수 있습니까?"라는 질문에 답합니다. 또한, 시스템이 어떤 작업을 수행할 수 있는지 결정하기 전에 ID를 알아야 하기 때문에 인증 (Authentication)은 권한 부여 (Authorization)의 전제 조건입니다.
+
+## 인증 (Authentication) 요소
+
+인증 (Authentication)은 하나 이상의 요소를 사용하여 수행될 수 있습니다. 여기 몇 가지 일반적인 요소가 있습니다:
+
+- **지식 요소**: 당신이 알고 있는 것 (예: 비밀번호, PIN)
+- **소유 요소**: 당신이 가지고 있는 것 (예: 스마트폰, 보안 토큰)
+- **고유 요소**: 당신 자체 (예: 지문, 안면 인식)
+
+<Ref slug="mfa" />는 보안을 강화하기 위해 여러 요소를 결합하는 일반적인 관행입니다. 예를 들어 은행 계정에 로그인할 때 비밀번호(지식 요소)와 인증 앱에서 제공하는 일회용 코드(소유 요소)를 제공해야 할 수 있습니다.
+
+<Ref slug="passkey" />는 여러 요소를 결합할 수 있고 피싱 공격에 저항하는 현대적인 인증 (Authentication) 요소입니다.
+
+## 인증 (Authentication) 프레임워크 (프로토콜)
+
+자체 제작한 인증 (Authentication) 시스템을 구축하는 대신, 보안 전문가에 의해 테스트되고 검토된 기존의 프레임워크 및 프로토콜을 사용하는 것이 좋습니다. 인증 (Authentication)이 어떻게 수행되어야 하는지를 정의하는 다양한 인증 (Authentication) 프레임워크와 프로토콜이 있습니다. 두 가지 일반적인 것은 다음과 같습니다:
+
+- <Ref slug="openid-connect" />: 인증 기능을 추가하는 <Ref slug="oauth-2.0" /> 위에 구축된 ID 레이어입니다. 이는 상대적으로 현대적이며 새로운 애플리케이션에 널리 사용됩니다.
+- <Ref slug="saml" />: 당사자 간 인증 및 권한 부여 데이터를 교환하기 위한 프로토콜입니다. 주로 기업 환경에서 사용됩니다.
+
+프레임워크 선택은 사용 사례와 요구 사항에 따라 다릅니다. 새로운 애플리케이션에는 현대적인 설계와 <Ref slug="jwt" /> 지원 때문에 OIDC가 권장됩니다.
+
+그러나, 이러한 프로토콜을 직접 다루는 것은 여전히 복잡하고 시간이 많이 걸릴 수 있습니다. 두 프로토콜 모두 학습 곡선이 가파르고, 보안을 보장하기 위해 신중한 구현이 필요합니다. 대신 이러한 프로토콜을 지원하거나 그 위에 구축된 <Ref slug="identity-provider" />를 사용하면 인증 (Authentication) 프로세스를 크게 단순화할 수 있습니다. 좋은 ID 제공자는 또한 <Ref slug="mfa" /> 및 <Ref slug="single-sign-on" />과 같은 추가 기능을 제공하여 미래의 필요를 충족시킬 것입니다.
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

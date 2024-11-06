@@ -1,0 +1,72 @@
+---
+title: 클레임 (Claim)
+tags: [oauth 2.0, oidc]
+description: JSON Web Token (JWT)에서 클레임 (Claim)은 특정 정보를 전달하는 이름-값 쌍이다. 보다 넓은 문맥에서, 클레임은 정보를 나타내는 이름-값 쌍일 수 있다.
+---
+
+## 클레임 (Claim)이란 무엇인가?
+
+클레임 (Claim)은 특정 정보를 전달하는 이름-값 쌍이다. 예를 들어, JSON 객체에서:
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+이 예제에서 `sub`은 값이 `foo`인 주체 식별자를 나타내는 클레임이고, `email`은 값이 `foo@bar.com`인 이메일 주소를 나타내는 클레임이다.
+
+> *사용자* 대신 *주체*를 사용한 이유는 주체 (`sub`)가 명확한 정의 없이 사용자, 장치 또는 어떤 엔티티라도 나타낼 수 있기 때문이다.
+
+### 클레임 (Claim)의 용도
+
+클레임은 다양한 문맥에서 널리 사용된다. 예를 들어:
+
+- <Ref slug="jwt" />: JWT에서 클레임은 issuer (`iss`), subject (`sub`), 만료 시간 (`exp`)과 같은 토큰 정보를 나타내기 위해 사용된다.
+- <Ref slug="openid-connect" />: OIDC에서 클레임은 <Ref slug="id-token" /> 및 <Ref slug="userinfo-endpoint" />에서 사용자 정보를 나타내기 위해 사용된다. 예를 들어 사용자 이메일 주소 (`email`), 이름 (`name`), 프로필 사진 (`picture`) 등이 있다.
+
+### 표준 클레임 (Standard claims)
+
+JWT 및 OIDC에서는 사양에 의해 정의된 표준 클레임이 있다. 몇 가지 일반적인 표준 클레임에는 다음이 포함된다:
+
+- **`iss`**: 토큰의 issuer. 예를 들어, 토큰을 발급한 <Ref slug="authorization-server" />가 `https://example.com`인 경우, 대부분의 경우 `iss` 클레임도 동일하게 된다 (`https://example.com`).
+- **`sub`**: 토큰의 subject. 토큰과 관련된 엔티티를 나타낸다. 예를 들어, ID 토큰의 경우 `sub` 클레임은 일반적으로 사용자 식별자를 나타낸다.
+- **`aud`**: 토큰의 audience. 토큰이 의도된 수신자를 나타낸다. 예를 들어, 토큰이 `https://api.example.com`의 API에 접근하기 위한 것이라면, `aud` 클레임은 동일하다 (`https://api.example.com`).
+- **`exp`**: 토큰의 만료 시간. 토큰이 처리에 더 이상 수용되지 않아야 하는 시점을 나타낸다.
+- **`nbf`**: 토큰의 "보다는 이후" 시간. 토큰이 처리에 수용되기 시작할 시점을 나타낸다.
+- **`iat`**: 토큰 발급 시간. 토큰이 발급된 시점을 나타낸다.
+- **`jti`**: 토큰의 JWT ID. 토큰에 대한 고유 식별자를 제공한다.
+
+OIDC는 또한 사용자 정보를 위한 추가적인 표준 클레임을 정의한다. 자세한 내용은 OIDC 사양의 [클레임](https://openid.net/specs/openid-connect-core-1_0.html#Claims)을 참조하라.
+
+### 커스텀 클레임 (Custom claims)
+
+표준 클레임 외에도 애플리케이션 특유의 정보를 나타내기 위해 커스텀 클레임을 정의할 수 있다. 예를 들어, 애플리케이션에서 사용자의 역할을 나타내기 위해 `role` 클레임을 포함시킬 수 있다.
+
+커스텀 클레임은 [Uniform Resource Identifiers (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn)로 네임스페이스화하여 다른 클레임과의 충돌을 피할 수 있다. 예를 들어:
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+이 예제에서 `role` 클레임은 고유성을 보장하기 위해 `https://example.com/claims/`로 네임스페이스화 되었다. 또는 커스텀 클레임을 위해 자신의 [Uniform Resource Name (URN)](https://blog.logto.io/unveiling-uri-url-and-urn)을 정의할 수 있다:
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+이 예제에서 `role` 클레임은 `urn:example:claims:`로 네임스페이스화 되었다.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

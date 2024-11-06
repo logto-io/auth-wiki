@@ -1,0 +1,73 @@
+---
+title: OpenID Connect (OIDC) 디스커버리 (Discovery)
+tags: [oidc]
+description: OpenID Connect (OIDC) 디스커버리는 클라이언트가 OpenID 공급자의 엔드포인트와 구성을 자동으로 발견할 수 있게 해주는 메커니즘입니다.
+---
+
+## OpenID Connect (OIDC) 디스커버리란 무엇인가?
+
+[OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)에 정의된 OpenID Connect (OIDC) 디스커버리는 <Ref slug="client">클라이언트</Ref>가 OpenID 공급자의 엔드포인트와 구성을 자동으로 발견할 수 있게 해주는 메커니즘입니다. 이는 클라이언트와 <Ref slug="openid-connect" headingId="openid-provider-op">OpenID 공급자</Ref> 간의 통신을 간소화하기 위한 현대적 접근 방식입니다.
+
+OIDC 디스커버리는 두 가지 주요 구성 요소가 있습니다:
+
+- OpenID 공급자 issuer (발급자) 디스커버리: 클라이언트는 [WebFinger](https://tools.ietf.org/html/rfc7033) 또는 외부 문서를 통해 issuer의 위치(URL)를 발견할 수 있습니다.
+- OpenID 공급자 메타데이터: 클라이언트는 메타데이터 문서를 검색하고 처리하여 OpenID 공급자의 기능 및 엔드포인트에 대해 배울 수 있습니다.
+
+## OIDC 디스커버리는 어떻게 작동하나요?
+
+### OpenID 공급자 issuer 디스커버리
+
+OpenID 공급자 issuer는 클라이언트가 OpenID 공급자 구성을 발견하는 데 사용할 수 있는 고유 식별자입니다(일반적으로 URL과 동일). 하지만 클라이언트가 메타데이터 문서를 검색하기 전에 issuer의 위치를 알고 있어야 합니다.
+
+issuer의 위치가 이미 알려진 경우 클라이언트는 다음 단계로 건너뛸 수 있습니다. 그렇지 않으면 클라이언트는 WebFinger를 사용하여 issuer의 위치를 발견할 수 있습니다. OIDC issuer 디스커버리에 필요한 정보는 다음과 같습니다:
+
+- `host`: WebFinger 서비스가 호스팅되는 곳.
+- `resource`: OpenID 공급자의 이메일 주소 또는 URL.
+- `rel`: 관계 유형, `http://openid.net/specs/connect/1.0/issuer`로 설정해야 함.
+
+예를 들어, 이메일 주소가 `foo@bar.com`인 사용자가 `example.com`에서 issuer의 위치를 발견하려고 합니다. WebFinger 요청은 다음과 같습니다:
+
+```http
+GET /.well-known/webfinger?resource=acct%3Afoo%40bar.com&
+  rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: example.com
+```
+
+디코드된 `resource` 매개변수는 `acct:foo@bar.com`이고, `rel` 매개변수는 `http://openid.net/specs/connect/1.0/issuer`입니다.
+
+### OpenID 공급자 메타데이터
+
+클라이언트가 issuer의 위치를 알게 되면, 잘 알려진 엔드포인트에서 메타데이터 문서를 검색할 수 있습니다. 메타데이터 문서의 경로는 issuer의 URL을 기준으로 `/.well-known/openid-configuration` 입니다.
+
+예를 들어, issuer의 URL이 `https://oidc.example.com`이라면, 클라이언트는 `https://oidc.example.com/.well-known/openid-configuration`에서 메타데이터 문서를 검색할 수 있습니다. 메타데이터 응답의 비규범적 예시는 다음과 같습니다:
+
+```json
+{
+  "issuer": "https://oidc.example.com",
+  "authorization_endpoint": "https://oidc.example.com/authorize",
+  "token_endpoint": "https://oidc.example.com/token",
+  //...
+}
+```
+
+메타데이터 문서에는 OpenID 공급자에 대한 많은 유용한 정보가 포함되어 있습니다. 몇 가지 주요 필드를 강조하겠습니다:
+
+- `issuer`: OpenID 공급자의 고유 식별자. 토큰을 검증하는 데 사용해야 합니다.
+- `authorization_endpoint`: <Ref slug="authentication-request" />를 시작할 URL.
+- `token_endpoint`: <Ref slug="token-request" />를 보내는 URL.
+- `jwks_uri`: <Ref slug="signing-key" /> 검증을 위한 <Ref slug="jwk" headingId="json-web-key-set-jwks" />을 검색하는 URL.
+- `response_types_supported`: <Ref slug="authentication-request" />에 대한 지원하는 응답 유형.
+- `scopes_supported`: <Ref slug="authentication-request" />에 대한 지원하는 <Ref slug="scope">스코프</Ref>.
+- `claims_supported`: <Ref slug="id-token" />에 대한 지원하는 <Ref slug="claim">클레임</Ref>.
+- `token_endpoint_auth_methods_supported`: <Ref slug="token-request" />에 대한 지원되는 클라이언트 인증 방법.
+
+메타데이터 필드의 포괄적인 목록은 [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) 명세서를 참조하세요.
+
+<SeeAlso slugs={["openid-connect", "authentication-request", "jwt", "token-request"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/exploring-oidc-configuration',
+    'https://openid.net/specs/openid-connect-discovery-1_0.html',
+  ]}
+/>

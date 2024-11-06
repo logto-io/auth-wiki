@@ -1,0 +1,51 @@
+---
+title: 오프라인 액세스 (Offline access)
+tags: [oauth 2.0, oidc]
+description: 오프라인 액세스 (Offline access)는 클라이언트가 사용자가 다시 인증 (re-authenticate)할 필요 없이 새 액세스 토큰 (access token)을 얻을 수 있게 합니다. 이는 장기 세션과 더 나은 사용자 경험에 유용합니다.
+---
+
+## 오프라인 액세스 (Offline access)란 무엇인가?
+
+오프라인 액세스 (Offline access)의 개념은 컨텍스트에 따라 다를 수 있으며, 여기서는 OAuth 2.0 및 OpenID Connect (OIDC) 사양에 초점을 맞춥니다. 이 컨텍스트에서 오프라인 액세스 (Offline access)는 사용자가 다시 인증 (re-authenticate)할 필요 없이 클라이언트가 새 <Ref slug="access-token">액세스 토큰 (access tokens)</Ref>을 <Ref slug="refresh-token">리프레시 토큰 (refresh token)</Ref>을 사용하여 획득할 수 있게 합니다. 이 기능은 특히 장기 세션과 더 나은 사용자 경험에 유용합니다.
+
+OAuth 2.0은 "오프라인 액세스 (Offline access)"라는 용어를 명시적으로 정의하지 않지만, 새 액세스 토큰 (access tokens)을 획득하기 위한 리프레시 토큰 (refresh tokens)의 사용은 명시합니다. 그러나 "오프라인 액세스 (Offline access)"라는 용어와 `offline_access` 스코프가 이 기능을 나타내기 위해 업계에서 널리 채택되었으며, <Ref slug="openid-connect" /> 사양에서 공식적으로 정의되었습니다.
+
+## 오프라인 액세스 (Offline access)는 어떻게 작동하는가?
+
+간단히 하기 위해 OAuth 2.0 용어인 <Ref slug="authorization-request" />와 <Ref slug="authorization-server" />를 사용하여 오프라인 액세스 (Offline access)가 어떻게 작동하는지 설명합니다. OIDC에서 해당 용어는 각각 <Ref slug="authentication-request" />와 <Ref slug="openid-connect" headingId="openid-provider-op" />입니다.
+
+오프라인 액세스 (Offline access)를 활용하는 데는 두 가지 주요 단계가 있습니다:
+
+1. **오프라인 액세스 (Offline access) 요청하기**: <Ref slug="client" />가 인증 요청을 권한 서버에 시작할 때, `offline_access` 스코프를 포함하여 오프라인 액세스 (Offline access)를 요청합니다. 이 스코프는 클라이언트가 액세스 토큰 (access token)과 함께 리프레시 토큰 (refresh token)을 받고자 한다는 것을 나타냅니다.
+
+   오프라인 액세스 (Offline access)에 대한 지원은 권한 서버마다 다를 수 있으며, 권한 서버가 이를 지원하지 않는 경우 `offline_access` 스코프를 무시할 수 있습니다. 이 스코프를 사용하기 전에 권한 서버의 문서를 참조하여 호환성을 확인하시기 바랍니다.
+
+2. **리프레시 토큰 (refresh token) 사용하기**: <Ref slug="oauth-2.0-grant" />가 완료되면, 클라이언트는 <Ref slug="access-token" />과 함께 <Ref slug="refresh-token" />을 받아야 합니다. 클라이언트는 리프레시 토큰 (refresh token)을 안전하게 저장하고, 현재의 액세스 토큰 (access token)이 만료될 때 해당 토큰으로 권한 서버에 새로운 액세스 토큰 (access token)을 얻기 위한 <Ref slug="token-request" />를 보낼 수 있습니다.
+
+오프라인 액세스 (Offline access)가 실현된 자세한 예시는 <Ref slug="refresh-token" /> 문서를 참조하시기 바랍니다.
+
+## 보안 고려 사항
+
+오프라인 액세스 (Offline access)의 보안 암시사항은 리프레시 토큰 (refresh tokens)의 것과 유사합니다. 자세한 내용은 리프레시 토큰 (refresh token)의 <Ref slug="refresh-token" headingId="security-considerations" /> 섹션을 참조하십시오.
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "Offline Access in OpenID Connect Core 1.0",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "Refresh Token in OAuth 2.0",
+        ogDescription: "리프레시 토큰 (refresh tokens)은 액세스 토큰 (access tokens)을 획득하기 위해 사용되는 자격입니다."
+      },
+    },
+  ]}
+/>

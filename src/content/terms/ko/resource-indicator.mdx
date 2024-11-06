@@ -1,0 +1,120 @@
+---
+title: 리소스 인디케이터 (Resource indicator)
+tags: [oauth 2.0]
+description: OAuth 2.0의 리소스 인디케이터는 RFC 8707에서 정의된 확장 파라미터로, 클라이언트가 authorization request (인가 요청)에서 리소스 서버의 위치를 지정할 수 있도록 합니다. 이는 하나의 인가 서버에서 여러 리소스 서버를 처리할 수 있는 확장 가능한 방법을 제공합니다.
+---
+
+## 리소스 인디케이터란 무엇인가?
+
+OAuth 2.0 확장 [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707)에서 정의된 리소스 인디케이터는 클라이언트가 <Ref slug="authorization-request" /> (또는 <Ref slug="openid-connect" />에서의 <Ref slug="authentication-request" />) 및 <Ref slug="token-request" />에서 리소스 서버의 URI를 지정할 수 있도록 하는 파라미터입니다. 리소스 인디케이터는 클라이언트가 접근하고자 하는 리소스 서버의 위치를 나타내는 데 사용됩니다.
+
+> [!Note]
+> 리소스 인디케이터는 OAuth 2.0의 핵심 사양에 포함되지 않는 확장 파라미터입니다. 이 파라미터를 지원하는지 확인하려면 <Ref slug="authorization-server" /> 문서를 참고하세요.
+
+## 리소스 인디케이터는 어떻게 작동하는가?
+
+리소스 인디케이터가 어떻게 작동하는지를 더 잘 이해하기 위해, 단일 인가 서버를 사용하여 여러 <Ref slug="resource-server">리소스 서버</Ref>에 접근하고자 하는 <Ref slug="client" />의 시나리오를 고려해보겠습니다.
+
+### 1. 리소스 서버 등록
+
+일반적으로, 개발자는 클라이언트가 사용할 수 있도록 각 리소스 서버를 인가 서버에 등록해야 합니다. 실제 등록 과정은 인가 서버 구현에 따라 다를 수 있습니다. 기능 이름도 "API 리소스" 혹은 단순히 "리소스" 등 다르게 불릴 수 있습니다.
+
+클라이언트가 `https://api.example.com`과 `https://api.another.com` 두 개의 리소스 서버에 접근하고자 하며, 이들이 인가 서버에 등록되어 있다고 가정합시다.
+
+### 2. 각 리소스 서버에 대한 스코프 정의
+
+전통적인 OAuth 2.0 흐름과 달리, <Ref slug="scope">스코프</Ref>가 모든 리소스 서버에 공유되는 대신, 리소스 인디케이터 확장은 클라이언트가 각 리소스 서버에 대한 스코프를 지정할 수 있도록 합니다. 이는 등록 과정의 일부가 되어야 합니다. 리소스 서버가 다음과 같은 스코프를 가지고 있다고 가정합시다:
+
+| 리소스 서버                 | 스코프          |
+|---------------------------|------------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. 인가 요청에 리소스 인디케이터 포함
+
+리가 서버에 리소스 인디케이터 확장을 사용하고자 한다고 알리기 위해, 클라이언트는 인가 요청에 `resource` 파라미터를 포함해야 합니다.
+
+여기 리소스 인디케이터가 포함된 인가 요청의 비전형적인 예제입니다:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+이 예에서, 클라이언트는 `resource` 파라미터를 인코딩된 값 `https%3A%2F%2Fapi.example.com`과 함께 포함하여 리소스 서버의 위치 (`https://api.example.com`)를 나타냅니다.
+
+또한 `openid`와 같은 미리 정의된 스코프도 리소스별 스코프와 함께 포함하는 것을 알 수 있습니다. 인가 서버는 스코프를 검증하고 요청된 리소스 서버와 관련 없는 다른 스코프는 걸러내야 합니다. 이를 **다운스코핑**이라고 합니다.
+
+다음은 클라이언트가 받기를 기대하는 실제 네 가지 스코프의 표입니다:
+
+| 리소스 서버                 | 스코프                        |
+|---------------------------|-------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                        |
+
+리소스 인디케이터의 장점은 클라이언트가 `resource` 파라미터를 반복하여 단일 인가 요청에서 여러 리소스 서버를 요청할 수 있다는 점입니다. 다음 예제를 살펴보겠습니다:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+이 예에서, 클라이언트는 각각의 스코프로 `https://api.example.com`과 `https://api.another.com`에 대한 접근을 요청합니다. 인가 서버는 각 리소스 서버에 대해 스코프를 검증해야 하며, 이는 스코프와 리소스 서버의 **데카르트 곱**을 계산하는 것을 의미합니다. 결과는 다음과 같아야 합니다:
+
+| 리소스 서버                 | 스코프                        |
+|---------------------------|-------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`              |
+| `https://api.another.com` | `read`, `delete`             |
+
+인가 요청에 대해 총 일곱 가지 유효한 스코프가 있습니다.
+
+### 4. 토큰 요청에 리소스 인디케이터 포함
+
+클라이언트가 인가 코드를 받으면, 필요에 따라 **단일** 리소스 인디케이터와 함께 액세스 토큰으로 교환할 수 있습니다. 예를 들어:
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+토큰 요청의 `resource` 파라미터는 선택 사항입니다. 클라이언트가 이를 포함하면, 인가 서버는 현재의 그랜트와 연관된 스코프에 대해 리소스 인디케이터를 검증해야 합니다. 그렇지 않으면, 인가 서버는 전역 스코프로 되돌아가야 합니다 (예: <Ref slug="openid-connect" /> 스코프).
+
+> [!Note]
+> 인가 서버는 항상 <Ref slug="access-control" />을 적용하여, 발행된 액세스 토큰이 유효하며 현재 그랜트 컨텍스트에 따라 적절히 다운스코핑되었음을 보장해야 합니다.
+
+그랜트에서 여러 리소스 서버를 처리하는 방법에 대한 의문이 있을 수 있습니다. 인가 코드는 한 번만 사용할 수 있으므로, 클라이언트는 <Ref slug="refresh-token" />과 같은 다른 그랜트를 사용하여 다른 리소스 서버에 대한 액세스 토큰을 얻을 수 있습니다.
+
+## 왜 리소스 인디케이터가 필요한가?
+
+위의 예에서 볼 수 있듯이, 리소스 인디케이터 확장은 <Ref slug="scope">스코프</Ref>가 충돌하는 것을 걱정하지 않고 여러 리소스 서버를 처리할 수 있는 확장 가능한 방법을 제공합니다. 이는 클라이언트가 다양한 리소스 서버에서 리소스를 액세스하는 데 더 많은 유연성을 제공하는 강력한 기능입니다.
+
+리소스 인디케이터 확장은 OAuth 2.0의 핵심 사양에 포함되지 않는다는 점에 유의하세요. 이 확장을 애플리케이션에서 사용하기 전에 인가 서버가 이를 지원하는지 확인하세요. 
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

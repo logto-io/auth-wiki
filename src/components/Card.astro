@@ -1,6 +1,7 @@
 ---
-import { defaultLocale } from "astro-i18n-aut";
+import { defaultLocale, getLocale } from "astro-i18n-aut";
 import type { CollectionEntry } from "astro:content";
+import { getPhrases } from "../phrases";
 
 type Props = {
   entry: CollectionEntry<"terms">;
@@ -13,6 +14,8 @@ const {
 const slug = rawSlug.startsWith(`${defaultLocale}/`)
   ? rawSlug.slice(defaultLocale.length + 1)
   : rawSlug;
+const locale = getLocale(Astro.url);
+const phrases = getPhrases(locale);
 ---
 
 <section>
@@ -23,7 +26,7 @@ const slug = rawSlug.startsWith(`${defaultLocale}/`)
     {description}
   </p>
   <hr />
-  <a href={`/${slug}`}>Learn more</a>
+  <a href={`/${slug}`}>{phrases.general.learn_more}</a>
 </section>
 
 <style>

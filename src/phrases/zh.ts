@@ -1,6 +1,7 @@
 export const zh = Object.freeze({
   general: {
     share: '分享',
+    learn_more: '了解更多',
   },
   site: {
     description: 'Auth Wiki 是一个关于身份验证和授权的全面文章、教程和资源集合。了解 OAuth 2.0、OpenID Connect、SAML 等内容。'

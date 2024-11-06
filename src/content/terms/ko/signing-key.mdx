@@ -1,0 +1,149 @@
+---
+title: 서명 키 (Signing key)
+tags: [oidc]
+description: 서명 키는 OpenID Connect (OIDC)에서 JSON Web Tokens (JWT)를 서명하고 검증하는 데 사용되는 암호화 키입니다. OIDC 공급자가 발행한 토큰의 무결성과 진위성을 보장하는 데 사용됩니다.
+---
+
+## 서명 키 (Signing key)란 무엇인가?
+
+<Ref slug="openid-connect" />의 맥락에서, **서명 키 (Signing key)**는 대개 비대칭 키 쌍으로, <Ref slug="jwt">JSON Web Tokens (JWT)</Ref>를 서명하고 검증하는 데 사용됩니다. OpenID 공급자는 서명 키를 사용하여 <Ref slug="id-token">ID 토큰</Ref> 및 <Ref slug="access-token">액세스 토큰 (Access token)</Ref>과 같은 토큰의 무결성과 진위성을 보장하기 위해 서명합니다.
+
+서명 키의 개념은 더 넓게 적용될 수 있지만, 여기서는 OIDC에서 토큰을 보호하기 위해 어떻게 사용되는지 중점적으로 다룹니다. 다른 사용 사례에는 이메일, 문서 및 소프트웨어 패키지 서명 등이 있으며, 동일한 원리에 기반할 수 있습니다.
+
+## 예시: ID 토큰 서명
+
+사용자가 OpenID 공급자를 통해 인증 (Authentication)할 때, 공급자는 사용자 정보(<Ref slug="claim">클레임 (Claims)</Ref>)를 포함하고 공급자의 서명 키로 서명된 ID 토큰을 발행합니다. ID 토큰은 JWT이기 때문에 세 부분으로 구성됩니다: 헤더, 페이로드 및 서명.
+
+### 1. 헤더
+
+헤더가 다음과 같다고 가정합시다:
+
+```json
+{
+  "alg": "ES384",
+  "typ": "JWT"
+}
+```
+
+해당 JSON은 ID 토큰이 [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) 알고리즘으로 P-384 곡선을 사용하여 서명되었음을 나타냅니다. `typ` 필드는 토큰의 종류가 JWT임을 지정합니다.
+
+### 2. 페이로드
+
+페이로드는 기본 사용자 정보를 포함합니다:
+
+```json
+{
+  "sub": "1234567890",
+  "name": "Alice"
+}
+```
+
+`sub` 클레임은 사용자의 고유 식별자이고, `name`은 사용자의 표시 이름입니다.
+
+### 3. 토큰 서명
+
+JWT 포맷에 따르면, 헤더와 페이로드는 Base64URL 인코딩되어 서명하기 위해 `.`으로 연결되어야 합니다:
+
+```
+{{header}}.{{payload}}
+```
+
+이 경우, 값은 다음과 같습니다:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0
+```
+
+OpenID 공급자가 다음 개인 키를 사용하여 토큰을 서명한다고 가정합시다:
+
+```
+-----BEGIN PRIVATE KEY-----
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDBW9PDXInlNT2hjOtQr
+g4pkVkyJsKia33dHrsbOG4Z77pfYN7SYZCHh9YdLXTTKinehZANiAAQX/FB1s6Gj
+YnDSGCY08PRUAQ8CCRCt8Ph/VDHfLj1xSbrjp8wFf0NjH7jcfNebpV1fvu4XKbP3
+Ro7h0G6elN1TMsVECJPv4ieDNkYOsgT4UboJypC5E/rmvrlJTMM6Y/k=
+-----END PRIVATE KEY-----
+```
+
+토큰 서명을 위해, OpenID 공급자는 개인 키를 사용하여 서명을 생성해야 합니다:
+
+```
+signature = sign(header + '.' + payload, private_key)
+```
+
+그런 다음 Base64URL 인코딩된 서명은 다음과 같습니다:
+
+```
+Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+### 4. JWT 조립
+
+마지막으로, OpenID 공급자는 헤더, 페이로드 및 서명을 `.`으로 연결하여 JWT를 조립합니다:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+이 경우, ID 토큰은 다음과 같습니다:
+
+```
+eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+이제 ID 토큰은 <Ref slug="client" />에 전송되어 추가 처리될 준비가 되었습니다.
+
+### 5. 토큰 검증
+
+클라이언트가 ID 토큰을 수신하면, OpenID 공급자의 공개 키를 사용하여 서명을 검증할 수 있습니다. 보통 공개 키는 <Ref slug="openid-connect-discovery" /> 엔드포인트 (`jwks_uri`)를 통해 <Ref slug="jwk" headingId="json-web-key-set-jwks" /> 형식으로 제공됩니다.
+
+이 예에서 공개 키는 다음과 같습니다:
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx-43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+그리고 해당 JWK 값은 다음과 같습니다:
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+이제 클라이언트는 공개 키를 사용하여 서명을 검증할 수 있습니다.
+
+## 적절한 알고리즘 선택
+
+JWT를 서명하기 위한 다양한 알고리즘이 있습니다:
+
+- **대칭 알고리즘**: HMAC과 SHA-family(예: HS256, HS384, HS512)는 동일한 키를 사용하여 서명하고 검증하는 대칭 알고리즘입니다. 일반적으로 비밀 키가 당사자 간에 공유되어야 하기 때문에 대부분의 경우 추천되지 않습니다.
+- **비대칭 알고리즘**: RSA(예: RS256, RS384, RS512) 및 ECDSA(예: ES256, ES384, ES512)는 서명을 위한 비대칭 알고리즘으로, 서명을 위한 개인 키와 검증을 위한 공개 키의 쌍을 사용합니다.
+  - RSA는 많은 라이브러리와 플랫폼에서 널리 사용되고 지원됩니다. 그러나 ECDSA에 비해 훨씬 더 큰 키 크기와 서명 크기를 가지고 있습니다.
+  - ECDSA는 더 성능이 좋고 작은 서명을 생성하여 제한된 환경에서 더 나은 선택입니다. 덜 일반적이므로 플랫폼이 이를 지원하는지 확인해야 합니다.
+
+> ECDSA는 성능 및 보안 이점으로 인해 새로운 애플리케이션에 권장되는 선택입니다.
+
+## 다른 서명 키 시나리오
+
+위의 예는 OIDC에서 ID 토큰에 중점을 두었지만, 서명 키 개념은 이메일, 문서 및 소프트웨어 패키지 서명 등 다양한 시나리오에서 널리 사용됩니다. 주요 원칙은 동일합니다:
+
+- 대칭 키의 경우, 동일한 키가 서명과 검증에 사용됩니다. 이는 당사자가 키를 안전하게 공유할 수 있는 시나리오나 서명과 검증을 모두 담당하는 단일 엔터티가 있는 경우 적합합니다.
+- 비대칭 키의 경우, 서명을 위한 개인 키와 검증을 위한 해당 공개 키가 사용됩니다. 이는 서명 당사자와 검증 당사자가 다른 엔터티인 대부분의 시나리오에 적합합니다.
+
+<SeeAlso slugs={["jwt", "jws", "jwk", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/introduction-to-ec-and-rsa-signing-algorithms-in-jwt",
+    "https://tools.ietf.org/html/rfc7515",
+    "https://tools.ietf.org/html/rfc7517",
+  ]}
+/>

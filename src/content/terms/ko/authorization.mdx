@@ -1,0 +1,50 @@
+---
+title: 권한 부여 (Authorization)
+tags: [authorization]
+description: 권한 부여 (Authorization)는 한 정체성이 리소스에서 어떤 작업을 수행할 수 있는지를 결정하는 과정입니다. 이는 접근 정책을 정의하고 시행하는 기본적인 보안 메커니즘입니다.
+---
+
+## 권한 부여 (Authorization)란 무엇인가?
+
+> **간단히 말해**: 권한 부여 (Authorization)는 "당신이 무엇을 할 수 있는가?"라는 질문에 답합니다.
+
+권한 부여 (Authorization)는 정체성(사용자, 서비스 또는 디바이스)이 리소스에서 특정 작업을 수행할 수 있는 권한을 가지고 있는지를 결정하는 의사 결정 과정입니다. 몇 가지 예를 살펴보겠습니다:
+
+- 온라인 문서 편집기에서 사용자는 문서를 다른 사람과 공유할 수 있습니다.
+- 클라우드 저장 서비스에서 서비스는 특정 폴더에 파일을 읽고 쓸 수 있습니다.
+- 스마트 홈 시스템에서 디바이스는 거실의 조명을 켤 수 있습니다.
+
+이 모든 예시들은 정체성(주체)이 리소스에서 작업을 수행하는 것을 포함합니다. 물론, 권한 부여 (Authorization)는 실패할 수도 있습니다. 예를 들어 사용자가 접근 권한이 없는 파일을 삭제하려고 할 때입니다.
+
+권한 부여 (Authorization)의 기본 모델은 간단합니다: **정체성**이 **작업**을 **리소스**에서 수행하면, **승인** 또는 **거부**합니다.
+
+### 인증 (Authentication)과 권한 부여 (Authorization)의 차이점
+
+인증 (Authentication)과 권한 부여 (Authorization)는 종종 혼동되지만, 본질적으로 다릅니다: <Ref slug="authentication" />는 "어떤 정체성을 소유하고 있는가?"라는 질문에 답합니다. 또한, 대부분의 경우, 시스템이 접근 결정을 내리기 전에 정체성을 알아야 하기 때문에 권한 부여 (Authorization)는 인증 (Authentication) 이후에 발생합니다.
+
+### 권한 부여 (Authorization)와 접근 제어 (Access Control)의 차이점
+
+권한 부여 (Authorization)는 접근 제어 (Access Control)의 하위 집합입니다. 접근 제어 (Access Control)는 권한 부여 (Authorization)와 접근 관리에 대한 기타 제한을 포함하는 더 넓은 개념입니다. 즉, 접근 제어 (Access Control)는 리소스에 대한 선택적 접근 제한을 설명하는 일반 용어이며, 권한 부여 (Authorization)는 특히 의사 결정 과정에 관한 것입니다.
+
+## 권한 부여 (Authorization)는 어떻게 작동하나요?
+
+권한 부여 (Authorization)는 보통 <Ref slug="access-control" headingId="access-control-models" />을 사용하여 구현됩니다. 이것들은 시스템에서 권한이 할당되고 시행되는 방식을 정의합니다.
+
+## 권한 부여 (Authorization) 프레임워크 (프로토콜)
+
+<Ref slug="oauth-2.0" />는 권한 부여 (Authorization)에 매우 인기 있는 프레임워크이지만, OAuth 2.0은 사용할 접근 제어 (Access Control) 모델을 정의하지 않는다는 점을 주목할 필요가 있습니다. 대신, 권한 부여 (Authorization)를 위임하고 액세스 토큰을 발행하는 데 중점을 둡니다.
+
+즉, OAuth 2.0은 사용자가 클라이언트에 자신의 리소스에 대한 접근 권한을 부여하는 경우와 같은 제3자 권한 부여 (Authorization) 시나리오에 적합합니다. 예를 들어, Google 계정을 사용하여 웹사이트에 로그인할 때, 당신은 웹사이트에게 Google 프로필에 접근할 수 있도록 권한을 부여하는 것입니다.
+
+첫 번째 측의 권한 부여 (Authorization)(예: 애플리케이션이나 조직 내부)와 관련이 있다면 <Ref slug="rbac" /> 또는 <Ref slug="abac" />와 같은 접근 제어 (Access Control) 모델을 구현해야 할 수 있습니다. <Ref slug="openid-connect" />과 접근 제어 (Access Control) 모델의 조합은 인증 (Authentication)과 권한 부여 (Authorization)에 대한 견고한 기반을 제공할 수 있습니다.
+
+홈메이드 권한 부여 (Authorization) 시스템을 구축하는 대신 인증 (Authentication)과 권한 부여 (Authorization) 기능을 제공하는 <Ref slug="identity-provider" />를 사용하는 것이 좋습니다. 좋은 아이덴티티 제공자 (Identity Provider)는 접근 제어 (Access Control)의 복잡성을 처리하고 애플리케이션에 대한 안전하고 확장 가능한 솔루션을 제공합니다.
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

@@ -1,0 +1,50 @@
+---
+title: Userinfo 엔드포인트 (Userinfo endpoint)
+tags: [oidc]
+description: Userinfo 엔드포인트는 OpenID Connect (OIDC) 엔드포인트로 클라이언트에게 사용자 정보를 제공합니다. ID 토큰의 보조 엔드포인트이며, 클라이언트가 추가적인 사용자 정보를 검색할 수 있게 해줍니다.
+---
+
+## Userinfo 엔드포인트란 무엇인가?
+
+<Ref slug="openid-connect" />에서, userinfo 엔드포인트는 <Ref slug="openid-connect" headingId="openid-provider-op" />의 엔드포인트 중 하나로, <Ref slug="client">클라이언트</Ref>에게 사용자 정보를 제공합니다. userinfo 엔드포인트는 일반적으로 <Ref slug="id-token" />의 보조 엔드포인트이며, ID 토큰에 포함되지 않은 추가적인 사용자 정보를 클라이언트가 검색할 수 있게 해줍니다.
+
+Userinfo 엔드포인트는 [OpenID Connect Core 명세](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)에 정의되어 있으며, 주로 클라이언트가 ID 토큰을 받은 후에 접근합니다.
+
+## Userinfo 엔드포인트는 어떻게 작동하나요?
+
+클라이언트가 userinfo 엔드포인트에 요청을 할 때, <Ref slug="token-request" />에서 획득한 access token (액세스 토큰)을 포함해야 하며 `GET` 또는 `POST` HTTP 메서드를 사용해야 합니다. userinfo 엔드포인트는 액세스 토큰을 검증하고, 응답으로 사용자 정보를 반환합니다.
+
+여기 비규범적인 userinfo 요청의 예시가 있습니다:
+
+```http
+GET /userinfo HTTP/1.1
+Host: openid-provider.example.com
+Authorization: Bearer some-access-token
+```
+
+다양한 OpenID Provider에서 userinfo 엔드포인트의 정확한 경로는 다를 수 있습니다. 제공자의 <Ref slug="openid-connect-discovery" />를 참고하여 userinfo 엔드포인트 URL을 찾을 수 있습니다. 액세스 토큰이 유효하다면, userinfo 엔드포인트는 다음과 같이 사용자 정보를 응답합니다:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "sub": "user123",
+  "name": "Alice",
+  "email": "alice@foo.com",
+  "birthdate": "1990-01-01",
+  "address": {
+    "street": "1234 Elm St",
+    "city": "Springfield",
+    "country": "US"
+  }
+}
+```
+
+응답에는 `name`, `email`, `birthdate`, `address`와 같은 다양한 사용자 속성이 포함될 수 있으며, 일반적으로 <Ref slug="id-token" />보다 많은 <Ref slug="claim">클레임</Ref>을 포함합니다. 반환되는 실제 속성은 <Ref slug="openid-connect" headingId="openid-provider-op" />의 구성과 사용자의 동의에 따라 달라집니다. 특정 속성은 OpenID Provider의 문서를 참조하세요.
+
+### 서명 및 암호화
+
+userinfo 응답은 무결성과 기밀성을 보장하기 위해 서명되거나 암호화될 수 있습니다. 이러한 보호 중 하나 또는 둘 다 적용될 경우, userinfo 엔드포인트 응답은 평문 JSON 객체가 아닌 <Ref slug="jwt" />가 됩니다.
+
+<SeeAlso slugs={["openid-connect", "id-token", "openid-connect-discovery", "jwt", "signing-key"]} />

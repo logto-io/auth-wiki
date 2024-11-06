@@ -1,0 +1,60 @@
+---
+title: 토큰 인트로스펙션 (Token introspection)
+tags: [oauth 2.0, oidc]
+description: 토큰 인트로스펙션 (Token introspection)은 클라이언트가 인가 서버에 질의하여 액세스 토큰을 검증하고 그 메타데이터를 가져오는 OAuth 2.0 확장 기능입니다.
+---
+
+## 토큰 인트로스펙션 (Token introspection)이란?
+
+토큰 인트로스펙션 (Token introspection)은 [RFC 7662](https://datatracker.ietf.org/doc/html/rfc7662)에 정의된 OAuth 2.0 확장 기능으로, <Ref slug="client">클라이언트</Ref>가 <Ref slug="authorization-server" />에게 질의하여 액세스 토큰을 검증하고 그 메타데이터를 가져올 수 있도록 합니다. 이 확장 기능은 다음과 같은 경우에 유용합니다:
+
+- 클라이언트가 실시간으로 액세스 토큰의 유효성을 확인하고자 할 때.
+- 액세스 토큰이 <Ref slug="opaque-token">불투명 토큰</Ref>일 경우(자체 포함되지 않음) 인가 서버를 통해 검증이 필요할 때.
+
+## 토큰 인트로스펙션 (Token introspection)은 어떻게 작동하나요?
+
+다음은 토큰 인트로스펙션 요청의 비표준 예시입니다:
+
+```http
+POST /introspect HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+token=random-token-value
+  &token_type_hint=access_token
+```
+
+`token_type_hint` 매개변수는 선택사항이며, 인트로스펙션할 토큰의 유형으로 설정해야 합니다. 액세스 토큰이 유효하면, 인가 서버는 토큰의 메타데이터를 응답으로 반환합니다:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "active": true,
+  "scope": "read write",
+  "client_id": "client-id",
+  "username": "johndoe",
+  "token_type": "Bearer",
+  "exp": 1634020800,
+  "iat": 1634017200
+}
+```
+
+모든 인가 서버가 토큰 인트로스펙션을 지원하는 것은 아니며, 모든 토큰이 인트로스펙션 가능하지도 않습니다. <Ref slug="authorization-server" />는 다양한 요인에 따라 토큰 인트로스펙션 사용을 제한할 수 있습니다. 예를 들어, 일부 인가 서버는 <Ref slug="jwt">JWT</Ref>에 대한 인트로스펙션을 지원하지 않을 수 있습니다.
+
+### 토큰 인트로스펙션 요청의 주요 매개변수
+
+토큰 인트로스펙션 요청의 주요 매개변수는 다음과 같습니다:
+
+- **`token`**: 인트로스펙션할 토큰.
+- **`token_type_hint`**: 인트로스펙션할 토큰의 유형. `access_token` 또는 `refresh_token`일 수 있습니다.
+
+<SeeAlso slugs={["oauth-2.0", "opaque-token", "jwt"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/oauth2-token-introspection',
+    'https://datatracker.ietf.org/doc/html/rfc7662',
+  ]}
+/>

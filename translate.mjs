@@ -54,12 +54,12 @@ console.log(`Found ${missingEntries.length} missing entries to translate.`);
 const terms = ['issuer'];
 const entryTerms = defaultLocaleEntries.map((entry) => basename(entry, '.mdx').split('-').join(' '));
 const listr = new Listr([], { concurrent: 4 });
-const openAiTranslate = new OpenAiTranslate(...new Set([...terms, ...entryTerms]));
+const openAiTranslate = new OpenAiTranslate([...new Set([...terms, ...entryTerms])]);
 
 for (const missingEntry of missingEntries) {
   listr.add({
-    title: `Translating ${missingEntry}...`,
     task: async (_, task) => {
+      task.title = `Translating ${missingEntry}...`;
       const [locale, ...rest] = missingEntry.split('/');
       const entry = rest.join('/');
       const content = await fs.readFile(path.join(contentDir, defaultLocale, entry), 'utf-8');

@@ -1,6 +1,7 @@
 export const en = Object.freeze({
   general: {
     share: 'Share',
+    learn_more: 'Learn more',
   },
   site: {
     description: 'Auth Wiki is a comprehensive collection of articles, tutorials, and resources about authentication and authorization. Learn about OAuth 2.0, OpenID Connect, SAML, and more.',
