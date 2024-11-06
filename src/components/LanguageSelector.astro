@@ -1,0 +1,50 @@
+---
+import { getLocale, getLocaleUrl } from "astro-i18n-aut";
+import { localeDisplay } from "../phrases";
+
+type Props = {
+  class?: string;
+};
+
+const locale = getLocale(Astro.url);
+const alternateLinks = Object.fromEntries(
+  Object.keys(localeDisplay).map((locale) => [
+    locale,
+    getLocaleUrl(Astro.url.pathname, locale),
+  ]),
+);
+const { class: className, ...rest } = Astro.props;
+---
+
+<astro-language-selector data-links={JSON.stringify(alternateLinks)}>
+  <select class={className} {...rest}>
+    {
+      Object.entries(localeDisplay).map(([value, display]) => (
+        <option value={value} selected={value === locale}>
+          {display}
+        </option>
+      ))
+    }
+  </select>
+</astro-language-selector>
+
+<script>
+  // Astro doesn't provide syntax sugar for passing frontmatter variables to scripts.
+  // https://docs.astro.build/en/guides/client-side-scripts/#pass-frontmatter-variables-to-scripts
+  class AstroLanguageSelector extends HTMLElement {
+    connectedCallback() {
+      const select = this.querySelector("select");
+      const links = JSON.parse(this.dataset.links ?? "{}");
+
+      if (select) {
+        select.addEventListener("change", () => {
+          const locale = select.value;
+          const url = links[locale];
+          window.location.href = url;
+        });
+      }
+    }
+  }
+
+  customElements.define("astro-language-selector", AstroLanguageSelector);
+</script>
