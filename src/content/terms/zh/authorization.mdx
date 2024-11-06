@@ -1,0 +1,50 @@
+---
+title: 授权 (Authorization)
+tags: [authorization]
+description: 授权 (Authorization) 是确定一个身份对资源可以执行哪些操作的过程。它是定义和强制执行访问策略的基本安全机制。
+---
+
+## 什么是授权 (Authorization)？
+
+> **简而言之**：授权 (Authorization) 回答了“你能做什么？”这个问题。
+
+授权 (Authorization) 是一个决策过程，用于确定一个身份（用户、服务或设备）是否具有对某个资源执行特定操作的必要权限。让我们看看一些例子：
+
+- 在一个在线文档编辑器中，用户可以与其他人共享文档。
+- 在云存储服务中，服务可以在特定文件夹中读取和写入文件。
+- 在智能家居系统中，设备可以打开客厅的灯。
+
+所有这些例子都涉及身份（主体）对资源执行操作。当然，授权 (Authorization) 也可能失败，例如，当用户尝试删除他们没有权限访问的文件时。
+
+授权 (Authorization) 的基本模型很简单：如果 **身份** 对 **资源** 执行 **操作**，那么 **接受** 或 **拒绝**。
+
+### 认证 (Authentication) 和授权 (Authorization) 的区别
+
+认证 (Authentication) 和授权 (Authorization) 经常被混淆，但它们有根本的不同：<Ref slug="authentication" /> 回答了“你拥有什么身份？”这个问题。此外，在大多数情况下，授权 (Authorization) 发生在认证 (Authentication) 之后，因为系统需要在做出访问决策之前知道身份。
+
+### 授权 (Authorization) 和访问控制 (Access Control) 的区别
+
+授权 (Authorization) 是访问控制 (Access Control) 的一个子集。访问控制是一个更广泛的概念，包括授权 (Authorization) 和其他对访问管理的限制。换句话说，访问控制是描述对资源访问进行选择性限制的总称，而授权 (Authorization) 专门指决策过程。
+
+## 授权 (Authorization) 的工作原理
+
+授权 (Authorization) 通常使用 <Ref slug="access-control" headingId="access-control-models" /> 实现。它们定义了权限如何在系统中被分配和执行。
+
+## 授权 (Authorization) 框架（协议）
+
+虽然 <Ref slug="oauth-2.0" /> 是一个非常流行的授权 (Authorization) 框架，但值得注意的是，OAuth 2.0 并没有定义使用哪个访问控制模型。相反，它专注于授权 (Authorization) 的委托和访问令牌 (Access Tokens) 的颁发。
+
+也就是说，OAuth 2.0 适合于用户授予客户端访问其资源权限的第三方授权 (Authorization) 场景。例如，当你使用 Google 帐户登录网站时，你是在授权 (Authorization) 网站访问你的 Google 个人资料。
+
+如果你处理的是第一方授权 (Authorization) （例如，在你的应用程序或组织内），你可能需要实现一个访问控制模型，比如 <Ref slug="rbac" /> 或 <Ref slug="abac" />。结合 <Ref slug="openid-connect" /> 和访问控制模型可以为认证 (Authentication) 和授权 (Authorization) 提供坚实的基础。
+
+建议使用提供认证 (Authentication) 和授权 (Authorization) 功能的 <Ref slug="identity-provider" />，而不是自行构建授权 (Authorization) 系统。一个好的身份提供者将处理访问控制的复杂性，并为你的应用程序提供一个安全且可扩展的解决方案。
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

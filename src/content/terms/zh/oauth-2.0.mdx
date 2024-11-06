@@ -2,15 +2,14 @@
 title: OAuth 2.0
 slug: zh/oauth-2.0
 tags: [oauth 2.0]
-description: OAuth 2.0 是一个广泛使用的授权框架，允许应用程序（客户端）代表用户或自身获取对受保护资源的有限访问权限。
-
+description: OAuth 2.0 是一个广泛使用的授权框架，允许应用程序 (client) 代表用户或应用程序自身获得对受保护资源的有限访问权限。
 ---
 
 ## 什么是 OAuth 2.0？
 
-OAuth 2.0 是事实上的授权标准，在网络中被广泛使用。它允许应用程序安全地获取对另一个应用程序中受保护资源的有限访问，例如用户的个人资料或数据，而无需暴露诸如密码之类的凭证。
+OAuth 2.0 是授权的事实标准，被广泛应用于网络中。它允许一个应用程序安全地获得对另一个应用程序的受保护资源的有限访问权限，例如用户的个人资料或数据，而无需暴露诸如密码等凭据。
 
-让我们通过一个真实的例子来更好地理解这一点。你有一个名为 MyApp 的网络应用程序，想要访问用户的 Google Drive。MyApp 无需要求用户分享他们的 Google Drive 凭据，而是可以使用 OAuth 2.0 来请求代表用户访问 Google Drive。以下是一个简化的流程：
+让我们来看一个实际的例子来更好地理解。你有一个名为 MyApp 的 Web 应用程序，它想要访问用户的 Google Drive。 MyApp 可以使用 OAuth 2.0 代表用户请求访问 Google Drive，而无需要求用户分享他们的 Google Drive 凭据。以下是一个简化的流程：
 
 ```mermaid
 sequenceDiagram
@@ -19,71 +18,71 @@ sequenceDiagram
     participant Google
 
     User->>MyApp: 打开 MyApp 并<br/>点击“连接 Google Drive”
-    MyApp->>Google: 重定向到 Google<br/>发送授权请求
+    MyApp->>Google: 重定向到 Google<br/>并附带授权请求 (authorization request)
     Google->>User: 登录 Google
     User->>Google: 登录
-    Google->>User: 请求许可以访问 Google Drive
-    User->>Google: 授权 MyApp 访问
-    Google->>MyApp: 重定向回 MyApp<br/>带授权数据（如访问令牌）
-    MyApp->>Google: 使用访问令牌<br/>访问用户的 Google Drive
+    Google->>User: 请求访问 Google Drive 的权限
+    User->>Google: 授予 MyApp 访问权限
+    Google->>MyApp: 重定向回 MyApp<br/>并附带授权数据 (例如：access token)
+    MyApp->>Google: 使用 access token 访问用户的 Google Drive
 ```
 
-在此流程中，MyApp 永远不会看到用户的 Google Drive 凭据。相反，它会从 Google 收到一个 <Ref slug="access-token" />，用于代表用户访问 Google Drive。
+在这个流程中，MyApp 从未看到用户的 Google Drive 凭据。相反，它从 Google 收到了一个 <Ref slug="access-token" />，可以用来代表用户访问 Google Drive。
 
 ### OAuth 2.0 的关键组件
 
-在上述示例中，MyApp 是 <Ref slug="client" />，Google 同时是 <Ref slug="authorization-server" /> 和 <Ref slug="resource-server" />，而用户是 <Ref slug="resource-owner" />。此流程涉及 OAuth 2.0 的所有关键组件：
+对于上述例子，MyApp 是 <Ref slug="client" />，Google 即是 <Ref slug="authorization-server" /> 又是 <Ref slug="resource-server" />，用户是 <Ref slug="resource-owner" />。该流程涉及了 OAuth 2.0 的所有关键组件：
 
-- **Client**：想要访问受保护资源的应用程序。“客户端”和“应用程序”常被互换使用。
-- **Resource owner**：拥有受保护资源的用户。资源所有者可以授权或拒绝客户端访问。
-- **Authorization server**：执行授权（通常带有身份验证）并向客户端颁发访问令牌的服务器。
-- **Resource server**：托管受保护资源的服务器。它验证访问令牌并将受保护资源提供给客户端。
+- **Client**: 想要访问受保护资源的应用程序。“Client”和“应用程序”经常可以互换使用。
+- **Resource owner**: 拥有受保护资源的用户。资源所有者可以授予 (authorize) 或拒绝 client 的访问。
+- **Authorization server**: 进行授权（通常与身份验证 (authentication) 一起）并向 client 发放 access token 的服务器。
+- **Resource server**: 托管受保护资源的服务器。它验证 access token 并向 client 提供受保护的资源。
 
-## OAuth 2.0 授权模式（流程）
+## OAuth 2.0 授权 (grants)（流程）
 
-<Ref slug="oauth-2.0-grant">授权模式</Ref> 是 OAuth 2.0 的基础，定义了客户端如何从授权服务器获取访问令牌。基本的 OAuth 2.0 规范定义了四种授权模式：
+<Ref slug="oauth-2.0-grant">授权 (grant)</Ref> 是 OAuth 2.0 的基础，定义了 client 如何从授权服务器获取 access token。基本的 OAuth 2.0 规范定义了四种授权：
 
-- <Ref slug="authorization-code-flow">授权码模式</Ref>
-- <Ref slug="implicit-flow">隐式模式</Ref>
-- [资源所有者密码凭据（ROPC）模式](https://datatracker.ietf.org/doc/html/rfc6749#section-4.3)
-- <Ref slug="client-credentials-flow">客户端凭据模式</Ref>
+- <Ref slug="authorization-code-flow">授权码授权 (authorization code grant)</Ref>
+- <Ref slug="implicit-flow">隐式授权 (implicit grant)</Ref>
+- [资源所有者密码凭证 (ROPC) 授权](https://datatracker.ietf.org/doc/html/rfc6749#section-4.3)
+- <Ref slug="client-credentials-flow">客户端凭证授权 (client credentials grant)</Ref>
 
-无需深入每种模式的细节，我们可以将这些模式分为两类：
+不深入每种授权的细节，我们可以将这些授权分为两类：
 
-- **授权模式**：当客户端需要代表用户访问资源时使用，即需要用户授权。
-- **客户端凭据模式**：当客户端需要代表自身访问资源时使用。此模式适用于 <Ref slug="machine-to-machine" /> 通信。
+- **授权授权 (authorization grants)**: 当 client 需要代表用户访问资源时使用，即需要用户的授权。
+- **客户端凭证授权 (client credentials grant)**: 当 client 需要以自身名义访问资源时使用。此授权适合 <Ref slug="machine-to-machine" /> 通信。
 
-### 授权模式
+### 授权授权
 
-无论授权模式类型如何，授权模式都有以下共同步骤：
+无论授权类型如何，授权授权都具有以下共同步骤：
 
-1. 客户端向授权服务器发起 <Ref slug="authorization-request" />。
-2. 授权服务器对用户（资源所有者）进行身份验证并请求访问资源的权限。
-3. 用户授予客户端访问权限。
-4. 授权服务器向客户端颁发访问令牌。
-5. 客户端使用访问令牌访问 <Ref slug="resource-server" /> 上的受保护资源。
+1. client 向授权服务器发起 <Ref slug="authorization-request" />。
+2. 授权服务器验证用户（资源所有者）并请求访问资源的权限。
+3. 用户授予 client 权限。
+4. 授权服务器向 client 颁发 access token。
+5. client 使用 access token 访问 <Ref slug="resource-server" /> 上的受保护资源。
 
-请注意，具体步骤和参数可能会因授权模式而异。例如，<Ref slug="authorization-code-flow">授权码模式</Ref>涉及诸如代码生成和交换等更多步骤。
+注意，根据授权类型，不同的步骤和参数可能有所不同。例如，<Ref slug="authorization-code-flow">授权码授权</Ref> 涉及更多步骤，如代码生成和交换。
 
-### 客户端凭据模式
+### 客户端凭证授权
 
-<Ref slug="client-credentials-flow">客户端凭据模式</Ref> 简单得多，不涉及用户授权。简化流程如下：
+<Ref slug="client-credentials-flow">客户端凭证授权</Ref> 更加简单，不涉及用户授权。以下是一个简化的流程：
 
-1. 客户端向授权服务器发送 <Ref slug="token-request" />。
-2. 授权服务器验证客户端并颁发访问令牌。
-3. 客户端使用访问令牌访问 <Ref slug="resource-server" /> 上的受保护资源。
+1. client 向授权服务器发送 <Ref slug="token-request" />。
+2. 授权服务器认证 client 并发放 access token。
+3. client 使用 access token 访问 <Ref slug="resource-server" /> 上的受保护资源。
 
 ---
 
-有关 OAuth 2.0 授权模式的深入讨论，请参阅 <Ref slug="oauth-2.0-grant" /> 和具体的授权模式文章。
+关于 OAuth 2.0 授权的深入讨论，请参阅 <Ref slug="oauth-2.0-grant" /> 和特定的授权文章。
 
-## 使用 OAuth 2.0 进行访问控制
+## OAuth 2.0 的访问控制 (access control)
 
-OAuth 2.0 定义了 <Ref slug="scope" /> 参数，用于指定客户端请求的权限。授权服务器可以完全或部分忽略请求的范围，并根据自身的访问控制策略授予访问权限。
+OAuth 2.0 定义了 <Ref slug="scope" /> 参数用于指定 client 所请求的权限。授权服务器可能会完全或部分忽略请求的范围 (scopes)，并根据自身的访问控制 (access control) 策略授予访问权限。
 
-然而，OAuth 2.0 允许授权服务器自行决定如何实施 <Ref slug="access-control" />。这意味着授权服务器可以决定主题（用户或客户端）可以访问哪些资源以及在这些资源上执行哪些操作。
+然而，OAuth 2.0 让授权服务器自行决定如何实施 <Ref slug="access-control" />。这意味着授权服务器可以决定 subject（用户或 client）可以访问哪些资源，以及他们可以对这些资源执行哪些操作。
 
-继续使用 Google Drive 的例子，MyApp 可能错误地发起了请求访问其他用户的 Google Drive 的授权请求。在这种情况下，Google 的授权服务器应拒绝请求，因为用户没有访问其他用户 Google Drive 的权限。
+仍然以 Google Drive 为例。MyApp 可能错误地发起了访问另一用户 Google Drive 的授权请求。在这种情况下，Google 的授权服务器应拒绝该请求，因为用户没有访问另一用户 Google Drive 的必要权限。
 
 ```mermaid
 sequenceDiagram
@@ -92,14 +91,14 @@ sequenceDiagram
     participant Google
 
     User->>MyApp: 打开 MyApp 并<br/>点击“连接 Google Drive”
-    MyApp->>Google: 重定向到 Google<br/>发送错误的授权请求
+    MyApp->>Google: 重定向到 Google<br/>并附带错误的授权请求
     Google->>User: 登录 Google
     User->>Google: 登录
-    Note left of Google: 拒绝访问<br/>其他用户的 Google Drive
-    Google->>MyApp: 重定向回 MyApp<br/>并显示错误信息
+    Note left of Google: 拒绝访问<br/>另一用户的 Google Drive
+    Google->>MyApp: 重定向回 MyApp<br/>并附带错误信息
 ```
 
-另一个例子是，MyApp 收到来自 Google 的访问令牌，允许它读取用户的 Google Drive 文件。然而，MyApp 试图删除文件而不是读取文件。资源服务器（Google）应拒绝请求。
+另一个案例是当 MyApp 从 Google 收到了允许其读取用户 Google Drive 文件的 access token。然而，MyApp 尝试删除文件而不是读取文件。资源服务器（Google）应该拒绝该请求。
 
 ```mermaid
 sequenceDiagram
@@ -108,27 +107,27 @@ sequenceDiagram
     participant Google
 
     User->>MyApp: 打开 MyApp 并<br/>点击“删除文件”
-    MyApp->>Google: 使用访问令牌<br/>访问 Google Drive
+    MyApp->>Google: 使用 access token 访问 Google Drive
     Google->>MyApp: 拒绝删除文件的请求
 ```
 
-这两个示例说明了在实现 OAuth 2.0 时需要 <Ref slug="access-control" /> 的原因。<Ref slug="authorization-server" /> 和 <Ref slug="resource-server" /> 应协作实施访问控制策略并保护资源。
+这两个案例演示了为什么在实施 OAuth 2.0 时需要 <Ref slug="access-control" />。<Ref slug="authorization-server" /> 和 <Ref slug="resource-server" /> 应该协同工作以执行访问控制策略并保护资源。
 
 ### 访问控制模型
 
-为正确处理访问控制，建议使用标准的访问控制模型，如 <Ref slug="rbac" /> 和 <Ref slug="abac" />。这些模型在业界已被证明有效，并为未来需求提供了可扩展性。
+为正确处理访问控制，建议使用标准的访问控制模型，如 <Ref slug="rbac" /> 和 <Ref slug="abac" />。这些模型已被业界证明有效，并提供未来需求的可扩展性。
 
 ## OAuth 2.1
 
-<Ref slug="oauth-2.1" /> 是对 OAuth 2.0 规范的拟议更新，旨在根据多年来的行业经验提高安全性和可用性。尽管 OAuth 2.1 尚未最终确定，我们仍然可以了解拟议的更改，并了解它们可能如何影响当前的 OAuth 2.0 实现。OAuth 2.1 可以视为业界已广泛采用的最佳实践和安全建议的正式化。
+<Ref slug="oauth-2.1" /> 是对 OAuth 2.0 规范的建议更新，旨在根据多年来的行业经验提高安全性和可用性。虽然 OAuth 2.1 尚未最终定稿，但我们仍然可以了解提议的更改，并理解它们可能如何影响当前的 OAuth 2.0 实现。OAuth 2.1 可以被视为业界广泛采用的最佳实践和安全建议的形式化。
 
-## OAuth 2.0 与 OpenID Connect (OIDC)
+## OAuth 2.0 和 OpenID Connect (OIDC)
 
-OAuth 2.0 仅定义了授权过程，并未涉及用户身份验证或身份。因此，引入了 <Ref slug="openid-connect" /> 作为 OAuth 2.0 之上的身份层。OIDC 扩展了 OAuth 2.0，以 <Ref slug="id-token" /> 的形式提供用户身份验证和身份信息。
+OAuth 2.0 只定义了授权过程，并不涵盖用户身份验证 (authentication) 或身份识别。为此，<Ref slug="openid-connect" /> 作为身份层引入，构建于 OAuth 2.0 之上。OIDC 扩展了 OAuth 2.0，以 <Ref slug="id-token" /> 的形式提供用户身份验证和身份信息。
 
-OpenID Connect 扩展了两种 OAuth 2.0 授权模式（授权码模式和隐式模式），以包含 ID 令牌，并引入了一种新的授权模式——<Ref slug="hybrid-flow">混合模式</Ref>，结合了两者。
+OpenID Connect 扩展了两种 OAuth 2.0 授权（授权码和隐式）以包含 ID tokens，并引入了一种称为 <Ref slug="hybrid-flow">混合流程 (hybrid flow)</Ref> 的新授权，结合了两者。
 
-也就是说，所有的 OAuth 2.0 知识和实践都可以直接应用于 OIDC；所有的 OAuth 2.0 扩展，如 <Ref slug="pkce" /> 和 <Ref slug="resource-indicator" /> 也可用于 OIDC。
+也就是说，你的所有 OAuth 2.0 知识和实践可以直接应用于 OIDC；所有 OAuth 2.0 扩展，如 <Ref slug="pkce" /> 和 <Ref slug="resource-indicator" />，也可以在 OIDC 中使用。
 
 <SeeAlso slugs={["oauth-2.0-grant", "oauth-2.1", "openid-connect"]} />
 

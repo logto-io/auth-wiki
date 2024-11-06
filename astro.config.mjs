@@ -4,10 +4,11 @@ import { rehypeShiki } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import icon from "astro-icon";
+import remarkCustomHeaderId from 'remark-custom-header-id';
 import { i18n, filterSitemapByDefaultLocale } from "astro-i18n-aut/integration";
 
 export const defaultLocale = 'en';
-const locales = Object.freeze({
+export const locales = Object.freeze({
   en: 'en',
   zh: 'zh-Hans',
 });
@@ -24,6 +25,7 @@ export default defineConfig({
       [rehypeMermaid, { dark: true, strategy: 'img-svg' }],
       [rehypeShiki, { themes: { light: 'one-light', dark: 'one-dark-pro' } }]
     ],
+    remarkPlugins: [remarkCustomHeaderId],
     remarkRehype: {
       footnoteLabelTagName: 'span',
     },

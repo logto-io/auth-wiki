@@ -1,0 +1,72 @@
+---
+title: 声明 (Claim)
+tags: [oauth 2.0, oidc]
+description: 在 JSON Web Token (JWT) 中，声明 (Claim) 是一个传递特定信息的键值对。在更广泛的上下文中，声明可以是表示信息的任何键值对。
+---
+
+## 什么是声明 (Claim)？
+
+声明 (Claim) 是一个传递特定信息的键值对。例如，在一个 JSON 对象中：
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+在这个例子中，`sub` 是一个声明，表示主题标识符，其值为 `foo`；`email` 是一个声明，表示电子邮件地址，其值为 `foo@bar.com`。
+
+> 我们使用 *subject* 而不是 *user*，因为在没有明确定义的情况下，主题 (`sub`) 可以表示一个用户、设备或任何实体。
+
+### 声明的用途
+
+声明在各种上下文中被广泛使用，例如：
+
+- <Ref slug="jwt" />: 在 JWT 中，声明用于表示有关令牌的信息，例如签发者 (`iss`)、主题 (`sub`) 和过期时间 (`exp`)。
+- <Ref slug="openid-connect" />: 在 OIDC 中，声明用于在 <Ref slug="id-token" /> 和 <Ref slug="userinfo-endpoint" /> 中表示用户信息，例如用户的电子邮件地址 (`email`)、姓名 (`name`) 和个人资料图片 (`picture`)。
+
+### 标准声明
+
+在 JWT 和 OIDC 中，有一些规范定义的标准声明。一些常见的标准声明包括：
+
+- **`iss`**: 令牌的签发者。例如，如果颁发令牌的 <Ref slug="authorization-server" /> 是 `https://example.com`，在大多数情况下，`iss` 声明将是相同的 (`https://example.com`)。
+- **`sub`**: 令牌的主题。它代表令牌所涉及的实体。例如，在一个 ID 令牌中，`sub` 声明通常代表用户标识符。
+- **`aud`**: 令牌的受众。它表示令牌的目标接收者。例如，如果令牌用于访问 `https://api.example.com` 的 API，`aud` 声明将是相同的 (`https://api.example.com`)。
+- **`exp`**: 令牌的到期时间。它指示令牌何时不再被接受处理。
+- **`nbf`**: 令牌的“不可用之前”时间。它指示令牌何时开始被接受处理。
+- **`iat`**: 令牌的签发时间。它指示令牌何时被签发。
+- **`jti`**: 令牌的 JWT ID。它为令牌提供了一个唯一标识符。
+
+OIDC 还定义了用于用户信息的其他标准声明。有关详细信息，请参阅 OIDC 规范中的 [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims)。
+
+### 自定义声明
+
+除了标准声明外，你可以定义自定义声明来表示特定于应用程序的信息。例如，你可以包含一个 `role` 声明来表示用户在应用程序中的角色。
+
+自定义声明可以使用[统一资源标识符 (URI)](https://blog.logto.io/unveiling-uri-url-and-urn)进行命名空间处理，以避免与其他声明冲突。例如：
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+在这个例子中，`role` 声明使用 `https://example.com/claims/` 进行命名空间处理以确保唯一性。或者，你可以为自定义声明定义你自己的[统一资源名 (URN)](https://blog.logto.io/unveiling-uri-url-and-urn)：
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+在这个例子中，`role` 声明使用 `urn:example:claims:` 进行命名空间处理。
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

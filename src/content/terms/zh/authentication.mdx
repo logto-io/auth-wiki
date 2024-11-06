@@ -1,0 +1,56 @@
+---
+title: 认证 (Authentication)
+tags: [authentication]
+description: 认证 (Authentication) 是验证身份所有权（例如用户或服务）的过程。它是身份和访问管理 (IAM) 系统的基础，对于保护应用程序和服务至关重要。
+---
+
+## 什么是认证 (Authentication)？
+
+> **简而言之**: 认证 (Authentication) 回答了“你拥有哪个身份？”
+
+以下是一些典型的认证 (Authentication) 示例：
+
+- 使用用户名和密码登录
+- 社交登录（例如，通过 Google 登录）
+- <Ref slug="machine-to-machine" /> 认证 (Authentication)（例如，API keys）
+
+我们没有使用“你是谁？”这一短语，因为：
+
+- 在 <Ref slug="iam" /> 的领域中，认证 (Authentication) 是关于验证身份的所有权，而不是识别个人或实体。例如，当你的家庭成员使用你的凭据登录你的帐户时，他们不是你，但对于系统来说，身份是相同的。
+- 身份可以是用户、服务或设备。例如，服务可以使用 API keys 对另一服务进行认证 (Authentication)。
+
+### 认证 (Authentication) 和授权 (Authorization) 的区别
+
+这两个术语常被混淆，但它们本质上是不同的：<Ref slug="authorization" /> 回答“你能做什么？”。另外，认证 (Authentication) 是授权 (Authorization) 的前提，因为系统需要在决定可以执行哪些操作之前知道身份。
+
+## 认证 (Authentication) 因素
+
+认证 (Authentication) 可以通过一个或多个因素来执行。以下是一些常见因素：
+
+- **知识因素**：你知道的东西（例如，密码，PIN）
+- **持有因素**：你拥有的东西（例如，智能手机，安全令牌）
+- **生物因素**：你自己的特征（例如，指纹，面部识别）
+
+<Ref slug="mfa" /> 是一种常见做法，通过结合多个因素来提高安全性。例如，当你登录银行帐户时，可能需要提供密码（知识因素）和来自验证器应用程序的一次性代码（持有因素）。
+
+<Ref slug="passkey" /> 是一种现代化的认证 (Authentication) 因素，可以结合多个因素，并能抵抗网络钓鱼攻击。
+
+## 认证 (Authentication) 框架（协议）
+
+建议使用成熟的框架和协议而不是自行构建认证 (Authentication) 系统，因为它们经过实战测试并由安全专家审查。有多种认证 (Authentication) 框架和协议定义了认证 (Authentication) 应如何执行。两个常见的例子是：
+
+- <Ref slug="openid-connect" />：一种构建在 <Ref slug="oauth-2.0" /> 之上的身份层，增加了认证 (Authentication) 功能。它相对现代，并广泛用于新的应用程序。
+- <Ref slug="saml" />：一种在多个参与方之间交换认证 (Authentication) 和授权 (Authorization) 数据的协议。它通常用于企业环境。
+
+框架的选择取决于你的用例和需求。对于新应用程序，推荐使用 OIDC，因为其现代设计和对 <Ref slug="jwt" /> 的支持。
+
+然而，直接使用这些协议仍然复杂且耗时。这些协议都有陡峭的学习曲线，并且需要仔细实施以确保安全。相反，使用支持或基于这些协议构建的 <Ref slug="identity-provider" /> 可以大大简化认证 (Authentication) 过程。一个好的身份提供者还将为你的未来需求提供额外功能，如 <Ref slug="mfa" /> 和 <Ref slug="single-sign-on" />。
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>
