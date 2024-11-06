@@ -15,6 +15,7 @@ import { Icon } from "astro-icon/components";
 import { getCollection } from "astro:content";
 import { getEntry } from "astro:content";
 import { defaultLocale, getLocale } from "astro-i18n-aut";
+import { getPhrases } from "../phrases";
 
 export async function getStaticPaths() {
   // Only the default locale is needed for generating paths. Other locales will be handled by
@@ -53,6 +54,8 @@ const { headings, Content } = await entry.render();
 if (headings.some(({ depth }) => depth === 1)) {
   throw new Error("The article must not contain a top-level heading.");
 }
+
+const phrases = getPhrases(locale);
 ---
 
 <Layout title={title} description={description}>
@@ -70,7 +73,7 @@ if (headings.some(({ depth }) => depth === 1)) {
             {description}
           </p>
           <div class="actions">
-            <Share title={title} />
+            <Share title={title} shareText={phrases.general.share} />
             <a
               class="edit"
               href={`https://github.com/logto-io/auth-wiki/edit/master/src/content/${entry.collection}/${entry.slug}.mdx`}
@@ -78,14 +81,14 @@ if (headings.some(({ depth }) => depth === 1)) {
               rel="noopener"
             >
               <Icon name="github" />
-              <span>Edit on GitHub</span>
+              <span>{phrases.content.edit_on_github}</span>
             </a>
           </div>
         </div>
       </header>
       <div class="content">
         <nav class="toc">
-          <h2>Table of Contents</h2>
+          <h2>{phrases.content.table_of_contents}</h2>
           <ul>
             {
               headings
@@ -120,6 +123,7 @@ if (headings.some(({ depth }) => depth === 1)) {
     position: relative;
   }
   header div.background {
+    z-index: -1;
     position: absolute;
     background: linear-gradient(180deg, #6225cc 0%, rgb(179, 3, 255) 100%);
     top: -100px;
@@ -128,6 +132,7 @@ if (headings.some(({ depth }) => depth === 1)) {
     right: 0;
   }
   .background-cells {
+    z-index: -1;
     position: absolute;
     right: 12px;
     top: 100px;

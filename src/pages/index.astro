@@ -5,6 +5,7 @@ import Topbar from "../components/Topbar.astro";
 import Footer from "../components/Footer.astro";
 import BackgroundBanner from "../components/BackgroundBanner.astro";
 import Share from "../components/Share.astro";
+import { getPhrases } from "../phrases";
 import { getCollection } from "astro:content";
 import { defaultLocale, getLocale } from "astro-i18n-aut";
 
@@ -44,6 +45,8 @@ const sections = entries
     },
     {} as Record<string, typeof entries>,
   );
+
+const phrases = getPhrases(locale);
 ---
 
 <Layout>
@@ -59,14 +62,8 @@ const sections = entries
           <li>OAuth 2.0</li>
           <li>SAML</li>
         </ul>
-        <p>
-          Explore and find clear definitions of key glossaries related to
-          authentication, authorization, and identity management. Work with
-          open-standards like <a href="/openid-connect">OpenID Connect</a>, <a
-            href="/oauth-2.0">OAuth 2.0</a
-          >, and <a href="/saml">SAML</a>.
-        </p>
-        <Share title="Auth Wiki" />
+        <p set:html={phrases.home.description} />
+        <Share title="Auth Wiki" shareText={phrases.general.share} />
       </div>
     </header>
     <div class="content">
@@ -132,11 +129,11 @@ const sections = entries
       line-height: 36px;
       margin: 0;
     }
-    header p a {
+    header p :global(a) {
       color: #f1e8ff;
       text-decoration: none;
     }
-    header p a:hover {
+    header p :global(a:hover) {
       text-decoration: underline 1.5px;
       text-underline-offset: 2px;
     }
@@ -202,7 +199,7 @@ const sections = entries
       header div.background {
         display: none;
       }
-      header p a {
+      header p :global(a) {
         color: #cabeff;
       }
     }

@@ -1,5 +1,7 @@
 ---
+import { getLocale } from "astro-i18n-aut";
 import Ref from "./Ref.astro";
+import { getPhrases } from "../phrases";
 
 type Props = {
   /**
@@ -15,9 +17,12 @@ const { slugs } = Astro.props;
 if (slugs.length === 0) {
   throw new Error('The "slugs" prop must contain at least one slug.');
 }
+
+const locale = getLocale(Astro.url);
+const phrases = getPhrases(locale);
 ---
 
-<h2>See also</h2>
+<h2>{phrases.content.see_also}</h2>
 <ul class="list">
   {
     slugs.map((slug) => (

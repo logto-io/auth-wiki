@@ -1,5 +1,7 @@
 ---
 import ogs from "open-graph-scraper";
+import { getPhrases } from "../phrases";
+import { getLocale } from "astro-i18n-aut";
 
 /** Type to override the default metadata for the page. */
 type UrlMetadata = {
@@ -47,10 +49,13 @@ const results = await Promise.all(
     return { url, result };
   }),
 );
+
+const locale = getLocale(Astro.url);
+const phrases = getPhrases(locale);
 ---
 
 <aside>
-  <h2>Resources and references</h2>
+  <h2>{phrases.content.resources_and_references}</h2>
   {
     results.map(({ url, result }) => (
       <a href={url} class="resource" target="_blank" rel="noopener">

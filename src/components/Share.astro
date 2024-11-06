@@ -3,13 +3,14 @@ import ShareButton from "../components/ShareButton.astro";
 
 type Props = {
   title: string;
+  shareText?: string;
 };
 
-const { title } = Astro.props;
+const { title, shareText } = Astro.props;
 ---
 
 <aside class="share">
-  <span>Share</span>
+  <span>{shareText ?? "Share"}</span>
   <div>
     <ShareButton type="x" title={title} />
     <ShareButton type="reddit" title={title} />
