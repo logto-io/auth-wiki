@@ -1,6 +1,11 @@
 ---
 import { AstroSeo } from "@astrolib/seo";
-import { getLocale } from "astro-i18n-aut";
+import {
+  defaultLocale,
+  getLocale,
+  getLocaleUrl,
+  locales,
+} from "astro-i18n-aut";
 import { getPhrases } from "../phrases";
 
 type Props = {
@@ -31,6 +36,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
         url: canonical,
         site_name: "Auth Wiki",
       }}
+      languageAlternates={[
+        ...Object.keys(locales).map((lang) => ({
+          hreflang: lang,
+          href: new URL(getLocaleUrl(Astro.url.pathname, lang), Astro.url).href,
+        })),
+        {
+          hreflang: "x-default",
+          href: new URL(
+            getLocaleUrl(Astro.url.pathname, defaultLocale),
+            Astro.url,
+          ).href,
+        },
+      ]}
     />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
