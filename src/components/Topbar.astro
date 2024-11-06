@@ -2,8 +2,8 @@
 import { Icon } from "astro-icon/components";
 import Logo from "./Logo.astro";
 import ByLogto from "./ByLogto.astro";
-import SolidA from "./SolidA.astro";
 import { defaultLocale, getLocale } from "astro-i18n-aut";
+import LanguageSelector from "./LanguageSelector.astro";
 
 const locale = getLocale(Astro.url);
 ---
@@ -17,14 +17,16 @@ const locale = getLocale(Astro.url);
     <Logo />
   </a>
   <div class="actions">
-    <SolidA
+    <a
+      class="solid-button"
       href="https://github.com/logto-io/auth-wiki"
       target="_blank"
       rel="noopener"
     >
       <Icon name="github" />
       <span class="github">GitHub</span>
-    </SolidA>
+    </a>
+    <LanguageSelector class="select solid-button" />
     <ByLogto />
   </div>
 </div>
@@ -50,7 +52,18 @@ const locale = getLocale(Astro.url);
     display: flex;
     gap: 12px;
   }
-  @media (max-width: 500px) {
+  .select {
+    border: none;
+    border-right: 12px solid transparent;
+    height: 100%;
+  }
+  @media (max-width: 810px) {
+    .topbar a.home :global(svg) {
+      width: auto;
+      height: 24px;
+    }
+  }
+  @media (max-width: 600px) {
     .topbar .actions {
       gap: 8px;
     }

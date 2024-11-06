@@ -16,7 +16,6 @@ import { getCollection } from "astro:content";
 import { getEntry } from "astro:content";
 import { defaultLocale, getLocale } from "astro-i18n-aut";
 import { getPhrases } from "../phrases";
-import LanguageSelector from "../components/LanguageSelector.astro";
 
 export async function getStaticPaths() {
   // Only the default locale is needed for generating paths. Other locales will be handled by
@@ -70,18 +69,15 @@ const phrases = getPhrases(locale);
           <BackgroundCells class="background-cells" />
           <div class="actions">
             <Tags data={tags} />
-            <div class="actions compact">
-              <a
-                class="button"
-                href={`https://github.com/logto-io/auth-wiki/edit/master/src/content/${entry.collection}/${entry.slug}.mdx`}
-                target="_blank"
-                rel="noopener"
-              >
-                <span>{phrases.content.edit_on_github}</span>
-                <Icon name="github" />
-              </a>
-              <LanguageSelector class="button" />
-            </div>
+            <a
+              class="button"
+              href={`https://github.com/logto-io/auth-wiki/edit/master/src/content/${entry.collection}/${entry.slug}.mdx`}
+              target="_blank"
+              rel="noopener"
+            >
+              <Icon name="github" />
+              <span>{phrases.content.edit_on_github}</span>
+            </a>
           </div>
           <h1>{title}</h1>
           <p class="description">
@@ -180,10 +176,6 @@ const phrases = getPhrases(locale);
     flex-wrap: wrap;
     column-gap: 32px;
     row-gap: 16px;
-  }
-  div.actions.compact {
-    column-gap: 10px;
-    row-gap: 8px;
   }
   div.actions select.button {
     border: none;
