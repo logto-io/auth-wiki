@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="https://auth.wiki/?utm_source=github&utm_medium=readme" target="_blank" align="center" alt="Go to Auth Wiki">
+    <picture>
+      <source height="48" media="(prefers-color-scheme: dark)" srcset="https://github.com/logto-io/auth-wiki/raw/master/public/logo-dark.svg">
+      <source height="48" media="(prefers-color-scheme: light)" srcset="https://github.com/logto-io/auth-wiki/raw/master/public/logo-light.svg">
+      <img height="48" src="https://github.com/logto-io/logto/raw/master/public/logo.svg" alt="Auth Wiki">
+    </picture>
+  </a>
+</p>
+
 # Auth Wiki
 
 A comprehensive collection of articles, tutorials, and resources about authentication and authorization. Learn about OAuth 2.0, OpenID Connect, SAML, and more.
