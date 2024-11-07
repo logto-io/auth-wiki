@@ -1,0 +1,51 @@
+---
+title: Acceso sin conexión (Offline access)
+tags: [oauth 2.0, oidc]
+description: El acceso sin conexión (Offline access) permite a los clientes obtener nuevos tokens de acceso sin requerir que el usuario vuelva a autenticarse. Es útil para sesiones de larga duración y una mejor experiencia de usuario.
+---
+
+## ¿Qué es el acceso sin conexión (Offline access)?
+
+El concepto de acceso sin conexión (offline access) puede variar dependiendo del contexto, nos enfocaremos en las especificaciones de OAuth 2.0 y OpenID Connect (OIDC). En este contexto, el acceso sin conexión permite a los clientes obtener nuevos <Ref slug="access-token">tokens de acceso (access tokens)</Ref> usando un <Ref slug="refresh-token">token de actualización (refresh token)</Ref> sin requerir que el usuario vuelva a autenticarse. Esta característica es particularmente útil para sesiones de larga duración y una mejor experiencia de usuario.
+
+Vale la pena señalar que OAuth 2.0 no define el término "acceso sin conexión" explícitamente; solo especifica el uso de tokens de actualización para obtener nuevos tokens de acceso. Sin embargo, el término "acceso sin conexión" (junto con el scope `offline_access`) ha sido ampliamente adoptado en la industria para referirse a esta capacidad, y está oficialmente definido en la especificación <Ref slug="openid-connect" />.
+
+## ¿Cómo funciona el acceso sin conexión (Offline access)?
+
+Para simplificar, usaremos los términos de OAuth 2.0 <Ref slug="authorization-request" /> y <Ref slug="authorization-server" /> para ilustrar cómo funciona el acceso sin conexión. Sus términos alternativos en OIDC son <Ref slug="authentication-request" /> y <Ref slug="openid-connect" headingId="openid-provider-op" />, respectivamente.
+
+Hay dos pasos principales involucrados en usar el acceso sin conexión:
+
+1. **Solicitar acceso sin conexión**: Cuando el <Ref slug="client" /> inicia una autorización (authorization request) al servidor de autorización (authorization server), incluye el scope `offline_access` para solicitar acceso sin conexión. Este scope indica que el cliente desea obtener un token de actualización junto con el token de acceso.
+
+  El soporte para acceso sin conexión puede variar entre diferentes servidores de autorización, y el servidor de autorización puede ignorar el scope `offline_access` si no lo admite. Por favor, consulta la documentación del servidor de autorización para asegurar la compatibilidad antes de usar este scope.
+
+2. **Usar el token de actualización**: Una vez que la <Ref slug="oauth-2.0-grant" /> se complete, el cliente debería recibir un <Ref slug="refresh-token">token de actualización (refresh token)</Ref> junto con el <Ref slug="access-token">token de acceso (access token)</Ref>. El cliente puede almacenar el token de actualización de manera segura y usarlo para enviar una <Ref slug="token-request">solicitud de token (token request)</Ref> al servidor de autorización para obtener un nuevo token de acceso cuando el token de acceso actual expire.
+
+Para ejemplos detallados de acceso sin conexión en acción, por favor consulta el artículo sobre <Ref slug="refresh-token">token de actualización</Ref>.
+
+## Consideraciones de seguridad
+
+Las implicaciones de seguridad del acceso sin conexión son similares a las de los tokens de actualización. Por favor, consulta la sección de <Ref slug="refresh-token" headingId="security-considerations">consideraciones de seguridad</Ref> del token de actualización para más detalles.
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "Offline Access in OpenID Connect Core 1.0",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "Refresh Token in OAuth 2.0",
+        ogDescription: "Refresh tokens are credentials used to obtain access tokens."
+      },
+    },
+  ]}
+/>

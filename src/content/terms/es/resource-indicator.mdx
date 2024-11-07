@@ -1,0 +1,120 @@
+---
+title: Indicador de recursos (Resource indicator)
+tags: [oauth 2.0]
+description: El indicador de recursos en OAuth 2.0 es un parámetro de extensión definido en RFC 8707 que permite a los clientes especificar la ubicación del servidor de recursos en la solicitud de autorización (authorization request). Proporciona una forma escalable de manejar múltiples servidores de recursos en un único servidor de autorización (authorization server).
+---
+
+## ¿Qué es un indicador de recursos?
+
+Un indicador de recursos, tal como se define en la extensión OAuth 2.0 [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707), es un parámetro que permite a los clientes especificar el URI del servidor de recursos en la <Ref slug="authorization-request" /> (o <Ref slug="authentication-request" /> en <Ref slug="openid-connect" />) y la <Ref slug="token-request" />. El indicador de recursos se utiliza para indicar la ubicación del servidor de recursos al que el cliente desea acceder.
+
+> [!Note]
+> El indicador de recursos es un parámetro de extensión que no forma parte de la especificación central de OAuth 2.0. Por favor, revisa la documentación de tu <Ref slug="authorization-server" /> para ver si admite este parámetro.
+
+## ¿Cómo funcionan los indicadores de recursos?
+
+Para entender mejor cómo funcionan los indicadores de recursos, consideremos un escenario en el que un <Ref slug="client" /> desea acceder a múltiples <Ref slug="resource-server">servidores de recursos</Ref> usando un único servidor de autorización.
+
+### 1. Registrar servidores de recursos
+
+Normalmente, el desarrollador necesita registrar cada servidor de recursos con el servidor de autorización para ponerlos a disposición del cliente. El proceso de registro real puede variar dependiendo de la implementación del servidor de autorización. El nombre de la característica podría ser diferente, como "recursos API" o simplemente "recursos".
+
+Supongamos que el cliente desea acceder a dos servidores de recursos: `https://api.example.com` y `https://api.another.com`, y han sido registrados con el servidor de autorización.
+
+### 2. Definir alcances para cada servidor de recursos
+
+A diferencia de los flujos tradicionales de OAuth 2.0, donde los <Ref slug="scope">alcances</Ref> se comparten entre todos los servidores de recursos, la extensión del indicador de recursos permite al cliente especificar los alcances para cada servidor de recursos. Esto también debe ser parte del proceso de registro. Supongamos que los servidores de recursos tienen los siguientes alcances:
+
+| Servidor de Recursos           | Alcances        |
+|--------------------------------|-----------------|
+| `https://api.example.com`      | `read`, `write` |
+| `https://api.another.com`      | `read`, `delete`|
+
+### 3. Incluir indicadores de recursos en la solicitud de autorización
+
+Para notificar al servidor de autorización que queremos usar la extensión del indicador de recursos, el cliente debe incluir el parámetro `resource` en la solicitud de autorización.
+
+Aquí tienes un ejemplo no normativo de una solicitud de autorización que incluye un indicador de recursos:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+En este ejemplo, el cliente incluye el parámetro `resource` con el valor codificado `https%3A%2F%2Fapi.example.com` para indicar la ubicación del servidor de recursos (`https://api.example.com`).
+
+Puedes notar que también incluimos algunos alcances predefinidos, como `openid`, junto con los alcances específicos del recurso. El servidor de autorización debe validar los alcances y filtrar otros alcances que no estén asociados con el servidor de recursos solicitado. Esto se llama **downscoping**.
+
+Aquí está la tabla de los cuatro alcances reales que se espera que el cliente reciba:
+
+| Servidor de Recursos           | Alcances                       |
+|--------------------------------|-------------------------------|
+| N/A                            | `openid`, `profile`, `email`  |
+| `https://api.example.com`      | `read`                        |
+
+La belleza del indicador de recursos es que el cliente puede solicitar múltiples servidores de recursos en una sola solicitud de autorización repitiendo el parámetro `resource`. Veamos otro ejemplo:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+En este ejemplo, el cliente solicita acceso tanto a `https://api.example.com` como a `https://api.another.com` con los respectivos alcances. El servidor de autorización debe validar los alcances para cada servidor de recursos, es decir, hacer un **producto cartesiano** de los alcances y los servidores de recursos. El resultado debería ser:
+
+| Servidor de Recursos           | Alcances                       |
+|--------------------------------|--------------------------------|
+| N/A                            | `openid`, `profile`, `email`  |
+| `https://api.example.com`      | `read`, `write`               |
+| `https://api.another.com`      | `read`, `delete`              |
+
+Hay siete alcances válidos en total para esta solicitud de autorización.
+
+### 4. Incluir indicadores de recursos en la solicitud de token
+
+Una vez que el cliente recibe el código de autorización, puede intercambiarlo por un access token con un **único** indicador de recursos, si es necesario. Por ejemplo:
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+El parámetro `resource` en la solicitud de token es opcional. Si el cliente lo incluye, el servidor de autorización debe validar el indicador de recursos contra los alcances asociados con la concesión actual; de lo contrario, el servidor de autorización debe retroceder a los alcances globales (por ejemplo, alcances de <Ref slug="openid-connect" />).
+
+> [!Note]
+> El servidor de autorización siempre debe aplicar <Ref slug="access-control" /> para garantizar que el access token emitido sea válido y se haya reducido adecuadamente en función del contexto de la concesión actual.
+
+Puede que te preguntes cómo manejar múltiples servidores de recursos en la concesión. Dado que el código de autorización es de un solo uso, el cliente puede usar otras concesiones, como la concesión de <Ref slug="refresh-token" />, para obtener access tokens para otros servidores de recursos.
+
+## ¿Por qué necesitamos indicadores de recursos?
+
+Como puedes ver en los ejemplos anteriores, la extensión del indicador de recursos proporciona una forma escalable de manejar múltiples servidores de recursos sin complicar los <Ref slug="scope">alcances</Ref> preocupándose por los conflictos de alcance. Es una característica poderosa que proporciona más flexibilidad para que los clientes accedan a recursos desde diferentes servidores de recursos.
+
+Vale la pena señalar que la extensión del indicador de recursos no es parte de la especificación central de OAuth 2.0. Asegúrate de que tu servidor de autorización admita esta extensión antes de usarla en tu aplicación.
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

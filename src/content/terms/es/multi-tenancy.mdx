@@ -1,0 +1,111 @@
+---
+title: Multitenencia (Multi-tenancy)
+tags: [authentication, authorization]
+description: La multitenencia es una arquitectura de software en la que una única instancia de aplicación sirve a múltiples clientes (inquilinos), manteniendo sus datos aislados y seguros. Es común en la computación en la nube y SaaS para optimizar recursos y simplificar el mantenimiento.
+---
+
+## ¿Qué es la multitenencia?
+
+La multitenencia de software es una [arquitectura de software](https://en.wikipedia.org/wiki/Software_architecture) en la cual una única [instancia](https://en.wikipedia.org/wiki/Instance_(computer_science)) de un [software](https://en.wikipedia.org/wiki/Computer_software) se ejecuta en un servidor y sirve a múltiples inquilinos. Los sistemas diseñados de esta manera son "compartidos" (en lugar de "dedicados" o "aislados").
+
+![multi_tenant_architecture.webp](https://uploads.strapi.logto.io/multi_tenant_architecture_600f47afe8.webp)
+
+Un inquilino es un grupo de usuarios que comparten un acceso común con privilegios específicos a la instancia de software.
+
+La arquitectura multi-inquilino se prefiere a menudo cuando los proveedores de servicios ofrecen servicios estandarizados a múltiples clientes. Estos servicios suelen tener personalización mínima, y todos los clientes comparten la misma instancia de aplicación. Cuando la aplicación se actualiza, se aplica a todos los clientes a la vez.
+
+Por ejemplo, los sistemas CRM (Customer Relationship Management) suelen usar arquitectura multi-inquilino para proporcionar el mismo servicio a todos los clientes.
+
+Un principio clave de la multitenencia es el "compartir". Esto no significa que **todas** las partes de la solución se compartan; significa que al menos **algunos** componentes son reutilizados por múltiples inquilinos. Comprender este concepto más amplio puede ayudarte a abordar mejor las necesidades de tus clientes.
+
+## ¿Cuáles son los casos de uso para productos multi-inquilinos?
+
+Las aplicaciones multi-inquilino se utilizan comúnmente en productos de software como servicio (SaaS) como herramientas de productividad, software de colaboración, etc. En esta configuración, cada "inquilino" suele representar un cliente comercial, con múltiples usuarios (generalmente empleados). En diferentes productos, puede referirse a un inquilino, espacio de trabajo o proyecto, según el contexto. Un solo negocio también podría tener múltiples inquilinos para representar diferentes divisiones u organizaciones.
+
+En casos más complejos, como aplicaciones B2B más allá de SaaS, las aplicaciones multi-inquilino proporcionan una plataforma compartida para que varios equipos, clientes empresariales y empresas asociadas accedan a tus servicios.
+
+## ¿Por qué deberías emplear la multitenencia en un producto SaaS?
+
+### Escalando con la multitenencia
+
+Para empresas de nivel empresarial, la multitenencia es clave para cumplir eficazmente sus requisitos de disponibilidad, gestión de recursos, gestión de costos y seguridad de datos. A nivel técnico, adoptar un enfoque multi-inquilino simplifica tus procesos de desarrollo, minimiza los desafíos técnicos y promueve una expansión sin problemas.
+
+### Creando una experiencia unificada
+
+Al examinar las raíces de los productos SaaS, es como un edificio que alberga varios apartamentos. Todos los inquilinos comparten servicios comunes como agua, electricidad y gas, pero mantienen control independiente sobre la gestión de su propio espacio y recursos. Este enfoque simplifica la gestión de la propiedad.
+
+### Asegurando la seguridad mediante la aislación de inquilinos
+
+En una arquitectura de multitenencia, se introduce el término "inquilino" para crear límites que separan y aseguran los recursos y datos de diferentes inquilinos dentro de una instancia compartida. Esto asegura que los datos y operaciones de cada inquilino permanezcan distintos y seguros, incluso si están utilizando los mismos recursos subyacentes.
+
+## ¿Cómo lograr la aislación de inquilinos en la arquitectura de multitenencia?
+
+Al hablar de aplicaciones multi-inquilino, siempre es necesario lograr la **aislación de inquilinos**. Esto significa mantener separados y seguros los datos y recursos de diferentes inquilinos dentro de un sistema compartido (por ejemplo, una infraestructura en la nube o una aplicación multi-inquilino). Esto previene cualquier intento no autorizado de acceder a los recursos de otro inquilino.
+
+Aunque la explicación pueda parecer abstracta, usaremos ejemplos y detalles clave para explicar más a fondo la mentalidad de aislamiento y la mejor práctica para lograr la aislación de inquilinos.
+
+### La aislación de inquilinos no va en contra de la mentalidad "compartida" de la multitenencia
+
+Eso se debe a que la aislación de inquilinos no es necesariamente una construcción a nivel de recursos de infraestructura. En el ámbito de la multitenencia y la aislación, algunos ven la aislación como una división estricta entre recursos de infraestructura reales. Esto usualmente lleva a un modelo donde cada inquilino tiene bases de datos separadas, instancias de cómputo, cuentas o nubes privadas. En escenarios de recursos compartidos, como aplicaciones multi-inquilino, la manera de lograr la aislación puede ser una construcción lógica.
+
+En el diseño de la arquitectura, se pueden lograr varios grados de aislamiento de recursos entre inquilinos:
+
+En general, cuantos más recursos se comparten entre los inquilinos, menor es el costo de iteración y mantenimiento del sistema. Por el contrario, cuanto menos recursos se comparten, mayor es el costo.
+
+La aislación de inquilinos se centra exclusivamente en usar el contexto "inquilino" para limitar el acceso a recursos. Evalúa el contexto del inquilino actual y usa ese contexto para determinar qué recursos son accesibles para ese inquilino.
+
+### La authentication y authorization no equivalen a “aislación”
+
+Usar authentication y authorization para controlar el acceso a tus entornos SaaS es importante, pero no es suficiente para una aislación completa. Estos mecanismos son solo una parte del rompecabezas de la seguridad.
+
+La gente a menudo hace una pregunta: ¿puedo usar soluciones generales de authorization y role-based access control para lograr la aislación de inquilinos?
+
+Puedes construir una aplicación multi-inquilino, pero no puedes decir que has logrado e implementado estrategias de aislación de inquilinos como una mejor práctica. Generalmente, no lo recomendamos porque la aislación de inquilinos está separada de authentication y authorization.
+
+Para ilustrar, considera una situación en la que has configurado authentication y authorization para tu sistema SaaS. Cuando los usuarios inician sesión, reciben un token que contiene información sobre su rol, dictando lo que pueden hacer en la aplicación. Este enfoque aumenta la seguridad, pero no asegura la aislación.
+
+### Usa “organización” como un contexto para representar el inquilino del producto SaaS, para lograr la aislación de inquilinos
+
+Confiar únicamente en authentication y authorization no impedirá que un usuario con el rol correcto acceda a los recursos de otro inquilino. Por lo que necesitamos incorporar un contexto de “inquilino”, como un tenant ID, para restringir el acceso a los recursos.
+
+Aquí es donde entra en juego la aislación de inquilinos. Usa identificadores específicos del inquilino para establecer límites, como paredes, puertas y cerraduras, asegurando una separación clara entre inquilinos.
+
+## ¿Cómo se gestionan las identidades en aplicaciones multi-inquilino?
+
+Discutimos la aislación de inquilinos, pero ¿qué hay de las identidades? ¿Cómo decides si tus identidades deben estar “aisladas” o no?
+
+A menudo hay confusión en torno al concepto de "aislación de identidad". Podría referirse a situaciones donde un usuario del mundo real tiene dos identidades en la comprensión general de las personas.
+
+1. Ambas identidades pueden existir dentro de un solo sistema de identidad. Por ejemplo, Sarah podría tener un correo electrónico personal registrado junto a un correo electrónico corporativo conectado a través de single sign-on (SSO).
+2. Los usuarios mantienen dos identidades distintas dentro de sistemas de identidad separados, representando productos completamente separados. Estos productos no están relacionados entre sí.
+
+A veces, estos escenarios se llaman "aislación de identidad", pero ese término podría no ayudar en la toma de decisiones.
+
+En lugar de preguntar si necesitas "aislación de identidad", piensa en si partes de tu negocio o producto requieren sistemas de identidad separados. Esto guiará el diseño de tu sistema. Para aplicaciones multi-inquilino, en la mayoría de los casos, las identidades se comparten, mientras que los recursos de cada inquilino se mantienen separados.
+
+En aplicaciones multi-inquilino, las identidades se comparten entre inquilinos, a diferencia de los recursos y datos específicos del inquilino. Es como ser un administrador de edificio: no querrías mantener dos listas separadas de los nombres de los inquilinos.
+
+Al apuntar a la aislación de inquilinos, el término "organización" a menudo aparece, ya que es una mejor práctica para construir aplicaciones multi-inquilino.
+
+Al usar "organización" en muchos servicios CIAM (Customer Identity Management) o Auth, puedes lograr la aislación de inquilinos en tu aplicación multi-inquilino mientras mantienes un sistema de identidad unificado.
+
+## ¿Cómo eliges los modelos de authorization adecuados para un mejor access control?
+
+Al seleccionar el modelo de authorization adecuado, considera estas preguntas:
+
+1. ¿Estás desarrollando un producto B2C, B2B o una combinación de ambos tipos de productos?
+2. ¿Tu aplicación tiene una arquitectura multi-inquilino?
+3. ¿Existe la necesidad de un cierto nivel de aislamiento en tu aplicación, según lo determine la unidad comercial?
+4. ¿Qué permisos y roles necesitan definirse dentro del contexto de la organización, y cuáles no?
+
+<Resources
+  urls={[
+    "https://blog.logto.io/implement-multi-tenancy",
+    "https://blog.logto.io/multi-tenant-ultimate-guide",
+    "https://blog.logto.io/case-study-multi-tenancy",
+    "https://blog.logto.io/multi-tenancy-explained",
+    "https://blog.logto.io/are-multi-tenant-apps-equal-saas",
+    "https://blog.logto.io/tenancy-models",
+    "https://blog.logto.io/do-you-need-multiple-tenants-identity-model",
+  ]}
+/>

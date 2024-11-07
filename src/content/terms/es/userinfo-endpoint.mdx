@@ -1,0 +1,50 @@
+---
+title: Endpoint de información del usuario (Userinfo endpoint)
+tags: [oidc]
+description: El endpoint de información del usuario (Userinfo endpoint) es un endpoint de OpenID Connect (OIDC) que proporciona información del usuario a los clientes. Es un endpoint suplementario al ID token y permite a los clientes recuperar información adicional del usuario.
+---
+
+## ¿Qué es un endpoint de información del usuario (userinfo endpoint)?
+
+En <Ref slug="openid-connect" />, un endpoint de información del usuario (userinfo endpoint) es un endpoint del <Ref slug="openid-connect" headingId="openid-provider-op" /> que ofrece información de usuario a los <Ref slug="client">clientes</Ref>. El userinfo endpoint es generalmente un endpoint suplementario al <Ref slug="id-token" /> y permite a los clientes obtener información adicional del usuario que no está incluida en el ID token.
+
+El userinfo endpoint está definido en la [especificación central de OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) y típicamente es accesado por los clientes después de que han obtenido un ID token.
+
+## ¿Cómo funciona un endpoint de información del usuario (userinfo endpoint)?
+
+Cuando un cliente realiza una solicitud al userinfo endpoint, necesita incluir el access token obtenido del <Ref slug="token-request" /> y usar los métodos HTTP `GET` o `POST`. El userinfo endpoint valida el access token y devuelve la información del usuario en la respuesta.
+
+Aquí hay un ejemplo no normativo de una solicitud al userinfo endpoint:
+
+```http
+GET /userinfo HTTP/1.1
+Host: openid-provider.example.com
+Authorization: Bearer some-access-token
+```
+
+La ruta exacta del userinfo endpoint puede variar en diferentes proveedores de OpenID. Puedes referirte al <Ref slug="openid-connect-discovery" /> del proveedor para encontrar la URL del userinfo endpoint. Si el access token es válido, el userinfo endpoint responde con la información del usuario:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "sub": "user123",
+  "name": "Alice",
+  "email": "alice@foo.com",
+  "birthdate": "1990-01-01",
+  "address": {
+    "street": "1234 Elm St",
+    "city": "Springfield",
+    "country": "US"
+  }
+}
+```
+
+La respuesta puede contener varios atributos del usuario como `name`, `email`, `birthdate` y `address`; y típicamente, contiene más <Ref slug="claim">claims</Ref> que el <Ref slug="id-token" />. Los atributos reales devueltos dependen de la configuración del <Ref slug="openid-connect" headingId="openid-provider-op" /> y del consentimiento del usuario. Consulta la documentación de tu proveedor de OpenID para conocer los atributos específicos disponibles.
+
+### Firma y cifrado
+
+La respuesta del userinfo puede ser firmada y/o cifrada para asegurar su integridad y confidencialidad. Si se aplica una o ambas de estas protecciones, la respuesta del userinfo endpoint será un <Ref slug="jwt" /> en lugar de un objeto JSON simple.
+
+<SeeAlso slugs={["openid-connect", "id-token", "openid-connect-discovery", "jwt", "signing-key"]} />

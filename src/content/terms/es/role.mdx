@@ -1,0 +1,99 @@
+---
+title: Rol (Role)
+tags: [authorization]
+description: Un rol es una colección de permisos en sistemas de control de acceso que define qué acciones pueden realizar los usuarios, proporcionando una forma eficiente de gestionar y asignar derechos de acceso a los usuarios.
+---
+
+## ¿Qué es un rol?
+
+Un rol es un concepto central en los sistemas de Control de Acceso Basado en Roles (RBAC). En RBAC, los roles son una agrupación de permisos que se pueden asignar a los usuarios. Proporcionan una manera de agregar permisos definidos para diferentes APIs, haciendo que la adición, eliminación o ajuste de permisos sea más eficiente que asignarlos individualmente a los usuarios.
+
+Los roles actúan como intermediarios entre los usuarios y los permisos, permitiendo a los administradores gestionar los derechos de acceso más eficazmente, especialmente en sistemas a gran escala.
+
+## ¿Cómo están estructurados los roles?
+
+Veamos un ejemplo de un rol `order_admin` para entender cómo suelen estructurarse los roles:
+
+Rol: `order_admin`
+Permisos:
+- Recurso de orden:
+   - `read:orders` (ver detalles del pedido)
+   - `write:orders` (editar la información del pedido)
+   - `delete:orders` (eliminar pedidos del sistema)
+
+- Recurso de producto:
+   - `read:products` (ver información del producto)
+   - `write:products` (editar detalles del producto)
+
+Este ejemplo demuestra cómo múltiples permisos relacionados pueden agruparse en un único rol, facilitando a los administradores la asignación de permisos a los usuarios. Al asignar a un usuario el rol `order_admin`, dicho usuario obtiene los permisos necesarios para gestionar tanto los pedidos como los productos sin la necesidad de asignar cada permiso individualmente.
+
+## ¿Qué son los permisos?
+
+Permiso se refiere a la autorización para acceder a un recurso o realizar una acción sobre un recurso. En el mundo real, entidades como pedidos, productos y documentos pueden designarse como recursos, y se pueden asignar diversas acciones.
+
+Ejemplos de permisos incluyen:
+
+- Recurso: Pedidos
+  - `write:orders`: Editar un pedido
+- Recurso: Documentos
+  - `read:documents`: Leer un documento
+- Recurso: Productos
+  - `delete:products`: Eliminar un producto
+
+Estos ejemplos demuestran claramente la relación entre permisos y recursos específicos.
+
+## ¿Cómo funcionan juntos los roles y los permisos?
+
+Los roles son esencialmente colecciones de permisos. Cuando se asigna un rol a un usuario, este hereda todos los permisos asociados con ese rol. Esto facilita la gestión del control de acceso a mayor escala.
+
+## ¿Por qué usar roles en el control de acceso?
+
+1. **Gestión simplificada**: Los administradores pueden asignar roles en lugar de permisos individuales, lo cual es más eficiente.
+2. **Consistencia**: Los roles aseguran que los usuarios con las mismas responsabilidades tengan el mismo conjunto de permisos.
+3. **Escalabilidad**: A medida que los sistemas crecen, los roles facilitan la gestión de permisos para un gran número de usuarios.
+4. **Flexibilidad**: Los roles pueden modificarse fácilmente, y estos cambios se reflejan inmediatamente para todos los usuarios asignados a ese rol.
+5. **Alineación con la lógica empresarial**: Los roles a menudo corresponden a funciones o responsabilidades laborales dentro de una organización, lo que los hace intuitivos de configurar y gestionar.
+
+Al aprovechar los roles de manera efectiva, los sistemas RBAC pueden mantener una seguridad robusta al tiempo que permiten una gestión eficiente de permisos y control de acceso de usuarios.
+
+## ¿Cómo organizar y gestionar roles de manera efectiva?
+
+Al implementar RBAC en tu aplicación, es crucial organizar los roles de manera efectiva. Aquí hay algunas mejores prácticas a considerar:
+
+1. Comienza con una jerarquía de roles. Por ejemplo, en BookHarber:
+   - Rol Base: Invitado
+   - Rol de Usuario: Cliente
+   - Roles del Personal: Agente de Servicio al Cliente, Gerente de Libros, Personal de Marketing
+   - Rol de Admin: Admin de la Tienda
+
+   Esta jerarquía permite una gestión más fácil y herencia de permisos.
+
+2. Deja que los roles de nivel superior hereden permisos de los roles de nivel inferior. Por ejemplo, el rol Admin de la Tienda podría heredar todos los permisos de otros roles del personal.
+
+3. Asigna solo los permisos mínimos necesarios a cada rol. Esto reduce el riesgo de acceso no autorizado si se compromete la cuenta de un usuario.
+
+4. Crea roles basados en responsabilidades laborales reales en tu organización. Esto hace que la asignación de roles sea más intuitiva y manejable.
+
+5. Para los usuarios que necesitan permisos de varios roles, crea roles compuestos en lugar de asignar múltiples roles individuales.
+
+6. Revisa y audita regularmente la estructura de roles para asegurar que aún se alinea con las necesidades de tu organización y los requisitos de seguridad.
+
+7. Ajusta tu interfaz de usuario en función del rol del usuario. Esto mejora la experiencia del usuario al mostrar solo información y controles relevantes.
+
+8. Mantén una documentación clara de tus roles, sus permisos y la lógica detrás del diseño de tus roles. Esto ayuda en la incorporación de nuevos miembros del equipo y en el mantenimiento futuro del sistema.
+
+9. Elige nombres de roles descriptivos que indiquen claramente la función o nivel de acceso, como "ReadOnlyUser" o "SeniorEditor".
+
+10. Diseña tu estructura de roles para acomodar el crecimiento y los cambios futuros en tu organización.
+
+Siguiendo estas mejores prácticas, puedes crear un sistema RBAC robusto y manejable que mejorará la seguridad de tu aplicación al tiempo que ofrece una experiencia de usuario fluida.
+
+## Recursos relacionados
+
+<Resources
+  urls={[
+    "https://blog.logto.io/rbac-and-abac",
+    "https://blog.logto.io/mastering-rbac",
+    "https://blog.logto.io/organization-and-role-based-access-control",
+  ]}
+/>

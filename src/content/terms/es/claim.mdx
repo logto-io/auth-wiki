@@ -1,0 +1,72 @@
+---
+title: Reclamación (Claim)
+tags: [oauth 2.0, oidc]
+description: Una reclamación (claim) en un JSON Web Token (JWT) es un par nombre-valor que transmite información específica. En un contexto más amplio, una reclamación puede ser cualquier par nombre-valor que represente información.
+---
+
+## ¿Qué es una reclamación (claim)?
+
+Una reclamación (claim) es un par nombre-valor que transmite información específica. Por ejemplo, en un objeto JSON:
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+En este ejemplo, `sub` es una reclamación que representa el identificador de sujeto con el valor `foo`, y `email` es una reclamación que representa la dirección de correo electrónico con el valor `foo@bar.com`.
+
+> Usamos *sujeto* en lugar de *usuario* porque sin una definición clara, el sujeto (`sub`) puede representar un usuario, dispositivo, o cualquier entidad.
+
+### Usos de las reclamaciones (claims)
+
+Las reclamaciones (claims) se utilizan ampliamente en varios contextos, tales como:
+
+- <Ref slug="jwt" />: En un JWT, las reclamaciones se usan para representar información sobre el token, como el issuer (`iss`), sujeto (`sub`), y tiempo de expiración (`exp`).
+- <Ref slug="openid-connect" />: En OIDC, las reclamaciones se usan para representar información del usuario en el <Ref slug="id-token" /> y el <Ref slug="userinfo-endpoint" />, como la dirección de correo electrónico del usuario (`email`), nombre (`name`), y foto de perfil (`picture`).
+
+### Reclamaciones estándar
+
+En JWT y OIDC, hay reclamaciones estándar definidas por las especificaciones. Algunas reclamaciones estándar comunes incluyen:
+
+- **`iss`**: El issuer del token. Por ejemplo, si el <Ref slug="authorization-server" /> que emitió el token es `https://example.com`, en la mayoría de los casos la reclamación `iss` será la misma (`https://example.com`).
+- **`sub`**: El sujeto del token. Representa la entidad sobre la que trata el token. Por ejemplo, en un ID token, la reclamación `sub` suele representar el identificador del usuario.
+- **`aud`**: El audience del token. Indica los destinatarios a los que está destinado el token. Por ejemplo, si el token está destinado a acceder a una API en `https://api.example.com`, la reclamación `aud` será la misma (`https://api.example.com`).
+- **`exp`**: El tiempo de expiración del token. Indica cuándo el token ya no debería ser aceptado para su procesamiento.
+- **`nbf`**: El tiempo "not before" del token. Indica cuándo el token debería empezar a ser aceptado para su procesamiento.
+- **`iat`**: El tiempo de emisión del token. Indica cuándo fue emitido el token.
+- **`jti`**: El JWT ID del token. Proporciona un identificador único para el token.
+
+OIDC también define reclamaciones estándar adicionales para la información de usuario. Consulta [Reclamaciones](https://openid.net/specs/openid-connect-core-1_0.html#Claims) en la especificación de OIDC para más detalles.
+
+### Reclamaciones personalizadas
+
+Además de las reclamaciones estándar, puedes definir reclamaciones personalizadas para representar información específica de la aplicación. Por ejemplo, puedes incluir una reclamación `role` para representar el rol del usuario en la aplicación.
+
+Las reclamaciones personalizadas pueden tener un espacio de nombres con [Identificadores Uniformes de Recursos (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) para evitar conflictos con otras reclamaciones. Por ejemplo:
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+En este ejemplo, la reclamación `role` tiene un espacio de nombres con `https://example.com/claims/` para asegurar su unicidad. Alternativamente, puedes definir tu propio [Nombre Uniforme de Recurso (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) para reclamaciones personalizadas:
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+En este ejemplo, la reclamación `role` tiene un espacio de nombres con `urn:example:claims:`.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

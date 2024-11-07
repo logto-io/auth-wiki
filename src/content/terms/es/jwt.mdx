@@ -1,0 +1,167 @@
+---
+title: JSON Web Token (JWT)
+tags: [oidc, jose]
+description: JSON Web Token (JWT) es un estándar abierto definido en RFC 7519 que permite la comunicación segura entre dos partes. Es compacto, seguro para URLs y autónomo, lo que lo hace ideal para transmitir datos de autenticación (authentication) y autorización (authorization) entre servicios.
+---
+
+## ¿Qué es un JSON Web Token (JWT)?
+
+JSON Web Token (JWT) es ampliamente utilizado en aplicaciones web modernas y estándares abiertos como OpenID Connect, facilitando la autenticación (authentication) y la autorización (authorization). Aunque el [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) oficial sirve como una referencia esencial, puede ser difícil de entender para principiantes. En este artículo, nos centraremos en los conceptos básicos de JWT y los presentaremos en un lenguaje sencillo con ejemplos.
+
+## ¿Por qué necesitamos JWT?
+
+Hoy en día, es bastante común usar JSON para intercambiar datos entre dos partes. Considera un objeto JSON que representa un usuario:
+
+```json
+{
+  "sub": "foo",
+  "name": "John Doe"
+}
+```
+
+> `sub` es una abreviatura de "subject", que es un [claim estándar](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims) en OpenID Connect para representar el identificador del usuario (ID de usuario).
+
+¿Cómo podemos garantizar la **integridad** de este objeto JSON? En otras palabras, ¿cómo podemos asegurarnos de que los datos no se modifiquen durante la transmisión? Una solución común es usar firmas digitales. Por ejemplo, podemos usar [criptografía de clave pública](https://es.wikipedia.org/wiki/Cifrado_asim%C3%A9trico): el servidor firma el objeto JSON con su clave privada, y el cliente puede verificar la firma con la clave pública del servidor.
+
+En resumen, JWT ofrece un enfoque estandarizado para representar el objeto JSON y su firma.
+
+> JWT también puede usarse para cifrar el objeto JSON, pero no es el enfoque de este artículo.
+
+## El formato de JWT
+
+Dado que existen muchos algoritmos para crear firmas digitales, es necesario especificar el algoritmo utilizado para firmar el JWT. Esto se logra construyendo un objeto JSON:
+
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+> `alg` es una abreviatura de "algoritmo", y `typ` es una abreviatura de "tipo".
+
+Por lo general, `typ` se establece en `JWT` en mayúsculas. Para nuestro ejemplo, `alg` es `HS256`, que representa [HMAC-SHA256](https://es.wikipedia.org/wiki/Hash-based_message_authentication_code) (lo explicaremos pronto), e indica que estamos usando este algoritmo para crear la firma.
+
+Ahora, tenemos todos los elementos para un JWT:
+
+- Header JSON: Algoritmo y tipo
+- Payload JSON: Los datos reales
+- Firma: La firma que abarca el header y el payload
+
+Sin embargo, ciertos caracteres como espacios y saltos de línea no son amigables para la transmisión en red. Por lo tanto, el header y el payload deben ser **codificados en Base64URL**. El JWT típico se ve así:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+> El `.` sirve como delimitador.
+
+Pongamos todo junto y creemos un JWT:
+
+### Header
+
+JSON: `{"alg":"HS256","typ":"JWT"}`
+
+Codificado en Base64URL: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`
+
+### Payload
+
+JSON: `{"sub":"foo","name":"John Doe"}`
+
+Codificado en Base64URL: `eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ`
+
+### Firma
+
+En HMAC-SHA256, la firma se crea con un secreto:
+
+```
+HMAC-SHA256(base64Url(header) + "." + base64Url(payload), secret)
+```
+
+Por ejemplo, con el secreto como `some-great-secret`, la firma se convierte en: `XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g`.
+
+### JWT
+
+El JWT final es:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g
+```
+
+Este JWT válido puede ser verificado por cualquier parte que posea el secreto.
+
+## Elegir el algoritmo de firma
+
+Como se mencionó anteriormente, existen varios algoritmos para crear firmas digitales. Usamos `HS256` como ejemplo, pero puede no ser lo suficientemente fuerte ya que el secreto debe compartirse entre las partes (por ejemplo, el cliente y el servidor).
+
+En escenarios del mundo real, los clientes pueden incluir aplicaciones públicas como aplicaciones React que no pueden mantener el secreto seguro. Por lo tanto, el enfoque preferido implica utilizar criptografía de clave pública (es decir, criptografía asimétrica) para firmar el JWT. Comencemos con el algoritmo más popular: [RSA](https://es.wikipedia.org/wiki/RSA).
+
+### RSA
+
+RSA, un algoritmo asimétrico, utiliza un par de claves: una clave pública y una clave privada. La clave pública se utiliza para verificar la firma, mientras que la clave privada se usa para firmar.
+
+El JSON de encabezado para RSA se ve así:
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+```
+
+> `RS256` significa RSA-SHA256, lo que significa que la firma se crea con el algoritmo RSA y la función hash SHA256. También se puede usar `RS384` y `RS512` para crear firmas con las funciones hash SHA384 y SHA512, respectivamente.
+
+La firma se crea con la clave privada:
+
+```
+RSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+Nuevamente, podemos ensamblar estas partes para crear un JWT, y el JWT final se ve así:
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+Ahora, el cliente puede verificar la firma sin conocer la clave privada.
+
+### ECDSA
+
+Aunque RSA es ampliamente adoptado, sufre de tamaños de firma más grandes, a veces superando el tamaño combinado del encabezado y el payload. El Algoritmo de Firma Digital de Curva Elíptica (ECDSA) es otro algoritmo asimétrico que puede crear firmas más compactas y es más eficiente.
+
+Para generar una clave privada para ECDSA, necesitamos elegir una curva. Esto está fuera del alcance de este artículo, pero puedes encontrar más información [aquí](https://es.wikipedia.org/wiki/Elliptic-curve_cryptography#Elliptic_Curve_Digital_Signature_Algorithm).
+
+El JSON de encabezado para ECDSA se ve así:
+
+```json
+{
+  "alg": "ES256",
+  "typ": "JWT"
+}
+```
+
+> `ES256` significa ECDSA-SHA256, lo que significa que la firma se crea con el algoritmo ECDSA y la función hash SHA256. También se puede usar `ES384` y `ES512` para crear firmas con las funciones hash SHA384 y SHA512, respectivamente.
+
+La firma se crea con la clave privada:
+
+```
+ECDSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+El JWT final mantiene la misma estructura que RSA pero con una firma significativamente más corta:
+
+```
+eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+## Verificar el JWT
+
+Verificar un JWT es sencillo como el proceso inverso de crear un JWT:
+
+1. Divide el JWT en tres partes (header, payload y signature) usando el delimitador `.`.
+2. Decodifica el header y el payload con Base64URL.
+3. Verifica la firma con el algoritmo especificado en el encabezado y la clave pública (para algoritmos asimétricos).
+
+Existen muchas bibliotecas disponibles que ayudan con la verificación de JWT, como [jose](https://github.com/panva/jose) para Node.js y navegadores web.
+
+<SeeAlso slugs={['opaque-token', 'id-token', 'access-token']} />

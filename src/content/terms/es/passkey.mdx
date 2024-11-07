@@ -1,0 +1,58 @@
+---
+title: Llave de acceso (Passkey)
+tags: [authentication, authorization]
+description: La llave de acceso (Passkey) es una credencial resistente al phishing y conveniente que reemplaza las contraseñas y puede ser utilizada para el inicio de sesión y la autenticación multifactor (MFA).
+---
+
+## ¿Qué es una llave de acceso (passkey)?
+
+**Llave de acceso (Passkey)** es una alternativa basada en [FIDO](https://fidoalliance.org/) a las contraseñas tradicionales, que es segura y conveniente. Utilizan criptografía avanzada para proteger tus cuentas de ataques de [phishing](https://en.wikipedia.org/wiki/Phishing). 
+
+- **Única para cada servicio**: Cuando te registras en un servicio, tu dispositivo crea una llave de acceso única vinculada al dominio específico de ese servicio.
+- **Vinculada al dispositivo:** Las llaves de acceso generalmente están vinculadas a un dispositivo, como un teléfono, una computadora portátil, un identificador biométrico o llaves de seguridad de hardware.
+- **Par de claves pública-privada:** El dispositivo mantiene la clave privada, mientras que la clave pública se comparte con el servicio. Estos pares de claves criptográficas se llaman llaves de acceso. (Citado de [FIDO](https://fidoalliance.org/how-fido-works/))
+- **Múltiples métodos de autenticación:** Puedes usar un escaneo de huella dactilar, reconocimiento facial, PIN del dispositivo, escaneo de código QR o llaves de seguridad para autenticarte con una llave de acceso.
+- **Sincronización entre dispositivos:** Las llaves de acceso pueden sincronizarse entre dispositivos usando almacenamiento seguro en la nube (por ejemplo, iCloud Keychain de Apple o Google Password Manager), lo que te permite iniciar sesión desde cualquier dispositivo compatible.
+
+## ¿Cómo es el flujo de trabajo de la llave de acceso (passkey)?
+
+Las **llaves de acceso (Passkeys)** funcionan utilizando criptografía de clave pública para proporcionar credenciales seguras. 
+
+- **Registro**
+    - Cuando te registras en un servicio, tu dispositivo genera un par de claves criptográficas únicas vinculadas a ese servicio.
+    - La **clave privada** permanece en tu dispositivo, mientras que la **clave pública** se comparte con el servicio.
+- **Autenticación**
+    - Cuando intentas iniciar sesión, el servicio envía un **desafío** a tu dispositivo.
+    - Tu dispositivo utiliza la **clave privada** para generar una **firma** criptográfica basada en el desafío.
+    - La **firma** se envía de vuelta al servicio, que la verifica utilizando la **clave pública**.
+    - Si la firma es válida, la autenticación es exitosa.
+
+Lee sobre WebAuthn, una API para implementar llaves de acceso, para conocer los detalles.
+
+## ¿Cómo es el flujo de usuario final de la llave de acceso (passkey)?
+
+Las llaves de acceso (Passkeys) ofrecen flexibilidad con dos tipos de autenticadores tanto para uso local como en la nube, y los usuarios pueden habilitar uno o ambos para el servicio.
+
+- **Autenticador de plataforma (Autenticador interno):** Vinculado a un sistema operativo de dispositivo específico (por ejemplo, teléfono, computadora portátil), usando biometría o código de acceso del dispositivo para autorizar. Es rápido y conveniente.
+    - Ejemplos: iCloud Keychain en dispositivos Apple (verificar a través de Touch ID, Face ID o código de acceso del dispositivo), Windows Hello, Google Password Manager en Android.
+- **Autenticador volante (Autenticador externo):** Dispositivos portátiles o software, por ejemplo, llaves de seguridad, teléfonos inteligentes. Pueden ser utilizados en múltiples dispositivos pero pueden requerir pasos adicionales como escaneo de código QR o emparejamiento NFC/Bluetooth.
+    - Ejemplos: YubiKey y cuentas basadas en la nube en teléfonos inteligentes. Los autenticadores móviles a menudo requieren escaneo de código QR para enlazarse con dispositivos de escritorio, y la autenticación entre dispositivos necesita conectarse a través de Bluetooth, NFC o USB para asegurar que el autenticador esté cerca.
+
+## ¿Cuándo usar una llave de acceso (passkey)?
+
+Las llaves de acceso (Passkeys) son un moderno factor de autenticación que pueden ser utilizadas como primer o segundo factor.
+
+- **Inicio de sesión con llave de acceso (Passkey):** Las llaves de acceso ofrecen un método de autenticación sin contraseña más rápido y seguro en comparación con la contraseña tradicional.
+    - Las aplicaciones modernas generalmente presentan un botón "Iniciar sesión con llave de acceso (passkey)" en la página de inicio de sesión, alentando a los usuarios a tocar esta opción proactivamente.
+    - Además, la página de inicio de sesión puede automáticamente mostrar un pop-up de inicio de sesión con llave de acceso si reconoce que el usuario está accediendo desde el mismo dispositivo y navegador donde su llave de acceso está registrada.
+- **Llave de acceso (Passkey) MFA:** Las llaves de acceso también pueden servir como un segundo factor para MFA.
+    - Cuando un usuario intenta iniciar sesión, primero introduce su correo electrónico y contraseña (u otros primeros factores), después de lo cual el servicio les solicita completar la verificación en dos pasos usando una llave de acceso.
+    - Si hay sesiones existentes en el navegador, el servicio puede solicitar directamente a los usuarios que inicien sesión con su llave de acceso sin requerir que ingresen su contraseña nuevamente. Este proceso, conocido como completar MFA, porque la llave de acceso es un alto nivel de seguridad al vincularse al dispositivo actual y verificar a los usuarios a través de biometría, PINs u otros métodos de hardware.
+- **Verificación de seguridad**: En entornos de alta seguridad, las llaves de acceso se utilizan a menudo para verificar la identidad del usuario. Por ejemplo, al acceder a información financiera sensible o realizar operaciones críticas (banca, gobierno, sistema corporativo).
+
+<Resources
+  urls={[
+    "https://fidoalliance.org/passkeys/",
+    "https://webauthn.io/"
+  ]}
+/>
