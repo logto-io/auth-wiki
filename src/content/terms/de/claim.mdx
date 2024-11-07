@@ -1,0 +1,72 @@
+---
+title: Anspruch (Claim)
+tags: [oauth 2.0, oidc]
+description: Ein Anspruch (Claim) in JSON Web Token (JWT) ist ein Name-Wert-Paar, das spezifische Informationen übermittelt. In einem weiteren Kontext kann ein Anspruch jedes Name-Wert-Paar sein, das Informationen repräsentiert.
+---
+
+## Was ist ein Anspruch (Claim)?
+
+Ein Anspruch (Claim) ist ein Name-Wert-Paar, das spezifische Informationen übermittelt. Zum Beispiel in einem JSON-Objekt:
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+In diesem Beispiel ist `sub` ein Anspruch (Claim), der den Subjektbezeichner mit dem Wert `foo` repräsentiert, und `email` ist ein Anspruch (Claim), der die E-Mail-Adresse mit dem Wert `foo@bar.com` repräsentiert.
+
+> Wir verwenden *Subjekt* anstelle von *Benutzer*, da ohne eine klare Definition das Subjekt (`sub`) einen Benutzer, ein Gerät oder eine beliebige Entität darstellen kann.
+
+### Verwendungen von Ansprüchen (Claims)
+
+Ansprüche (Claims) werden in verschiedenen Kontexten weit verbreitet, wie zum Beispiel:
+
+- <Ref slug="jwt" />: In einem JWT werden Ansprüche (Claims) verwendet, um Informationen über den Token darzustellen, wie den issuer (`iss`), das Subjekt (`sub`) und die Ablaufzeit (`exp`).
+- <Ref slug="openid-connect" />: In OIDC werden Ansprüche (Claims) verwendet, um Benutzerinformationen im <Ref slug="id-token" /> und <Ref slug="userinfo-endpoint" /> darzustellen, wie die E-Mail-Adresse des Benutzers (`email`), den Namen (`name`) und das Profilbild (`picture`).
+
+### Standardansprüche (Standard Claims)
+
+In JWT und OIDC gibt es von den Spezifikationen definierte Standardansprüche (Standard Claims). Einige häufige Standardansprüche sind:
+
+- **`iss`**: Der issuer des Tokens. Zum Beispiel, wenn der <Ref slug="authorization-server" /> den Token ausstellt, lautet der `iss` Claim in den meisten Fällen gleich (`https://example.com`).
+- **`sub`**: Das Subjekt des Tokens. Es repräsentiert die Entität, auf die sich der Token bezieht. Zum Beispiel repräsentiert im ID-Token der `sub` Claim normalerweise den Benutzerbezeichner.
+- **`aud`**: Die audience des Tokens. Es gibt die Empfänger an, für die der Token bestimmt ist. Zum Beispiel, wenn der Token dazu bestimmt ist, auf eine API unter `https://api.example.com` zuzugreifen, wird der `aud` Claim gleichlautend sein (`https://api.example.com`).
+- **`exp`**: Die Ablaufzeit des Tokens. Sie gibt an, wann der Token nicht mehr zur Verarbeitung akzeptiert werden sollte.
+- **`nbf`**: Die "nicht vor"-Zeit des Tokens. Sie gibt an, wann der Token für die Verarbeitung akzeptiert werden sollte.
+- **`iat`**: Die Ausstellungszeit des Tokens. Sie gibt an, wann der Token ausgestellt wurde.
+- **`jti`**: Die JWT-ID des Tokens. Sie bietet einen eindeutigen Bezeichner für den Token.
+
+OIDC definiert auch zusätzliche Standardansprüche für Benutzerinformationen. Siehe [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims) in der OIDC-Spezifikation für weitere Details.
+
+### Benutzerdefinierte Ansprüche (Custom Claims)
+
+Zusätzlich zu den Standardansprüchen kannst du benutzerdefinierte Ansprüche definieren, um anwendungsspezifische Informationen darzustellen. Zum Beispiel kannst du einen `role` Claim einfügen, um die Rolle des Benutzers in der Anwendung darzustellen.
+
+Benutzerdefinierte Ansprüche können mit [Uniform Resource Identifiers (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) namensorientiert werden, um Konflikte mit anderen Ansprüchen zu vermeiden. Zum Beispiel:
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+In diesem Beispiel ist der `role` Claim mit `https://example.com/claims/` namensorientiert, um Einzigartigkeit sicherzustellen. Alternativ kannst du deinen eigenen [Uniform Resource Name (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) für benutzerdefinierte Ansprüche festlegen:
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+In diesem Beispiel ist der `role` Claim mit `urn:example:claims:` namensorientiert.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

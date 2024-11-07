@@ -1,0 +1,56 @@
+---
+title: Bereich (Scope)
+tags: [authorization]
+description: Ein Bereich (Scope) definiert die Berechtigungen, die eine Anwendung von einem Benutzer anfragt, um auf dessen geschützte Ressourcen zuzugreifen. Es ist ein grundlegendes Konzept in OAuth 2.0 und OIDC (OpenID Connect), das das Zugriffslevel einer Anwendung auf die Daten eines Benutzers kontrolliert.
+---
+
+## Was ist ein Bereich (Scope)?
+
+In den Protokollen <Ref slug="oauth-2.0" /> und <Ref slug="openid-connect" /> ist ein **Bereich (Scope)** ein Mechanismus, um den Zugriff, den eine Anwendung auf die Ressourcen eines Benutzers hat, zu beschränken. Er definiert die Berechtigungen, die die Anwendung vom Benutzer anfordert.
+
+Bereiche (Scopes) werden als Zeichenketten dargestellt, die vom Autorisierungsserver definiert werden. Wenn eine Anwendung Zugriff auf die Ressourcen eines Benutzers anfordert, gibt sie die benötigten Bereiche im Autorisierungsantrag an. Der Benutzer wird dann aufgefordert, diese Berechtigungen während des Autorisierungsprozesses zu gewähren oder abzulehnen.
+
+### Warum Bereiche (Scopes) verwenden?
+
+- **Granulare access control (Zugangskontrolle)**: Bereiche ermöglichen es Anwendungen, nur die Berechtigungen anzufordern, die sie benötigen, um bestimmte Aktionen durchzuführen, wodurch das Risiko unbefugten Zugriffs reduziert wird.
+- **Einwilligung des Benutzers**: Bereiche helfen Benutzern zu verstehen, welche Daten die Anwendung zugreifen wird und warum.
+- **Sicherheit**: Bereiche verhindern, dass Anwendungen ihre Zugriffsberechtigungen überschreiten, und erhöhen die Sicherheit der Benutzerdaten.
+
+## Wie funktioniert ein Bereich (Scope)?
+
+Wenn eine Anwendung den OAuth 2.0 / OIDC (OpenID Connect) Autorisierungsprozess einleitet, wird eine Liste von Bereichen im Autorisierungsantrag aufgenommen. Der Autorisierungsserver präsentiert dem Benutzer dann einen Einwilligungsbildschirm, der die angeforderten Bereiche auflistet. Der Benutzer kann wählen, ob er den Zugriff auf jeden Bereich gewähren oder verweigern möchte. Dieser Prozess wird typischerweise verwendet, wenn die Anwendung eine Drittanbieteranwendung ist, die Zugriff auf die Ressourcen des Benutzers benötigt.
+
+Alternativ, wenn die Anwendung vom Autorisierungsserver als vertrauenswürdig eingestuft wird, wird der Benutzer möglicherweise nicht um Einwilligung gebeten. Stattdessen erfolgt eine automatische Einwilligung und alle angeforderten Bereiche werden gewährt.
+
+## Definition von Bereichen (Scopes)
+
+Bereiche werden typischerweise vom API-Anbieter definiert. Sie können sein:
+- **Standardbereiche (Standard Scopes)**: Häufig verwendete Bereiche, die durch die OAuth 2.0 Spezifikation definiert sind und von verschiedenen Anwendungen und Diensten genutzt werden. Z.B. `openid`, `profile`, `email`.
+- **Benutzerdefinierte Bereiche (Custom Scopes)**: Spezifisch für eine Anwendung oder einen Dienst, zugeschnitten auf dessen einzigartige Anforderungen. Z.B. `read:orders`, `write:comments`.
+
+## Wo können Bereiche (Scopes) in OIDC (OpenID Connect) und Identitätsmanagement verwendet werden?
+
+Bereiche können in verschiedenen Aspekten von OIDC und Identitätsmanagement verwendet werden, einschließlich, aber nicht beschränkt auf:
+
+- **Authentication (Authentifizierung)**: Bereiche können verwendet werden, um während des Authentifizierungsprozesses spezifische Benutzerinformationen anzufordern, z.B. `profile`, `email`.
+- **Authorization (Autorisierung)**: Bereiche können verwendet werden, um Zugriff auf spezifische Ressourcen zu erhalten oder bestimmte Aktionen durchzuführen, z.B. `read:orders`, `write:comments`.
+- **Einwilligung**: Bereiche werden dem Benutzer während des Einwilligungsbildschirms präsentiert, um ihn über die von der Anwendung angeforderten Berechtigungen zu informieren.
+- **Tokenausstellung**: Bereiche sind in der Tokenantwort enthalten, um die der Anwendung gewährten Berechtigungen anzuzeigen.
+- **Tokenvalidierung**: Bereiche können verwendet werden, um die Zugriffsrechte der Anwendung zu validieren, wenn sie das Token präsentiert, um auf geschützte Ressourcen zuzugreifen.
+- **Ressourcenserver**: Bereiche können vom Ressourcenserver verwendet werden, um access control (Zugangskontroll) Richtlinien basierend auf den der Anwendung gewährten Berechtigungen durchzusetzen.
+- **Benutzerprofil**: Bereiche können verwendet werden, um zusätzliche Benutzerprofilinformationen über die grundlegenden Ansprüche hinaus anzufragen.
+
+## Beste Praktiken
+
+- **Minimale Bereiche anfordern**: Fordere immer den minimalen Satz an Bereichen an, die für die Funktionsfähigkeit deiner Anwendung erforderlich sind. Dies minimiert das Risiko einer Übererlaubnis und stärkt das Vertrauen der Benutzer.
+- **Verwendung der Bereiche erläutern**: Erkläre den Benutzern klar, warum jeder Bereich benötigt wird. Transparenz hilft dabei, die Zustimmung der Benutzer zu gewinnen.
+- **Verwende nach Möglichkeit Standardbereiche**: Nutze Standardbereiche, um die Kompatibilität zu gewährleisten und die Komplexität zu reduzieren.
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims",
+  ]}
+/>

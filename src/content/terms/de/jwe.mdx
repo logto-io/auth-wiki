@@ -1,0 +1,73 @@
+---
+title: JSON Web Encryption (JWE)
+tags: [oidc, jose]
+description: JSON Web Encryption (JWE) ist ein Standardverfahren zum Verschlüsseln und Entschlüsseln von Daten im JSON-Format. Es wird häufig verwendet, um sensible Informationen in übermittelten JSON Web Tokens (JWTs) zu schützen.
+---
+
+## Was ist JSON Web Encryption (JWE)?
+
+Wie im RFC 7516 definiert, ist JSON Web Encryption (JWE) ein Mechanismus zum Verschlüsseln und Entschlüsseln von Daten im JSON-Format. Es fügt den Daten eine Schicht der Vertraulichkeit hinzu und ist besonders nützlich beim Übertragen von sensiblen Informationen über ein nicht vertrauenswürdiges Netzwerk.
+
+JWE wird häufig in Verbindung mit <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref> verwendet, um die Nutzlastdaten zu schützen. Zum Beispiel kann ein <Ref slug="id-token" /> oder ein <Ref slug="access-token" /> mithilfe von JWE verschlüsselt werden, um sicherzustellen, dass die Daten während der Übertragung geschützt sind.
+
+## Wie funktioniert JWE?
+
+JWE verfügt über zwei Serialisierungsformate: kompaktes und JSON. Jedes Format hat seine eigene Art, die verschlüsselten Daten darzustellen.
+
+### Kompakte Serialisierung
+
+In der kompakten Serialisierung wird das JWE als eine Zeichenkette mit fünf Base64URL-kodierten Teilen dargestellt, die durch Punkte (`.`) getrennt sind. Die fünf Teile sind:
+
+```
+{{header}}.{{encrypted-key}}.{{iv}}.{{ciphertext}}.{{tag}}
+```
+
+Jeder Teil hat einen bestimmten Zweck:
+
+- `header`: Enthält Metadaten über den Verschlüsselungsalgorithmus und das Schlüsselmanagement.
+- `encrypted-key`: Der verschlüsselte Inhaltsschlüssel (CEK), der verwendet wird, um die Nutzlast zu verschlüsseln.
+- `iv`: Der Initialisierungsvektor, der im Verschlüsselungsprozess verwendet wird.
+- `ciphertext`: Die verschlüsselten Nutzlastdaten.
+- `tag`: Der Authentifizierungstag, der verwendet wird, um die Integrität der verschlüsselten Daten zu überprüfen.
+
+### JSON-Serialisierung
+
+Die JSON-Serialisierung ist ausführlicher und bietet eine strukturierte Möglichkeit, das JWE darzustellen. Das JWE wird als JSON-Objekt mit den folgenden Eigenschaften dargestellt:
+
+```json
+{
+  "protected": "{{protected-header}}",
+  "unprotected": "{{unprotected-header}}",
+  "header": "{{header}}",
+  "encrypted_key": "{{encrypted-key}}",
+  "iv": "{{iv}}",
+  "ciphertext": "{{ciphertext}}",
+  "tag": "{{tag}}",
+  "aad": "{{additional-authenticated-data}}"
+}
+```
+
+- `protected`: Enthält den Base64URL-kodierten geschützten Header.
+- `unprotected`: Enthält den JWE-geteilten ungeschützten Header.
+- `header`: Enthält den JWE pro-Empfänger ungeschützten Header.
+- `encrypted_key`: Enthält den verschlüsselten Inhaltsschlüssel (CEK), der Base64URL-kodiert ist.
+- `iv`: Enthält den Base64URL-kodierten Initialisierungsvektor.
+- `ciphertext`: Enthält den Base64URL-kodierten Geheimtext (verschlüsselte Nutzlast).
+- `tag`: Enthält den Base64URL-kodierten Authentifizierungstag.
+- `aad`: Enthält die Base64URL-kodierten zusätzlichen authentifizierten Daten.
+
+---
+
+Der Client sollte in der Lage sein, das JWE mit dem entsprechenden Schlüssel und Algorithmus zu entschlüsseln. Ein vorab kommunizierter Schlüssel oder ein aus einem Schlüsselvereinbarungsprotokoll abgeleiteter Schlüssel kann verwendet werden, um das JWE zu entschlüsseln.
+
+Zum Beispiel kann ein <Ref slug="id-token" /> mithilfe von JWE verschlüsselt werden, und der Client kann es mit dem entsprechenden Schlüssel entschlüsseln, der vom `jwks_uri`-Endpunkt des OpenID-Anbieters abgerufen wurde.
+
+<SeeAlso slugs={["jwt", "jwk", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+    "https://datatracker.ietf.org/doc/html/rfc7518",
+  ]}
+/>

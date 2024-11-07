@@ -1,0 +1,58 @@
+---
+title: Passkey (Passkey)
+tags: [authentication, authorization]
+description: Passkey (Passkey) ist ein phishing-resistentes und bequemes Anmeldedaten-Ersetzungswerkzeug, das Passwörter ersetzt und für Anmeldungen und Multi-Faktor-Authentifizierung (MFA) verwendet werden kann.
+---
+
+## Was ist Passkey (Passkey)?
+
+**Passkey (Passkey)** ist eine auf [FIDO](https://fidoalliance.org/)-basierte, sichere und bequeme Alternative zu herkömmlichen Passwörtern. Sie verwenden fortschrittliche Kryptografie, um deine Konten vor [Phishing](https://de.wikipedia.org/wiki/Phishing)-Angriffen zu schützen.
+
+- **Einzigartig für jeden Dienst**: Wenn du dich bei einem Dienst registrierst, erstellt dein Gerät einen einzigartigen Passkey, der mit der Domain dieses Dienstes verknüpft ist.
+- **Gerätegebunden:** Passkeys sind typischerweise an ein Gerät gebunden, wie z.B. ein Telefon, Laptop, biometrischer Identifikator oder Hardware-Sicherheitsschlüssel.
+- **Public-Private-Schlüsselpaar:** Das Gerät behält den privaten Schlüssel, während der öffentliche Schlüssel mit dem Dienst geteilt wird. Diese kryptografischen Schlüsselpaaren werden Passkeys genannt. (Zitiert von [FIDO](https://fidoalliance.org/how-fido-works/))
+- **Mehrere Authentifizierungsmethoden:** Du kannst einen Fingerabdruckscan, Gesichtserkennung, Geräte-PIN, QR-Code-Scan oder Sicherheitsschlüssel verwenden, um dich mit einem Passkey zu authentifizieren.
+- **Geräteübergreifende Synchronisierung**: Passkeys können über sichere Cloud-Speicher (z.B. Apples iCloud-Schlüsselbund oder Google Passwort-Manager) auf verschiedenen Geräten synchronisiert werden, sodass du dich von jedem unterstützten Gerät aus anmelden kannst.
+
+## Wie sieht der Passkey (Passkey)-Workflow aus?
+
+**Passkeys** arbeiten mit Hilfe von Public-Key-Kryptografie, um sichere Anmeldedaten bereitzustellen.
+
+- **Registrierung**
+    - Bei der Registrierung für einen Dienst generiert dein Gerät ein einzigartiges kryptografisches Schlüsselpaar, das mit diesem Dienst verknüpft ist.
+    - Der **private Schlüssel** bleibt auf deinem Gerät, während der **öffentliche Schlüssel** mit dem Dienst geteilt wird.
+- **Authentifizierung**
+    - Wenn du versuchst, dich anzumelden, sendet der Dienst eine **Herausforderung** (Challenge) an dein Gerät.
+    - Dein Gerät verwendet den **privaten Schlüssel**, um basierend auf der Herausforderung eine kryptografische **Signatur** zu erstellen.
+    - Die **Signatur** wird an den Dienst zurückgesendet, der sie mit dem **öffentlichen Schlüssel** überprüft.
+    - Wenn die Signatur gültig ist, ist die Authentifizierung erfolgreich.
+
+Lies WebAuthn, eine API zur Implementierung von Passkeys, um die Details zu erfahren.
+
+## Wie sieht der Passkey (Passkey)-Endbenutzerablauf aus?
+
+Passkeys bieten Flexibilität mit zwei Arten von Authenticatoren sowohl für lokale als auch für Cloud-Nutzung, und Benutzer können einen oder beide für den Dienst aktivieren.
+
+- **Plattform-Authenticator (Interner Authenticator):** An ein spezifisches Geräte-OS gebunden (z.B. Telefon, Laptop), verwendet Biometrics oder Geräte-Passcode zur Autorisierung. Es ist schnell und bequem.
+    - Beispiele: iCloud-Schlüsselbund auf Apple-Geräten (verifizieren über Touch ID, Face ID oder Geräte-Passcode), Windows Hello, Google Passwort-Manager auf Android.
+- **Roaming-Authenticator (Externer Authenticator):** Tragbare Geräte oder Software, z.B. Sicherheitsschlüssel, Smartphones. Kann über mehrere Geräte hinweg verwendet werden, erfordert aber möglicherweise zusätzliche Schritte wie QR-Code-Scannen oder NFC/Bluetooth-Pairing.
+    - Beispiele: YubiKey und cloudbasierte Konten auf Smartphones. Mobile Authenticatoren erfordern oft das Scannen von QR-Codes, um sich mit Desktop-Geräten zu verbinden, und geräteübergreifende Authentifizierung muss über Bluetooth, NFC oder USB verbunden sein, um sicherzustellen, dass der Authenticator in der Nähe ist.
+
+## Wann sollte man Passkey (Passkey) verwenden?
+
+Passkeys sind ein modernes Authentifizierungsfaktor, der sowohl als erster als auch als zweiter Faktor verwendet werden kann.
+
+- **Passkey-Anmeldung:** Passkeys bieten eine schnellere und sicherere passwortlose Authentifizierungsmethode im Vergleich zu herkömmlichen Passwörtern.
+    - Moderne Anwendungen bieten typischerweise einen „Mit Passkey anmelden“-Button auf der Anmeldeseite, der die Benutzer dazu auffordert, diese Option proaktiv auszuwählen.
+    - Zusätzlich kann die Anmeldeseite automatisch ein Passkey-Anmelde-Pop-up anzeigen, wenn erkannt wird, dass der Benutzer auf demselben Gerät und Browser zugreift, auf dem ihr Passkey registriert ist.
+- **Passkey-MFA:** Passkeys können auch als zweiter Faktor für die MFA dienen.
+    - Wenn ein Benutzer versucht, sich anzumelden, gibt er zuerst seine E-Mail und sein Passwort (oder andere erste Faktoren) ein, wonach der Dienst ihn auffordert, die 2-Schritte-Verifizierung mit einem Passkey abzuschließen.
+    - Wenn es bestehende Sitzungen im Browser gibt, kann der Dienst Benutzer direkt auffordern, sich mit ihrem Passkey anzumelden, ohne dass sie erneut ihr Passwort eingeben müssen. Dieser Prozess wird als Abschluss von MFA bezeichnet, da Passkey ein hohes Maß an Sicherheit bietet, indem er sich mit dem aktuellen Gerät verbindet und Benutzer durch Biometrics, PINs oder andere Hardwaremethoden verifiziert.
+- **Sicherheitsüberprüfung**: In hochsicheren Umgebungen werden Passkeys oft verwendet, um die Identität des Benutzers doppelt zu überprüfen. Zum Beispiel beim Zugriff auf sensible Finanzinformationen oder bei der Durchführung kritischer Operationen (Bankwesen, Regierung, Unternehmenssystem).
+
+<Resources
+  urls={[
+    "https://fidoalliance.org/passkeys/",
+    "https://webauthn.io/"
+  ]}
+/>

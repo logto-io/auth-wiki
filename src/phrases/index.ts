@@ -1,4 +1,5 @@
 import { ar } from './ar';
+import { de } from './de';
 import { en } from './en';
 import { es } from './es';
 import { fr } from './fr';
@@ -10,6 +11,7 @@ import { zh } from './zh';
 /** Display names for each locale. */
 export const localeDisplay: Readonly<Record<string, string>> = Object.freeze({
   ar: 'العربية',
+  de: 'Deutsch',
   en: 'English',
   es: 'Español',
   fr: 'Français',
@@ -23,6 +25,8 @@ export const getPhrases = (locale: string) => {
   switch (locale) {
     case 'ar':
       return ar;
+    case 'de':
+      return de;
     case 'en':
       return en;
     case 'es':

@@ -1,0 +1,60 @@
+---
+title: Tokenintrospektion (Token introspection)
+tags: [oauth 2.0, oidc]
+description: Tokenintrospektion ist eine OAuth 2.0-Erweiterung, die es Clients ermöglicht, den Autorisierungsserver abzufragen, um Zugriffstoken zu validieren und Metadaten darüber abzurufen.
+---
+
+## Was ist Tokenintrospektion?
+
+Tokenintrospektion ist eine OAuth 2.0-Erweiterung, definiert in [RFC 7662](https://datatracker.ietf.org/doc/html/rfc7662), die es <Ref slug="client">Clients</Ref> ermöglicht, den <Ref slug="authorization-server" /> abzufragen, um Zugriffstoken zu validieren und Metadaten darüber abzurufen. Diese Erweiterung ist nützlich, wenn:
+
+- Der Client die Gültigkeit eines Zugriffstokens in Echtzeit überprüfen möchte.
+- Das Zugriffstoken <Ref slug="opaque-token">opak</Ref> (nicht selbst-enthaltend) ist und der Autorisierungsserver es validieren muss.
+
+## Wie funktioniert die Tokenintrospektion?
+
+Hier ist ein nicht normatives Beispiel für eine Tokenintrospektionsanfrage:
+
+```http
+POST /introspect HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+token=random-token-value
+  &token_type_hint=access_token
+```
+
+Der Parameter `token_type_hint` ist optional und sollte auf den Typ des introspektierten Tokens gesetzt werden. Wenn das Zugriffstoken gültig ist, antwortet der Autorisierungsserver mit den Metadaten des Tokens:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "active": true,
+  "scope": "read write",
+  "client_id": "client-id",
+  "username": "johndoe",
+  "token_type": "Bearer",
+  "exp": 1634020800,
+  "iat": 1634017200
+}
+```
+
+Es ist erwähnenswert, dass nicht alle Autorisierungsserver die Tokenintrospektion unterstützen und nicht alle Tokens introspektierbar sind. Der <Ref slug="authorization-server" /> kann die Nutzung der Tokenintrospektion aus verschiedenen Gründen einschränken. Beispielsweise unterstützen einige Autorisierungsserver möglicherweise keine Introspektion für <Ref slug="jwt">JWTs</Ref>.
+
+### Wichtige Parameter in einer Tokenintrospektionsanfrage
+
+Hier sind zwei wichtige Parameter in einer Tokenintrospektionsanfrage:
+
+- **`token`**: Das zu introspektierende Token.
+- **`token_type_hint`**: Der Typ des introspektierten Tokens. Es kann `access_token` oder `refresh_token` sein.
+
+<SeeAlso slugs={["oauth-2.0", "opaque-token", "jwt"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/oauth2-token-introspection',
+    'https://datatracker.ietf.org/doc/html/rfc7662',
+  ]}
+/>

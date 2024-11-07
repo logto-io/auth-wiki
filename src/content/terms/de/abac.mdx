@@ -1,0 +1,113 @@
+---
+title: Attributbasierte Zugriffskontrolle (Attribute-based access control, ABAC)
+tags: [authorization]
+description: Attributbasierte Zugriffskontrolle (ABAC) ist ein Zugriffssteuerungsmodell, das Attribute (wie Benutzerrollen, Ressourceneigenschaften und Umweltbedingungen) zur Entscheidungsfindung bei der Zugriffskontrolle nutzt. Es ist eine flexible und dynamische Methode, um den Zugriff auf geschützte Ressourcen zu verwalten.
+---
+
+## Was ist attributbasierte Zugriffskontrolle (ABAC)?
+
+ABAC ist ein <Ref slug="access-control" /> Modell, das Attribute zur Entscheidungsfindung bei der Zugriffskontrolle nutzt. Diese Attribute können verschiedene Faktoren umfassen, wie zum Beispiel:
+
+- Benutzerattribute: z. B. Rollen, Abteilung, Standort, etc.
+- Ressourcenattribute: z. B. Sensitivitätsstufe, Eigentümer, Typ, etc.
+- Umweltattribute: z. B. Zugriffszeit, Standort, Gerät, etc.
+
+Durch die Bewertung dieser Attribute und deren Verarbeitung durch eine Reihe von Regeln kann ABAC bestimmen, ob ein Subjekt (z. B. Benutzer, Dienst) Zugriff auf eine Ressource erhalten sollte. Dieser Ansatz ermöglicht eine fein abgestimmte Zugriffskontrolle (access control) und eine dynamische Durchsetzung von Richtlinien basierend auf dem Kontext.
+
+## Wie funktioniert ABAC?
+
+ABAC verwendet einen richtlinienbasierten Ansatz zur Zugangskontrolle (access control). Eine typische ABAC-Richtlinie besteht aus:
+
+- **Subjekt**: Die Entität, die Zugriff anfordert (z. B. Benutzer, Dienst, Gerät).
+- **Aktion**: Die Operation, die auf der Ressource ausgeführt wird (z. B. Lesen, Schreiben, Löschen).
+- **Ressource**: Die Entität, auf die zugegriffen wird (z. B. Datei, Datenbank, API).
+- **Umgebung**: Der Kontext, in dem der Zugriff angefordert wird (z. B. Zeit, Standort, Gerät).
+- **Attribute**: Die Eigenschaften des Subjekts, der Ressource und der Umgebung, die bewertet werden, um Zugang zu entscheiden.
+- **Richtlinien**: Eine Reihe von Regeln, die die Bedingungen definieren, unter denen Zugriff gewährt oder verweigert wird.
+
+ABAC-Richtlinien sind komplexer als traditionelle Zugriffssteuerungsmodelle wie <Ref slug="rbac" />. Andererseits bietet ABAC mehr Flexibilität und Granularität bei Zugangskontrollentscheidungen.
+
+### Beispiel für ABAC-Richtlinien
+
+Zum Beispiel hat ein System mehrere ABAC-Richtlinien:
+
+1. **Richtlinie 1**: Zugriff erlauben, wenn:
+
+    - (Subjekt) Subjektrolle ist `manager`.
+    - (Attribut) Ressourcensensitivitätsstufe ist `high`.
+    - (Umgebung) Standort ist `internal`.
+    - (Aktion) Jede Aktion.
+    - (Umgebung) Zeit ist zwischen 9 Uhr und 17 Uhr (Bürozeiten).
+
+2. **Richtlinie 2**: Zugriff verweigern, wenn:
+
+    - (Subjekt) Subjektrolle ist nicht `manager`.
+    - (Attribut) Ressourcensensitivitätsstufe ist `high`.
+    - (Umgebung) Jeder Standort.
+    - (Aktion) Jede Aktion.
+    - (Umgebung) Jede Zeit.
+
+3. **Richtlinie 3**: Zugriff erlauben, wenn:
+
+    - (Subjekt) Subjektrolle ist `employee` oder `manager`.
+    - (Attribut) Ressourcensensitivitätsstufe ist `low`.
+    - (Umgebung) Jeder Standort.
+    - (Aktion) `read` Aktion.
+    - (Umgebung) Jede Zeit.
+
+Die Richtlinienauswertungsmaschine überprüft diese Richtlinien der Reihe nach, und die erste Richtlinie, die die Bedingungen erfüllt, bestimmt die Zugriffsentscheidung. Währenddessen wird eine standardmäßige Verweigerungsrichtlinie durchgesetzt, wenn keine anderen Richtlinien zutreffen.
+
+Schauen wir uns einige Szenarien an, um zu verstehen, wie ABAC funktioniert:
+
+> **Szenario 1**. Ein Benutzer möchte auf ein Dokument mit hoher Sensitivitätsstufe (Ressource) außerhalb des Büros (Umgebung) zugreifen (Aktion `read` ausführen). Die Rolle des Benutzers ist im System als `manager` gespeichert.
+  
+**Entscheidung**: Zugriff wird verweigert, weil der Benutzer sich außerhalb des Büros befindet (Standort ist nicht `internal`).
+
+> **Szenario 2**. Ein Benutzer möchte auf ein Dokument mit hoher Sensitivitätsstufe (Ressource) während der Bürozeiten (Umgebung) im Firmennetzwerk (Standort=`internal`) zugreifen (Aktion `read` ausführen). Der Benutzer hat die Rolle `manager`.
+
+**Entscheidung**: Zugriff wird gewährt, weil alle Bedingungen in Richtlinie 1 erfüllt sind.
+
+> **Szenario 3**. Alle Bedingungen aus Szenario 2 sind gleich, aber der Benutzer hat die Rolle `employee` statt `manager`.
+
+**Entscheidung**: Zugriff wird verweigert, weil die Rolle des Benutzers nicht den Bedingungen in Richtlinie 1 entspricht.
+
+> **Szenario 4**. Ein Benutzer möchte auf ein Dokument mit niedriger Sensitivitätsstufe (Ressource) zugreifen (Aktion `read` ausführen). Der Benutzer hat die Rolle `employee`.
+
+**Entscheidung**: Zugriff wird gewährt, weil alle Bedingungen in Richtlinie 3 erfüllt sind.
+
+> **Szenario 5**. Ein Benutzer möchte ein Dokument mit niedriger Sensitivitätsstufe (Ressource) löschen (Aktion `delete` ausführen). Der Benutzer hat die Rolle `employee`.
+
+**Entscheidung**: Zugriff wird verweigert, weil keine Richtlinie das Löschen von Dokumenten mit niedriger Sensitivitätsstufe erlaubt.
+
+Es kann auffallen, dass nicht alle Attribute in jeder Richtlinie erforderlich sind. Diese Flexibilität ermöglicht einen dynamischeren und kontextbewussten Mechanismus zur Zugriffskontrolle (access control).
+
+## Implementierungsüberlegungen
+
+Während ABAC eine leistungsstarke Möglichkeit zur Verwaltung der Zugangskontrolle (access control) bietet, sind auch einige Implementierungsüberlegungen zu beachten:
+
+- Systemkomplexität: ABAC-Richtlinien können komplex werden, wenn die Anzahl der Attribute und Regeln zunimmt. Eine ordnungsgemäße Verwaltung und Prüfung der Richtlinien sind zeitaufwändiger als bei einfacheren Zugriffskontrollmodellen.
+- Leistung: Die Auswertung komplexer ABAC-Richtlinien kann die Systemleistung beeinträchtigen. Caching- und Optimierungstechniken können helfen, dieses Problem zu mindern.
+- Richtlinienkonflikte: Sich widersprechende Richtlinien können zu unvorhersehbaren Zugriffsentscheidungen führen. Regelmäßige Richtlinienüberprüfung und Konfliktlösung sollten Teil des Richtlinienverwaltungsprozesses sein.
+
+## ABAC vs. RBAC
+
+Ein Vergleich von ABAC mit <Ref slug="rbac" /> kann helfen, die Unterschiede zwischen den beiden Modellen zu verstehen:
+
+|                       | RBAC                               | ABAC                                     |
+|-----------------------|------------------------------------|------------------------------------------|
+| Zugriffssteuerungsrichtlinie | Basierend auf Rollen          | Basierend auf Attributen                 |
+| Granularität          | Grobgranuliert                     | Fein granuliert                          |
+| Flexibilität          | Begrenzt                           | Hoch flexibel                            |
+| Komplexität           | Einfacher                          | Komplexer                                |
+| Leistungseinfluss     | Minimal                            | Kann signifikant sein                    |
+| Zugriffsmanagement    | Rollenverwaltung                   | Richtlinienverwaltung                    |
+| Am besten geeignet für| Klar definierte Berechtigungsstrukturen | Dynamische und kontextbewusste Zugriffskontrolle |
+
+<SeeAlso slugs={["access-control", "rbac", "authorization"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/rbac-and-abac",
+    "https://csrc.nist.gov/publications/detail/sp/800-162/final",
+  ]}
+/>

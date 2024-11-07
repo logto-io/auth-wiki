@@ -1,0 +1,51 @@
+---
+title: Offline-Zugang (Offline access)
+tags: [oauth 2.0, oidc]
+description: Offline-Zugang ermöglicht es Clients, neue Access Tokens (Zugriffstoken) zu erhalten, ohne dass der Benutzer sich erneut authentifizieren muss. Dies ist nützlich für langlebige Sitzungen und eine bessere Benutzererfahrung.
+---
+
+## Was ist Offline-Zugang?
+
+Das Konzept des Offline-Zugangs kann je nach Kontext variieren, wir konzentrieren uns auf die OAuth 2.0 und OpenID Connect (OIDC) Spezifikationen. In diesem Kontext ermöglicht Offline-Zugang es Clients, neue <Ref slug="access-token">Access Tokens (Zugriffstoken)</Ref> mit einem <Ref slug="refresh-token">Refresh Token (Auffrischungstoken)</Ref> zu erhalten, ohne dass der Benutzer sich erneut authentifizieren muss. Diese Funktion ist besonders nützlich für langlebige Sitzungen und eine bessere Benutzererfahrung.
+
+Es ist zu beachten, dass OAuth 2.0 den Begriff "Offline-Zugang" nicht explizit definiert; es spezifiziert lediglich die Nutzung von Refresh Tokens, um neue Access Tokens zu erhalten. Der Begriff "Offline-Zugang" (zusammen mit dem `offline_access` Scope) wurde jedoch in der Branche weitgehend übernommen, um diese Fähigkeit zu beschreiben, und ist in der <Ref slug="openid-connect" /> Spezifikation offiziell definiert.
+
+## Wie funktioniert der Offline-Zugang?
+
+Zur Vereinfachung verwenden wir die OAuth 2.0 Begriffe <Ref slug="authorization-request" /> und <Ref slug="authorization-server" />, um zu veranschaulichen, wie Offline-Zugang funktioniert. Ihre alternativen Begriffe in OIDC sind <Ref slug="authentication-request" /> und <Ref slug="openid-connect" headingId="openid-provider-op" />.
+
+Es gibt zwei Hauptschritte bei der Nutzung des Offline-Zugangs:
+
+1. **Offline-Zugang anfordern**: Wenn der <Ref slug="client" /> eine Authorization Request (Autorisierungsanfrage) an den Authorization Server (Autorisierungsserver) initiiert, schließt er den `offline_access` Scope ein, um Offline-Zugang anzufordern. Dieser Scope zeigt an, dass der Client einen Refresh Token zusammen mit dem Access Token erhalten möchte.
+
+  Die Unterstützung für Offline-Zugang kann je nach Authorization Server variieren, und der Authorization Server kann den `offline_access` Scope ignorieren, wenn er diesen nicht unterstützt. Bitte konsultiert die Dokumentation des Authorization Servers, um die Kompatibilität sicherzustellen, bevor ihr diesen Scope verwendet.
+
+2. **Verwendung des Refresh Tokens**: Sobald der <Ref slug="oauth-2.0-grant" /> abgeschlossen ist, sollte der Client ein <Ref slug="refresh-token" /> zusammen mit dem <Ref slug="access-token" /> erhalten. Der Client kann das Refresh Token sicher speichern und es verwenden, um eine <Ref slug="token-request" /> an den Authorization Server zu senden, um ein neues Access Token zu erhalten, wenn das aktuelle Access Token abläuft.
+
+Für detaillierte Beispiele zur Offline-Zugangs-Nutzung, besucht bitte den <Ref slug="refresh-token" /> Artikel.
+
+## Sicherheitsüberlegungen
+
+Die sicherheitsrelevanten Auswirkungen des Offline-Zugangs sind ähnlich wie die der Refresh Tokens. Bitte beachtet den Abschnitt <Ref slug="refresh-token" headingId="security-considerations" /> des Refresh Tokens für Details.
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "Offline Access in OpenID Connect Core 1.0",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "Refresh Token in OAuth 2.0",
+        ogDescription: "Refresh Tokens sind Anmeldeinformationen, die zum Erlangen von Access Tokens verwendet werden.",
+      },
+    },
+  ]}
+/>

@@ -1,0 +1,56 @@
+---
+title: Authentifizierung (Authentication)
+tags: [authentication]
+description: Authentifizierung (Authentication) ist der Prozess der Überprüfung des Identitätsbesitzes (z.B. Benutzer oder Dienst). Sie ist die Grundlage von Identitäts- und Zugriffskontrollmanagementsystemen (IAM) und essenziell für die Sicherheit von Anwendungen und Diensten.
+---
+
+## Was ist Authentifizierung (Authentication)?
+
+> **Kurz gesagt**: Authentifizierung (Authentication) beantwortet die Frage "Welche Identität besitzt du?"
+
+Hier sind einige typische Beispiele für Authentifizierung (Authentication):
+
+- Anmeldung mit Benutzername und Passwort
+- Soziale Anmeldung (z.B., Anmeldung mit Google)
+- <Ref slug="machine-to-machine" /> Authentifizierung (z.B., API-Schlüssel)
+
+Wir haben nicht die Frage "Wer bist du?" verwendet, weil:
+
+- Im Bereich des <Ref slug="iam" /> geht es bei der Authentifizierung (Authentication) darum, den Besitz einer Identität zu überprüfen, nicht darum, die Person oder Entität zu identifizieren. Zum Beispiel, wenn eines deiner Familienmitglieder deine Zugangsdaten verwendet, um sich bei deinem Konto anzumelden, sind sie nicht du, aber die Identität für das System ist dieselbe.
+- Die Identität kann ein Benutzer, ein Dienst oder ein Gerät sein. Zum Beispiel kann sich ein Dienst bei einem anderen Dienst mit API-Schlüsseln authentifizieren (authenticate).
+
+### Unterschied zwischen Authentifizierung (Authentication) und Autorisierung (Authorization)
+
+Diese beiden Begriffe werden oft verwechselt, sind jedoch grundlegend unterschiedlich: <Ref slug="authorization" /> beantwortet die Frage "Was kannst du tun?". Zudem ist die Authentifizierung (Authentication) eine Voraussetzung für die Autorisierung (Authorization), da das System die Identität kennen muss, bevor es entscheiden kann, welche Aktionen es ausführen kann.
+
+## Authentifizierungsfaktoren
+
+Die Authentifizierung (Authentication) kann mit einem oder mehreren Faktoren durchgeführt werden. Hier sind einige gängige Faktoren:
+
+- **Wissensfaktor**: Etwas, das du weißt (z.B., Passwort, PIN)
+- **Besitzfaktor**: Etwas, das du hast (z.B., Smartphone, Sicherheitstoken)
+- **Inhärenzfaktor**: Etwas, das du bist (z.B., Fingerabdruck, Gesichtserkennung)
+
+<Ref slug="mfa" /> ist eine gängige Praxis, die mehrere Faktoren kombiniert, um die Sicherheit zu erhöhen. Zum Beispiel, wenn du dich bei deinem Bankkonto anmeldest, musst du möglicherweise ein Passwort (Wissensfaktor) und einen einmaligen Code von einer Authenticator-App (Besitzfaktor) angeben.
+
+<Ref slug="passkey" /> ist ein moderner Authentifizierungsfaktor, der mehrere Faktoren kombinieren kann und gegen Phishing-Angriffe resistent ist.
+
+## Authentifizierungs-Frameworks (Protokolle)
+
+Anstatt ein hausgemachtes Authentifizierungssystem zu entwickeln, wird empfohlen, etablierte Frameworks und Protokolle zu verwenden, da sie von Sicherheitsexperten getestet und überprüft wurde. Es gibt verschiedene Authentifizierungs-Frameworks und Protokolle, die definieren, wie die Authentifizierung (Authentication) durchgeführt werden soll. Zwei gängige sind:
+
+- <Ref slug="openid-connect" />: Eine Identitätsschicht, die auf <Ref slug="oauth-2.0" /> aufgebaut ist und Authentifizierungsfähigkeiten hinzufügt. Es ist relativ modern und wird häufig für neue Anwendungen verwendet.
+- <Ref slug="saml" />: Ein Protokoll zum Austausch von Authentifizierungs- und Autorisierungsdaten zwischen Parteien. Es wird häufig in Unternehmensumgebungen verwendet.
+
+Die Wahl des Frameworks hängt von deinem Anwendungsfall und deinen Anforderungen ab. Für neue Anwendungen wird OIDC aufgrund seines modernen Designs und der Unterstützung für <Ref slug="jwt" /> empfohlen.
+
+Das direkte Arbeiten mit diesen Protokollen kann jedoch immer noch komplex und zeitaufwändig sein. Beide Protokolle erfordern eine steile Lernkurve und eine sorgfältige Implementierung, um die Sicherheit zu gewährleisten. Stattdessen kann die Verwendung eines <Ref slug="identity-provider" />, der diese Protokolle unterstützt oder auf ihnen basiert, den Authentifizierungsprozess erheblich vereinfachen. Ein guter Identitätsanbieter bietet auch zusätzliche Funktionen wie <Ref slug="mfa" /> und <Ref slug="single-sign-on" /> für deine zukünftigen Bedürfnisse.
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

@@ -1,0 +1,120 @@
+---
+title: Ressourcenindikator (Resource indicator)
+tags: [oauth 2.0]
+description: Der Ressourcenindikator in OAuth 2.0 ist ein erweitertes Parameter, definiert in RFC 8707, das es Clients ermöglicht, den Standort des Resource Servers im Authorization Request (Autorisierungsanfrage) zu spezifizieren. Es bietet eine skalierbare Möglichkeit, mehrere Resource Server in einem einzigen Authorization Server (Autorisierungsserver) zu verwalten.
+---
+
+## Was ist ein Ressourcenindikator?
+
+Ein Ressourcenindikator, wie in der OAuth 2.0 Erweiterung [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707) definiert, ist ein Parameter, der es Clients ermöglicht, die URI des Resource Servers in der <Ref slug="authorization-request" /> (oder <Ref slug="authentication-request" /> in <Ref slug="openid-connect" />) und dem <Ref slug="token-request" /> zu spezifizieren. Der Ressourcenindikator wird verwendet, um den Standort des Resource Servers anzugeben, auf den der Client zugreifen möchte.
+
+> [!Note]
+> Der Ressourcenindikator ist ein Erweiterungsparameter, der nicht Teil der Kern-Spezifikation von OAuth 2.0 ist. Bitte überprüfe die Dokumentation deines <Ref slug="authorization-server" />, um zu sehen, ob dieser Parameter unterstützt wird.
+
+## Wie funktionieren Ressourcenindikatoren?
+
+Um besser zu verstehen, wie Ressourcenindikatoren funktionieren, betrachten wir ein Szenario, bei dem ein <Ref slug="client" /> auf mehrere <Ref slug="resource-server">Resource Server</Ref> über einen einzigen Authorization Server zugreifen möchte.
+
+### 1. Registriere Resource Server
+
+Normalerweise muss der Entwickler jeden Resource Server beim Authorization Server registrieren, um sie für den Client verfügbar zu machen. Der eigentliche Registrierungsprozess kann je nach Implementierung des Authorization Servers variieren. Der Funktionsname könnte unterschiedlich sein, z. B. "API Resources" oder einfach "Resources".
+
+Angenommen, der Client möchte auf zwei Resource Server zugreifen: `https://api.example.com` und `https://api.another.com`, und sie wurden beim Authorization Server registriert.
+
+### 2. Definiere Scopes für jeden Resource Server
+
+Im Gegensatz zu herkömmlichen OAuth 2.0 Flows, bei denen die <Ref slug="scope">Scopes</Ref> über alle Resource Server hinweg geteilt werden, ermöglicht die Ressourcenindikator-Erweiterung dem Client, die Scopes für jeden Resource Server anzugeben. Dies sollte ebenfalls Teil des Registrierungsprozesses sein. Angenommen, die Resource Server haben die folgenden Scopes:
+
+| Resource Server           | Scopes           |
+|---------------------------|------------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. Füge Ressourcenindikatoren in der Autorisierungsanfrage hinzu
+
+Um den Authorization Server darüber zu informieren, dass wir die Ressourcenindikator-Erweiterung verwenden möchten, sollte der Client den `resource`-Parameter in die Autorisierungsanfrage einfügen.
+
+Hier ist ein nicht-normativer Beispiel einer Autorisierungsanfrage, die einen Ressourcenindikator enthält:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+In diesem Beispiel fügt der Client den `resource`-Parameter mit dem kodierten Wert `https%3A%2F%2Fapi.example.com` hinzu, um den Standort des Resource Servers (`https://api.example.com`) anzugeben.
+
+Du wirst bemerken, dass wir auch einige vordefinierte Scopes wie `openid` zusammen mit den ressourcenspezifischen Scopes einschließen. Der Authorization Server sollte die Scopes validieren und andere Scopes herausfiltern, die nicht mit dem angefragten Resource Server verbunden sind. Dies wird als **Downscoping** bezeichnet.
+
+Hier ist die Tabelle mit den tatsächlich vier Scopes, die der Client zu erhalten erwartet:
+
+| Resource Server           | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                       |
+
+Das Schöne am Ressourcenindikator ist, dass der Client in einer einzigen Autorisierungsanfrage mehrere Resource Server anfordern kann, indem er den `resource`-Parameter wiederholt. Werfen wir einen Blick auf ein weiteres Beispiel:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+In diesem Beispiel fordert der Client Zugriff auf sowohl `https://api.example.com` als auch `https://api.another.com` mit den entsprechenden Scopes an. Der Authorization Server sollte die Scopes für jeden Resource Server validieren, das heißt, er sollte das **kartesische Produkt** der Scopes und der Resource Server bilden. Das Ergebnis sollte sein:
+
+| Resource Server           | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`              |
+| `https://api.another.com` | `read`, `delete`             |
+
+Insgesamt gibt es sieben gültige Scopes für diese Autorisierungsanfrage.
+
+### 4. Füge Ressourcenindikatoren in der Token-Anfrage hinzu
+
+Sobald der Client den Authorization Code erhält, kann er ihn bei Bedarf gegen ein Access Token mit einem **einzelten** Ressourcenindikator eintauschen. Zum Beispiel:
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+Der `resource`-Parameter in der Token-Anfrage ist optional. Falls der Client ihn einfügt, sollte der Authorization Server den Ressourcenindikator gegen die mit dem aktuellen Grant verbundenen Scopes validieren; andernfalls sollte der Authorization Server auf die globalen Scopes zurückfallen (z. B. <Ref slug="openid-connect" /> Scopes).
+
+> [!Note]
+> Der Authorization Server sollte immer <Ref slug="access-control" /> anwenden, um sicherzustellen, dass das ausgegebene Access Token gültig ist und im aktuellen Grant-Kontext ordnungsgemäß heruntergestuft wurde.
+
+Du fragst dich vielleicht, wie man mehrere Resource Server im Grant handhabt. Da der Authorization Code nur einmal verwendet werden kann, kann der Client andere Grants, wie den <Ref slug="refresh-token" /> Grant, verwenden, um Access Tokens für andere Resource Server zu erhalten.
+
+## Warum brauchen wir Ressourcenindikatoren?
+
+Wie du aus den obigen Beispielen sehen kannst, bietet die Ressourcenindikator-Erweiterung eine skalierbare Möglichkeit, mehrere Resource Server zu verwalten, ohne sich um Scope-Konflikte zu sorgen. Es ist eine leistungsstarke Funktion, die den Clients mehr Flexibilität bietet, um auf Ressourcen von verschiedenen Resource Servern zuzugreifen.
+
+Es ist wichtig zu beachten, dass die Ressourcenindikator-Erweiterung kein Teil der Kern-Spezifikation von OAuth 2.0 ist. Stelle sicher, dass dein Authorization Server diese Erweiterung unterstützt, bevor du sie in deiner Anwendung verwendest.
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

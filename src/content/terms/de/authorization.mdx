@@ -1,0 +1,50 @@
+---
+title: Autorisierung (Authorization)
+tags: [authorization]
+description: Autorisierung (Authorization) ist der Prozess der Bestimmung, welche Aktionen eine Identität auf einer Ressource ausführen kann. Es ist ein grundlegender Sicherheitsmechanismus, um Zugriffsrichtlinien zu definieren und durchzusetzen.
+---
+
+## Was ist Autorisierung (Authorization)?
+
+> **Kurz gesagt**: Autorisierung (Authorization) beantwortet die Frage "Was kannst du tun?"
+
+Autorisierung (Authorization) ist ein Entscheidungsprozess, der bestimmt, ob eine Identität (Benutzer, Dienst oder Gerät) die notwendigen Berechtigungen hat, um eine bestimmte Aktion auf einer Ressource auszuführen. Schauen wir uns einige Beispiele an:
+
+- In einem Online-Dokumenteditor kann ein Benutzer ein Dokument mit anderen teilen.
+- In einem Cloud-Speicherdienst kann ein Dienst Dateien in einem bestimmten Ordner lesen und schreiben.
+- In einem intelligenten Heimsystem kann ein Gerät die Lichter im Wohnzimmer einschalten.
+
+All diese Beispiele beinhalten eine Identität (Subjekt), die eine Aktion auf einer Ressource ausführt. Natürlich kann die Autorisierung (Authorization) auch fehlschlagen, zum Beispiel wenn ein Benutzer versucht, eine Datei zu löschen, auf die er keine Berechtigung hat.
+
+Das grundlegende Modell für die Autorisierung (Authorization) ist einfach: Wenn **Identität** **Aktion** auf **Ressource** ausführt, dann **akzeptieren** oder **verweigern**.
+
+### Unterschied zwischen Authentifizierung (Authentication) und Autorisierung (Authorization)
+
+Authentifizierung (Authentication) und Autorisierung (Authorization) werden oft verwechselt, sind aber grundlegend unterschiedlich: <Ref slug="authentication" /> beantwortet die Frage "Welche Identität besitzt du?". Darüber hinaus findet die Autorisierung (Authorization) in den meisten Fällen nach der Authentifizierung (Authentication) statt, da das System die Identität kennen muss, bevor es Zugriffsentscheidungen treffen kann.
+
+### Unterschied zwischen Autorisierung (Authorization) und Zugriffskontrolle (Access Control)
+
+Autorisierung (Authorization) ist ein Teil der Zugriffskontrolle (Access Control). Zugriffskontrolle (Access Control) ist das umfassendere Konzept, das die Autorisierung (Authorization) und andere Einschränkungen im Zugriffsmanagement umfasst. Mit anderen Worten, Zugriffskontrolle (Access Control) ist ein allgemeiner Begriff, der die selektive Einschränkung des Zugriffs auf Ressourcen beschreibt, während sich die Autorisierung (Authorization) speziell auf den Entscheidungsprozess bezieht.
+
+## Wie funktioniert die Autorisierung (Authorization)?
+
+Die Autorisierung (Authorization) wird typischerweise mit <Ref slug="access-control" headingId="access-control-models" /> implementiert. Diese definieren, wie Berechtigungen in einem System zugewiesen und durchgesetzt werden.
+
+## Autorisierungs-Frameworks (Protokolle)
+
+Während <Ref slug="oauth-2.0" /> ein sehr beliebtes Framework für die Autorisierung (Authorization) ist, ist es wichtig zu beachten, dass OAuth 2.0 nicht definiert, welches Zugriffskontrollmodell verwendet werden soll. Stattdessen konzentriert es sich auf die Delegation der Autorisierung (Authorization) und die Ausgabe von Zugriffstokens (Access Tokens).
+
+Das heißt, OAuth 2.0 ist geeignet für Drittanbieter-Autorisierungsszenarien, bei denen ein Benutzer einem Client die Erlaubnis erteilt, auf seine Ressourcen zuzugreifen. Zum Beispiel, wenn du dich mit deinem Google-Konto auf einer Website anmeldest, autorisierst du die Website, auf dein Google-Profil zuzugreifen.
+
+Wenn du dich mit Erstanbieter-Autorisierung (Authorization) befasst (z.B. innerhalb deiner Anwendung oder Organisation), musst du möglicherweise ein Zugriffskontrollmodell wie <Ref slug="rbac" /> oder <Ref slug="abac" /> implementieren. Die Kombination aus <Ref slug="openid-connect" /> und Zugriffskontrollmodellen kann eine solide Grundlage für sowohl Authentifizierung (Authentication) als auch Autorisierung (Authorization) bieten.
+
+Anstatt ein selbst entwickeltes Autorisierungssystem zu bauen, wird empfohlen, einen <Ref slug="identity-provider" /> zu verwenden, der Authentifizierungs- (Authentication) und Autorisierungsfunktionen (Authorization) bietet. Ein guter Identity Provider kümmert sich um die Komplexität der Zugriffskontrolle und bietet eine sichere und skalierbare Lösung für deine Anwendungen.
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

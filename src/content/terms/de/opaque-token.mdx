@@ -1,0 +1,156 @@
+---
+title: Opaques Token (Opaque token)
+tags: [oauth 2.0, oidc]
+description: Ein opaques Token ist eine Art von Token, dessen Format vom issuer (Aussteller) bestimmt wird, typischerweise als Zeichen- oder Zahlenfolge erscheint und eine Validierung durch den issuer (Aussteller) erfordert, anstatt alle notwendigen Informationen für eine direkte Validierung zu enthalten.
+---
+
+## Was ist ein Token?
+
+Bevor wir opaques Token einführen, ist es wichtig zu verstehen, was ein Token ist:
+
+Token werden verwendet, um sicher Informationen zwischen Parteien zu repräsentieren und zu übertragen, und sie unterstützen die überwiegende Mehrheit der Authentifizierungs- und Autorisierungsprozesse, die im Internet im Hintergrund ablaufen. Die beiden beliebtesten Tokenarten in Webdiensten sind [RFC 7519: JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519) und opaques Token.
+
+## Was ist ein opaques Token?
+
+Opaques Token sind Token in einem proprietären Format, auf das man nicht zugreifen kann und die typischerweise einen Identifikator für Informationen in einem persistenten Speicher eines Servers enthalten.
+
+Ein opaques Token ist eine Form, die ein Token annehmen kann, und sowohl access tokens (Zugriffstoken) als auch refresh tokens (Aktualisierungstoken) können als opaques Token existieren. Das Format eines opaques Token wird von seinem issuer (Aussteller) bestimmt und ist typischerweise eine Zeichen- und/oder Zahlenfolge, die dem issuer (Aussteller) hilft, bestimmte Informationen in einer Datenbank abzurufen und zu identifizieren. Hier ist ein Beispiel für ein opaques Token:
+
+```
+M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
+```
+
+Andererseits ist JWT ein weiteres gebräuchliches Tokenformat. Es ist eine JSON-Zeichenfolge, die alle claims (Ansprüche) und Informationen sowie eine Signatur des issuer (Ausstellers) enthält. Standardmäßig ist es nicht verschlüsselt, kann jedoch mit dem JSON Web Encryption (JWE)-Standard verschlüsselt werden. Auch wenn JWT typischerweise unverschlüsselt ist, beeinträchtigt dies nicht die Sicherheit — die Anwesenheit der Signatur gewährleistet die Integrität der Token-Inhalte, wodurch volles Vertrauen in die Daten innerhalb des JWT möglich ist.
+
+Im Gegensatz zu JWT, das alle Informationen enthält, die für eine direkte Validierung an der geschützten Ressource erforderlich sind, können opaques Token nicht direkt von der Ressource validiert werden. Stattdessen erfordern sie eine Validierung durch den issuer (Aussteller) des opaques Token (in der Regel der authorization server (Autorisierungsserver)). Dieser Validierungsprozess wird typischerweise als token introspection (Token-Überprüfung) bezeichnet.
+
+## Was ist JWT?
+
+Im Gegensatz zu opaques Token ist ein JWT ein unabhängiges, zustandsloses Token, das Informationen in einem strukturierten und lesbaren Format trägt.
+
+Ein JWT besteht aus drei Teilen: einem `header`, einem `payload` und einer `signature`, die jeweils im Base64URL-Format kodiert sind.
+
+Hier ist ein Beispiel für ein JWT:
+
+`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+
+- Der `header` enthält Informationen über die Art des Tokens und den Algorithmus, der für die Signierung verwendet wird. Zum Beispiel: `{"alg": "HS256", "typ": "JWT"}`.
+- Der `payload` Abschnitt enthält claims — Informationsstücke über den Benutzer oder die Autorisierung — wie Benutzer-ID, Ablaufzeit und scopes (Bereiche). Da diese Daten kodiert, aber nicht verschlüsselt sind, kann jeder, der das Token hat, es dekodieren, um die claims zu sehen, obwohl sie es nicht ändern können, ohne die Signatur ungültig zu machen. Basierend auf der Spezifikation und der Konfiguration des authorization server (Autorisierungsservers) können verschiedene claims im payload enthalten sein. Dies verleiht dem Token seinen selbstständigen Charakter. Zum Beispiel: `{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}`.
+- Die `signature` wird erzeugt, indem der header, das payload und ein geheimer Schlüssel mit dem angegebenen Algorithmus kombiniert werden. Diese Signatur wird verwendet, um die Integrität des Tokens zu überprüfen und sicherzustellen, dass es nicht manipuliert wurde.
+
+JWTs werden häufig verwendet, weil sie lokal vom client (Klient) oder jedem Dienst verifiziert werden können, ohne mit dem authorization server (Autorisierungsserver) interagieren zu müssen. Dies macht JWTs besonders effizient für verteilte Systeme, in denen mehrere Dienste die Authentizität des Tokens unabhängig überprüfen müssen.
+
+Diese Bequemlichkeit geht jedoch auch mit der Verantwortung einher, sicherzustellen, dass die claims des Tokens nicht übermäßig offengelegt werden, da sie für jeden sichtbar sind, der Zugriff auf das Token hat. Außerdem sind JWTs typischerweise von kurzer Dauer, und die Ablaufzeit ist in den claims des Tokens enthalten, um sicherzustellen, dass das Token nicht unbegrenzt gültig ist.
+
+## Validierung eines opaques Access Tokens (Zugriffstokens)
+
+Ein opaques Access Token wird validiert, indem es zur Überprüfung an den authorization server (Autorisierungsserver) zurückgesendet wird. Der authorization server (Autorisierungsserver) verwaltet den Status der ausgegebenen Token und kann die Gültigkeit des Tokens anhand seines internen Speichers bestimmen.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant AS as Logto Authorization Server
+    participant RP as Resource Provider
+
+    C ->> AS: 1. post /oidc/token
+    AS ->> C: 2. opaques Token
+    C ->> RP: 3. get /api/resource
+    RP ->> AS: 4. post /oidc/introspect
+    AS ->> RP: 5. Tokeninformationen
+
+```
+
+1. Der client (Klient) fordert ein Access Token vom authorization server (Autorisierungsserver) an.
+2. Der authorization server (Autorisierungsserver) stellt ein opaques Token aus.
+3. Der client (Klient) sendet die Ressourcenanforderung mit dem opaques Token im Header.
+4. Der resource provider (Ressourcenanbieter) sendet eine token introspection (Token-Überprüfung) ([RFC 7662: OAuth 2.0 Token Introspection](https://datatracker.ietf.org/doc/html/rfc7662)) Anfrage an den authorization server (Autorisierungsserver), um das Token zu validieren.
+5. Der authorization server (Autorisierungsserver) antwortet mit den Tokeninformationen.
+
+## JWT Access Token Validierung (offline)
+
+Ein JWT Access Token kann offline vom client (Klient) oder einem Dienst validiert werden, der Zugriff auf den öffentlichen Schlüssel des Tokens hat.
+
+```mermaid
+
+sequenceDiagram
+    participant C as Client
+    participant AS as Logto Authorization Server
+    participant RP as Resource Provider
+
+    RP ->> AS: 0. get /oidc/.well-known/jwks.json
+
+    C ->> AS: 1. post /oidc/token
+    AS ->> C: 2. JWT Token
+    C ->> RP: 3. get /api/resource
+    RP ->> RP: 4. validiere JWT Token
+    RP ->> C: 5. Antwort 200 OK
+
+```
+
+1. Der resource provider (Ressourcenanbieter) ruft den öffentlichen Schlüssel des authorization server (Autorisierungsservers) vom OIDC discovery endpoint (Entdeckungspunkt) ab. Der öffentliche Schlüssel wird verwendet, um die Signatur des Tokens zu überprüfen und seine Integrität sicherzustellen.
+2. Der client (Klient) fordert ein Access Token vom authorization server (Autorisierungsserver) an.
+3. Der authorization server (Autorisierungsserver) stellt ein JWT Token aus.
+4. Der client (Klient) sendet die Ressourcenanforderung mit dem JWT Token im Header.
+5. Der resource provider (Ressourcenanbieter) dekodiert und validiert das JWT Token mithilfe des vom authorization server (Autorisierungsserver) erhaltenen öffentlichen Schlüssels.
+6. Der resource provider (Ressourcenanbieter) gewährt den Zugriff basierend auf der Gültigkeit des Tokens.
+
+## Anwendungsfälle in OIDC
+
+Im Kontext von OIDC (OpenID Connect) dienen opaques Token und JWTs unterschiedlichen Zwecken und werden in verschiedenen Szenarien verwendet.
+
+### Opaques Token
+
+1. Abrufen des Benutzerprofils:
+
+Standardmäßig, wenn ein client (Klient) ein Access Token anfordert, ohne ein Ressourcenkonto anzugeben und den `openid` scope einschließt, stellt der authorization server (Autorisierungsserver) ein opaques Access Token aus. Dieses Token wird hauptsächlich verwendet, um Benutzerprofilinformationen vom OIDC `/oidc/userinfo` Endpunkt abzurufen. Bei Erhalt einer Anfrage mit dem opaques Access Token überprüft der authorization server (Autorisierungsserver) seinen internen Speicher, um die zugehörigen Autorisierungsinformationen abzurufen und zu überprüfen, bevor er mit den Benutzerprofildetails antwortet.
+
+2. Austausch des Refresh Tokens:
+
+Refresh tokens (Aktualisierungstoken) sind so konzipiert, dass sie nur zwischen dem client (Klient) und dem authorization server (Autorisierungsserver) ausgetauscht werden, ohne dass sie mit resource providers (Ressourcenanbietern) geteilt werden müssen. Daher werden refresh tokens (Aktualisierungstoken) typischerweise als opaques Token ausgegeben. Wenn das aktuelle Access Token abläuft, kann der client (Klient) das opaques Refresh Token verwenden, um ein neues Access Token zu erhalten und so den kontinuierlichen Zugriff ohne erneute Authentifizierung des Benutzers zu gewährleisten.
+
+### JWTs
+
+1. ID Token:
+
+In OIDC ist das ID Token ein JWT, das Benutzerinformationen enthält und zur Authentifizierung des Benutzers verwendet wird. Normalerweise wird es zusammen mit dem Access Token ausgegeben und ermöglicht es dem client (Klient), die Identität des Benutzers zu überprüfen. Zum Beispiel:
+
+```json
+// Dekodiertes payload eines ID Tokens
+{
+  "iss": "<https://logto.io>",
+  "sub": "1234567890",
+  "aud": "client_id",
+  "exp": 1630368000,
+  "name": "John Doe",
+  "email": "john.doe@mail.com",
+  "picture": "<https://example.com/johndoe.jpg>"
+}
+
+```
+
+Der client (Klient) kann das ID Token validieren, um die Identität des Benutzers sicherzustellen und Benutzerinformationen für Personalisierungs- oder Autorisierungszwecke zu extrahieren. ID Token ist nur für die einmalige Verwendung bestimmt und sollte nicht zur Autorisierung von API-Ressourcen genutzt werden.
+
+2. Zugriff auf API-Ressourcen (unter Verwendung des Access Tokens):
+
+Wenn ein client (Klient) ein Access Token mit einem spezifischen resource indicator (Ressourcenindikator) anfordert, stellt der authorization server (Autorisierungsserver) ein JWT Access Token aus, das für den Zugriff auf diese Ressource bestimmt ist. Das JWT enthält claims, die der resource provider (Ressourcenanbieter) verwenden kann, um den Zugang des clients (Klienten) zu autorisieren. Zum Beispiel:
+
+```json
+// Dekodiertes payload eines JWT Access Tokens
+{
+  "iss": "<https://dev.logto.app>",
+  "sub": "1234567890",
+  "aud": "<https://api.example.com>",
+  "scope": "read write",
+  "exp": 1630368000
+}
+
+```
+
+Der resource provider (Ressourcenanbieter) kann die Anfrage validieren, indem er die claims überprüft:
+
+- `iss`: Bestätigt, dass das Token von einem vertrauenswürdigen authorization server (Autorisierungsserver) ausgestellt wurde.
+- `sub`: Identifiziert den Benutzer, dem das Token zugeordnet ist.
+- `aud`: Stellt sicher, dass das Token für die spezifische Ressource bestimmt ist.
+- `scope`: Überprüft die Berechtigungen, die dem Benutzer gewährt wurden.
+
+<SeeAlso slugs={['jwt']} />

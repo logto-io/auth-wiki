@@ -1,0 +1,73 @@
+---
+title: JIT Bereitstellung (Just-in-time provisioning)
+tags: [authentication, authorization]
+description: JIT Bereitstellung ist ein Identity and Access Management (IAM) Prozess, bei dem Benutzerkonten dynamisch und automatisch erstellt werden, wenn ein Benutzer versucht, zum ersten Mal auf ein System oder eine Anwendung zuzugreifen. Dieser Ansatz hilft, den Onboarding-Prozess zu optimieren und stellt sicher, dass Benutzerkonten nur bei Bedarf erstellt werden, wodurch der Verwaltungsaufwand reduziert und die Sicherheit verbessert wird.
+---
+
+## Was ist Just-in-time Bereitstellung?
+
+Wenn du eine SaaS B2B App entwickelst und Mitgliedschaftsfunktionen unterstützen möchtest, damit Mitglieder deinem Arbeitsbereich (Mieter) leicht beitreten können. Du benötigst möglicherweise Funktionen wie in der untenstehenden Tabelle, und Just-in-time Bereitstellung ist eine davon, die hilft, den Prozess zu optimieren.
+
+| Funktionen | Fluss |
+| --- | --- |
+| Vom Administrator initiierte Einladung | Benutzer können eine E-Mail-Einladung erhalten, um der Organisation beizutreten. |
+| Benutzererstellung oder Import über API | Benutzer können ein vordefiniertes Benutzerkonto verwenden, um der Organisation beizutreten. |
+| Just-in-time Bereitstellung | Benutzer, die sich zum ersten Mal in der App anmelden, können der Organisation beitreten. |
+| Verzeichnissynchronisierung (z.B. SCIM) | Verwende die Verzeichnissynchronisationsfunktionalität des IdP, um Benutzer im Voraus in der App vorzubereiten. |
+
+**JIT Bereitstellung** ist ein Prozess, der in Identity- und Access Management-Systemen verwendet wird, um Benutzerkonten "on the fly" zu erstellen, sobald sie sich zum ersten Mal in ein System einloggen. Anstatt Konten im Voraus für Benutzer vorzubereiten, erstellt und konfiguriert JIT Bereitstellung die notwendigen Benutzerkonten dynamisch, sobald ein Benutzer sich authentifiziert. Die Just-in-time Bereitstellung ist eine beliebte Funktion mit eigenen Eigenschaften wie Effizienz, keine administrativen Beteiligungen und automatisierte Organisationsmitgliedschaft, usw.
+
+## Was sind die Anwendungsfälle für Just-in-time Bereitstellung?
+
+Diese Fälle sind häufig, wenn man eine B2B App entwickelt, die Multi-Tenant-Architektur, Enterprise SSO (Enterprise SSO), Arbeit mit Unternehmen oder Team-Onboarding-Funktionen umfasst. Hier sind einige Beispiel-Szenarien, mit denen deine Kunden möglicherweise konfrontiert werden.
+
+### Schnelles Onboarding
+
+Du hast einen Kunden, der häufige Einstellungen oder schnelles Wachstum erfährt und JIT Bereitstellung nutzen kann, um schnell Benutzerkonten für neue Mitarbeiter einzurichten. Hier ist ein Beispiel:
+
+Sarah ist eine neue Mitarbeiterin bei der Firma SuperFantasy, die Okta als Enterprise Identity Provider verwendet. Das HR-Team fügt sie einmalig als Geschäftsinformationen in Okta hinzu. Wenn Sarah diese E-Mail verwendet, um sich zum ersten Mal bei einer firmeninternen Produktivitäts-App namens Smartworkspace anzumelden, erstellt das System automatisch ein Konto und vergibt die richtige Rolle für sie innerhalb des Arbeitsbereichs des Unternehmens. Auf diese Weise müssen weder Sarah noch das HR-Team bei SuperFantasy mehrere Schritte für die Kontoerstellung und die Rollenzuweisung durchlaufen.
+
+### Fusionen, Übernahmen und Zeitarbeiter
+
+Wenn dein Kunde Fusionen oder Übernahmen erfährt, kann die JIT Bereitstellung den Prozess der Zugangsvergabe zu den Systemen des erwerbenden Unternehmens für viele neue Benutzer vereinfachen. Nehmen wir ein weiteres Beispiel,
+
+Peter arbeitet für MagicTech, das kürzlich von SuperFantasy übernommen wurde. MagicTech ist eine kleinere Organisation ohne Enterprise SSO, verwendet jedoch auch Smartworkspace, wo Peter bereits ein Geschäftskonto hat.
+
+Das HR-Team kann Peter in Okta hinzufügen. Wenn Peter sich zum ersten Mal über Okta bei Smartworkspace anmeldet, verknüpft das System automatisch sein bestehendes Geschäftskonto und gewährt den entsprechenden Zugang zu SuperFantasy.
+
+Die oben genannten Szenarien sind ideal für die Implementierung des JIT-Features.
+
+## Ist es spezifisch für SAML und Enterprise SSO?
+
+JIT Bereitstellung wird oft mit Single Sign-On (SSO) bei SAML Authentication in Verbindung gebracht, ist jedoch nicht ausschließlich auf SAML beschränkt. JIT Bereitstellung kann auch mit anderen Authentifizierungsprotokollen wie OAuth 2.0 und OpenID Connect verwendet werden und erfordert nicht immer eine Enterprise SSO-Konfiguration.
+
+Zum Beispiel kann E-Mail-basierte JIT Bereitstellung das Team-Onboarding vereinfachen, indem Benutzer automatisch basierend auf ihrer E-Mail-Domain zu einem Arbeitsbereich hinzugefügt werden. Dies ist besonders nützlich für Organisationen, die nicht über das Budget und die Ressourcen verfügen, um Enterprise SSO zu kaufen und zu verwalten.
+
+Die grundlegende Idee hinter JIT Bereitstellung ist die Automatisierung der Benutzerkontoerstellung oder -aktualisierung, wenn ein Benutzer zum ersten Mal versucht, auf einen Dienst zuzugreifen, unabhängig vom verwendeten spezifischen Protokoll.
+
+## Gilt dies für neue oder bestehende Benutzer der App?
+
+JIT Bereitstellung bezieht sich im Allgemeinen auf den ersten Versuch, auf eine App zuzugreifen. Unterschiedliche Produkte sehen diese Funktion jedoch unterschiedlich. Einige verwenden JIT Bereitstellung nur für Identitäts- und Kontenerstellung, während andere auch Just-in-time Kontoaktualisierungen beinhalten, wie z.B. Neu-Bereitstellung und Attributsynchronisation.
+
+Zusätzlich zur automatischen Benutzererstellung erlaubt SAML JIT Provisioning die Zuteilung und Widerrufung von Gruppenmitgliedschaften als Teil der Bereitstellung. Es kann auch bereitgestellte Benutzer aktualisieren, um ihre Attribute im Service Provider (SP) Store mit den Benutzerattributen im Identity Provider (IDP) Store zu synchronisieren.
+
+Wenn du das Szenario der anschließenden Anmeldung bestehender Benutzer in Betracht ziehen möchtest, stelle sicher, dass du ein robustes Bereitstellungssystem zusammen mit deinem JIT-System hast. Zum Beispiel:
+
+- **Konfliktlösung**: Dein System sollte eine Strategie zur Konfliktbehandlung haben, wenn ein Konto bereits mit anderen Informationen als den vom IdP bereitgestellten während des JIT-Prozesses existiert. Dies kann eine detaillierte Kontrolle über die Richtlinien deiner Organisation und die Konfiguration des IdP erfordern.
+- **Audit-Trails**: Es ist wichtig, Protokolle sowohl für neue Kontoerstellungen als auch für Updates an bestehenden Konten durch JIT-Prozesse zu führen, aus Sicherheits- und Compliance-Gründen.
+- **Leistung**: Während die JIT Bereitstellung schnell erfolgt, beachte die potenziellen Auswirkungen auf die Anmeldezeiten, insbesondere für bestehende Nutzer, wenn du ihre Informationen bei jeder Anmeldung aktualisierst.
+- **Datenkonsistenz**: Stelle sicher, dass dein JIT-Bereitstellungsprozess die Datenkonsistenz beibehält, insbesondere bei der Aktualisierung bestehender Benutzerkonten.
+
+## Was ist der Unterschied zwischen JIT und SCIM?
+
+SCIM ist ein offener Standardprotokoll, das entwickelt wurde, um die Benutzeridentitätsverwaltung über verschiedene Systeme und Domänen hinweg zu vereinfachen und zu automatisieren. Es wird häufig in Verzeichnissynchronisationsszenarien verwendet.
+
+Der Hauptunterschied zwischen JIT und SCIM besteht darin, dass JIT Konten während des Anmeldeversuchs des Benutzers erstellt, während SCIM Benutzer durch einen Offline-automatisierten Prozess bereitstellen kann, unabhängig von Benutzeranmeldeversuchen.
+
+Das bedeutet, JIT konzentriert sich auf das Onboarding neuer Benutzer, während SCIM sich auf das vollständige Lebenszyklusmanagement von Benutzern konzentriert.
+
+Darüber hinaus ist JIT oft eine Erweiterung von SAML und fehlt eine standardisierte Implementierung über Systeme hinweg, während SCIM ein gut definiertes, standardisiertes Protokoll [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) für das Identitätsmanagement ist.
+
+Einige größere Organisationen verwenden SCIM für die Kontenbereitstellung und integrieren es mit ihren eigenen Systemen. Dies kann sehr komplex sein und von Fall zu Fall variieren. Diese Organisationen haben oft ein Bereitstellungssystem, das sowohl automatisierte Prozesse als auch manuelle administrative Beteiligung beinhaltet.
+
+<Resources urls={['https://blog.logto.io/jit-provisioning']} />
