@@ -1,0 +1,50 @@
+---
+title: Autorisatie (Authorization)
+tags: [authorization]
+description: Autorisatie (Authorization) is het proces van het bepalen welke acties een identiteit kan uitvoeren op een bron. Het is een fundamenteel beveiligingsmechanisme om toegangsbeleid te definiëren en af te dwingen.
+---
+
+## Wat is autorisatie (Authorization)?
+
+> **Kort samengevat**: Autorisatie (Authorization) beantwoordt de vraag "Wat kun je doen?"
+
+Autorisatie (Authorization) is een beslissingsproces dat bepaalt of een identiteit (gebruiker, dienst of apparaat) de noodzakelijke permissies heeft om een specifieke actie op een bron uit te voeren. Laten we enkele voorbeelden bekijken:
+
+- In een online documenten editor kan een gebruiker een document delen met anderen.
+- In een cloudopslagdienst kan een dienst bestanden lezen en schrijven in een specifieke map.
+- In een slim thuissysteem kan een apparaat de lichten in de woonkamer aanzetten.
+
+Al deze voorbeelden betreffen een identiteit (subject) die een actie uitvoert op een bron. Uiteraard kan autorisatie (Authorization) ook mislukken, zoals wanneer een gebruiker probeert een bestand te verwijderen waar ze geen toestemming voor hebben.
+
+Het basismodel voor autorisatie (Authorization) is eenvoudig: Als **identiteit** **actie** uitvoert op **bron**, dan **accepteer** of **weiger**.
+
+### Verschil tussen authenticatie en autorisatie (Authorization)
+
+Authenticatie en autorisatie (Authorization) worden vaak verward, maar ze zijn fundamenteel verschillend: <Ref slug="authentication" /> beantwoordt de vraag "Welke identiteit bezit je?". Bovendien vindt autorisatie (Authorization) in de meeste gevallen plaats na authenticatie, omdat het systeem de identiteit moet kennen voordat het toegangsbeslissingen neemt.
+
+### Verschil tussen autorisatie (Authorization) en toegangscontrole
+
+Autorisatie (Authorization) is een deelverzameling van toegangscontrole. Toegangscontrole is het bredere concept dat autorisatie (Authorization) en andere beperkingen op toegangsbeheer omvat. Met andere woorden, toegangscontrole is een algemene term die de selectieve beperking van toegang tot bronnen beschrijft, terwijl autorisatie (Authorization) specifiek gaat over het beslissingsproces.
+
+## Hoe werkt autorisatie (Authorization)?
+
+Autorisatie (Authorization) wordt meestal geïmplementeerd met behulp van <Ref slug="access-control" headingId="access-control-models" />. Deze definiëren hoe permissies worden toegewezen en afgedwongen in een systeem.
+
+## Autorisatiekaders (protocollen)
+
+Hoewel <Ref slug="oauth-2.0" /> een zeer populair kader is voor autorisatie (Authorization), is het belangrijk op te merken dat OAuth 2.0 niet definieert welk toegangscontrolemiddel moet worden gebruikt. In plaats daarvan richt het zich op de delegatie van autorisatie (Authorization) en de uitgifte van toegangstokens.
+
+Dat gezegd hebbende, is OAuth 2.0 geschikt voor derden-autorisatiescenario's waarin een gebruiker toestemming geeft aan een client om hun bronnen te benaderen. Bijvoorbeeld, wanneer je je aanmeldt bij een website met je Google-account, geef je de website toestemming om je Google-profiel te benaderen.
+
+Als je met eerste partij autorisatie (Authorization) te maken hebt (bijvoorbeeld binnen je applicatie of organisatie), moet je mogelijk een toegangscontrolemodel zoals <Ref slug="rbac" /> of <Ref slug="abac" /> implementeren. De combinatie van <Ref slug="openid-connect" /> en toegangscontrolemiddelen kan een solide basis bieden voor zowel authenticatie als autorisatie (Authorization).
+
+In plaats van een zelfgemaakt autorisatiesysteem te bouwen, wordt aanbevolen om een <Ref slug="identity-provider" /> te gebruiken die authenticatie en autorisatie (Authorization) mogelijkheden biedt. Een goede identity provider zal de complexiteit van toegangscontrole afhandelen en een veilige en schaalbare oplossing bieden voor je applicaties.
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

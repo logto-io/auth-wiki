@@ -1,0 +1,58 @@
+---
+title: Toegangssleutel (Passkey)
+tags: [authentication, authorization]
+description: Toegangssleutel (Passkey) is een phishing-bestendig en handig authenticatiemiddel dat wachtwoorden vervangt en kan worden gebruikt voor inloggen en multi-factor authentication (MFA).
+---
+
+## Wat is een toegangssleutel (passkey)?
+
+**Toegangssleutel (Passkey)** is een op [FIDO](https://fidoalliance.org/)-gebaseerd, veilig en handig alternatief voor traditionele wachtwoorden. Ze gebruiken geavanceerde cryptografie om je accounts te beschermen tegen [phishing](https://en.wikipedia.org/wiki/Phishing)-aanvallen.
+
+- **Uniek voor elke dienst**: Wanneer je je registreert voor een dienst, maakt je apparaat een unieke toegangssleutel aan die is gekoppeld aan het domein van die specifieke dienst.
+- **Apparaatgebonden:** Toegangssleutels zijn meestal gekoppeld aan een apparaat, zoals een telefoon, laptop, biometrisch identificatiemiddel of hardware beveiligingssleutels.
+- **Publiek-privaatsleutelpaar:** Het apparaat bewaart de privésleutel, terwijl de publieke sleutel wordt gedeeld met de service. Deze cryptografische sleutels worden toegangssleutels genoemd. (Geciteerd van [FIDO](https://fidoalliance.org/how-fido-works/))
+- **Meerdere authenticatiemethoden:** Je kunt een vingerafdruk, gezichtsherkenning, apparaat-PIN, QR-codescanning of beveiligingssleutels gebruiken om te authenticeren met een toegangssleutel.
+- **Cross-device synchronisatie**: Toegangssleutels kunnen worden gesynchroniseerd over apparaten met behulp van veilige cloudopslag (bijv. Apple's iCloud Keychain of Google Password Manager), waarmee je kunt inloggen vanaf elk ondersteund apparaat.
+
+## Hoe ziet de workflow van een toegangssleutel eruit?
+
+**Toegangssleutels** werken door middel van openbare-sleutelcryptografie om veilige inloggegevens te bieden.
+
+- **Registratie**
+    - Wanneer je je registreert voor een dienst, genereert je apparaat een unieke cryptografische sleutelpaar gekoppeld aan die dienst.
+    - De **privésleutel** blijft op je apparaat, terwijl de **publieke sleutel** met de dienst wordt gedeeld.
+- **Authenticatie**
+    - Wanneer je probeert in te loggen, stuurt de service een **uitdaging** naar je apparaat.
+    - Je apparaat gebruikt de **privésleutel** om een cryptografische **handtekening** te genereren gebaseerd op de uitdaging.
+    - De **handtekening** wordt teruggestuurd naar de service, die het verifieert met behulp van de **publieke sleutel**.
+    - Als de handtekening geldig is, is de authenticatie succesvol.
+
+Lees WebAuthn, een API voor het implementeren van toegangssleutels, om de details te leren.
+
+## Hoe ziet de eindgebruikersstroom van een toegangssleutel eruit?
+
+Toegangssleutels bieden flexibiliteit met twee soorten authenticators voor zowel lokaal als cloudgebruik, en gebruikers kunnen een of beide voor de dienst inschakelen.
+
+- **Platformauthenticator (Interne authenticator):** Gebonden aan een specifiek apparaat-OS (bijv. telefoon, laptop), met biometrie of apparaat toegangscode om te autoriseren. Het is snel en handig.
+    - Voorbeelden: iCloud Keychain op Apple apparaten (verificatie via Touch ID, Face ID of apparaat toegangscode), Windows Hello, Google Password Manager op Android.
+- **Roamingauthenticator (Externe authenticator):** Draagbare apparaten of software, bijv. beveiligingssleutels, smartphones. Kan op meerdere apparaten worden gebruikt, maar kan extra stappen vereisen zoals QR-codescanning of NFC/Bluetooth-koppeling.
+    - Voorbeelden: YubiKey en cloud-gebaseerde accounts op smartphones. Mobiele authenticators vereisen vaak QR-codescanning om te koppelen met desktop apparaten, en cross-device authenticatie moet via Bluetooth, NFC of USB verbinden om ervoor te zorgen dat de authenticator in de buurt is.
+
+## Wanneer gebruik je een toegangssleutel?
+
+Toegangssleutels zijn een moderne authenticatiefactor die kan worden gebruikt als eerste of tweede factor.
+
+- **Toegangssleutel inloggen:** Toegangssleutels bieden een snellere en veiligere wachtwoordloze authenticatiemethode in vergelijking met traditionele wachtwoorden.
+    - Moderne applicaties hebben meestal een "Log in met toegangssleutel" knop op de inlogpagina, waarmee gebruikers proactief kunnen kiezen deze optie te gebruiken.
+    - Bovendien kan de inlogpagina automatisch een toegangssleutel inlog pop-up voorstellen als het herkent dat de gebruiker toegang probeert te verkrijgen vanaf hetzelfde apparaat en browser waar hun toegangssleutel is geregistreerd.
+- **Toegangssleutel MFA:** Toegangssleutels kunnen ook dienen als een tweede factor voor MFA.
+    - Wanneer een gebruiker probeert in te loggen, voert deze eerst hun e-mail en wachtwoord in (of andere eerste factoren), waarna de dienst hen aandringt om de 2-stap verificatie met een toegangssleutel te voltooien.
+    - Als er bestaande sessies in de browser zijn, kan de dienst gebruikers direct vragen in te loggen met hun toegangssleutel zonder dat ze opnieuw hun wachtwoord hoeven in te voeren. Dit proces, bekend als het voltooien van MFA, omdat de toegangssleutel een hoog veiligheidsniveau biedt door binding aan het huidige apparaat en door gebruikers te verifiëren via biometrie, PINs of andere hardwaremethoden.
+- **Beveiligingsverificatie**: In omgevingen met hoge beveiliging worden toegangssleutels vaak gebruikt om de identiteit van de gebruiker dubbel te controleren. Bijvoorbeeld bij het toegang verkrijgen tot gevoelige financiële informatie of het uitvoeren van kritieke handelingen (bankieren, overheid, bedrijfsystemen).
+
+<Resources
+  urls={[
+    "https://fidoalliance.org/passkeys/",
+    "https://webauthn.io/"
+  ]}
+/>

@@ -1,0 +1,72 @@
+---
+title: Claim (Claim)
+tags: [oauth 2.0, oidc]
+description: Een claim (claim) in JSON Web Token (JWT) is een naam-waarde paar dat specifieke informatie overbrengt. In een bredere context kan een claim (claim) elk naam-waarde paar zijn dat informatie vertegenwoordigt.
+---
+
+## Wat is een claim (claim)?
+
+Een claim (claim) is een naam-waarde paar dat specifieke informatie overbrengt. Bijvoorbeeld, in een JSON-object:
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+In dit voorbeeld is `sub` een claim (claim) die de uniek identifier van het onderwerp vertegenwoordigt met de waarde `foo`, en `email` is een claim (claim) die het e-mailadres vertegenwoordigt met de waarde `foo@bar.com`.
+
+> We gebruiken *onderwerp* in plaats van *gebruiker* omdat zonder een duidelijke definitie het onderwerp (`sub`) een gebruiker, apparaat of een willekeurige entiteit kan vertegenwoordigen.
+
+### Gebruik van claims (claims)
+
+Claims (claims) worden op grote schaal gebruikt in verschillende contexten, zoals:
+
+- <Ref slug="jwt" />: In een JWT worden claims (claims) gebruikt om informatie over het token te vertegenwoordigen, zoals de issuer (`iss`), subject (`sub`) en vervaltijd (`exp`).
+- <Ref slug="openid-connect" />: In OIDC worden claims (claims) gebruikt om gebruikersinformatie te vertegenwoordigen in de <Ref slug="id-token" /> en <Ref slug="userinfo-endpoint" />, zoals het e-mailadres van de gebruiker (`email`), naam (`name`) en profielfoto (`picture`).
+
+### Standaardclaims (standard claims)
+
+In JWT en OIDC zijn er standaardclaims gedefinieerd door de specificaties. Enkele veelvoorkomende standaardclaims zijn:
+
+- **`iss`**: De issuer van het token. Bijvoorbeeld, als de <Ref slug="authorization-server" /> die het token heeft uitgegeven `https://example.com` is, zal in de meeste gevallen de `iss` claim hetzelfde zijn (`https://example.com`).
+- **`sub`**: Het onderwerp van het token. Het vertegenwoordigt de entiteit waarover het token gaat. Bijvoorbeeld, in een ID token vertegenwoordigt de `sub` claim meestal de gebruiker identifier.
+- **`aud`**: De audience van het token. Het geeft de ontvangers aan waarvoor het token bedoeld is. Bijvoorbeeld, als het token bedoeld is voor toegang tot een API op `https://api.example.com`, zal de `aud` claim hetzelfde zijn (`https://api.example.com`).
+- **`exp`**: De vervaltijd van het token. Het geeft aan wanneer het token niet langer geaccepteerd zou moeten worden voor verwerking.
+- **`nbf`**: De "not before" tijd van het token. Het geeft aan wanneer het token begint geaccepteerd te worden voor verwerking.
+- **`iat`**: De afgiftetijd van het token. Het geeft aan wanneer het token is uitgegeven.
+- **`jti`**: De JWT ID van het token. Het biedt een unieke identifier voor het token.
+
+OIDC definieert ook aanvullende standaardclaims voor gebruikersinformatie. Zie [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims) in de OIDC-specificatie voor meer details.
+
+### Aangepaste claims (custom claims)
+
+Naast standaardclaims kun je aangepaste claims definiëren om applicatiespecifieke informatie te vertegenwoordigen. Bijvoorbeeld, je kunt een `role` claim opnemen om de rol van de gebruiker in de applicatie te vertegenwoordigen.
+
+Aangepaste claims kunnen worden voorzien van een namespace met [Uniform Resource Identifiers (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) om conflicten met andere claims te vermijden. Bijvoorbeeld:
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+In dit voorbeeld is de `role` claim voorzien van een namespace met `https://example.com/claims/` om uniciteit te waarborgen. Alternatief kun je je eigen [Uniform Resource Name (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) definiëren voor aangepaste claims:
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+In dit voorbeeld is de `role` claim voorzien van een namespace met `urn:example:claims:`.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

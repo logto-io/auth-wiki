@@ -7,7 +7,7 @@ export const es = Object.freeze({
     description: 'Auth Wiki es una colección completa de artículos, tutoriales y recursos sobre autenticación y autorización. Aprenda sobre OAuth 2.0, OpenID Connect, SAML y más.',
   },
   home: {
-    description: 'Explore y encuentre definiciones claras de glosarios clave relacionados con la autenticación, autorización y gestión de identidades. Trabaje con estándares abiertos como <a href="/openid-connect">OpenID Connect</a>, <a href="/oauth-2.0">OAuth 2.0</a> y <a href="/saml">SAML</a>.',
+    description: 'Explore y encuentre definiciones claras de glosarios clave relacionados con la autenticación, autorización y gestión de identidades. Trabaje con estándares abiertos como <a href="/es/openid-connect">OpenID Connect</a>, <a href="/es/oauth-2.0">OAuth 2.0</a> y <a href="/es/saml">SAML</a>.',
   },
   content: {
     edit_on_github: 'Editar en GitHub',

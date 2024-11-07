@@ -1,0 +1,44 @@
+---
+title: Auth (ondubbelzinnig)
+tags: [authentication, authorization]
+description: De term "auth" wordt vaak gebruikt als een afkorting voor authentication (verificatie) of authorization (autorisatie). Deze concepten zijn gerelateerd, maar fundamenteel verschillend.
+---
+
+## Auth
+
+Deze pagina is een uitleg voor de term "auth". Het wordt vaak gebruikt als een afkorting voor:
+
+- <Ref slug="authentication" />: Het proces van het verifiëren van de identiteitsbezit (bijvoorbeeld gebruiker of dienst). Het beantwoordt de vraag "Welke identiteit bezit je?"
+- <Ref slug="authorization" />: Het proces van het bepalen welke acties een identiteit kan uitvoeren op een resource. Het beantwoordt de vraag "Wat kan je doen?"
+
+> [!Opmerking]
+> Soms worden authentication (verificatie) en authorization (autorisatie) aangeduid als "AuthN" en "AuthZ", respectievelijk.
+
+Deze twee concepten zijn beide essentieel in het <Ref slug="iam" /> domein, maar ze zijn fundamenteel verschillend. Laten we een voorbeeld bekijken: Een webapplicatie MyStorage heeft de mogelijkheid om bestanden te uploaden en verbinding te maken met Google Drive. Een typische gebruikersstroom zou zijn:
+
+```mermaid
+sequenceDiagram
+    participant Gebruiker
+    participant MyStorage
+    participant Google
+    autonumber
+
+    Gebruiker->>MyStorage: Inloggen bij MyStorage
+    MyStorage->>Gebruiker: Welkom, Gebruiker!
+    Gebruiker->>MyStorage: Klik op "Verbind met Google Drive"
+    MyStorage->>Google: Omleiden naar Google<br />met authorization request (autorisatie aanvraag)
+    Google->>Gebruiker: Vraag de gebruiker om in te loggen
+    Gebruiker->>Google: Inloggen bij Google
+    Google->>Gebruiker: Vraag om toestemming om toegang tot Google Drive
+    Gebruiker->>Google: Verleen toegang aan MyStorage
+    Google->>MyStorage: Omleiden naar MyStorage<br />met authorization data (bijv. access token)
+    MyStorage->>Google: Toegang tot de Google Drive van de gebruiker met de access token
+```
+
+In deze stroom voert de gebruiker twee authentication (verificatie) stappen uit: één met MyStorage (stap 1) en een andere met Google (stap 6); en één authorization (autorisatie) stap: toegang verlenen tot Google Drive (stap 8).
+
+## Welke bedoel je?
+
+Wanneer je de term "auth" ziet, is het belangrijk om te verduidelijken of het verwijst naar authentication (verificatie) of authorization (autorisatie); anders zou je kunnen verwachten dat beide processen worden behandeld (net zoals deze website doet).
+
+<SeeAlso slugs={["authentication", "authorization", "iam", "oauth-2.0", "openid-connect"]} />

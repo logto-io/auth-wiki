@@ -1,0 +1,136 @@
+---
+title: JSON Web Signature (JWS)
+tags: [oidc, jose]
+description: JSON Web Signature (JWS) is een standaardmethode om gegevens in JSON-indeling te ondertekenen en te verifiëren. Het wordt vaak gebruikt om de integriteit en authenticiteit van JSON Web Tokens (JWTs) in OpenID Connect (OIDC) te waarborgen.
+---
+
+## Wat is JSON Web Signature (JWS)?
+
+JSON Web Signature (JWS) definieert een standaardmethode voor het ondertekenen en verifiëren van gegevens in JSON-indeling. Het wordt veel gebruikt in moderne applicaties en open standaarden zoals <Ref slug="openid-connect" /> om de integriteit en authenticiteit van verzonden gegevens te waarborgen.
+
+JWS is bijzonder nuttig bij het werken met <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref>. Bijvoorbeeld, een <Ref slug="id-token" /> of <Ref slug="access-token" /> kan worden ondertekend met JWS en door de ontvanger worden geverifieerd zonder een extra netwerkverzoek te doen.
+
+## Hoe werkt JWS?
+
+JWS gebruikt cryptografische algoritmen om de gegevens te ondertekenen en een handtekening te produceren. Er zijn twee hoofdconcepten in JWS: de JWS-header en JWS-serialisatie.
+
+### JWS-header
+
+JWS heeft een header die belangrijke metadata bevat over het ondertekeningsalgoritme en het sleutelbeheer. Enkele veel voorkomende attributen in een JWS-header zijn:
+
+- `alg` (Algorithm): Het cryptografische algoritme dat wordt gebruikt om de gegevens te ondertekenen.
+- `typ` (Type): Het type token, zoals JWT.
+- `kid` (Key ID): Een unieke identifier voor de sleutel die wordt gebruikt om de gegevens te ondertekenen.
+- `jku` (JWK Set URL): De URL waar de <Ref slug="jwk" headingId="json-web-key-set-jwks" /> zich bevindt.
+
+Voor een gedetailleerde lijst van JWS-headerattributen, zie [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4).
+
+### JWS-serialisatie
+
+JWS heeft twee serialisatieindelingen: compact en JSON. Elke indeling heeft zijn eigen manier om de ondertekende gegevens weer te geven.
+
+#### Compacte serialisatie
+
+Bij de compacte serialisatie wordt de JWS weergegeven als een string met drie Base64URL-gecodeerde delen gescheiden door punten (`.`). De drie delen zijn:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+Elk deel heeft een specifieke functie:
+
+- `header`: Metadata over het ondertekeningsalgoritme en sleutelbeheer in Base64URL-gecodeerde indeling.
+- `payload`: De te ondertekenen gegevens in Base64URL-gecodeerde indeling.
+- `signature`: De cryptografische handtekening van de header en payload.
+
+> [!Opmerking]
+> Er is geen niet-beschermde header opgenomen in de compacte serialisatie.
+
+Bijvoorbeeld, een JWS kan er zo uitzien:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+Na decodering van de Base64URL-gecodeerde delen bestaat de JWS uit het volgende:
+
+- Header: `{"alg":"HS256","typ":"JWT"}`
+- Payload: `{"sub":"1234567890","name":"Alice"}`
+- Handtekening: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+De header specificeert dat de JWS is ondertekend met behulp van het HMAC-SHA256-algoritme (`HS256`) en dat het type token een JWT is (`typ: "JWT"`) in JSON-indeling. De payload bevat basisinformatie over de gebruiker, zoals het onderwerp (`sub`) en naam (`name`).
+
+De handtekening wordt berekend door:
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  geheim
+)
+```
+
+Volgens de JWS-header wordt het HMAC-SHA256-algoritme gebruikt in de `Hash`-functie, waarbij het `geheim` de gedeelde geheime sleutel `top-secret` is in dit geval.
+
+Voor een gedetailleerd voorbeeld van hoe JWS werkt met JWT, zie het <Ref slug="signing-key" /> artikel.
+
+#### JSON-serialisatie
+
+JSON-serialisatie biedt een meer gestructureerde manier om de JWS weer te geven. De JWS wordt weergegeven als een JSON-object met de volgende eigenschappen:
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: De Base64URL-gecodeerde payload. Dit zijn de te ondertekenen gegevens.
+- `signatures`: Een array van handtekeningobjecten, elk met de beschermde header, header en handtekening.
+
+  Elk handtekeningobject kan bevatten:
+
+  - `protected`: De Base64URL-gecodeerde beschermde header (`header` in compacte serialisatie).
+  - `header`: De niet-beschermde header in JSON-indeling. De header is niet opgenomen in de handtekening.
+  - `signature`: De cryptografische handtekening van de header en payload (`signature` in compacte serialisatie).
+
+Bijvoorbeeld, een JWS in JSON-serialisatie kan er zo uitzien:
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+In het bovenstaande voorbeeld zijn er twee handtekeningen (`signatures` array) voor dezelfde payload. Elk handtekeningobject bevat de beschermde header, header en handtekening.
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

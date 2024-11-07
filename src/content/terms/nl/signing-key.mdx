@@ -1,0 +1,149 @@
+---
+title: Ondertekeningssleutel (Signing key)
+tags: [oidc]
+description: Een ondertekeningssleutel (signing key) is een cryptografische sleutel die wordt gebruikt om JSON Web Tokens te ondertekenen en te verifiëren in OpenID Connect (OIDC). Het wordt gebruikt om de integriteit en authenticiteit van de tokens die door de OpenID-provider zijn uitgegeven te waarborgen.
+---
+
+## Wat is een ondertekeningssleutel (signing key)?
+
+In de context van <Ref slug="openid-connect" />, wordt een **ondertekeningssleutel (signing key)**, meestal een asymmetrisch sleutelpaar, gebruikt om <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref> te ondertekenen en te verifiëren. OpenID-providers gebruiken ondertekeningssleutels (signing keys) om tokens zoals <Ref slug="id-token">ID-tokens</Ref> en <Ref slug="access-token">toegangstokens (access tokens)</Ref> te ondertekenen om hun integriteit en authenticiteit te waarborgen.
+
+Hoewel het concept van ondertekeningssleutels (signing keys) breder kan zijn, richten we ons op hoe ze in OIDC worden gebruikt om tokens te beveiligen. Andere toepassingsgebieden, zoals het ondertekenen van e-mails, documenten en softwarepakketten, kunnen voortkomen uit dezelfde principes.
+
+## Voorbeeld: ID-token ondertekening
+
+Wanneer een gebruiker zich authentiseert bij een OpenID-provider, geeft de provider een ID-token uit dat gebruikersinformatie bevat (<Ref slug="claim">claims</Ref>) en wordt ondertekend met de ondertekeningssleutel (signing key) van de provider. Aangezien het ID-token een JWT is, bestaat het uit drie delen: header, payload en handtekening.
+
+### 1. Header
+
+Stel dat de header is:
+
+```json
+{
+  "alg": "ES384",
+  "typ": "JWT"
+}
+```
+
+De JSON geeft aan dat het ID-token is ondertekend met behulp van het [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm)-algoritme met de P-384 curve. Het `typ`-veld specificeert dat het type token JWT is.
+
+### 2. Payload
+
+De payload bevat basisgebruikersinformatie:
+
+```json
+{
+  "sub": "1234567890",
+  "name": "Alice"
+}
+```
+
+De `sub` claim is de unieke identificatie van de gebruiker, en `name` is hun weergavenaam.
+
+### 3. Onderteken het token
+
+Volgens het JWT-formaat moeten de header en payload worden Base64URL-gecodeerd en met een `.` aan elkaar worden gekoppeld voor ondertekening:
+
+```
+{{header}}.{{payload}}
+```
+
+In dit geval zou de waarde zijn:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0
+```
+
+Stel dat de OpenID-provider de volgende privésleutel gebruikt om het token te ondertekenen:
+
+```
+-----BEGIN PRIVATE KEY-----
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDBW9PDXInlNT2hjOtQr
+g4pkVkyJsKia33dHrsbOG4Z77pfYN7SYZCHh9YdLXTTKinehZANiAAQX/FB1s6Gj
+YnDSGCY08PRUAQ8CCRCt8Ph/VDHfLj1xSbrjp8wFf0NjH7jcfNebpV1fvu4XKbP3
+Ro7h0G6elN1TMsVECJPv4ieDNkYOsgT4UboJypC5E/rmvrlJTMM6Y/k=
+-----END PRIVATE KEY-----
+```
+
+Om het token te ondertekenen, moet de OpenID-provider de privésleutel gebruiken om een handtekening te genereren door:
+
+```
+signature = sign(header + '.' + payload, private_key)
+```
+
+Dan is de Base64URL-gecodeerde handtekening:
+
+```
+Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+### 4. Stel de JWT samen
+
+Ten slotte stelt de OpenID-provider de JWT samen door de header, payload en handtekening met `.` aan elkaar te koppelen:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+In dit geval zou het ID-token zijn:
+
+```
+eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+Het ID-token is nu klaar om naar de <Ref slug="client" /> te worden verzonden voor verdere verwerking.
+
+### 5. Verifieer het token
+
+Wanneer de cliënt het ID-token ontvangt, kan deze de handtekening verifiëren met behulp van de openbare sleutel van de OpenID-provider. Gewoonlijk is de openbare sleutel beschikbaar via het <Ref slug="openid-connect-discovery" />-endpoint (`jwks_uri`) in het formaat van een <Ref slug="jwk" headingId="json-web-key-set-jwks" />.
+
+Voor dit voorbeeld is de openbare sleutel:
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx-43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+En de overeenkomstige JWK-waarde is:
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+Nu kan de cliënt de handtekening verifiëren met behulp van de openbare sleutel.
+
+## Kies het juiste algoritme
+
+Er zijn verschillende algoritmen beschikbaar voor het ondertekenen van JWTs:
+
+- **Symmetrische algoritmen**: HMAC met SHA-familie (bijv. HS256, HS384, HS512) is een symmetrisch algoritme dat dezelfde sleutel gebruikt voor zowel ondertekenen als verifiëren. Het wordt niet aanbevolen voor de meeste gevallen, omdat de geheime sleutel tussen partijen moet worden gedeeld.
+- **Asymmetrische algoritmen**: RSA (bijv. RS256, RS384, RS512) en ECDSA (bijv. ES256, ES384, ES512) zijn asymmetrische algoritmen die een paar sleutels gebruiken: een privésleutel voor ondertekenen en een openbare sleutel voor verifiëren.
+  - RSA wordt veel gebruikt en ondersteund door veel bibliotheken en platforms. Het heeft echter een veel grotere sleutelgrootte en handtekeningsgrootte vergeleken met ECDSA.
+  - ECDSA is beter presterend en genereert kleinere handtekeningen, waardoor het een betere keuze is voor omgevingen met beperkte middelen. Aangezien het minder gebruikelijk is, moet je ervoor zorgen dat jouw platform het ondersteunt.
+
+> ECDSA moet de voorkeur hebben voor nieuwe toepassingen vanwege de voordelen op het gebied van prestaties en beveiliging.
+
+## Andere scenario's met ondertekeningssleutels (signing keys)
+
+Hoewel het bovenstaande voorbeeld zich richt op ID-tokens in OIDC, wordt het concept van de ondertekeningssleutel (signing key) op grote schaal gebruikt in verschillende scenario's, zoals het ondertekenen van e-mails, documenten en softwarepakketten. De belangrijkste principes blijven hetzelfde:
+
+- Voor symmetrische sleutels wordt dezelfde sleutel gebruikt voor zowel ondertekenen als verifiëren. Dit is geschikt voor scenario's waarin de partijen de sleutel veilig kunnen delen, of er is een enkele entiteit die verantwoordelijk is voor zowel ondertekening als verificatie.
+- Voor asymmetrische sleutels wordt een privésleutel gebruikt voor ondertekenen en een overeenkomstige openbare sleutel voor verifiëren. Dit is geschikt voor de meeste scenario's waarin de ondertekenende en verifiërende partijen verschillende entiteiten zijn.
+
+<SeeAlso slugs={["jwt", "jws", "jwk", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/introduction-to-ec-and-rsa-signing-algorithms-in-jwt",
+    "https://tools.ietf.org/html/rfc7515",
+    "https://tools.ietf.org/html/rfc7517",
+  ]}
+/>

@@ -1,0 +1,56 @@
+---
+title: Scope
+tags: [authorization]
+description: Scope definieert de toestemmingen die een applicatie vraagt van een gebruiker om toegang te krijgen tot hun beschermde middelen. Het is een fundamenteel concept in OAuth 2.0 en OIDC dat het toegangsniveau regelt dat een applicatie kan hebben tot de gegevens van een gebruiker.
+---
+
+## Wat is een scope?
+
+In <Ref slug="oauth-2.0" /> en <Ref slug="openid-connect" />-protocollen is een **scope** een mechanisme om de toegang te beperken die een applicatie heeft tot de middelen van een gebruiker. Het definieert de toestemmingen die de applicatie van de gebruiker vraagt.
+
+Scopes worden weergegeven als strings die worden gedefinieerd door de authorization server. Wanneer een applicatie toegang vraagt tot de middelen van een gebruiker, specificeert het de benodigde scopes in de authorization request. De gebruiker wordt vervolgens gevraagd om deze toestemmingen te verlenen of te weigeren tijdens het authorization-proces.
+
+### Waarom scopes gebruiken?
+
+- **Fijngranulaire access control (toegangscontrole)**: Scopes stellen applicaties in staat alleen de vereiste toestemmingen te vragen om specifieke acties uit te voeren, waardoor het risico op ongeautoriseerde toegang wordt verminderd.
+- **Gebruikersconsent**: Scopes helpen gebruikers te begrijpen welke gegevens de applicatie zal benaderen en waarom.
+- **Beveiliging**: Scopes helpen voorkomen dat applicaties hun toegangstoestemmingen overschrijden, waardoor de beveiliging van de gegevens van de gebruiker wordt verbeterd.
+
+## Hoe werkt een scope?
+
+Wanneer een applicatie het OAuth 2.0 / OIDC authorization proces initieert, voegt het een lijst van scopes toe aan de authorization request. De authorization server presenteert vervolgens een toestemmingsscherm aan de gebruiker met de gevraagde scopes. De gebruiker kan ervoor kiezen om toegang te verlenen of te weigeren tot elke scope. Dit proces wordt meestal gebruikt wanneer de applicatie een derde partij applicatie is die toegang vereist tot de middelen van de gebruiker.
+
+Als alternatief kan, indien de applicatie door de authorization server wordt vertrouwd, de gebruiker niet om consent gevraagd worden, in plaats daarvan vindt er een automatische toestemming plaats en worden alle gevraagde scopes verleend.
+
+## Het definiëren van scopes
+
+Scopes worden meestal gedefinieerd door de API provider. Ze kunnen zijn:
+- **Standaard scopes**: Veelgebruikte scopes gedefinieerd door de OAuth 2.0-specificatie, gedeeld door verschillende applicaties en diensten. Bijv. `openid`, `profile`, `email`.
+- **Aangepaste scopes**: Specifiek voor een applicatie of dienst, afgestemd op de unieke vereisten ervan. Bijv. `read:orders`, `write:comments`.
+
+## Waar kunnen scopes worden gebruikt in OIDC en identity management?
+
+Scopes kunnen worden gebruikt in verschillende aspecten van OIDC, inclusief maar niet beperkt tot:
+
+- **Authentication (Authenticatie)**: Scopes kunnen worden gebruikt om specifieke gebruikersinformatie te vragen tijdens het authenticatieproces. Bijv. `profile`, `email`.
+- **Authorization (Autorisatie)**: Scopes kunnen worden gebruikt om toegang te vragen tot specifieke resources of specifieke acties uit te voeren. Bijv. `read:orders`, `write:comments`.
+- **Consent**: Scopes worden aan de gebruiker gepresenteerd tijdens het toestemmingsscherm om hen te informeren over de toestemmingen die door de applicatie worden aangevraagd.
+- **Tokenuitgifte**: Scopes zijn opgenomen in de token response om de verleende toestemmingen aan de applicatie aan te geven.
+- **Tokenvalidatie**: Scopes kunnen worden gebruikt om de toegangsrechten van de applicatie te valideren wanneer het de token voorlegt om toegang te krijgen tot beschermde middelen.
+- **Resource server**: Scopes kunnen door de resource server worden gebruikt om access control beleidsregels af te dwingen op basis van de aan de applicatie verleende toestemmingen.
+- **Gebruikersprofiel**: Scopes kunnen worden gebruikt om aanvullende gebruikersprofielinformatie op te vragen, naast de basisclaims.
+
+## Best practices
+
+- **Vraag minimale scopes aan**: Vraag altijd de minimale set van scopes aan die nodig zijn voor de werking van je applicatie. Dit minimaliseert het risico van overtoestemming en vergroot het vertrouwen van de gebruiker.
+- **Leg het gebruik van scopes uit**: Leg duidelijk aan gebruikers uit waarom elke scope nodig is. Transparantie helpt bij het verkrijgen van gebruikersconsent.
+- **Gebruik standaard scopes indien mogelijk**: Maak gebruik van standaardscopes om compatibiliteit te garanderen en complexiteit te verminderen.
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims",
+  ]}
+/>

@@ -1,0 +1,60 @@
+---
+title: Token introspectie
+tags: [oauth 2.0, oidc]
+description: Token introspectie is een OAuth 2.0-extensie die het mogelijk maakt voor clients om de autorisatieserver te raadplegen voor het valideren van access tokens (toegangstokens) en het ophalen van metadata hierover.
+---
+
+## Wat is token introspectie?
+
+Token introspectie is een OAuth 2.0-extensie gedefinieerd in [RFC 7662](https://datatracker.ietf.org/doc/html/rfc7662) die het mogelijk maakt voor <Ref slug="client">clients</Ref> om de <Ref slug="authorization-server" /> te raadplegen voor het valideren van access tokens (toegangstokens) en het ophalen van metadata hierover. Deze extensie is nuttig wanneer:
+
+- De client de geldigheid van een access token (toegangstoken) in real-time wil verifiëren.
+- Het access token (toegangstoken) een <Ref slug="opaque-token">opaak token</Ref> is (niet zelf-bevattend) en de autorisatieserver nodig heeft om het te valideren.
+
+## Hoe werkt token introspectie?
+
+Hier is een niet-normatief voorbeeld van een token introspectie-aanvraag:
+
+```http
+POST /introspect HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+token=random-token-value
+  &token_type_hint=access_token
+```
+
+De parameter `token_type_hint` is optioneel en moet worden ingesteld op het type token dat wordt geanalyseerd. Als het access token (toegangstoken) geldig is, reageert de autorisatieserver met de metadata van het token:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "active": true,
+  "scope": "read write",
+  "client_id": "client-id",
+  "username": "johndoe",
+  "token_type": "Bearer",
+  "exp": 1634020800,
+  "iat": 1634017200
+}
+```
+
+Het is belangrijk op te merken dat niet alle autorisatieservers token introspectie ondersteunen en niet alle tokens introspecteerbaar zijn. De <Ref slug="authorization-server" /> kan het gebruik van token introspectie beperken op basis van verschillende factoren, bijvoorbeeld, sommige autorisatieservers ondersteunen mogelijk geen introspectie voor <Ref slug="jwt">JWT's</Ref>.
+
+### Belangrijke parameters in een token introspectie-aanvraag
+
+Hier zijn twee belangrijke parameters in een token introspectie-aanvraag:
+
+- **`token`**: Het token dat introspectie ondergaat.
+- **`token_type_hint`**: Het type token dat introspectie ondergaat. Het kan `access_token` of `refresh_token` zijn.
+
+<SeeAlso slugs={["oauth-2.0", "opaque-token", "jwt"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/oauth2-token-introspection',
+    'https://datatracker.ietf.org/doc/html/rfc7662',
+  ]}
+/>

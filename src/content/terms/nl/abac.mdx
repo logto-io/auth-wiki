@@ -1,0 +1,113 @@
+---
+title: Attribuut-gebaseerde toegangscontrole (ABAC)
+tags: [authorization]
+description: Attribuut-gebaseerde toegangscontrole (ABAC) is een toegangscontrolemodel dat gebruikmaakt van attributen (zoals gebruikersrollen, resource-eigenschappen en omgevingscondities) om beslissingen over toegangscontrole te nemen. Het is een flexibele en dynamische manier om toegang tot beschermde middelen te beheren.
+---
+
+## Wat is attribuut-gebaseerde toegangscontrole (ABAC)?
+
+ABAC is een <Ref slug="access-control" /> model dat gebruikmaakt van attributen om beslissingen over toegangscontrole te nemen. Deze attributen kunnen diverse factoren omvatten, zoals:
+
+- Gebruikersattributen: bijvoorbeeld rollen, afdeling, locatie, etc.
+- Resource-attributen: bijvoorbeeld gevoeligheidsniveau, eigenaar, type, etc.
+- Omgevingsattributen: bijvoorbeeld tijd van toegang, locatie, apparaat, etc.
+
+Door deze attributen te evalueren en door een reeks regels te laten lopen, kan ABAC bepalen of een subject (bijvoorbeeld gebruiker, service) toegang tot een resource moet krijgen. Deze benadering maakt fijnmazige toegangscontrole en dynamische beleidsafdwinging op basis van de context mogelijk.
+
+## Hoe werkt ABAC?
+
+ABAC gebruikt een beleidsgebaseerde benadering voor toegangscontrole. Een typisch ABAC-beleid bestaat uit:
+
+- **Subject**: De entiteit die toegang aanvraagt (bijvoorbeeld gebruiker, service, apparaat).
+- **Actie**: De bewerking die op de resource wordt uitgevoerd (bijvoorbeeld lezen, schrijven, verwijderen).
+- **Resource**: De entiteit waartoe toegang wordt gezocht (bijvoorbeeld bestand, database, API).
+- **Omgeving**: De context waarin toegang wordt aangevraagd (bijvoorbeeld tijd, locatie, apparaat).
+- **Attributen**: De eigenschappen van het subject, de resource en de omgeving die worden geëvalueerd om toegangsbeslissingen te nemen.
+- **Beleidsregels**: Een reeks regels die de voorwaarden definiëren waaronder toegang wordt verleend of geweigerd.
+
+ABAC-beleidsregels zijn complexer dan traditionele toegangscontrolemodellen zoals <Ref slug="rbac" />. Aan de andere kant biedt ABAC meer flexibiliteit en granulariteit in toegangsbeslissingen.
+
+### Voorbeeld van ABAC-beleidsregels
+
+Bijvoorbeeld, een systeem heeft verschillende ABAC-beleidsregels:
+
+1. **Beleid 1**: Toegang toestaan als:
+
+    - (Subject) Subjectrol is `manager`.
+    - (Attribuut) Gevoeligheidsniveau van de resource is `hoog`.
+    - (Omgeving) Locatie is `intern`.
+    - (Actie) Elke actie.
+    - (Omgeving) Tijd is tussen 9.00 uur en 17.00 uur (kantooruren).
+
+2. **Beleid 2**: Toegang weigeren als:
+
+    - (Subject) Subjectrol is niet `manager`.
+    - (Attribuut) Gevoeligheidsniveau van de resource is `hoog`.
+    - (Omgeving) Elke locatie.
+    - (Actie) Elke actie.
+    - (Omgeving) Elke tijd.
+
+3. **Beleid 3**: Toegang toestaan als:
+
+    - (Subject) Subjectrol is `werknemer` of `manager`.
+    - (Attribuut) Gevoeligheidsniveau van de resource is `laag`.
+    - (Omgeving) Elke locatie.
+    - (Actie) `lees` actie.
+    - (Omgeving) Elke tijd.
+
+De beleidsbeoordelingsmotor controleert deze beleidsregels in volgorde, en het eerste beleid dat aan de voorwaarden voldoet, bepaalt de toegangsbeslissing. Ondertussen wordt een standaard weigering afgedwongen als geen andere beleidsregels overeenkomen.
+
+Laten we enkele scenario's doornemen om te begrijpen hoe ABAC werkt:
+
+> **Scenario 1**. Een gebruiker wil toegang (de `lees` actie uitvoeren) tot een document met een hoog gevoeligheidsniveau (resource) buiten het kantoor (omgeving). De gebruiker heeft de rol van `manager` in het systeem.
+
+**Beslissing**: Toegang geweigerd omdat de gebruiker buiten het kantoor is (locatie is niet `intern`).
+
+> **Scenario 2**. Een gebruiker wil toegang (de `lees` actie uitvoeren) tot een document met een hoog gevoeligheidsniveau (resource) tijdens kantooruren (omgeving) in het kantoornetwerk (locatie=`intern`). De gebruiker heeft de rol van `manager`.
+
+**Beslissing**: Toegang verleend omdat aan alle voorwaarden in Beleid 1 wordt voldaan.
+
+> **Scenario 3**. Alle voorwaarden in scenario 2 zijn hetzelfde, maar de gebruiker heeft de rol van `werknemer` in plaats van `manager`.
+
+**Beslissing**: Toegang geweigerd omdat de rol van de gebruiker niet voldoet aan de voorwaarden in Beleid 1.
+
+> **Scenario 4**. Een gebruiker wil toegang (de `lees` actie uitvoeren) tot een document met een laag gevoeligheidsniveau (resource). De gebruiker heeft de rol van `werknemer`.
+
+**Beslissing**: Toegang verleend omdat aan alle voorwaarden in Beleid 3 wordt voldaan.
+
+> **Scenario 5**. Een gebruiker wil een document met een laag gevoeligheidsniveau (resource) verwijderen (de `verwijderen` actie uitvoeren). De gebruiker heeft de rol van `werknemer`.
+
+**Beslissing**: Toegang geweigerd omdat er geen beleid is dat de `verwijderen` actie op documenten met een laag gevoeligheidsniveau toestaat.
+
+Je zult merken dat niet alle attributen in elk beleid vereist zijn. Deze flexibiliteit maakt een meer dynamisch en contextbewust toegangscontrolemecanisme mogelijk.
+
+## Overwegingen bij implementatie
+
+Hoewel ABAC een krachtige manier biedt om toegangscontrole te beheren, brengt het ook enkele implementatieoverwegingen met zich mee:
+
+- Systeemcomplexiteit: ABAC-beleidsregels kunnen complex worden naarmate het aantal attributen en regels toeneemt. Correct beleidbeheer en testen zijn tijdrovender dan eenvoudigere toegangscontrolemodellen.
+- Prestatie: Het evalueren van complexe ABAC-beleidsregels kan invloed hebben op de systeemprestaties. Caching- en optimalisatietechnieken kunnen dit probleem helpen verminderen.
+- Beleidsconflicten: Tegenstrijdige beleidsregels kunnen leiden tot onvoorspelbare toegangsbeslissingen. Regelmatige beleidsbeoordeling en conflictoplossing moeten deel uitmaken van het beleidbeheerproces.
+
+## ABAC versus RBAC
+
+Door ABAC te vergelijken met <Ref slug="rbac" /> kun je de verschillen tussen de twee modellen begrijpen:
+
+|                       | RBAC                               | ABAC                                     |
+|-----------------------|------------------------------------|------------------------------------------|
+| Toegangsbeleid        | Gebaseerd op rollen                | Gebaseerd op attributen                   |
+| Granulariteit         | Grofmazig                          | Fijnmazig                                 |
+| Flexibiliteit         | Beperkt                            | Zeer flexibel                            |
+| Complexiteit          | Eenvoudiger                        | Complexer                                |
+| Prestatiesimpact      | Minimaal                           | Kan aanzienlijk zijn                     |
+| Toegangsbeheer        | Rolbeheer                          | Beleidsbeheer                            |
+| Beste voor            | Goed gedefinieerde permissiestructuren | Dynamische en contextbewuste toegangscontrole |
+
+<SeeAlso slugs={["access-control", "rbac", "authorization"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/rbac-and-abac",
+    "https://csrc.nist.gov/publications/detail/sp/800-162/final",
+  ]}
+/>

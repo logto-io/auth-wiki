@@ -1,0 +1,73 @@
+---
+title: OpenID Connect (OIDC) Discovery
+tags: [oidc]
+description: OpenID Connect (OIDC) Discovery is een mechanisme dat het mogelijk maakt voor clients om automatisch de eindpunten en configuratie van de OpenID Provider (aanbieder) te ontdekken.
+---
+
+## Wat is OpenID Connect (OIDC) Discovery?
+
+OpenID Connect (OIDC) Discovery, gedefinieerd in [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html), is een mechanisme dat het mogelijk maakt voor <Ref slug="client">clients</Ref> om automatisch de eindpunten en configuratie van de OpenID Provider te ontdekken. Het is een moderne benadering om de communicatie tussen clients en <Ref slug="openid-connect" headingId="openid-provider-op">OpenID Providers</Ref> te vereenvoudigen.
+
+OIDC Discovery heeft twee hoofdcomponenten:
+
+- OpenID Provider issuer (uitgever) discovery: De client kan de locatie (URL) van de OpenID Provider ontdekken via [WebFinger](https://tools.ietf.org/html/rfc7033) of een document buiten de band.
+- OpenID Provider metadata: De client kan het metadatadocument ophalen en verwerken om meer te leren over de capaciteiten en eindpunten van de OpenID Provider.
+
+## Hoe werkt OIDC Discovery?
+
+### OpenID Provider issuer discovery
+
+De OpenID Provider issuer is een unieke identificatie (meestal hetzelfde als de URL) die clients kunnen gebruiken om de configuratie van de OpenID Provider te ontdekken. Echter, clients moeten de locatie van de issuer kennen voordat ze het metadatadocument kunnen ophalen.
+
+Als de locatie van de issuer al bekend is, kan de client deze stap overslaan. Anders kan de client WebFinger gebruiken om de locatie van de issuer te ontdekken. De benodigde informatie voor OIDC issuer discovery is:
+
+- `host`: Waar de WebFinger-service wordt gehost.
+- `resource`: Het e-mailadres of de URL van de OpenID Provider.
+- `rel`: Het relatietype, dat moet worden ingesteld op `http://openid.net/specs/connect/1.0/issuer`.
+
+Bijvoorbeeld, een gebruiker met het e-mailadres `foo@bar.com` probeert de locatie van de issuer te ontdekken op `example.com`. De WebFinger-aanvraag zou er zo uitzien:
+
+```http
+GET /.well-known/webfinger?resource=acct%3Afoo%40bar.com&
+  rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: example.com
+```
+
+De gedecodeerde `resource` parameter is `acct:foo@bar.com`, en de `rel` parameter is `http://openid.net/specs/connect/1.0/issuer`.
+
+### OpenID Provider metadata
+
+Zodra de client de locatie van de issuer kent, kan het het metadatadocument ophalen van het bekende eindpunt. Het pad naar het metadatadocument is `/.well-known/openid-configuration` relatief aan de URL van de issuer.
+
+Als bijvoorbeeld de URL van de issuer `https://oidc.example.com` is, kan de client het metadatadocument ophalen van `https://oidc.example.com/.well-known/openid-configuration`. Hier is een niet-normatief voorbeeld van de metadata respons:
+
+```json
+{
+  "issuer": "https://oidc.example.com",
+  "authorization_endpoint": "https://oidc.example.com/authorize",
+  "token_endpoint": "https://oidc.example.com/token",
+  //...
+}
+```
+
+Het metadatadocument bevat veel nuttige informatie over de OpenID Provider. Hier zijn een paar belangrijke velden:
+
+- `issuer`: De unieke identificatie van de OpenID Provider. Het moet worden gebruikt voor het valideren van de tokens.
+- `authorization_endpoint`: De URL om het <Ref slug="authentication-request" /> te initiëren.
+- `token_endpoint`: De URL om de <Ref slug="token-request" /> te versturen.
+- `jwks_uri`: De URL om de <Ref slug="jwk" headingId="json-web-key-set-jwks" /> op te halen voor <Ref slug="signing-key" /> validatie.
+- `response_types_supported`: De ondersteunde antwoordtypes voor de <Ref slug="authentication-request" />.
+- `scopes_supported`: De ondersteunde <Ref slug="scope">scopes</Ref> voor de <Ref slug="authentication-request" />.
+- `claims_supported`: De ondersteunde <Ref slug="claim">claims</Ref> voor de <Ref slug="id-token" />.
+- `token_endpoint_auth_methods_supported`: De ondersteunde client-authenticatiemethoden voor de <Ref slug="token-request" />.
+
+Voor een uitputtende lijst van metadatavelden, raadpleeg de [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) specificatie.
+
+<SeeAlso slugs={["openid-connect", "authentication-request", "jwt", "token-request"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/exploring-oidc-configuration',
+    'https://openid.net/specs/openid-connect-discovery-1_0.html',
+  ]}
+/>

@@ -1,0 +1,73 @@
+---
+title: JSON Web Encryption (JWE)
+tags: [oidc, jose]
+description: JSON Web Encryptie (JWE) is een standaard manier om data in JSON-formaat te versleutelen en te ontsleutelen. Het wordt vaak gebruikt om gevoelige informatie te beschermen in JSON Web Tokens (JWTs) tijdens overdracht.
+---
+
+## Wat is JSON Web Encryptie (JWE)?
+
+Zoals gedefinieerd in de RFC 7516, is JSON Web Encryptie (JWE) een mechanisme om data in JSON-formaat te versleutelen en te ontsleutelen. Het voegt een laag van vertrouwelijkheid toe aan de data en is bijzonder nuttig bij het verzenden van gevoelige informatie over een niet-vertrouwd netwerk.
+
+JWE wordt vaak gebruikt in combinatie met <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref> om de payload-gegevens te beschermen. Bijvoorbeeld, een <Ref slug="id-token" /> of <Ref slug="access-token" /> kan worden versleuteld met JWE om ervoor te zorgen dat de gegevens veilig zijn tijdens de overdracht.
+
+## Hoe werkt JWE?
+
+JWE heeft twee serialisatieformaten: compact en JSON. Elk formaat heeft zijn eigen manier om de versleutelde data te representeren.
+
+### Compacte serialisatie
+
+In de compacte serialisatie wordt de JWE weergegeven als een string met vijf Base64URL-gecodeerde delen gescheiden door punten (`.`). De vijf delen zijn:
+
+```
+{{header}}.{{encrypted-key}}.{{iv}}.{{ciphertext}}.{{tag}}
+```
+
+Elk deel heeft een specifieke functie:
+
+- `header`: Bevat metadata over het versleutelingsalgoritme en sleutelbeheer.
+- `encrypted-key`: De versleutelde inhoudsencryptiesleutel (CEK) die wordt gebruikt om de payload te versleutelen.
+- `iv`: De initiële vector die wordt gebruikt in het versleutelingsproces.
+- `ciphertext`: De versleutelde payload-gegevens.
+- `tag`: De authenticatietag die wordt gebruikt om de integriteit van de versleutelde gegevens te verifiëren.
+
+### JSON-serialisatie
+
+JSON-serialisatie is uitgebreider en biedt een gestructureerde manier om de JWE weer te geven. De JWE wordt weergegeven als een JSON-object met de volgende eigenschappen:
+
+```json
+{
+  "protected": "{{protected-header}}",
+  "unprotected": "{{unprotected-header}}",
+  "header": "{{header}}",
+  "encrypted_key": "{{encrypted-key}}",
+  "iv": "{{iv}}",
+  "ciphertext": "{{ciphertext}}",
+  "tag": "{{tag}}",
+  "aad": "{{additional-authenticated-data}}"
+}
+```
+
+- `protected`: Bevat de Base64URL-gecodeerde beschermde header.
+- `unprotected`: Bevat de JWE gedeelde niet-beschermde header.
+- `header`: Bevat de JWE per-ontvanger niet-beschermde header.
+- `encrypted_key`: Bevat de versleutelde inhoudsencryptiesleutel (CEK) die Base64URL-gecodeerd is.
+- `iv`: Bevat de Base64URL-gecodeerde initiële vector.
+- `ciphertext`: Bevat de Base64URL-gecodeerde ciphertekst (versleutelde payload).
+- `tag`: Bevat de Base64URL-gecodeerde authenticatietag.
+- `aad`: Bevat de Base64URL-gecodeerde aanvullende geauthenticeerde data.
+
+---
+
+De client moet in staat zijn om de JWE te ontsleutelen met de juiste sleutel en algoritme. Een vooraf gecommuniceerde sleutel of een sleutel afgeleid van een sleutelafstemmingsprotocol kan worden gebruikt om de JWE te ontsleutelen.
+
+Bijvoorbeeld, een <Ref slug="id-token" /> kan worden versleuteld met JWE, en de client kan deze ontsleutelen met de juiste sleutel verkregen van de `jwks_uri`-endpoint van de OpenID-provider.
+
+<SeeAlso slugs={["jwt", "jwk", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+    "https://datatracker.ietf.org/doc/html/rfc7518",
+  ]}
+/>

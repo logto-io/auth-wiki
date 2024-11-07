@@ -1,0 +1,56 @@
+---
+title: Authenticatie (Authentication)
+tags: [authentication]
+description: Authenticatie (Authentication) is het proces van het verifiëren van de identiteitseigendom (bijv. gebruiker of service). Het is de basis van identiteit en toegangsbeheer (IAM) systemen en is essentieel voor het beveiligen van applicaties en diensten.
+---
+
+## Wat is authenticatie (Authentication)?
+
+> **TL;DR**: Authenticatie (Authentication) beantwoordt de vraag "Welke identiteit bezit je?"
+
+Hier zijn enkele typische voorbeelden van authenticatie (authentication):
+
+- Inloggen met gebruikersnaam en wachtwoord
+- Sociale login (bijv., Inloggen met Google)
+- <Ref slug="machine-to-machine" /> authenticatie (bijv., API-keys)
+
+We hebben de uitdrukking "Wie ben je?" niet gebruikt omdat:
+
+- In de wereld van <Ref slug="iam" /> gaat authenticatie (authentication) over het verifiëren van het eigendom van een identiteit, niet over het identificeren van de persoon of entiteit. Bijvoorbeeld, wanneer een van je familieleden je inloggegevens gebruikt om in te loggen op je account, zijn zij niet jij, maar de identiteit voor het systeem is hetzelfde.
+- De identiteit kan een gebruiker, een dienst of een apparaat zijn. Bijvoorbeeld, een dienst kan zichzelf authenticeren naar een andere dienst met behulp van API-keys.
+
+### Verschil tussen authenticatie en autorisatie
+
+Deze twee termen worden vaak verward, maar ze zijn fundamenteel verschillend: <Ref slug="authorization" /> beantwoordt de vraag "Wat kun je doen?". Bovendien is authenticatie (authentication) een vereiste voor autorisatie omdat het systeem de identiteit moet kennen voordat het kan beslissen welke acties het kan uitvoeren.
+
+## Authenticatiefactoren
+
+Authenticatie (Authentication) kan worden uitgevoerd met één of meer factoren. Hier zijn enkele veelvoorkomende factoren:
+
+- **Kennisfactor**: Iets dat je weet (bijv., wachtwoord, PIN)
+- **Bezitsfactor**: Iets dat je hebt (bijv., smartphone, beveiligingstoken)
+- **Eigenschapsfactor**: Iets dat je bent (bijv., vingerafdruk, gezichtsherkenning)
+
+<Ref slug="mfa" /> is een veelgebruikte praktijk waarmee meerdere factoren worden gecombineerd om de beveiliging te verhogen. Bijvoorbeeld, wanneer je inlogt op je bankrekening, moet je mogelijk een wachtwoord (kennisfactor) en een eenmalige code van een authenticator-app (bezitsfactor) opgeven.
+
+<Ref slug="passkey" /> is een moderne authenticatiefactor die meerdere factoren kan combineren en resistent is tegen phishing-aanvallen.
+
+## Authenticatieraamwerken (protocollen)
+
+In plaats van een zelfgemaakt authenticatiesysteem te bouwen, is het aan te raden gevestigde raamwerken en protocollen te gebruiken, omdat ze zijn beproefd en door beveiligingsexperts zijn beoordeeld. Er zijn verschillende authenticatieraamwerken en protocollen die definiëren hoe authenticatie (authentication) moet worden uitgevoerd. Twee veelvoorkomende zijn:
+
+- <Ref slug="openid-connect" />: Een identiteitselement gebouwd bovenop <Ref slug="oauth-2.0" /> dat authenticatiemogelijkheden toevoegt. Het is relatief modern en wordt veel gebruikt voor nieuwe applicaties.
+- <Ref slug="saml" />: Een protocol voor het uitwisselen van authenticatie- en autorisatiegegevens tussen partijen. Het wordt vaak gebruikt in bedrijfsomgevingen.
+
+De keuze van het raamwerk hangt af van je gebruikssituatie en vereisten. Voor nieuwe applicaties wordt OIDC aanbevolen vanwege het moderne ontwerp en de ondersteuning voor <Ref slug="jwt" />.
+
+Echter, directe omgang met deze protocollen kan nog steeds complex en tijdrovend zijn. Beide protocollen hebben een steile leercurve en vereisen zorgvuldige implementatie om de veiligheid te waarborgen. In plaats daarvan kan het gebruik van een <Ref slug="identity-provider" /> die deze protocollen ondersteunt of erop is gebouwd het authenticatieproces aanzienlijk vereenvoudigen. Een goede identity provider zal ook extra functies bieden zoals <Ref slug="mfa" /> en <Ref slug="single-sign-on" /> voor je toekomstige behoeften.
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

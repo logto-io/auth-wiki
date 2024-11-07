@@ -1,0 +1,120 @@
+---
+title: Resource-indicator
+tags: [oauth 2.0]
+description: Resource-indicator in OAuth 2.0 is een uitbreidingsparameter gedefinieerd in RFC 8707 waarmee clients de locatie van de resource server kunnen specificeren in de authorization request (autorisatieverzoek). Het biedt een schaalbare manier om meerdere resource servers te beheren in een enkele authorization server (autorisatieserver).
+---
+
+## Wat is een resource-indicator?
+
+Een resource-indicator, zoals gedefinieerd in de OAuth 2.0-extensie [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707), is een parameter waarmee clients de URI van de resource server kunnen specificeren in de <Ref slug="authorization-request" /> (of <Ref slug="authentication-request" /> in <Ref slug="openid-connect" />) en <Ref slug="token-request" />. De resource-indicator wordt gebruikt om de locatie van de resource server aan te geven die de client wil benaderen.
+
+> [!Note]
+> Resource-indicator is een uitbreidingsparameter die geen onderdeel is van de kernspecificatie van OAuth 2.0. Controleer de documentatie van je <Ref slug="authorization-server" /> om te zien of deze parameter ondersteund wordt.
+
+## Hoe werken resource-indicatoren?
+
+Om beter te begrijpen hoe resource-indicatoren werken, laten we een scenario overwegen waarin een <Ref slug="client" /> toegang wil tot meerdere <Ref slug="resource-server">resource servers</Ref> met behulp van een enkele authorization server.
+
+### 1. Resource-servers registreren
+
+Normaal gesproken moet de ontwikkelaar elke resource server registreren bij de authorization server om ze beschikbaar te maken voor de client. Het daadwerkelijke registratieproces kan variëren afhankelijk van de implementatie van de authorization server. De functienaam kan anders zijn, zoals "API resources" of gewoon "resources".
+
+Laten we aannemen dat de client toegang wil tot twee resource servers: `https://api.example.com` en `https://api.another.com`, en dat ze zijn geregistreerd bij de authorization server.
+
+### 2. Scopes definiëren voor elke resource server
+
+In tegenstelling tot traditionele OAuth 2.0-flows, waar de <Ref slug="scope">scopes</Ref> worden gedeeld over alle resource servers, stelt de resource-indicatoruitbreiding de client in staat om de scopes voor elke resource server te specificeren. Dit zou ook onderdeel van het registratieproces moeten zijn. Laten we aannemen dat de resource servers de volgende scopes hebben:
+
+| Resource Server           | Scopes           |
+|---------------------------|------------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. Resource-indicatoren opnemen in het autorisatieverzoek
+
+Om de authorization server te laten weten dat we de resource-indicatoruitbreiding willen gebruiken, moet de client de `resource`-parameter opnemen in het authorization request.
+
+Hier is een niet-normatief voorbeeld van een authorization request dat een resource-indicator bevat:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+In dit voorbeeld neemt de client de `resource`-parameter op met de gecodeerde waarde `https%3A%2F%2Fapi.example.com` om de locatie van de resource server aan te geven (`https://api.example.com`).
+
+Je zult merken dat we ook enkele vooraf gedefinieerde scopes opnemen, zoals `openid`, samen met de resource-specifieke scopes. De authorization server zou de scopes moeten valideren en andere scopes filteren die niet geassocieerd zijn met de aangevraagde resource server. Dit wordt **downscoping** genoemd.
+
+Hier is de tabel met de daadwerkelijke vier scopes die de client naar verwachting zal ontvangen:
+
+| Resource Server           | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                       |
+
+Het mooie van de resource-indicator is dat de client meerdere resource servers in een enkel authorization request kan aanvragen door de `resource`-parameter te herhalen. Laten we een ander voorbeeld bekijken:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+In dit voorbeeld vraagt de client toegang tot zowel `https://api.example.com` als `https://api.another.com` met de respectieve scopes. De authorization server zou de scopes voor elke resource server moeten valideren, dat wil zeggen, een **Cartesian product** maken van de scopes en de resource servers. Het resultaat zou zijn:
+
+| Resource Server           | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`              |
+| `https://api.another.com` | `read`, `delete`             |
+
+Er zijn in totaal zeven geldige scopes voor dit authorization request.
+
+### 4. Resource-indicatoren opnemen in het token request
+
+Zodra de client de authorization code ontvangt, kan deze deze inwisselen voor een access token met een **enkele** resource-indicator, indien nodig. Bijvoorbeeld:
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+De `resource`-parameter in het token request is optioneel. Als de client deze opneemt, zou de authorization server de resource-indicator moeten valideren tegen de scopes die zijn geassocieerd met de huidige grant; anders moet de authorization server terugvallen op de globale scopes (bijvoorbeeld, <Ref slug="openid-connect" /> scopes).
+
+> [!Note]
+> De authorization server zou altijd <Ref slug="access-control" /> moeten toepassen om ervoor te zorgen dat het uitgegeven access token geldig is en correct is gedownsized op basis van de huidige grant context.
+
+Je vraagt je misschien af hoe je meerdere resource servers in de grant kunt behandelen. Aangezien de authorization code eenmalig is te gebruiken, kan de client andere grants gebruiken, zoals de <Ref slug="refresh-token" /> grant, om access tokens voor andere resource servers te verkrijgen.
+
+## Waarom hebben we resource-indicatoren nodig?
+
+Zoals je kunt zien aan de bovenstaande voorbeelden, biedt de resource-indicatoruitbreiding een schaalbare manier om met meerdere resource servers om te gaan zonder de <Ref slug="scope">scopes</Ref> door elkaar te halen en je zorgen te maken over scope-conflicten. Het is een krachtige functie die meer flexibiliteit biedt voor clients om toegang te krijgen tot resources van verschillende resource servers.
+
+Het is vermeldenswaard dat de resource-indicatoruitbreiding geen deel uitmaakt van de kernspecificatie van OAuth 2.0. Zorg ervoor dat je authorization server deze uitbreiding ondersteunt voordat je deze in je applicatie gebruikt.
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

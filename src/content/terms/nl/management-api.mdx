@@ -1,0 +1,65 @@
+---
+title: Beheer API (Management API)
+tags: [api, integration]
+description: De Beheer API (Management API) in de context van identity and access management (IAM) maakt programmatisch beheer van resources zoals gebruikers, applicaties, rollen en permissies mogelijk. Doorgaans RESTful, biedt het een abstractielaag tussen het IAM-systeem en de gebruikersinterface, die automatisering, integratie en ontwikkeling van aangepaste functies mogelijk maakt.
+---
+
+## Wat is Beheer API (Management API)?
+
+De definitie van Beheer API (Management API) kan variëren afhankelijk van de software of dienst die je gebruikt. In de context van identity and access management (IAM) verwijst Beheer API meestal naar een set APIs die je in staat stellen IAM-gerelateerde resources programmatisch te beheren. Bijvoorbeeld, gebruikers, applicaties, rollen, permissies, organisaties, enzovoort.
+
+Hoewel de naam niet de exacte implementatie specificeert, is Beheer API meestal RESTful, gezien de aard om de resources en de operaties die erop uitgevoerd kunnen worden, nauwkeurig te definiëren. Dat gezegd hebbende, als je `POST /users` ziet, kun je verwachten dat deze API-aanroep een nieuwe gebruiker zal creëren.
+
+## Waarom is Beheer API (Management API) belangrijk?
+
+Beheer API creëert een aparte abstractielaag bovenop het IAM-systeem, maar onder de gebruikersinterface. Dit stelt ontwikkelaars in staat om het beheer van IAM-resources te automatiseren, wat in verschillende scenario's bijzonder nuttig kan zijn:
+
+### 1. Automatisering
+
+Zoals de naam al suggereert, stelt Beheer API je in staat om met code resources te beheren, in plaats van handmatig door de gebruikersinterface te klikken. Dit is bijzonder nuttig wanneer je een groot aantal gebruikers, applicaties of rollen moet beheren. Je kunt bijvoorbeeld een script schrijven om gebruikers uit een CSV-bestand te importeren en hen de juiste rollen en permissies toe te wijzen.
+
+### 2. Integratie
+
+Beheer API creëert een standaard manier voor service-to-service (of machine-to-machine) communicatie. Wanneer je meerdere services hebt die met het IAM-systeem moeten communiceren, kan een goed ontworpen Beheer API worden gebruikt voor alle services door de API-aanroepen te combineren, in plaats van voor elke service aangepaste integraties te implementeren. Een service die bijvoorbeeld alle gebruikers onder een specifieke rol moet opsommen, kan dit doen door `GET /roles/{rol_id}/users` aan te roepen.
+
+### 3. Samenstelling en functieverlenging
+
+Vanwege de verscheidenheid aan zakelijke vereisten, kan een IAM-systeem mogelijk niet alle exacte functies bieden die je nodig hebt, vooral wanneer het om complexe access control (toegangscontrole) vereisten gaat. Beheer API stelt je in staat om aangepaste functies bovenop het bestaande IAM-systeem te bouwen zonder het onderliggende platform of de architectuur aan te passen.
+
+Laten we een dagelijks voorbeeld bekijken: eindgebruikers moeten hun e-mailadres veranderen. Verschillende apps kunnen verschillende eisen hebben:
+
+1. App A vereist dat de gebruiker zowel het oude als het nieuwe e-mailadres verifieert.
+2. App B vereist dat de gebruiker het bestaande wachtwoord verifieert voordat het e-mailadres wordt gewijzigd.
+3. App C vereist dat de gebruiker het bestaande wachtwoord verifieert en een beheerder goedkeuring verleent voor het wijzigen van het e-mailadres.
+
+Met Beheer API kun je een aangepaste service bouwen die deze vereisten orkestreert door de noodzakelijke APIs in de juiste volgorde aan te roepen. Je kunt zelfs de Beheer API combineren met de API van je service om een complexe workflow te bereiken. Laten we App C als voorbeeld nemen:
+
+1. De gebruiker klikt op "E-mailadres wijzigen" in App C, die een verzoek `POST /email-change-requests` naar je service stuurt. Het creëert een nieuwe aanvraag voor e-mailwijziging en retourneert de identificatie `foo`.
+2. App C toont een dialoogvenster aan de gebruiker en vraagt hen om het bestaande wachtwoord in te voeren.
+3. De gebruiker voert het wachtwoord in en App C stuurt een verzoek `PATCH /email-change-requests/foo` naar je service met het wachtwoord. Op de achtergrond verifieert je service het wachtwoord door de Beheer API `POST /users/{user_id}/verify-password` aan te roepen.
+4. Als het wachtwoord correct is, creëert je service een succesvolle verificatie in de e-mailwijzigingsaanvraag `foo`.
+5. In het beheerderspaneel kan een beheerder de openstaande wijzigingen in e-mailadres aanvragen zien met `GET /email-change-requests?status=pending`.
+6. Als de administrator het verzoek goedkeurt, stuurt het beheerderspaneel een verzoek `PATCH /email-change-requests/foo` naar je service met de goedkeuring van de beheerder.
+7. Je service roept vervolgens de Beheer API `PATCH /users/{user_id}` aan om het e-mailadres van de gebruiker bij te werken. Als het e-mailadres niet kan worden bijgewerkt, zal de Beheer API een fout retourneren en kan je service deze op de juiste manier afhandelen.
+
+Merk op dat in het bovenstaande voorbeeld onze eindgebruikers nooit rechtstreeks met de Beheer API interageren. In plaats daarvan interageren ze met App C, die de Beheer API-aanroepen op de achtergrond orkestreert om de gewenste workflow te bereiken.
+
+## Hoe zou een goede Beheer API (Management API) eruit moeten zien?
+
+- **RESTful**: Volg de RESTful principes om de API voorspelbaar en eenvoudig te gebruiken te maken.
+- **Resource-georiënteerd**: Vertegenwoordig resources als zelfstandige naamwoorden en gebruik HTTP-methoden om acties op hen uit te voeren.
+- **Consistent**: Gebruik consistente naamconventies, foutafhandeling en responsformaten.
+- **Veilig**: Implementeer correcte authenticatie en autorisatiemechanismen om de API te beschermen.
+- **Gedocumenteerd**: Bied duidelijke en beknopte documentatie over hoe de API te gebruiken, inclusief voorbeelden en use cases.
+- **Compatibel**: Zorg voor achterwaartse compatibiliteit bij het introduceren van nieuwe versies van de API.
+- **Omvattend**: Dek alle noodzakelijke operaties om IAM-resources effectief te beheren.
+
+Er zijn andere aspecten zoals prestaties en schaalbaarheid, die meer gerelateerd zijn aan de infrastructuur dan aan het API-design zelf. In de praktijk zou een goede Beheer API deze aspecten echter ook moeten overwegen.
+
+<Resources
+  urls={[
+    "https://blog.logto.io/graphql-and-rest-api",
+    "https://blog.logto.io/post-only-debate",
+    "https://swagger.io/specification/",
+  ]}
+/>

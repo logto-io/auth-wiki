@@ -1,0 +1,34 @@
+---
+title: Tijdgebaseerd eenmalig wachtwoord (TOTP)
+tags: [authentication]
+description: Een tijdgebaseerd eenmalig wachtwoord (TOTP) is een tijdelijke, unieke code die wordt gegenereerd door een algoritme dat de huidige tijd als sleutelfactor gebruikt.
+---
+
+## Wat is TOTP?
+
+Een Tijdgebaseerd Eenmalig Wachtwoord (TOTP) is een tijdelijke, unieke code die wordt gegenereerd door een algoritme dat de huidige tijd als sleutelfactor gebruikt. Net als een generieke <Ref slug="otp" />, wordt een TOTP slechts één keer gebruikt, maar het heeft een vaste levensduur, meestal variërend van 30 tot 60 seconden. Na het verlopen wordt automatisch een nieuwe code gegenereerd.
+
+De TOTP-standaard wordt gedefinieerd door de Internet Engineering Task Force (IETF) onder [RFC 6238](https://datatracker.ietf.org/doc/html/rfc6238), en het wordt veel gebruikt in verschillende tweefactorauthenticatie (2FA) en multi-factorauthenticatie (MFA) systemen. Omdat TOTPs afhankelijk zijn van gesynchroniseerde tijd tussen de client (gebruikersapparaat) en de server, bieden ze een hoog beveiligingsniveau en zijn ze moeilijk te voorspellen of te hergebruiken.
+
+## Hoe TOTP werkt
+
+De generatie van een TOTP omvat de volgende stappen:
+
+1. Gedeeld geheim: Tijdens de initiële setup wordt een gedeelde geheime sleutel gegenereerd en veilig opgeslagen op zowel de client als de server. Deze sleutel wordt meestal gecodeerd als een QR-code die gebruikers scannen met een authenticatie-app.
+2. Tijdintervallen: De huidige tijd wordt verdeeld in vaste intervallen, meestal van 30 seconden.
+3. Algoritmetoepassing: De gedeelde geheime sleutel en de huidige tijdstempel worden ingevoerd in een hash-gebaseerd algoritme (vaak HMAC-SHA1) om een unieke numerieke code te produceren.
+4. Synchronisatie: Zowel de client als de server genereren onafhankelijk de code met behulp van dezelfde gedeelde geheime sleutel en huidige tijdstempel. De codes komen alleen overeen als beide gesynchroniseerd zijn.
+5. Verificatie: Wanneer de gebruiker inlogt of een kritieke transactie uitvoert, voert hij de TOTP in die op zijn authenticatie-app wordt weergegeven. De server vergelijkt deze vervolgens met de intern gegenereerde TOTP voor validatie.
+
+## Wanneer TOTP te gebruiken
+
+In de meeste gevallen wordt een normale OTP aanbevolen, maar in de gevallen waarin het niet mogelijk is om een nieuwe toegangscode te "activeren", wordt TOTP aanbevolen.
+
+- TOTP voorbeeld: Authenticator App
+- OTP voorbeeld: E-mail, SMS
+
+## Wat zijn de verschillen tussen OTP en TOTP?
+
+Het belangrijkste verschil is dat TOTP tijdgebaseerd is, waardoor het geschikt is wanneer het apparaat niet verbonden is met de server. De server kan gemakkelijk een nieuwe toegangscode sturen naar een e-mailadres of telefoonnummer, maar dat vereist dat de e-mail of telefoon online is. Echter, de Authenticator App kan offline blijven en "tijd" gebruiken om de toegangscode te verifiëren.
+
+<SeeAlso slugs={['otp', 'mfa']} />

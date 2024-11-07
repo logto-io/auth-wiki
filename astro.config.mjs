@@ -9,12 +9,13 @@ import { i18n, filterSitemapByDefaultLocale } from "astro-i18n-aut/integration";
 
 export const defaultLocale = 'en';
 export const locales = Object.freeze({
+  ar: 'ar',
   en: 'en',
   es: 'es',
-  zh: 'zh-Hans',
   ko: 'ko',
-  ar: 'ar',
   ja: 'ja',
+  nl: 'nl',
+  zh: 'zh-Hans',
 });
 
 // https://astro.build/config

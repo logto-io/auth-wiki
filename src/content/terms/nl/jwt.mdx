@@ -1,0 +1,167 @@
+---
+title: JSON Web Token (JWT)
+tags: [oidc, jose]
+description: JSON Web Token (JWT) is een open standaard gedefinieerd in RFC 7519 die veilige communicatie tussen twee partijen mogelijk maakt. Het is compact, URL-veilig en zelfstandig, waardoor het ideaal is voor het verzenden van authenticatie (Authentication) en autorisatie (Authorization) gegevens tussen diensten.
+---
+
+## Wat is een JSON Web Token (JWT)?
+
+JSON Web Token (JWT) wordt veel gebruikt in moderne webapplicaties en open standaarden zoals OpenID Connect, en faciliteert authenticatie (Authentication) en autorisatie (Authorization). Hoewel de officiële [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) als een essentiële referentie dient, kan het voor beginners uitdagend zijn om te begrijpen. In dit artikel richten we ons op de kernconcepten van JWT en presenteren we ze in begrijpelijke taal met voorbeelden.
+
+## Waarom hebben we JWT nodig?
+
+Tegenwoordig is het vrij gebruikelijk om JSON te gebruiken om gegevens tussen twee partijen uit te wisselen. Overweeg een JSON-object dat een gebruiker vertegenwoordigt:
+
+```json
+{
+  "sub": "foo",
+  "name": "John Doe"
+}
+```
+
+> `sub` is de afkorting voor "subject", wat een [standaardclaim](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims) is in OpenID Connect om de gebruiker identifier (gebruikers-ID) weer te geven.
+
+Hoe kunnen we de **integriteit** van dit JSON-object garanderen? Met andere woorden, hoe kunnen we ervoor zorgen dat de gegevens tijdens de overdracht niet zijn gewijzigd? Een gebruikelijke oplossing is het gebruik van digitale handtekeningen. Bijvoorbeeld, we kunnen [openbare-sleutelcryptografie](https://en.wikipedia.org/wiki/Public-key_cryptography) gebruiken: de server ondertekent het JSON-object met zijn privésleutel, en de client kan de handtekening verifiëren met de openbare sleutel van de server.
+
+Kortom, JWT biedt een gestandaardiseerde aanpak om het JSON-object en de bijbehorende handtekening te vertegenwoordigen.
+
+> JWT kan ook worden gebruikt om het JSON-object te versleutelen, maar dat is niet de focus van dit artikel.
+
+## Het formaat van JWT
+
+Aangezien er veel algoritmen zijn voor het maken van digitale handtekeningen, is het noodzakelijk om het algoritme te specificeren dat voor JWT-ondertekening wordt gebruikt. Dit wordt bereikt door het construeren van een JSON-object:
+
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+> `alg` staat voor "algoritme", en `typ` staat voor "type".
+
+Typisch wordt `typ` ingesteld op `JWT` in hoofdletters. In ons voorbeeld is `alg` `HS256`, dat staat voor [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC) (we zullen het zo uitleggen), en geeft aan dat we dit algoritme gebruiken om de handtekening te maken.
+
+Nu hebben we alle ingrediënten voor een JWT:
+
+- Header JSON: Algoritme en type
+- Payload JSON: De eigenlijke data
+- Handtekening: De handtekening die de header en payload omvat
+
+Echter, bepaalde tekens zoals spaties en regeleinden zijn niet vriendelijk voor netwerkoverdracht. Daarom moeten de header en payload **Base64URL-gecodeerd** worden. De typische JWT ziet er zo uit:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+> De `.` dient als scheidingsteken.
+
+Laten we alles samenvoegen en een JWT maken:
+
+### Header
+
+JSON: `{"alg":"HS256","typ":"JWT"}`
+
+Base64URL gecodeerd: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`
+
+### Payload
+
+JSON: `{"sub":"foo","name":"John Doe"}`
+
+Base64URL gecodeerd: `eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ`
+
+### Handtekening
+
+In HMAC-SHA256 wordt de handtekening gemaakt met een geheim:
+
+```
+HMAC-SHA256(base64Url(header) + "." + base64Url(payload), secret)
+```
+
+Bijvoorbeeld, met het geheim als `some-great-secret`, wordt de handtekening: `XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g`.
+
+### JWT
+
+De uiteindelijke JWT is:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g
+```
+
+Deze geldige JWT kan worden geverifieerd door elke partij die het geheim bezit.
+
+## Kies het ondertekeningsalgoritme
+
+Zoals eerder vermeld, zijn er verschillende algoritmen om digitale handtekeningen te maken. We hebben `HS256` als voorbeeld gebruikt, maar het is mogelijk niet sterk genoeg omdat het geheim moet worden gedeeld tussen de partijen (bijvoorbeeld de client en de server).
+
+In scenario's uit de praktijk kunnen clients openbare applicaties bevatten, zoals React-apps, die het geheim niet veilig kunnen houden. Daarom is de voorkeursbenadering het gebruik van openbare-sleutelcryptografie (d.w.z. asymmetrische cryptografie) voor het ondertekenen van de JWT. Laten we beginnen met het meest populaire algoritme: [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem).
+
+### RSA
+
+RSA, een asymmetrisch algoritme, gebruikt een paar van sleutels: een openbare sleutel en een privésleutel. De openbare sleutel wordt gebruikt om de handtekening te verifiëren, terwijl de privésleutel wordt gebruikt voor het ondertekenen.
+
+Het header JSON voor RSA ziet er zo uit:
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+```
+
+> `RS256` staat voor RSA-SHA256, wat betekent dat de handtekening wordt gemaakt met het RSA-algoritme en SHA256-hashfunctie. Je kunt ook `RS384` en `RS512` gebruiken om handtekeningen te maken met respectievelijk SHA384 en SHA512 hashfuncties.
+
+De handtekening wordt gemaakt met de privésleutel:
+
+```
+RSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+Opnieuw kunnen we deze onderdelen samenvoegen om een JWT te maken, en de uiteindelijke JWT ziet er zo uit:
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+Nu kan de client de handtekening verifiëren zonder de privésleutel te kennen.
+
+### ECDSA
+
+Hoewel RSA veel toegepast wordt, heeft het last van grotere handtekeningformaten die soms de gecombineerde grootte van de header en payload overschrijden. Het Elliptic Curve Digital Signature Algorithm (ECDSA) is een ander asymmetrisch algoritme dat compactere handtekeningen kan maken en beter presteert.
+
+Om een privésleutel voor ECDSA te genereren, moeten we een kromme kiezen. Dit valt buiten de scope van dit artikel, maar je kunt meer informatie vinden [hier](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Elliptic_Curve_Digital_Signature_Algorithm).
+
+Het header JSON voor ECDSA ziet er zo uit:
+
+```json
+{
+  "alg": "ES256",
+  "typ": "JWT"
+}
+```
+
+> `ES256` staat voor ECDSA-SHA256, wat betekent dat de handtekening wordt gemaakt met het ECDSA-algoritme en SHA256-hashfunctie. Je kunt ook `ES384` en `ES512` gebruiken om handtekeningen te maken met respectievelijk SHA384 en SHA512 hashfuncties.
+
+De handtekening wordt gemaakt met de privésleutel:
+
+```
+ECDSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+De uiteindelijke JWT behoudt dezelfde structuur als RSA maar met een aanzienlijk kortere handtekening:
+
+```
+eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+## Verifieer de JWT
+
+Het verifiëren van een JWT is eenvoudig als het omgekeerde proces van het maken van een JWT:
+
+1. Splits de JWT in drie delen (header, payload en handtekening) met behulp van de `.` scheidingsteken.
+2. Decodeer de header en payload met Base64URL.
+3. Verifieer de handtekening met het algoritme dat in de header is gespecificeerd en de openbare sleutel (voor asymmetrische algoritmen).
+
+Er zijn veel libraries beschikbaar om te helpen met JWT-verificatie, zoals [jose](https://github.com/panva/jose) voor Node.js en webbrowsers.
+
+<SeeAlso slugs={['opaque-token', 'id-token', 'access-token']} />
