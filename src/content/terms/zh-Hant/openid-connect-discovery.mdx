@@ -1,0 +1,73 @@
+---
+title: OpenID Connect (OIDC) 發現 (Discovery)
+tags: [oidc]
+description: OpenID Connect (OIDC) 發現是一種機制，允許客戶端自動發現 OpenID 提供者的端點和配置。
+---
+
+## 什麼是 OpenID Connect (OIDC) 發現？
+
+OpenID Connect (OIDC) 發現，在 [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) 中定義，是一種機制，允許<Ref slug="client">客戶端</Ref>自動發現 OpenID 提供者的端點和配置。這是一種現代化的方法，簡化客戶端和<Ref slug="openid-connect" headingId="openid-provider-op">OpenID 提供者</Ref>之間的通信。
+
+OIDC 發現包含兩個主要組件：
+
+- OpenID 提供者 issuer (提供者) 發現：客戶端可以通過 [WebFinger](https://tools.ietf.org/html/rfc7033) 或一個外部文檔發現 issuer 的位置 (URL)。
+- OpenID 提供者元數據：客戶端可以檢索和處理元數據文檔，以瞭解 OpenID 提供者的功能和端點。
+
+## OIDC 發現如何運作？
+
+### OpenID 提供者 issuer (提供者) 發現
+
+OpenID 提供者的 issuer 是一個唯一識別符 (通常與其 URL 相同)，客戶端可以用來發現 OpenID 提供者的配置。然而，客戶端需要知道 issuer 的位置，才能檢索元數據文檔。
+
+如果 issuer 的位置已知，客戶端可以直接進入下一步。否則，客戶端可以使用 WebFinger 來發現 issuer 的位置。OIDC issuer 發現所需的信息包括：
+
+- `host`: WebFinger 服務的宿主位置。
+- `resource`: OpenID 提供者的電子郵件地址或 URL。
+- `rel`: 關係類型，應設置為 `http://openid.net/specs/connect/1.0/issuer`。
+
+例如，一個擁有電子郵件地址 `foo@bar.com` 的用戶試圖在 `example.com` 發現 issuer 的位置。WebFinger 請求如下所示：
+
+```http
+GET /.well-known/webfinger?resource=acct%3Afoo%40bar.com&
+  rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: example.com
+```
+
+解碼後的 `resource` 參數為 `acct:foo@bar.com`，`rel` 參數為 `http://openid.net/specs/connect/1.0/issuer`。
+
+### OpenID 提供者元數據
+
+一旦客戶端知道了 issuer 的位置，就可以從知名的端點檢索元數據文檔。元數據文檔的路徑相對於 issuer 的 URL 是 `/.well-known/openid-configuration`。
+
+例如，如果 issuer 的 URL 是 `https://oidc.example.com`，客戶端可以從 `https://oidc.example.com/.well-known/openid-configuration` 檢索元數據文檔。下面是元數據返回的一個非規範示例：
+
+```json
+{
+  "issuer": "https://oidc.example.com",
+  "authorization_endpoint": "https://oidc.example.com/authorize",
+  "token_endpoint": "https://oidc.example.com/token",
+  //...
+}
+```
+
+元數據文檔包含許多關於 OpenID 提供者的有用信息。讓我們重點介紹幾個關鍵字段：
+
+- `issuer`: OpenID 提供者的唯一識別符，應用於驗證令牌。
+- `authorization_endpoint`: 用於發起<Ref slug="authentication-request" />的 URL。
+- `token_endpoint`: 用於發送<Ref slug="token-request" />的 URL。
+- `jwks_uri`: 用於檢索 <Ref slug="jwk" headingId="json-web-key-set-jwks" /> 以進行<Ref slug="signing-key" />驗證的 URL。
+- `response_types_supported`: 支持的<Ref slug="authentication-request" />響應類型。
+- `scopes_supported`: <Ref slug="authentication-request" />支持的<Ref slug="scope">範圍</Ref>。
+- `claims_supported`: <Ref slug="id-token" />支持的<Ref slug="claim">聲明</Ref>。
+- `token_endpoint_auth_methods_supported`: <Ref slug="token-request" />支持的客戶端驗證方法。
+
+對於完整的元數據字段列表，請參考 [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) 規範。
+
+<SeeAlso slugs={["openid-connect", "authentication-request", "jwt", "token-request"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/exploring-oidc-configuration',
+    'https://openid.net/specs/openid-connect-discovery-1_0.html',
+  ]}
+/>

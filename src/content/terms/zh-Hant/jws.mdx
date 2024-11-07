@@ -1,0 +1,136 @@
+---
+title: JSON Web Signature (JWS)
+tags: [oidc, jose]
+description: JSON Web Signature (JWS) 是一種簽名和驗證 JSON 格式數據的標準方法。它通常用於確保 OpenID Connect (OIDC) 中的 JSON Web Tokens (JWTs) 的完整性和真實性。
+---
+
+## 什麼是 JSON Web Signature (JWS)？
+
+JSON Web Signature (JWS) 定義了一種簽名和驗證 JSON 格式數據的標準方法。它廣泛應用於現代應用程序和開放標準，如 <Ref slug="openid-connect" />，以確保傳輸數據的完整性和真實性。
+
+JWS 在處理 <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref> 時特別有用。比如，一個 <Ref slug="id-token" /> 或 <Ref slug="access-token" /> 可以使用 JWS 進行簽名，接收方可以在不發起其他網絡請求的情況下進行驗證。
+
+## JWS 如何運作？
+
+JWS 使用加密演算法對數據進行簽名並生成簽名。JWS 中有兩個主要概念：JWS 標頭和 JWS 序列化。
+
+### JWS 標頭
+
+JWS 包含一個標頭，其中包含有關簽名演算法和密鑰管理的重要元數據。JWS 標頭中的一些常見屬性包括：
+
+- `alg` (Algorithm): 用於簽名數據的加密演算法。
+- `typ` (Type): 類型，如 JWT。
+- `kid` (Key ID): 用於簽名數據的密鑰的唯一標識符。
+- `jku` (JWK Set URL): <Ref slug="jwk" headingId="json-web-key-set-jwks" /> 所在的 URL。
+
+欲了解 JWS 標頭屬性的詳細列表，請參閱 [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4)。
+
+### JWS 序列化
+
+JWS 有兩種序列化格式：緊湊和 JSON。每種格式都有其表示簽名數據的方法。
+
+#### 緊湊序列化
+
+在緊湊序列化中，JWS 表示為一個包含三個 Base64URL 編碼部分的字符串，這些部分由點 (`.`) 分隔。這三個部分是：
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+每個部分都有其特定用途：
+
+- `header`: 以 Base64URL 編碼格式的簽名演算法和密鑰管理的元數據。
+- `payload`: 以 Base64URL 編碼格式簽名的數據。
+- `signature`: 標頭和負載的加密簽名。
+
+> [!注意]
+> 緊湊序列化中不包括未保護的標頭。
+
+例如，一個 JWS 可能看起來是這樣的：
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+解碼 Base64URL 編碼後，JWS 包含以下內容：
+
+- 標頭: `{"alg":"HS256","typ":"JWT"}`
+- 負載: `{"sub":"1234567890","name":"Alice"}`
+- 簽名: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+標頭指定 JWS 是使用 HMAC-SHA256 演算法 (`HS256`) 簽名的，並且令牌類型是 JWT (`typ: "JWT"`) 的 JSON 格式。負載包含基本用戶信息，如主體 (`sub`) 和名稱 (`name`)。
+
+簽名的計算為：
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  secret
+)
+```
+
+根據 JWS 標頭，在 `Hash` 函數中使用 HMAC-SHA256 演算法，其中 `secret` 是此情況下的共享密鑰 `top-secret`。
+
+欲了解 JWS 如何與 JWT 一起使用的詳細示例，請參閱 <Ref slug="signing-key" /> 文章。
+
+#### JSON 序列化
+
+JSON 序列化提供了一種更結構化的方式來表示 JWS。JWS 表示為具有以下屬性的 JSON 對象：
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: Base64URL 編碼的負載。這是被簽名的數據。
+- `signatures`: 簽名對象的數組，每個包含受保護的標頭、標頭和簽名。
+
+  每個簽名對象可能包含：
+
+  - `protected`: Base64URL 編碼的受保護標頭（緊湊序列化中的 `header`）。
+  - `header`: JSON 格式的未保護標頭。標頭未包含在簽名中。
+  - `signature`: 標頭和負載的加密簽名（緊湊序列化中的 `signature`）。
+
+例如，JSON 序列化中的 JWS 可能看起來是這樣的：
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+在上述示例中，對相同負載有兩個簽名（`signatures` 數組）。每個簽名對象包含受保護的標頭、標頭和簽名。
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

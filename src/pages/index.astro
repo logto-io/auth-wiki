@@ -7,9 +7,10 @@ import BackgroundBanner from "../components/BackgroundBanner.astro";
 import Share from "../components/Share.astro";
 import { getPhrases } from "../phrases";
 import { getCollection } from "astro:content";
-import { defaultLocale, getLocale } from "astro-i18n-aut";
+import { defaultLocale } from "astro-i18n-aut";
+import { getLocaleFromUrl } from "../utils/locale";
 
-const locale = getLocale(Astro.url);
+const locale = getLocaleFromUrl(Astro.url);
 const defaultEntries = await getCollection("terms", (entry) =>
   entry.slug.startsWith(`${defaultLocale}/`),
 );

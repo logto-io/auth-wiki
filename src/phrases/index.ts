@@ -7,6 +7,7 @@ import { ja } from './ja';
 import { ko } from './ko';
 import { nl } from './nl';
 import { zh } from './zh';
+import { zhHant } from './zh-hant';
 
 /** Display names for each locale. */
 export const localeDisplay: Readonly<Record<string, string>> = Object.freeze({
@@ -19,6 +20,7 @@ export const localeDisplay: Readonly<Record<string, string>> = Object.freeze({
   ko: '한국어',
   nl: 'Nederlands',
   zh: '简体中文',
+  'zh-hant': '繁體中文',
 });
 
 export const getPhrases = (locale: string) => {
@@ -41,6 +43,8 @@ export const getPhrases = (locale: string) => {
       return nl;
     case 'zh':
       return zh;
+    case 'zh-hant':
+      return zhHant;
     default:
       throw new Error(`Unsupported locale: ${locale}`);
   }

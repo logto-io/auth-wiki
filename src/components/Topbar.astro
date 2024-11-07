@@ -2,10 +2,11 @@
 import { Icon } from "astro-icon/components";
 import Logo from "./Logo.astro";
 import ByLogto from "./ByLogto.astro";
-import { defaultLocale, getLocale } from "astro-i18n-aut";
+import { defaultLocale } from "astro-i18n-aut";
 import LanguageSelector from "./LanguageSelector.astro";
+import { getLocaleFromUrl } from "../utils/locale";
 
-const locale = getLocale(Astro.url);
+const locale = getLocaleFromUrl(Astro.url);
 ---
 
 <div class="topbar">

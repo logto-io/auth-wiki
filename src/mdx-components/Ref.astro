@@ -1,7 +1,8 @@
 ---
 import { getEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
-import { defaultLocale, getLocale } from "astro-i18n-aut";
+import { defaultLocale } from "astro-i18n-aut";
+import { getLocaleFromUrl } from "../utils/locale";
 
 type Props = {
   /**
@@ -16,7 +17,7 @@ type Props = {
   headingId?: string;
 };
 
-const locale = getLocale(Astro.url);
+const locale = getLocaleFromUrl(Astro.url);
 const { slug: rawSlug, headingId } = Astro.props;
 const getEntryWithFallback = async () => {
   const entry = await getEntry("terms", `${locale}/${rawSlug}`);

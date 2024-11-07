@@ -1,0 +1,73 @@
+---
+title: JSON 網路加密 (JSON Web Encryption, JWE)
+tags: [oidc, jose]
+description: JSON 網路加密 (JWE) 是一種加密和解密 JSON 格式數據的標準方式。它經常用於保護傳輸中的 JSON 網路令牌 (JWT) 中的敏感信息。
+---
+
+## 什麼是 JSON 網路加密 (JWE)？
+
+根據 RFC 7516 的定義，JSON 網路加密 (JWE) 是一種加密和解密 JSON 格式數據的機制。它為數據添加了一層保密性，特別是在不受信任的網絡上傳輸敏感信息時非常有用。
+
+JWE 通常與 <Ref slug="jwt">JSON 網路令牌 (JWT)</Ref> 一起使用，以保護有效負載數據。例如，一個 <Ref slug="id-token" /> 或 <Ref slug="access-token" /> 可以使用 JWE 加密，以確保數據在傳輸過程中的安全性。
+
+## JWE 如何運作？
+
+JWE 有兩種序列化格式：緊湊和 JSON。每種格式都有自己的方式來表示加密數據。
+
+### 緊湊序列化
+
+在緊湊序列化中，JWE 表示為一個由點 (`.`) 分隔的五段 Base64URL 編碼的字符串。這五段是：
+
+```
+{{header}}.{{encrypted-key}}.{{iv}}.{{ciphertext}}.{{tag}}
+```
+
+每段都有特定的目的：
+
+- `header`: 包含關於加密算法和密鑰管理的元數據。
+- `encrypted-key`: 用於加密有效負載的加密內容加密密鑰 (CEK)。
+- `iv`: 加密過程中使用的初始化向量。
+- `ciphertext`: 加密的有效負載數據。
+- `tag`: 用於驗證加密數據完整性的認證標籤。
+
+### JSON 序列化
+
+JSON 序列化更詳細，提供了一種結構化的方式來表示 JWE。JWE 表示為具有以下屬性的 JSON 對象：
+
+```json
+{
+  "protected": "{{protected-header}}",
+  "unprotected": "{{unprotected-header}}",
+  "header": "{{header}}",
+  "encrypted_key": "{{encrypted-key}}",
+  "iv": "{{iv}}",
+  "ciphertext": "{{ciphertext}}",
+  "tag": "{{tag}}",
+  "aad": "{{additional-authenticated-data}}"
+}
+```
+
+- `protected`: 包含 Base64URL 編碼的受保護標頭。
+- `unprotected`: 包含 JWE 共享的未保護標頭。
+- `header`: 包含 JWE 每個接收者的未保護標頭。
+- `encrypted_key`: 包含 Base64URL 編碼的加密內容加密密鑰 (CEK)。
+- `iv`: 包含 Base64URL 編碼的初始化向量。
+- `ciphertext`: 包含 Base64URL 編碼的密文 (加密的有效負載)。
+- `tag`: 包含 Base64URL 編碼的認證標籤。
+- `aad`: 包含 Base64URL 編碼的附加認證數據。
+
+---
+
+客戶端應能夠使用適當的密鑰和算法解密 JWE。可以使用預先協商的密鑰或通過密鑰協商協議導出的密鑰來解密 JWE。
+
+例如，一個 <Ref slug="id-token" /> 可能會使用 JWE 加密，客戶端可以使用從 OpenID 供應商的 `jwks_uri` 端點獲得的適當密鑰來解密它。
+
+<SeeAlso slugs={["jwt", "jwk", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+    "https://datatracker.ietf.org/doc/html/rfc7518",
+  ]}
+/>

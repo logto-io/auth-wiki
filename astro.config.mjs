@@ -18,6 +18,11 @@ export const locales = Object.freeze({
   ja: 'ja',
   nl: 'nl',
   zh: 'zh-Hans',
+  // Astro doesn't maintain the case when generating file-based slugs, so we need to use the
+  // lowercase version of the locale code as the key.
+  // See: https://github.com/withastro/roadmap/pull/373#issuecomment-1332459000
+  // See: https://github.com/withastro/roadmap/discussions/516
+  'zh-hant': 'zh-Hant',
 });
 
 // https://astro.build/config

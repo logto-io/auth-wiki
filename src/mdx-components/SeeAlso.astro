@@ -1,7 +1,7 @@
 ---
-import { getLocale } from "astro-i18n-aut";
 import Ref from "./Ref.astro";
 import { getPhrases } from "../phrases";
+import { getLocaleFromUrl } from "../utils/locale";
 
 type Props = {
   /**
@@ -18,7 +18,7 @@ if (slugs.length === 0) {
   throw new Error('The "slugs" prop must contain at least one slug.');
 }
 
-const locale = getLocale(Astro.url);
+const locale = getLocaleFromUrl(Astro.url);
 const phrases = getPhrases(locale);
 ---
 

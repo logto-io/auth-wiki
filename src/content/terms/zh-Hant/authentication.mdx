@@ -1,0 +1,56 @@
+---
+title: 認證 (Authentication)
+tags: [authentication]
+description: 認證 (Authentication) 是驗證身份所有權（例如，用戶或服務）的過程。它是身份和存取管理 (IAM) 系統的基礎，對於安全保護應用程式和服務至關重要。
+---
+
+## 什麼是認證 (Authentication)？
+
+> **簡而言之**：認證 (Authentication) 回答了 "你擁有哪個身份？" 這個問題。
+
+以下是一些典型的認證 (Authentication) 例子：
+
+- 使用名稱和密碼登錄
+- 社交登入（例如，使用 Google 登錄）
+- <Ref slug="machine-to-machine" /> 認證（例如，API keys）
+
+我們沒有使用 "你是誰？" 這個短語，因為：
+
+- 在 <Ref slug="iam" /> 領域中，認證 (Authentication) 是關於驗證身份的所有權，而不是識別個人或實體。例如，當你的家人使用你的憑據登錄到你的帳戶時，他們不是你，但對系統來說，身份是相同的。
+- 身份可以是一個用戶、一個服務或一個設備。例如，一個服務可能使用 API keys 對另一個服務進行身份認證。
+
+### 認證 (Authentication) 和授權的區別
+
+這兩個術語經常被混淆，但它們本質上是不同的：<Ref slug="authorization" /> 回答了 "你能做什麼？" 此外，認證 (Authentication) 是授權的前提，因為系統需要知道身份才能決定可以執行哪些操作。
+
+## 認證因素
+
+認證 (Authentication) 可以使用一個或多個因素來執行。以下是一些常見的因素：
+
+- **知識因素**：你知道的東西（例如，密碼，PIN）
+- **持有因素**：你擁有的東西（例如，智能手機，安全令牌）
+- **屬性因素**：你是誰（例如，指紋，面部識別）
+
+<Ref slug="mfa" /> 是一種常見的做法，結合多個因素來提高安全性。例如，當你登錄銀行賬戶時，你可能需要提供一個密碼（知識因素）和來自驗證器應用的單次代碼（持有因素）。
+
+<Ref slug="passkey" /> 是一種現代的認證 (Authentication) 因素，可以結合多個因素並且對釣魚攻擊具有抵抗力。
+
+## 認證 (Authentication) 框架（協議）
+
+與其自行構建一個認證 (Authentication) 系統，建議使用已建立的框架和協議，因為它們經過了安全專家的實戰測試和審查。有多種認證 (Authentication) 框架和協議定義了認證應如何執行。兩個常見的是：
+
+- <Ref slug="openid-connect" />：建立在 <Ref slug="oauth-2.0" /> 基礎上的一個身份層，增加了認證能力。它相對現代，廣泛應用於新應用程式。
+- <Ref slug="saml" />：一種用於在各方之間交換認證和授權數據的協議。通常用於企業環境。
+
+框架的選擇取決於你的使用案例和需求。對於新的應用程式，建議使用 OIDC，因為它具有現代設計和對 <Ref slug="jwt" /> 的支持。
+
+然而，直接使用這些協議仍然可能很複雜且耗時。這兩種協議都有陡峭的學習曲線，需要仔細實施以確保安全性。相反，使用一個支持或基於這些協議的 <Ref slug="identity-provider" /> 可以大大簡化認證 (Authentication) 過程。一個好的身份提供者還將為你的未來需求提供額外功能，如 <Ref slug="mfa" /> 和 <Ref slug="single-sign-on" />。
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

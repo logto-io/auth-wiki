@@ -1,0 +1,51 @@
+---
+title: 離線存取 (Offline access)
+tags: [oauth 2.0, oidc]
+description: 離線存取 (Offline access) 允許客戶端在不需要用戶重新認證 (authenticate) 的情況下獲取新的訪問 (access) 令牌，這對於長期會話和更好的用戶體驗非常有用。
+---
+
+## 什麼是離線存取 (Offline access)？
+
+離線存取 (Offline access) 的概念可能因情境而異，我們將專注於 OAuth 2.0 和 OpenID Connect (OIDC) 規範。在這個情境中，離線存取允許客戶端使用<Ref slug="refresh-token">刷新 (refresh) 令牌</Ref>獲取新的<Ref slug="access-token">訪問 (access) 令牌</Ref>，而無需用戶重新認證 (authenticate)。此功能特別有助於長期會話和改善用戶體驗。
+
+值得注意的是，OAuth 2.0 並未明確定義「離線存取 (offline access)」這一術語；它只規定使用刷新 (refresh) 令牌來獲取新的訪問 (access) 令牌。但是，「離線存取 (offline access)」這一術語（以及 `offline_access` scope）已在業界廣泛採用來指代此功能，並在<Ref slug="openid-connect" />規範中得到正式定義。
+
+## 離線存取 (Offline access) 如何運作？
+
+為了簡化，我們將使用 OAuth 2.0 術語<Ref slug="authorization-request" />和<Ref slug="authorization-server" />來說明離線存取 (offline access) 的運作方式。在 OIDC 中，這些術語的替代詞分別是<Ref slug="authentication-request" />和<Ref slug="openid-connect" headingId="openid-provider-op" />。
+
+離線存取 (Offline access) 涉及兩個主要步驟：
+
+1. **請求離線存取**：當<Ref slug="client" />向授權伺服器發起授權 (authorization) 請求時，包含 `offline_access` scope 以請求離線存取。此 scope 表明客戶端希望獲取刷新 (refresh) 令牌以及訪問 (access) 令牌。
+
+  對於離線存取 (offline access) 的支援可能因授權伺服器而異，如果授權伺服器不支援此功能，可能會忽略 `offline_access` scope。請參閱授權伺服器的文件以確保在使用此 scope 前的相容性。
+
+2. **使用刷新 (refresh) 令牌**：一旦<Ref slug="oauth-2.0-grant" />完成，客戶端應該收到一個<Ref slug="refresh-token">刷新 (refresh) 令牌</Ref>和一個<Ref slug="access-token">訪問 (access) 令牌</Ref>。客戶端可以安全地存儲刷新 (refresh) 令牌，並在當前訪問 (access) 令牌過期時，使用它向授權伺服器發送<Ref slug="token-request" />以獲取新的訪問 (access) 令牌。
+
+有關離線存取 (offline access) 實際操作的詳細範例，請參閱<Ref slug="refresh-token" />文章。
+
+## 安全考量
+
+離線存取 (Offline access) 的安全影響類似於刷新 (refresh) 令牌。請參閱刷新 (refresh) 令牌的<Ref slug="refresh-token" headingId="security-considerations" />部分以獲取詳細信息。
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "Offline Access in OpenID Connect Core 1.0",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "Refresh Token in OAuth 2.0",
+        ogDescription: "Refresh tokens are credentials used to obtain access tokens."
+      },
+    },
+  ]}
+/>

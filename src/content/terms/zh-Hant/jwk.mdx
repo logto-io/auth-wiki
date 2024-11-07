@@ -1,0 +1,96 @@
+---
+title: JSON Web Key (JWK)
+tags: [oidc, jose]
+description: JSON Web Key (JWK) 是用於表示加密密鑰的基於 JSON 的格式。當需要將多個 JWK 組合在一起時，它們會被組織成 JSON Web Key Set (JWKS)。
+---
+
+## 什麼是 JSON Web Key (JWK)？
+
+JSON Web Key (JWK) 是用於表示加密密鑰的基於 JSON 的格式。它在 <Ref slug="jws" /> 和 <Ref slug="jwe" /> 中廣泛使用，用於驗證 <Ref slug="jwt">JSON Web Tokens</Ref> 的完整性和機密性。它也在 <Ref slug="openid-connect" /> 中用於身份和存取管理 (Access Control)。
+
+例如，一個 PEM 編碼的 ECDSA 公鑰：
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx+43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+可以表示為 JWK：
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+## JWK 如何工作？
+
+由於 JWK 是一種基於 JSON 的格式，相較於傳統的 PEM 格式，它可以攜帶更豐富的密鑰元數據。以下是 JWK 中的一些常見屬性：
+
+- `kty` (Key Type)：與密鑰一起使用的加密算法系列。常見值包括 `RSA`、`EC` 和 `oct`。`EC` 在 [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518) 中被標記為 "Recommended+"。
+- `use` (Public Key Use)：公鑰的預期用途。常見值包括 `sig` (簽名) 和 `enc` (加密)。
+- `key_ops` (Key Operations)：密鑰支持的操作。常見值包括 `sign`、`verify`、`encrypt` 和 `decrypt`。
+- `alg` (Algorithm)：預期與密鑰一起使用的算法。根據密鑰類型，算法可能有所不同。例如，`RS256` 可能與 RSA 密鑰一起使用，而 `ES256` 可能與 EC 密鑰一起使用。
+- `kid` (Key ID)：密鑰的唯一標識符。可以用於在一組密鑰中匹配特定密鑰。
+
+除 `kty` 外，所有其他屬性都是可選的，可以用於提供有關密鑰的額外上下文。根據 `kty` 的值，其他屬性可能是必需的或可選的。在上述示例中，JWK 表示一個帶有 P-384 曲線的 ECDSA 密鑰 (`kty: "EC"`)。`x` 和 `y` 屬性包含公鑰坐標。
+
+以下是另一個非規範的 RSA 公鑰 JWK 示例：
+
+```json
+{
+  "kty": "RSA",
+  "use": "sig",
+  "alg": "RS256",
+  "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+  "e": "AQAB",
+  "kid": "2011-04-29-1234"
+}
+```
+
+有關 JWK 屬性及其含義的詳細信息，請參閱 [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517)。
+
+## JSON Web Key Set (JWKS)
+
+當需要將多個 JWK 組合在一起時，它們會被組織成 JSON Web Key Set (JWKS)。JWKS 是一個 JSON 對象，包含一個 JWK 的數組。它常用於 <Ref slug="openid-connect-discovery" /> 的 `jwks_uri` 端點的響應中，以提供 JWT <Ref slug="signing-key" /> 驗證的公鑰。
+
+以下是包含兩個 JWK 的 JWKS 的非規範示例：
+
+```json
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+      "e": "AQAB",
+      "kid": "2011-04-29-1234"
+    },
+    {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+      "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+    }
+  ]
+}
+```
+
+在此示例中，JWKS 包含兩個 JWK：一個 RSA 密鑰和一個 EC 密鑰。`keys` 屬性是一個 JWK 的數組，每個都代表不同的密鑰。
+
+<SeeAlso slugs={["jwt", "jws", "signing-key", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7517",
+    "https://tools.ietf.org/html/rfc7518",
+    "https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata",
+  ]}
+/>

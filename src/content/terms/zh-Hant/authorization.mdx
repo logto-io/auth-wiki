@@ -1,0 +1,50 @@
+---
+title: 授權 (Authorization)
+tags: [authorization]
+description: 授權 (Authorization) 是確定一個身份可以在資源上執行哪些操作的過程。這是一種基本的安全機制，用於定義和實施訪問策略。
+---
+
+## 什麼是授權 (Authorization)？
+
+> **簡而言之**：授權 (Authorization) 解答了「你能做什麼？」這個問題。
+
+授權 (Authorization) 是一個決策過程，用來確定一個身份（用戶、服務或設備）是否擁有必要的權限以對資源執行特定操作。我們來看看一些例子：
+
+- 在一個線上文檔編輯器中，用戶可以與其他人共享文檔。
+- 在一個雲存儲服務中，服務可以在特定文件夾中讀寫文件。
+- 在一個智慧家庭系統中，設備可以開啟客廳的燈光。
+
+所有這些例子都涉及一個身份（主體）在資源上執行操作。當然，授權 (Authorization) 也可能失敗，例如當一個用戶嘗試刪除他們無權訪問的文件時。
+
+授權 (Authorization) 的基本模型很簡單：如果 **身份** 在 **資源** 上執行 **操作**，則 **接受** 或 **拒絕**。
+
+### 認證 (Authentication) 和授權 (Authorization) 的區別
+
+認證 (Authentication) 和授權 (Authorization) 常常被混淆，但它們本質上是不同的：<Ref slug="authentication" /> 解答了「你擁有哪個身份？」這個問題。此外，在大多數情況下，授權 (Authorization) 發生在認證 (Authentication) 之後，因為系統需要知道身份才能做出訪問決策。
+
+### 授權 (Authorization) 和訪問控制 (Access Control) 的區別
+
+授權 (Authorization) 是訪問控制 (Access Control) 的一個子集。訪問控制 (Access Control) 是包括授權 (Authorization) 和其他訪問管理限制的更廣泛概念。換句話說，訪問控制 (Access Control) 是一個描述對資源的選擇性限制的通用術語，而授權 (Authorization) 特指決策過程。
+
+## 授權 (Authorization) 是如何運作的？
+
+授權 (Authorization) 通常使用 <Ref slug="access-control" headingId="access-control-models" /> 來實現。它們定義了如何在系統中分配和執行權限。
+
+## 授權框架 (Authorization Frameworks)（協議）
+
+雖然 <Ref slug="oauth-2.0" /> 是一個非常流行的授權 (Authorization) 框架，但值得注意的是 OAuth 2.0 並未定義使用哪種訪問控制 (Access Control) 模型。相反，它專注於授權 (Authorization) 的委託和訪問令牌的發行。
+
+也就是說，OAuth 2.0 適用於用戶授權客戶端訪問其資源的第三方授權 (Authorization) 場景。例如，當你使用 Google 帳戶登錄網站時，你是在授權 (Authorization) 該網站訪問你的 Google 個人資料。
+
+如果你處理的是第一方授權 (Authorization)（例如你的應用程序或組織內），則可能需要實施一種訪問控制 (Access Control) 模型，例如 <Ref slug="rbac" /> 或 <Ref slug="abac" />。<Ref slug="openid-connect" /> 和訪問控制 (Access Control) 模型的結合能為認證 (Authentication) 和授權 (Authorization) 提供堅實的基礎。
+
+與其構建一個自製的授權 (Authorization) 系統，建議使用提供認證 (Authentication) 和授權 (Authorization) 功能的 <Ref slug="identity-provider" />。一個好的身份提供者將處理訪問控制 (Access Control) 的複雜性，並為你的應用程序提供一個安全且可擴展的解決方案。
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

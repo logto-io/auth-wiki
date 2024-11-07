@@ -1,0 +1,50 @@
+---
+title: Userinfo 端點 (Userinfo endpoint)
+tags: [oidc]
+description: Userinfo 端點 (Userinfo endpoint) 是一個 OpenID Connect (OIDC) 端點，提供使用者資訊給客戶端。它是 ID token 的補充端點，允許客戶端檢索額外的使用者資訊。
+---
+
+## 什麼是 userinfo 端點 (Userinfo endpoint)？
+
+在 <Ref slug="openid-connect" /> 中，userinfo 端點 (Userinfo endpoint) 是 <Ref slug="openid-connect" headingId="openid-provider-op" /> 的一個端點，提供使用者資訊給 <Ref slug="client">客戶端</Ref>。userinfo 端點通常是 <Ref slug="id-token" /> 的補充端點，允許客戶端檢索不包括在 ID token 中的額外使用者資訊。
+
+userinfo 端點在 [OpenID Connect 核心規範](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) 中定義，通常在客戶端取得 ID token 之後由客戶端存取。
+
+## userinfo 端點如何運作？
+
+當客戶端向 userinfo 端點發出請求時，需要包含從 <Ref slug="token-request" /> 獲得的 access token，並使用 `GET` 或 `POST` HTTP 方法。userinfo 端點會驗證 access token，並在回應中返回使用者資訊。
+
+以下是一個非規範的 userinfo 請求範例：
+
+```http
+GET /userinfo HTTP/1.1
+Host: openid-provider.example.com
+Authorization: Bearer some-access-token
+```
+
+不同 OpenID Providers 的 userinfo 端點路徑可能會有所不同。你可以參考提供者的 <Ref slug="openid-connect-discovery" /> 找到 userinfo 端點的 URL。如果 access token 有效，userinfo 端點會用使用者資訊回應：
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "sub": "user123",
+  "name": "Alice",
+  "email": "alice@foo.com",
+  "birthdate": "1990-01-01",
+  "address": {
+    "street": "1234 Elm St",
+    "city": "Springfield",
+    "country": "US"
+  }
+}
+```
+
+回應可能包含各種使用者屬性，比如 `name`、`email`、`birthdate` 和 `address`；通常，它包含比 <Ref slug="id-token" /> 更多的 <Ref slug="claim">宣告 (claims)</Ref>。實際返回的屬性取決於 <Ref slug="openid-connect" headingId="openid-provider-op" /> 配置和使用者的同意。請查閱你的 OpenID Provider 的文件以獲取可用的具體屬性。
+
+### 簽名和加密
+
+userinfo 回應可以被簽名和/或加密以確保其完整性和機密性。若應用了其中一種或兩種保護，userinfo 端點回應將是一個 <Ref slug="jwt" /> 而非普通的 JSON 物件。
+
+<SeeAlso slugs={["openid-connect", "id-token", "openid-connect-discovery", "jwt", "signing-key"]} />

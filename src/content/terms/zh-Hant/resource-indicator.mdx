@@ -1,0 +1,120 @@
+---
+title: 資源指示器 (Resource indicator)
+tags: [oauth 2.0]
+description: OAuth 2.0 中的資源指示器 (Resource indicator) 是在 RFC 8707 中定義的一個擴展參數，允許客戶端在授權請求 (authorization request) 中指定資源伺服器的位置。它提供了一種可擴展的方式來在單一授權伺服器中處理多個資源伺服器。
+---
+
+## 什麼是資源指示器 (Resource indicator)？
+
+資源指示器 (Resource indicator)，如在 OAuth 2.0 擴展 [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707) 中定義，是一個參數，允許客戶端在 <Ref slug="authorization-request" />（或 <Ref slug="openid-connect" /> 中的 <Ref slug="authentication-request" />）和 <Ref slug="token-request" /> 中指定資源伺服器的 URI。資源指示器 (Resource indicator) 用來指示客戶端希望訪問的資源伺服器的位置。
+
+> [!Note]
+> 資源指示器 (Resource indicator) 是擴展參數，不屬於 OAuth 2.0 的核心規範。請檢查你的 <Ref slug="authorization-server" /> 文檔確認是否支援該參數。
+
+## 資源指示器 (Resource indicator) 如何工作？
+
+為了更好地了解資源指示器 (Resource indicator) 的工作原理，讓我們考慮一個場景，即一個 <Ref slug="client" /> 想要通過單一授權伺服器訪問多個 <Ref slug="resource-server">資源伺服器</Ref>。
+
+### 1. 註冊資源伺服器
+
+通常，開發者需要在授權伺服器上註冊每個資源伺服器，以使其可供客戶端使用。實際的註冊過程可能因授權伺服器的實現而異。此功能名稱可能不同，例如 "API 資源" 或僅僅是 "resources"。
+
+假設客戶端想要訪問兩個資源伺服器：`https://api.example.com` 和 `https://api.another.com`，並且它們已註冊到授權伺服器上。
+
+### 2. 定義每個資源伺服器的 scope
+
+不像傳統的 OAuth 2.0 流程，其中的 <Ref slug="scope">scopes</Ref> 跨所有資源伺服器共享，資源指示器 (Resource indicator) 擴展允許客戶端為每個資源伺服器指定 scopes。這也應該是註冊過程的一部分。假設資源伺服器具有以下 scopes：
+
+| 資源伺服器               | Scopes           |
+|-------------------------|------------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. 在授權請求中包含資源指示器 (Resource indicator)
+
+為了通知授權伺服器我們想要使用資源指示器 (Resource indicator) 擴展，客戶端應在授權請求中包含 `resource` 參數。
+
+這裡是一個包含資源指示器 (Resource indicator) 的非規範性授權請求示例：
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+在此示例中，客戶端包含 `resource` 參數，其編碼值為 `https%3A%2F%2Fapi.example.com`，以指示資源伺服器的位置（`https://api.example.com`）。
+
+你可能會注意到，我們還包括了一些預定義的 scopes，例如 `openid`，以及資源專用的 scopes。授權伺服器應驗證 scopes 並過濾掉與所請求資源伺服器無關的其他 scopes。這被稱為 **downscoping**。
+
+以下是客戶端預期收到的實際四個 scopes 的表格：
+
+| 資源伺服器               | Scopes                       |
+|-------------------------|------------------------------|
+| N/A                     | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                       |
+
+資源指示器 (Resource indicator) 的妙處在於客戶端可以在單一授權請求中通過重複 `resource` 參數來請求多個資源伺服器。讓我們看看另一個例子：
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+在這個例子中，客戶端請求訪問 `https://api.example.com` 和 `https://api.another.com` 並附上相應的 scopes。授權伺服器應驗證每個資源伺服器的 scopes，也就是說，需要做 scopes 和資源伺服器的 **笛卡兒積**。結果應該是：
+
+| 資源伺服器               | Scopes                       |
+|-------------------------|------------------------------|
+| N/A                     | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`              |
+| `https://api.another.com` | `read`, `delete`             |
+
+本次授權請求總共有七個有效的 scopes。
+
+### 4. 在令牌請求中包含資源指示器 (Resource indicator)
+
+一旦客戶端收到授權碼，它可以用 **單一** 的資源指示器 (Resource indicator) 交換成訪問令牌 (access token)，如果有需要。例如：
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+令牌請求中的 `resource` 參數是可選的。如果客戶端包括它，授權伺服器應驗證當前授權範圍內的資源指示器 (Resource indicator)；否則，授權伺服器應回退到全局 scopes（例如，<Ref slug="openid-connect" /> scopes）。
+
+> [!Note]
+> 授權伺服器應始終應用 <Ref slug="access-control" /> 以確保發布的訪問令牌 (access token) 是有效的並且已根據當前授權上下文適當縮減。
+
+你可能想知道如何處理授權中的多個資源伺服器。由於授權碼是一次性使用的，客戶端可以使用其他授權方式，例如 <Ref slug="refresh-token" /> 授權，來獲取其他資源伺服器的訪問令牌 (access token)。
+
+## 我們為什麼需要資源指示器 (Resource indicator)？
+
+從上述例子中可以看到，資源指示器 (Resource indicator) 擴展提供了一種可擴展的方法來處理多個資源伺服器，而不必擔心範圍衝突。它是一個強大的功能，提供了更大的靈活性，讓客戶端可以訪問來自不同資源伺服器的資源。
+
+值得注意的是，資源指示器 (Resource indicator) 擴展不是 OAuth 2.0 核心規範的一部分。在應用程式中使用此擴展之前，請確保授權伺服器支援此擴展。
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

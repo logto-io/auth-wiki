@@ -14,8 +14,9 @@ import Share from "../components/Share.astro";
 import { Icon } from "astro-icon/components";
 import { getCollection } from "astro:content";
 import { getEntry } from "astro:content";
-import { defaultLocale, getLocale } from "astro-i18n-aut";
+import { defaultLocale } from "astro-i18n-aut";
 import { getPhrases } from "../phrases";
+import { getLocaleFromUrl } from "../utils/locale";
 
 export async function getStaticPaths() {
   // Only the default locale is needed for generating paths. Other locales will be handled by
@@ -31,7 +32,8 @@ export async function getStaticPaths() {
   });
 }
 
-const locale = getLocale(Astro.url);
+const locale = getLocaleFromUrl(Astro.url);
+console.log("locale", locale);
 const entry = await getEntry("terms", `${locale}/${Astro.params.slug}`);
 
 if (!entry) {

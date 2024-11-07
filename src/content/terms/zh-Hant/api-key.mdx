@@ -1,0 +1,64 @@
+---
+title: API key
+tags: [authentication (Authentication), api]
+description: API 金鑰 (API key) 是用於在存取 API 時驗證和授權客戶端的唯一識別碼。它作為一個包含在 API 請求中的秘密令牌，用於驗證客戶端的身份並允許訪問特定的資源或服務。API 金鑰通常用於伺服器到伺服器的通信或在存取公共資料時使用。
+---
+
+## 什麼是 API 金鑰 (API key)？
+
+API 金鑰 (API key) 用於識別和授權呼叫應用程式或服務。它們通常具有長期效力和穩定性，直到被替換，並且通常具有固定的權限集。它們主要用於伺服器到伺服器的通信或存取公共資料，這些令牌通常不代表特定的使用者。
+
+## API 金鑰 (API key) 如何工作？
+
+API 金鑰 (API key) 是由 API 提供者生成的長字符串，並與授權用戶共享。此金鑰必須包含在存取 API 時的請求標頭中。API 金鑰 (API key) 在基本安全需求中是簡單而有效的。例如，Google Maps API 和 AWS 等流行服務提供 API 金鑰 (API key) 來控制存取和監控使用情況。
+
+```java
+curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
+```
+
+API 金鑰 (API key) 不如其他形式的 API 驗證 (Authentication)，例如 OAuth 和 JWT，有效，但它們在幫助 API 生產者監控使用情況方面仍然發揮著重要作用，因為這是最簡單且廣為使用的方式來保護 APIs。
+
+## 它的優缺點是什麼？
+
+### 優點
+
+- 實施簡單：API 金鑰 (API key) 容易實施和使用。它們涉及將金鑰附加到請求標頭，對於開發人員和客戶來說是一種直接的方法。
+- 易於監控：API 金鑰 (API key) 易於監控。你可以跟踪每個金鑰的使用情況，並在必要時撤銷它們。
+- 有效的速率限制：API 金鑰 (API key) 可以有效地進行速率限制。你可以設置每個金鑰的請求數量限制以防止濫用。
+- 適合非敏感資料：API 金鑰 (API key) 適用於非敏感資料或公開可用的 APIs，在這些情況下安全要求較低。
+
+### 缺點
+
+- 安全性有限：API 金鑰 (API key) 對於敏感資料不夠安全，尤其是對於客戶端應用程式。它們通常用於機器對機器 (Machine-to-Machine) 的通信。
+- 不適用於使用者驗證 (Authentication)：API 金鑰 (API key) 與應用程式或系統綁定，而不是個別的使用者，使得識別特定使用者或跟踪他們的行動充滿挑戰。
+- 無令牌到期：API 金鑰 (API key) 通常是靜態的且不會到期。如果一個金鑰被洩露，它可能會被無限期地濫用，除非手動重新生成。
+
+## API 金鑰 (API key) 的使用情境是什麼？
+
+- 服務到服務通信：API 金鑰 (API key) 適合於需要通過命令行介面與 APIs 直接通信的應用程式場景。例：呼叫 OpenAI APIs。
+- 公開 APIs：在向公眾公開 APIs 時，API 金鑰 (API key) 提供了一種簡單的方法進行存取控制。
+- 簡化的設置：對於快速和簡單的驗證 (Authentication) 需求，特別是在開發階段。與機器對機器 (Machine-to-Machine) 驗證 (Authentication) 不同，API 金鑰 (API key) 不需要事先的客戶端註冊，也不需要換取存取令牌 (Access Token)。你只需在請求中傳遞你的 API 金鑰 (API key) 作為參數，就能正常工作。
+
+在實際場景中，建立產品的最常見目的是產品集成。以下是一個典型的使用案例：
+
+### 例子：與 Stripe 的集成
+
+Stripe 使用 API 金鑰 (API key) 來安全地與不同平台和應用程式進行集成。你可以通過開發者儀表板創建、查看、刪除和管理這些金鑰。通過使用 API 金鑰 (API key)，你可以將 Stripe 的結帳和計費功能集成到你的產品中。
+
+![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
+
+## Personal Access Tokens (PAT) 和機器對機器 (Machine-to-Machine, M2M) 的區別是什麼？
+
+談論 API 金鑰 (API key) 時，可以提到個人存取令牌 (Personal Access Tokens) 和機器對機器 (Machine-to-Machine)，因為它們都可以透過命令行介面程式設置程序化存取 API 資源，或在後端服務之間建立通信。
+
+### 個人存取令牌 (Personal Access Tokens, PATs)
+
+個人存取令牌 (Personal Access Tokens) 也是一個字符串，但表示***特定使用者***的身份和權限，在成功驗證 (Authentication) 或登錄後動態生成，通常有一個有限的生命週期，但可以刷新。它提供了對用戶特定資料和功能的精細訪問控制，通常用於命令行介面工具、腳本或個人的 API 存取。主要區別在於它更具針對性並用於用戶特定的操作。
+
+### 機器對機器 (Machine-to-Machine, M2M)
+
+機器對機器 (Machine-to-Machine) 通信是指設備在沒有人工參與的情況下自動交換數據。
+
+在 OIDC (或 OAuth 2.0) 的上下文中，M2M 應用程式使用客戶端憑證流程 (Client Credentials Flow)，如 [OAuth 2.0 RFC 6749 協定](https://datatracker.ietf.org/doc/html/rfc6749) 中所定義，支持類似的標準協定。它通常涉及客戶端應用程式（即機器或服務）自己或代表用戶存取資源。這對於只有受信任的客戶端可以存取後端服務的情況尤其理想。
+
+<SeeAlso slugs={["machine-to-machine"]} />

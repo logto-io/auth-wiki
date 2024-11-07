@@ -1,0 +1,167 @@
+---
+title: JSON Web Token (JWT)
+tags: [oidc, jose]
+description: JSON Web Token (JWT) 是一種在 RFC 7519 中定義的開放標準，用於實現雙方之間的安全通信。它緊湊、URL 安全且自包含，適合在服務間傳輸認證 (Authentication) 和授權 (Authorization) 數據。
+---
+
+## 什麼是 JSON Web Token (JWT)？
+
+JSON Web Token (JWT) 在現代 Web 應用及開放標準中被廣泛使用，例如 OpenID Connect，以促進認證 (Authentication) 和授權 (Authorization)。儘管官方的 [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) 是一個重要的參考資料，但對於初學者來說理解起來可能會有挑戰。在本文中，我們將集中說明 JWT 的核心概念，並用簡單的語言和示例來展示它們。
+
+## 為什麼我們需要 JWT？
+
+當今常會使用 JSON 在雙方之間交換數據。想像一個代表用戶的 JSON 物件：
+
+```json
+{
+  "sub": "foo",
+  "name": "John Doe"
+}
+```
+
+> `sub` 是 "subject" 的簡寫，是 OpenID Connect 中的 [標準 claim](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims)，用來表示用戶標識符 (user ID)。
+
+我們如何保證這個 JSON 物件的**完整性**？換句話說，我們如何確保數據在傳輸過程中沒有被篡改？一個常見的解決方案是使用數字簽名。例如，我們可以使用[公鑰加密](https://en.wikipedia.org/wiki/Public-key_cryptography)：服務器使用其私鑰簽署這個 JSON 物件，然後客戶端可以使用服務器的公鑰驗證這個簽名。
+
+簡而言之，JWT 提供了一個標準化的方法來表示 JSON 物件及其簽名。
+
+> JWT 也可以用來加密 JSON 物件，但這不是本文的重點。
+
+## JWT 的格式
+
+由於創建數字簽名有許多算法，因此需要指定用於 JWT 簽名的算法。這是通過構建一個 JSON 物件來完成的：
+
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+> `alg` 是 "algorithm" 的簡寫，而 `typ` 是 "type" 的簡寫。
+
+通常，`typ` 設為大寫的 `JWT`。在我們的示例中，`alg` 是 `HS256`，代表 [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC)（我們將很快解釋它），表示我們使用這個算法來創建簽名。
+
+現在，我們有了創建 JWT 的所有元素：
+
+- 頭部 JSON：算法和類型
+- 載荷 JSON：實際數據
+- 簽名：涵蓋頭部和載荷的簽名
+
+然而，像空格和換行符這樣的字符對網絡傳輸不友好。因此，頭部和載荷需要**Base64URL 編碼**。典型的 JWT 看起來是這樣的：
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+> `.` 作為分隔符使用。
+
+讓我們將所有內容組合起來並創建一個 JWT：
+
+### 頭部
+
+JSON: `{"alg":"HS256","typ":"JWT"}`
+
+Base64URL 編碼: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`
+
+### 載荷
+
+JSON: `{"sub":"foo","name":"John Doe"}`
+
+Base64URL 編碼: `eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ`
+
+### 簽名
+
+在 HMAC-SHA256 中，簽名是用一個秘密創建的：
+
+```
+HMAC-SHA256(base64Url(header) + "." + base64Url(payload), secret)
+```
+
+例如，使用秘密 `some-great-secret`，簽名成為：`XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g`。
+
+### JWT
+
+最終的 JWT 是：
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g
+```
+
+擁有該秘密的任何方都可以驗證這個有效的 JWT。
+
+## 選擇簽名算法
+
+如前所述，創建數字簽名的算法有多種選擇。我們以 `HS256` 作為示例，但它可能不夠安全，因為秘密必須在雙方（例如客戶端和服務器）之間共享。
+
+在現實世界的場景中，客戶端可能包括像 React 應用這樣的公共應用，無法安全地保管秘密。因此，首選方法是利用公鑰加密（即非對稱加密）來簽署 JWT。我們從最受歡迎的算法開始：[RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem)。
+
+### RSA
+
+RSA 是一種非對稱算法，使用一對密鑰：公鑰和私鑰。公鑰用來驗證簽名，而私鑰用於簽名。
+
+RSA 的頭部 JSON 看起來是這樣的：
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+```
+
+> `RS256` 代表 RSA-SHA256，意思是使用 RSA 算法和 SHA256 數位雜湊函數創建簽名。你也可以使用 `RS384` 和 `RS512` 分別創建基於 SHA384 和 SHA512 的簽名。
+
+簽名是用私鑰創建的：
+
+```
+RSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+再一次，我們可以組裝這些部分來創建一個 JWT，最終的 JWT 看起來是這樣的：
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+現在，客戶端可以在不知道私鑰的情況下驗證簽名。
+
+### ECDSA
+
+雖然 RSA 被廣泛採用，但它存在簽名較大的問題，有時甚至超過頭部和載荷的組合大小。橢圓曲線數字簽名算法 (ECDSA) 是另一種非對稱算法，可以創建更緊湊的簽名，並且性能更高。
+
+要為 ECDSA 生成私鑰，我們需要選擇一個曲線。這不在本文的範疇內，但你可以在[這裡](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Elliptic_Curve_Digital_Signature_Algorithm)找到更多信息。
+
+ECDSA 的頭部 JSON 看起來是這樣的：
+
+```json
+{
+  "alg": "ES256",
+  "typ": "JWT"
+}
+```
+
+> `ES256` 代表 ECDSA-SHA256，意思是使用 ECDSA 算法和 SHA256 數位雜湊函數創建簽名。你也可以使用 `ES384` 和 `ES512` 分別創建基於 SHA384 和 SHA512 的簽名。
+
+簽名是用私鑰創建的：
+
+```
+ECDSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+最終的 JWT 結構保持與 RSA 相同，但簽名顯著縮短：
+
+```
+eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+## 驗證 JWT
+
+驗證 JWT 是創建 JWT 的反向過程，非常簡單：
+
+1. 使用 `.` 分隔符將 JWT 分為三部分（頭部、載荷和簽名）。
+2. 使用 Base64URL 解碼頭部和載荷。
+3. 使用頭部中指定的算法和公鑰（針對非對稱算法）驗證簽名。
+
+有許多庫可以幫助進行 JWT 驗證，例如 Node.js 和 Web 瀏覽器的 [jose](https://github.com/panva/jose)。
+
+<SeeAlso slugs={['opaque-token', 'id-token', 'access-token']} />

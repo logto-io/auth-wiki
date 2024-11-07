@@ -1,0 +1,72 @@
+---
+title: 聲明 (Claim)
+tags: [oauth 2.0, oidc]
+description: 在 JSON Web Token (JWT) 中，聲明 (claim) 是一個名稱值對，用來傳達特定資訊。在更廣泛的上下文中，聲明可以是任何表示資訊的名稱值對。
+---
+
+## 什麼是聲明 (claim)？
+
+聲明 (claim) 是一個用來傳達特定資訊的名稱值對。比如，在一個 JSON 對象中：
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+在這個例子中，`sub` 是一個表示主體識別碼的聲明，值為 `foo`，`email` 是一個表示電子郵件地址的聲明，值為 `foo@bar.com`。
+
+> 我們使用 *subject* 而不是 *user*，因為如果沒有明確定義，主體 (`sub`) 可以表示用戶、設備或任何實體。
+
+### 聲明的用途
+
+聲明廣泛用於各種上下文中，例如：
+
+- <Ref slug="jwt" />: 在 JWT 中，聲明用於表示有關 token 的資訊，例如發行者 (`iss`)、主體 (`sub`) 和過期時間 (`exp`)。
+- <Ref slug="openid-connect" />: 在 OIDC 中，聲明用於表示用戶資訊，如 <Ref slug="id-token" /> 和 <Ref slug="userinfo-endpoint" /> 中的用戶電子郵件地址 (`email`)、姓名 (`name`) 和頭像 (`picture`)。
+
+### 標準聲明
+
+在 JWT 和 OIDC 中，規範定義了一些標準聲明。常見的標準聲明包括：
+
+- **`iss`**: token 的發行者。例如，如果發行 token 的 <Ref slug="authorization-server" /> 是 `https://example.com`，那麼在大多數情況下 `iss` 聲明將是相同的 (`https://example.com`)。
+- **`sub`**: token 的主體。它表示 token 所涉及的實體。例如，在 ID token 中，`sub` 聲明通常表示用戶識別碼。
+- **`aud`**: token 的受眾。它表明 token 所針對的接收者。例如，如果 token 是為了訪問位於 `https://api.example.com` 的 API，那麼 `aud` 聲明將是相同的 (`https://api.example.com`)。
+- **`exp`**: token 的過期時間。它表明 token 何時不應再被接受處理。
+- **`nbf`**: token 的 "not before" (不早於) 時間。它表明 token 何時開始被接受處理。
+- **`iat`**: token 的簽發時間。它表明 token 的發行時間。
+- **`jti`**: token 的 JWT ID。它為 token 提供一個唯一識別碼。
+
+OIDC 還定義了其他用于用戶資訊的標準聲明。請參見 OIDC 規範中的 [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims) 獲取更多詳情。
+
+### 自定義聲明
+
+除了標準聲明外，你可以定義自定義聲明來表示應用程式特定的資訊。例如，你可以包含一個 `role` 聲明來表示用戶在應用程式中的角色。
+
+自定義聲明可以用 [統一資源標識符 (URI)](https://blog.logto.io/unveiling-uri-url-and-urn) 命名空間來避免與其他聲明衝突。例如：
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+在這個例子中，`role` 聲明用 `https://example.com/claims/` 命名空間來確保唯一性。另外，你可以為自定義聲明定義自己的 [統一資源名稱 (URN)](https://blog.logto.io/unveiling-uri-url-and-urn)：
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+在這個例子中，`role` 聲明用 `urn:example:claims:` 命名空間。
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

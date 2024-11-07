@@ -1,12 +1,12 @@
 ---
-import { getLocale, getLocaleUrl } from "astro-i18n-aut";
 import { localeDisplay } from "../phrases";
+import { getLocaleFromUrl, getLocaleUrl } from "../utils/locale";
 
 type Props = {
   class?: string;
 };
 
-const locale = getLocale(Astro.url);
+const locale = getLocaleFromUrl(Astro.url);
 const alternateLinks = Object.fromEntries(
   Object.keys(localeDisplay).map((locale) => [
     locale,

@@ -1,0 +1,56 @@
+---
+title: 範圍 (Scope)
+tags: [authorization]
+description: 範圍 (Scope) 定義應用程式向使用者請求訪問其受保護資源的許可權。它是 OAuth 2.0 和 OIDC 中控制應用程式可訪問使用者資料的級別的基本概念。
+---
+
+## 什麼是範圍 (Scope)？
+
+在 <Ref slug="oauth-2.0" /> 和 <Ref slug="openid-connect" /> 協議中，**範圍 (Scope)** 是一種限制應用程式對使用者資源訪問的機制。它定義了應用程式向使用者請求的權限。
+
+範圍 (Scopes) 由授權 (authorization) 伺服器定義為字串表示。當應用程式請求訪問使用者資源時，它在授權 (authorization) 請求中指定所需的範圍 (scopes)。然後使用者會在授權過程中被要求授予或拒絕這些權限。
+
+### 為什麼使用範圍 (scopes)？
+
+- **細緻的訪問控制 (access control)**：範圍 (Scopes) 允許應用程式僅請求執行特定操作所需的權限，從而減少未授權訪問的風險。
+- **使用者同意**：範圍 (Scopes) 幫助使用者瞭解應用程式將訪問的資料及其原因。
+- **安全性**：範圍 (Scopes) 有助於防止應用程式超出其訪問權限，增強使用者資料的安全性。
+
+## 範圍 (Scope) 如何運作？
+
+當應用程式啟動 OAuth 2.0 / OIDC 授權 (authorization) 過程時，它會在授權 (authorization) 請求中包含一系列範圍 (scopes)。授權 (authorization) 伺服器隨後向使用者顯示列出請求範圍 (scopes) 的同意畫面。使用者可以選擇授予或拒絕對每個範圍 (scope) 的訪問。此過程通常在應用程式是需要訪問使用者資源的第三方應用程式時使用。
+
+或者，如果應用程式被授權 (authorization) 伺服器信任，則可能不會提示使用者進行同意，而是自動同意並授予所有請求的範圍 (scopes)。
+
+## 定義範圍 (Scopes)
+
+範圍 (Scopes) 通常由 API 提供者定義。它們可以是：
+- **標準範圍 (Standard scopes)**：由 OAuth 2.0 規範定義的常用範圍 (scopes)，可由不同應用程式和服務共享。例如 `openid`、`profile`、`email`。
+- **自定義範圍 (Custom scopes)**：特定於某個應用程式或服務，針對其獨特需求量身定制。例如 `read:orders`、`write:comments`。
+
+## 範圍 (Scopes) 在 OIDC 和身份管理中的應用
+
+範圍 (Scopes) 可用於 OIDC 的各個方面，包括但不限於：
+
+- **認證 (Authentication)**：範圍 (Scopes) 可用於在認證 (authentication) 過程中請求特定的使用者資訊。例如 `profile`、`email`。
+- **授權 (Authorization)**：範圍 (Scopes) 可用於請求對特定資源的訪問或執行特定操作。例如 `read:orders`、`write:comments`。
+- **同意**：在同意畫面上，範圍 (Scopes) 會呈現給使用者，以告知應用程式請求的權限。
+- **令牌 (Token) 發行**：範圍 (Scopes) 會包含在令牌 (token) 響應中，以指示授予應用程式的權限。
+- **令牌 (Token) 驗證**：範圍 (Scopes) 可用於當應用程式持有令牌 (token) 訪問受保護資源時，驗證其訪問權限。
+- **資源伺服器 (Resource server)**：範圍 (Scopes) 可由資源伺服器用於根據授予應用程式的權限強制執行訪問控制 (access control) 策略。
+- **使用者資料**：範圍 (Scopes) 可用於請求超出基本認領 (claims) 的其他使用者資料資訊。
+
+## 最佳實踐
+
+- **請求最少的範圍 (scopes)**：始終請求應用程式運行所需的最少範圍 (scopes) 集，這可最大程度地減少過度許可的風險並增強使用者信任。
+- **說明範圍 (scope) 使用情況**：向使用者清楚說明每個範圍 (scope) 的必要性。透明度有助於獲得使用者同意。
+- **盡可能使用標準範圍 (scopes)**：利用標準範圍 (scopes) 以確保兼容性並降低複雜性。
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims",
+  ]}
+/>

@@ -1,12 +1,8 @@
 ---
 import { AstroSeo } from "@astrolib/seo";
-import {
-  defaultLocale,
-  getLocale,
-  getLocaleUrl,
-  locales,
-} from "astro-i18n-aut";
+import { defaultLocale, locales } from "astro-i18n-aut";
 import { getPhrases } from "../phrases";
+import { getLocaleFromUrl, getLocaleUrl } from "../utils/locale";
 
 type Props = {
   title?: string;
@@ -15,7 +11,7 @@ type Props = {
 
 const { props } = Astro;
 
-const locale = getLocale(Astro.url);
+const locale = getLocaleFromUrl(Astro.url);
 const phrases = getPhrases(locale);
 const title = props.title ? `${props.title} · Auth Wiki` : "Auth Wiki";
 const description = props.description ?? phrases.site.description;
