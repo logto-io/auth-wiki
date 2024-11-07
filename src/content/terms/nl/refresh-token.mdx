@@ -60,7 +60,7 @@ grant_type=refresh_token
   &scope=openid%20profile%20email
 ```
 
-## Overwegingen voor beveiliging
+## Overwegingen voor beveiliging ||security-considerations||
 
 Aangezien vernieuwen tokens (refresh tokens) langlevend zijn (bijvoorbeeld dagen, weken) en kunnen worden gebruikt om nieuwe toegangstokens (access tokens) te verkrijgen zonder gebruikersinteractie, vormen ze een hoger beveiligingsrisico dan toegangstokens (bijvoorbeeld minuten, uren). Het gebruik van vernieuwen tokens (refresh tokens) moet zorgvuldig worden overwogen en geïmplementeerd om potentiële beveiligingsrisico's te beperken. Hier zijn enkele beste praktijken om te overwegen:
 
@@ -71,7 +71,7 @@ Bewaar vernieuwen tokens (refresh tokens) veilig aan clientzijde om ongeautorise
 - **HTTP-only cookies**: Bewaar tokens in HTTP-only cookies om te voorkomen dat client-side JavaScript er toegang tot heeft.
 - **Versleutelde opslag**: Gebruik beveiligde opslag zoals Keychain (iOS) of KeyStore (Android) op mobiele apparaten of versleutelde databases in webapplicaties.
 
-### Vernieuwen token rotatie
+### Vernieuwen token rotatie ||refresh-token-rotation||
 
 Hoewel vernieuwen tokens (refresh tokens) langlevend kunnen zijn, kan het periodiek roteren ervan of op basis van bepaalde voorwaarden (bijvoorbeeld na een succesvolle tokenuitwisseling) het risico op ongeautoriseerde toegang aanzienlijk verminderen. De exacte rotatiestrategie kan variëren op basis van de beveiligingseisen van de applicatie en de mogelijkheden van de autorisatieserver.
 
@@ -82,7 +82,7 @@ Hier zijn twee veelvoorkomende tokenrotatiestrategieën:
 
 Wanneer een vernieuwen token (refresh token) wordt geroteerd, moet het vorige vernieuwen token (refresh token) ongeldig worden gemaakt om hergebruik ervan te voorkomen. Deze strategieën worden vaak gecombineerd met de sessie TTL (time-to-live) om ervoor te zorgen dat na een bepaalde tijd, ongeacht de geldigheid van het vernieuwen token (refresh token), de gebruiker opnieuw moet authenticeren.
 
-### Zendergebonden vernieuwen tokens (Sender-constrained refresh tokens)
+### Zendergebonden vernieuwen tokens (Sender-constrained refresh tokens) ||sender-constrained-refresh-tokens||
 
 Zendergebonden vernieuwen tokens (refresh tokens) zijn een beveiligingsmechanisme om het vernieuwen token (refresh token) te binden aan de client die het heeft aangevraagd, als de client geen <Ref slug="client" headingId="confidential-clients">vertrouwelijke client (confidential client)</Ref> is. Veelgebruikte methoden zijn [DPoP](https://datatracker.ietf.org/doc/html/rfc9449) en [mTLS](https://datatracker.ietf.org/doc/html/rfc8705).
 

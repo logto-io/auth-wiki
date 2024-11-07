@@ -1,21 +1,21 @@
 ---
 title: Toegangstoken (Access token)
 tags: [oauth 2.0, oidc]
-description: Een toegangstoken (access token) is een referentie die wordt gebruikt om toegang te krijgen tot beschermde bronnen namens een identiteit (bijv. gebruiker of dienst). Het is een draagtoken (bearer token) dat toegang verleent tot bronnen op basis van de scopes (toestemmingen) van het token.
+description: Een toegangstoken (Access token) is een referentie die wordt gebruikt om toegang te krijgen tot beschermde bronnen namens een identiteit (bijv. gebruiker of dienst). Het is een draagtoken (bearer token) dat toegang verleent tot bronnen op basis van de scopes (toestemmingen) van het token.
 ---
 
-## Wat is een toegangstoken (access token)?
+## Wat is een toegangstoken (Access token)?
 
-Een toegangstoken (access token) is een referentie, meestal een reeks karakters, die wordt gebruikt om toegang te krijgen tot beschermde bronnen. In de context van OAuth 2.0 en OpenID Connect (OIDC) kunnen <Ref slug="authorization-server">authorization servers</Ref> toegangstokens (access tokens) uitgeven aan cliënten (applicaties) na succesvolle authenticatie en autorisatie.
+Een toegangstoken (Access token) is een referentie, meestal een reeks karakters, die wordt gebruikt om toegang te krijgen tot beschermde bronnen. In de context van OAuth 2.0 en OpenID Connect (OIDC) kunnen <Ref slug="authorization-server">authorization servers</Ref> toegangstokens (Access tokens) uitgeven aan cliënten (applicaties) na succesvolle authenticatie en autorisatie.
 
-Hoewel de RFC's voor OAuth 2.0 en OIDC de implementatiedetails van toegangstokens (access tokens) niet specificeren, zijn er twee gangbare soorten toegangstokens die in de praktijk worden gebruikt:
+Hoewel de RFC's voor OAuth 2.0 en OIDC de implementatiedetails van toegangstokens (Access tokens) niet specificeren, zijn er twee gangbare soorten toegangstokens die in de praktijk worden gebruikt:
 
 - <Ref slug="opaque-token" />: Een willekeurige reeks die geen betekenis heeft ("ondoorzichtig") voor de cliënt. De cliënt biedt het token aan de resource server, die het token valideert bij de authorization server.
 - <Ref slug="jwt" />: Een zelfbeheerd token dat <Ref slug="claim">claims</Ref> bevat (bijv. gebruikers-ID, vervaltijd) met een digitale handtekening. De resource server kan het token valideren zonder een extra verzoek te doen aan de authorization server.
 
-## Hoe werkt een toegangstoken (access token)?
+## Hoe werkt een toegangstoken (Access token)?
 
-Afhankelijk van het type toegangstoken (access token), kan de stroom van het gebruik van een toegangstoken variëren.
+Afhankelijk van het type toegangstoken (Access token), kan de stroom van het gebruik van een toegangstoken variëren.
 
 Hier is een vereenvoudigd voorbeeld van het gebruik van een ondoorzichtig toegangstoken (opaque access token):
 
@@ -50,12 +50,12 @@ sequenceDiagram
     Resource Server->>Client: Zend antwoord
 ```
 
-Het verschil tussen de twee typen toegangstokens (access tokens) is hoe de resource server het token valideert:
+Het verschil tussen de twee typen toegangstokens (Access tokens) is hoe de resource server het token valideert:
 
 - De resource server moet een extra verzoek doen aan de authorization server om een ondoorzichtig token te valideren elke keer dat het een token ontvangt.
 - De resource server kan een JWT valideren zonder een extra verzoek te doen aan de authorization server omdat het token alle benodigde informatie bevat en de resource server de publieke sleutel kan cachen van de JSON Web Key Set (JWKS) van de authorization server.
 
-Toegangstokens (access tokens) zijn meestal van korte duur en hebben een vervaltijd (bijv. 1 uur). Cliënten moeten een nieuw toegangstoken aanvragen wanneer het huidige token verloopt.
+Toegangstokens (Access tokens) zijn meestal van korte duur en hebben een vervaltijd (bijv. 1 uur). Cliënten moeten een nieuw toegangstoken aanvragen wanneer het huidige token verloopt.
 
 ## Welk type token moet ik gebruiken?
 
@@ -79,7 +79,7 @@ Voor meer informatie over het kiezen tussen de twee typen tokens, zie [Opaque to
 
 In de meeste gevallen heeft de <Ref slug="authorization-server" /> de volgende verantwoordelijkheden:
 
-- Geeft toegangstokens (access tokens) uit aan cliënten na succesvolle authenticatie en autorisatie. De authorization server kan het toegangsniveau verkleinen (de scopes verkleinen tot een subset) of het tokenverzoek afwijzen op basis van de toegangspolicies (bijv. gebruikersinstemming, <Ref slug="rbac" />, <Ref slug="abac" />).
+- Geeft toegangstokens (Access tokens) uit aan cliënten na succesvolle authenticatie en autorisatie. De authorization server kan het toegangsniveau verkleinen (de scopes verkleinen tot een subset) of het tokenverzoek afwijzen op basis van de toegangspolicies (bijv. gebruikersinstemming, <Ref slug="rbac" />, <Ref slug="abac" />).
 - Controleert of het toegangstoken door de authorization server is uitgegeven en niet verlopen of ingetrokken is (<Ref slug="token-introspection" />).
 - Biedt informatie over het token (bijv. scopes, vervaltijd) via token introspection of <Ref slug="userinfo-endpoint" />.
 
@@ -89,7 +89,7 @@ Je zult merken dat de authorization server de betekenis van het toegangstoken ni
 - Dwingt de toegangspolicy af op basis van de claims van het token (meestal scopes).
 - Biedt de beschermde bronnen als het toegangstoken geldig is.
 
-## Levenscyclus van een toegangstoken (access token)
+## Levenscyclus van een toegangstoken (Access token)
 
 De levenscyclus van een toegangstoken bestaat meestal uit de volgende fasen:
 

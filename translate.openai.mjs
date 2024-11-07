@@ -12,7 +12,7 @@ const buildInstructions = (terms) => [
   'Keep all frontmatter keys in the original language, translate title and description.',
   'Do not translate JSON keys, inline code, component names and keys.',
   'For mermaid diagrams, translate the text inside the diagram, but keep the diagram type and structure.',
-  'Do not translate proper nouns, e.g. "OAuth", "JWT".',
+  'Do not translate the following nouns: OAuth, OpenID Connect.',
   `Whenever seeing one of the following terms, including in title, you must add the untranslated term in parentheses after the translated term, e.g. "认证 (Authentication)": ${terms.join(', ')}.`,
   'Prefer using "你" instead of "您" in Chinese.',
   'Make sure there is a space between the CJK and non-CJK characters.',
