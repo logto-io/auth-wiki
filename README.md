@@ -15,6 +15,9 @@ We welcome contributions from everyone! Whether you’ve found a typo, want to s
    - Click the **edit** button (pencil icon) in the top right corner.
    - Make your edits and submit a pull request.
 
+> [!Note]
+> Auth Wiki is a multilingual project. You can contribute to any language you're comfortable with, we'll take care of the rest.
+
 ### Running locally
 
 Auth Wiki uses PNPM and Astro. To preview your changes locally:
