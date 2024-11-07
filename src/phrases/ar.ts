@@ -4,10 +4,10 @@ export const ar = Object.freeze({
     learn_more: 'اعرف المزيد',
   },
   site: {
-    description: 'موسوعة ويكي المصادقة هي مجموعة شاملة من المقالات والبرامج التعليمية والموارد حول المصادقة والتفويض. تعرف على OAuth 2.0 و OpenID Connect و SAML والمزيد.',
+    description: 'Auth Wiki هو مجموعة شاملة من الموارد حول المصادقة والتفويض وإدارة الهوية والوصول. تعرف على OAuth 2.0 و OpenID Connect و SAML.',
   },
   home: {
-    description: 'استكشف واعثر على تعاريف واضحة لمصطلحات رئيسية تتعلق بالمصادقة والتفويض وإدارة الهوية. اعمل مع المعايير المفتوحة مثل <a href="/ar/openid-connect">OpenID Connect</a> و <a href="/ar/oauth-2.0">OAuth 2.0</a> و <a href="/ar/saml">SAML</a>.',
+    description: 'استكشف واعثر على تعاريف واضحة لمصطلحات رئيسية متعلقة بالمصادقة والتفويض وإدارة الهوية والوصول (IAM). اعمل مع المعايير المفتوحة مثل <a href="/ar/openid-connect">OpenID Connect</a> و <a href="/ar/oauth-2.0">OAuth 2.0</a> و <a href="/ar/saml">SAML</a>.',
   },
   content: {
     edit_on_github: 'تحرير على جيثب',

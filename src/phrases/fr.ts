@@ -4,10 +4,10 @@ export const fr = Object.freeze({
     learn_more: 'En savoir plus',
   },
   site: {
-    description: 'Auth Wiki est une collection complète d\'articles, de tutoriels et de ressources sur l\'authentification et l\'autorisation. Apprenez-en plus sur OAuth 2.0, OpenID Connect, SAML et plus encore.',
+    description: 'Auth Wiki est une collection complète de ressources sur l\'authentification, l\'autorisation et la gestion de l\'identité et des accès. Apprenez-en plus sur OAuth 2.0, OpenID Connect, SAML.',
   },
   home: {
-    description: 'Explorez et trouvez des définitions claires des principaux glossaires liés à l\'authentification, l\'autorisation et la gestion de l\'identité. Travaillez avec des normes ouvertes comme <a href="/fr/openid-connect">OpenID Connect</a>, <a href="/fr/oauth-2.0">OAuth 2.0</a> et <a href="/fr/saml">SAML</a>.',
+    description: 'Explorez et trouvez des définitions claires des glossaires clés liés à l\'authentification, l\'autorisation et la gestion de l\'identité et des accès (IAM). Travaillez avec des normes ouvertes comme <a href="/fr/openid-connect">OpenID Connect</a>, <a href="/fr/oauth-2.0">OAuth 2.0</a> et <a href="/fr/saml">SAML</a>.',
   },
   content: {
     edit_on_github: 'Modifier sur GitHub',
