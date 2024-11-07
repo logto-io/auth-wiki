@@ -1,0 +1,44 @@
+---
+title: توضيح (Auth, إزالة الغموض)
+tags: [authentication, authorization]
+description: غالبًا ما يُستخدم مصطلح "auth" كاختصار لعملية المصادقة (authentication) أو التفويض (authorization). هذه المفاهيم ذات صلة ولكنها مختلفة تمامًا.
+---
+
+## توضيح (Auth)
+
+هذه الصفحة توضيح لمصطلح "auth". غالبًا ما يُستخدم كاختصار لـ:
+
+- <Ref slug="authentication" />: عملية التحقق من ملكية الهوية (مثل المستخدم أو الخدمة). يجيب عن السؤال "ما هي الهوية التي تملكها؟"
+- <Ref slug="authorization" />: عملية تحديد ما هي الإجراءات التي يمكن للهوية تنفيذها على المورد. يجيب عن السؤال "ماذا يمكنك أن تفعل؟"
+
+> [!Note]
+> أحيانًا، تُعرف المصادقة (authentication) والتفويض (authorization) بـ "AuthN" و "AuthZ" على التوالي.
+
+هذان المفهومان كلاهما ضروري في مجال <Ref slug="iam" />، ولكنهما مختلفان أساسًا. لنرى مثالاً: تطبيق الويب MyStorage لديه القدرة على تحميل الملفات والاتصال بـ Google Drive. ستكون عملية المستخدم النموذجية كما يلي:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MyStorage
+    participant Google
+    autonumber
+
+    User->>MyStorage: تسجيل الدخول إلى MyStorage
+    MyStorage->>User: مرحبًا، User!
+    User->>MyStorage: انقر على "الاتصال بـ Google Drive"
+    MyStorage->>Google: تحويل إلى Google<br />مع طلب تفويض (authorization request)
+    Google->>User: مطالبة المستخدم بتسجيل الدخول
+    User->>Google: تسجيل الدخول إلى Google
+    Google->>User: طلب إذن للوصول إلى Google Drive
+    User->>Google: منح الوصول إلى MyStorage
+    Google->>MyStorage: إعادة التوجيه إلى MyStorage<br />مع بيانات التفويض (مثل access token)
+    MyStorage->>Google: الوصول إلى Google Drive الخاص بالمستخدم باستخدام access token
+```
+
+في هذا التسلسل، يقوم المستخدم بخطوتين من المصادقة (authentication): واحدة مع MyStorage (الخطوة 1) وأخرى مع Google (الخطوة 6)؛ وخطوة واحدة من التفويض (authorization): منح الوصول إلى Google Drive (الخطوة 8).
+
+## ماذا تقصد؟
+
+عندما ترى مصطلح "auth"، من المهم توضيح ما إذا كان يشير إلى المصادقة (authentication) أو التفويض (authorization)؛ وإلا، قد تتوقع أن يتم تغطية كلا العمليتين (تمامًا كما تفعل هذه الصفحة).
+
+<SeeAlso slugs={["authentication", "authorization", "iam", "oauth-2.0", "openid-connect"]} />

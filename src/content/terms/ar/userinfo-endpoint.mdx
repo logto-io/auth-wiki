@@ -1,0 +1,50 @@
+---
+title: نقطة نهاية معلومات المستخدم (Userinfo endpoint)
+tags: [oidc]
+description: نقطة نهاية معلومات المستخدم (Userinfo endpoint) هي نقطة نهاية في OpenID Connect (OIDC) توفر معلومات المستخدم للعملاء. وهي نقطة نهاية تكميلية لـ ID token وتسمح للعملاء بجلب معلومات إضافية عن المستخدم.
+---
+
+## ما هي نقطة نهاية معلومات المستخدم (Userinfo endpoint)؟
+
+في <Ref slug="openid-connect" />، نقطة نهاية معلومات المستخدم (Userinfo endpoint) هي نقطة نهاية لـ <Ref slug="openid-connect" headingId="openid-provider-op" /> التي تقدم معلومات المستخدم لـ <Ref slug="client">العملاء</Ref>. وعادة ما تكون نقطة نهاية معلومات المستخدم نقطة نهاية تكميلية لـ <Ref slug="id-token" /> وتسمح للعملاء بجلب معلومات إضافية عن المستخدم غير المشمولة في ID token.
+
+تم تعريف نقطة نهاية معلومات المستخدم (Userinfo endpoint) في [مواصفة OpenID Connect Core](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) ويتم الوصول إليها عادة من قبل العملاء بعد الحصول على ID token.
+
+## كيف تعمل نقطة نهاية معلومات المستخدم (Userinfo endpoint)؟
+
+عندما يقوم العميل بإرسال طلب إلى نقطة نهاية معلومات المستخدم (Userinfo endpoint)، يحتاج إلى تضمين access token الذي تم الحصول عليه من <Ref slug="token-request" /> واستخدام طرق HTTP `GET` أو `POST`. تقوم نقطة نهاية معلومات المستخدم بالتحقق من access token وترجع معلومات المستخدم في الرد.
+
+إليك مثالًا غير معياري لطلب معلومات المستخدم:
+
+```http
+GET /userinfo HTTP/1.1
+Host: openid-provider.example.com
+Authorization: Bearer some-access-token
+```
+
+قد يختلف المسار الدقيق لنقطة نهاية معلومات المستخدم في موفري OpenID المختلفين. يمكنك الرجوع إلى <Ref slug="openid-connect-discovery" /> الخاصة بالمزود للعثور على URL نقطة نهاية معلومات المستخدم. إذا كان access token صالحًا، ترد نقطة نهاية معلومات المستخدم بمعلومات المستخدم:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "sub": "user123",
+  "name": "Alice",
+  "email": "alice@foo.com",
+  "birthdate": "1990-01-01",
+  "address": {
+    "street": "1234 Elm St",
+    "city": "Springfield",
+    "country": "US"
+  }
+}
+```
+
+قد يحتوي الرد على سمات مستخدم مختلفة مثل `name` و`email` و`birthdate` و`address`؛ وعادة ما يحتوي على المزيد من <Ref slug="claim">المطالبات</Ref> مقارنة بـ <Ref slug="id-token" />. تعتمد السمات الفعلية التي يتم إرجاعها على تهيئة <Ref slug="openid-connect" headingId="openid-provider-op" /> وموافقة المستخدم. يرجى الرجوع إلى وثائق موفر OpenID الخاص بك للحصول على السمات المحددة المتاحة.
+
+### التوقيع والتشفير
+
+يمكن توقيع أو تشفير رد نقطة نهاية معلومات المستخدم لضمان سلامته وسريته. إذا تم تطبيق إحدى أو كلا هاتين الحمايتين، سيكون رد نقطة نهاية معلومات المستخدم في شكل <Ref slug="jwt" /> بدلاً من كائن JSON عادي.
+
+<SeeAlso slugs={["openid-connect", "id-token", "openid-connect-discovery", "jwt", "signing-key"]} />

@@ -1,0 +1,120 @@
+---
+title: مؤشر الموارد (Resource indicator)
+tags: [oauth 2.0]
+description: مؤشر الموارد في OAuth 2.0 هو معلمة تمديد معرفة في RFC 8707 تتيح للعملاء تحديد موقع خادم الموارد في الطلب التفويضي (authorization request). يوفر طريقة قابلة للتوسع للتعامل مع خوادم موارد متعددة في خادم تفويض (authorization server) واحد.
+---
+
+## ما هو مؤشر الموارد (Resource indicator)؟
+
+مؤشر الموارد، كما هو معرف في تمديد OAuth 2.0 [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707)، هو معلمة تتيح للعملاء تحديد URI لخادم الموارد في <Ref slug="authorization-request" /> (أو <Ref slug="authentication-request" /> في <Ref slug="openid-connect" />) و<Ref slug="token-request" />. يُستخدم مؤشر الموارد لتحديد موقع خادم الموارد الذي يرغب العميل في الوصول إليه.
+
+> [!Note]
+> مؤشر الموارد هو معلمة تمديد لا تعتبر جزءًا من مواصفات OAuth 2.0 الأساسية. يرجى التحقق من وثائق <Ref slug="authorization-server" /> الخاصة بك لمعرفة ما إذا كانت تدعم هذه المعلمة.
+
+## كيف تعمل مؤشرات الموارد (Resource indicators)؟
+
+لفهم كيفية عمل مؤشرات الموارد بشكل أفضل، دعونا ننظر في سيناريو حيث يريد <Ref slug="client" /> الوصول إلى عدة <Ref slug="resource-server">خوادم موارد</Ref> باستخدام خادم تفويض واحد.
+
+### 1. تسجيل خوادم الموارد
+
+عادةً ما يحتاج المطور إلى تسجيل كل خادم موارد مع خادم التفويض لجعلها متاحة للعميل. قد تختلف عملية التسجيل الفعلية اعتمادًا على تنفيذ خادم التفويض. قد يكون اسم الميزة مختلفًا، مثل "موارد API" أو فقط "الموارد".
+
+لنقل إن العميل يريد الوصول إلى خادمي موارد: `https://api.example.com` و`https://api.another.com`، وقد تم تسجيلهما مع خادم التفويض.
+
+### 2. تحديد النطاقات لكل خادم موارد
+
+على عكس تدفقات OAuth 2.0 التقليدية، حيث يتم مشاركة <Ref slug="scope">النطاقات</Ref> عبر جميع خوادم الموارد، يسمح تمديد مؤشر الموارد للعميل بتحديد النطاقات لكل خادم موارد. يجب أن يكون هذا أيضاً جزءاً من عملية التسجيل. لنعترف أن خوادم الموارد لديها النطاقات التالية:
+
+| خادم الموارد              | النطاقات         |
+|--------------------------|------------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. تضمين مؤشرات الموارد في طلب التفويض (authorization request)
+
+لإبلاغ خادم التفويض بأننا نريد استخدام تمديد مؤشر الموارد، يجب أن يضمن العميل معلمة `resource` في طلب التفويض.
+
+إليك مثال غير معياري لطلب تفويض يتضمن مؤشر موارد:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+في هذا المثال، يضمن العميل معلمة `resource` بالقيمة المشفرة `https%3A%2F%2Fapi.example.com` لتحديد موقع خادم الموارد (`https://api.example.com`).
+
+قد تلاحظ أننا نضم أيضًا بعض النطاقات المحددة مسبقًا، مثل `openid`، مع النطاقات الخاصة بالموارد. يجب على خادم التفويض التحقق من صحة النطاقات وتصفيتها من النطاقات الأخرى التي لا ترتبط بخادم المورد المطلوب. يسمى هذا **التقليص**.
+
+إليك جدول بالنطاقات الفعلية الأربعة التي من المتوقع أن يستلمها العميل:
+
+| خادم الموارد              | النطاقات                  |
+|--------------------------|---------------------------|
+| N/A                      | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                    |
+
+جمال مؤشر الموارد يكمن في أنه يمكن للعميل طلب عدة خوادم موارد في طلب تفويض واحد عن طريق تكرار معلمة `resource`. دعونا نلقي نظرة على مثال آخر:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+في هذا المثال، يطلب العميل الوصول إلى كل من `https://api.example.com` و`https://api.another.com` مع النطاقات المعنية. يجب على خادم التفويض التحقق من صحة النطاقات لكل خادم موارد، بمعنى آخر، القيام بعملية **المنتج الديكارتي** بين النطاقات وخوادم الموارد. يجب أن تكون النتيجة:
+
+| خادم الموارد              | النطاقات                  |
+|--------------------------|---------------------------|
+| N/A                      | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`           |
+| `https://api.another.com` | `read`, `delete`          |
+
+هناك سبعة نطاقات صالحة في المجموع لهذا الطلب التفويضي.
+
+### 4. تضمين مؤشرات الموارد في طلب الرمز (token request)
+
+بمجرد أن يستلم العميل رمز التفويض (authorization code)، يمكن أن يقوم بتبديله برمز وصول (access token) مع مؤشر موارد واحد، إذا لزم الأمر. على سبيل المثال:
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+معلمة `resource` في طلب الرمز اختيارية. إذا تضمنها العميل، يجب على خادم التفويض التحقق من صحة مؤشر الموارد مقابل النطاقات المرتبطة بالمنحة الحالية؛ وإلا، يجب على خادم التفويض الرجوع إلى النطاقات العامة (على سبيل المثال، <Ref slug="openid-connect" /> النطاقات).
+
+> [!Note]
+> يجب على خادم التفويض دائمًا تطبيق <Ref slug="access-control" /> للتأكد من أن رمز الوصول الصادر صالح وقد تم تقليصه بشكل صحيح بناءً على سياق المنحة الحالي.
+
+قد تتساءل عن كيفية التعامل مع خوادم الموارد المتعددة في المنحة. بما أن رمز التفويض يستخدم مرة واحدة فقط، يمكن للعميل استخدام منح أخرى، مثل منحة <Ref slug="refresh-token" />، للحصول على رموز وصول لخوادم الموارد الأخرى.
+
+## لماذا نحتاج إلى مؤشرات الموارد (Resource indicators)؟
+
+كما ترى من الأمثلة المذكورة أعلاه، يوفر تمديد مؤشر الموارد طريقة قابلة للتوسع للتعامل مع خوادم موارد متعددة دون العبث بـ <Ref slug="scope">النطاقات</Ref> والقلق بشأن تعارض النطاقات. إنه ميزة قوية توفر مرونة أكبر للعملاء للوصول إلى الموارد من خوادم الموارد المختلفة.
+
+من الجدير بالذكر أن تمديد مؤشر الموارد ليس جزءًا من مواصفات OAuth 2.0 الأساسية. تأكد من أن خادم التفويض الخاص بك يدعم هذا التمديد قبل استخدامه في تطبيقك.
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

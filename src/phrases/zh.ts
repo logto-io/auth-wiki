@@ -7,7 +7,7 @@ export const zh = Object.freeze({
     description: 'Auth Wiki 是一个关于身份验证和授权的全面文章、教程和资源集合。了解 OAuth 2.0、OpenID Connect、SAML 等内容。'
   },
   home: {
-    description: '探索并找到与身份验证、授权和身份管理相关的关键术语的清晰定义。使用诸如 <a href="/openid-connect">OpenID Connect</a>、<a href="/oauth-2.0">OAuth 2.0</a> 和 <a href="/saml">SAML</a> 等开放标准。'
+    description: '探索并找到与身份验证、授权和身份管理相关的关键术语的清晰定义。使用诸如 <a href="/zh/openid-connect">OpenID Connect</a>、<a href="/zh/oauth-2.0">OAuth 2.0</a> 和 <a href="/zh/saml">SAML</a> 等开放标准。'
   },
   content: {
     edit_on_github: '在 GitHub 上编辑',

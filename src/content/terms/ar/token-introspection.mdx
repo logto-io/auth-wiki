@@ -1,0 +1,60 @@
+---
+title: تفتيش الرمز المميز (Token introspection)
+tags: [oauth 2.0, oidc]
+description: تفتيش الرمز المميز (Token introspection) هو امتداد لـ OAuth 2.0 يتيح للعملاء استعلام خادم التفويض للتحقق من صحة الرموز المميزة واسترداد البيانات الوصفية الخاصة بها.
+---
+
+## ما هو تفتيش الرمز المميز (Token introspection)؟
+
+تفتيش الرمز المميز (Token introspection) هو امتداد لـ OAuth 2.0 يعرف في [RFC 7662](https://datatracker.ietf.org/doc/html/rfc7662) الذي يتيح لـ <Ref slug="client">العملاء (clients)</Ref> استعلام <Ref slug="authorization-server" /> للتحقق من صحة الرموز المميزة واسترداد البيانات الوصفية الخاصة بها. يكون هذا الامتداد مفيدًا عندما:
+
+- يرغب العميل في التحقق من صحة الرمز المميز في الوقت الفعلي.
+- يكون الرمز المميز <Ref slug="opaque-token">غير شفاف (opaque)</Ref> (غير محتوٍ ذاتيًا) ويتطلب من خادم التفويض التحقق منه.
+
+## كيف يعمل تفتيش الرمز المميز (Token introspection)؟
+
+إليك مثال غير معياري لطلب تفتيش رمز مميز:
+
+```http
+POST /introspect HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+token=random-token-value
+  &token_type_hint=access_token
+```
+
+المعامل `token_type_hint` اختياري ويجب تحديده لنوع الرمز المميز الذي يتم التفتيش عنه. إذا كان الرمز المميز صحيحًا، فإن خادم التفويض يستجيب بالبيانات الوصفية الخاصة بالرمز:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "active": true,
+  "scope": "read write",
+  "client_id": "client-id",
+  "username": "johndoe",
+  "token_type": "Bearer",
+  "exp": 1634020800,
+  "iat": 1634017200
+}
+```
+
+من الجدير بالذكر أن ليس كل خوادم التفويض تدعم تفتيش الرمز المميز وليس كل الرموز قابلة للتفتيش. قد يحد <Ref slug="authorization-server" /> من استخدام تفتيش الرمز المميز بناءً على عوامل مختلفة، على سبيل المثال، قد لا تدعم بعض خوادم التفويض التفتيش لـ <Ref slug="jwt">JWTs</Ref>.
+
+### المعاملات الرئيسية في طلب تفتيش الرمز المميز
+
+إليك معاملتين رئيسيتين في طلب تفتيش الرمز المميز:
+
+- **`token`**: الرمز المميز الذي سيتم تفتيشه.
+- **`token_type_hint`**: نوع الرمز المميز الذي يتم التفتيش عنه. يمكن أن يكون `access_token` أو `refresh_token`.
+
+<SeeAlso slugs={["oauth-2.0", "opaque-token", "jwt"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/oauth2-token-introspection',
+    'https://datatracker.ietf.org/doc/html/rfc7662',
+  ]}
+/>

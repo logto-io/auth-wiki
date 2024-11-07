@@ -1,0 +1,96 @@
+---
+title: المفتاح الشبكي الجاسوني (JSON Web Key, JWK)
+tags: [oidc, jose]
+description: المفتاح الشبكي الجاسوني (JWK) هو صيغة تعتمد على جيسون لتمثيل المفاتيح التشفيرية. عندما تحتاج عدة مفاتيح JWK إلى تجميعها معًا، يتم تنظيمها في مجموعة مفاتيح شبكية جاسونية (JWKS).
+---
+
+## ما هو المفتاح الشبكي الجاسوني (JWK)؟
+
+المفتاح الشبكي الجاسوني (JWK) هو صيغة تعتمد على جيسون لتمثيل المفاتيح التشفيرية. يُستخدم بشكل واسع في سياق <Ref slug="jws" /> و<Ref slug="jwe" /> للتحقق من سلامة وسرية <Ref slug="jwt">رموز جيسون الشبكية</Ref>. كما يُستخدم في <Ref slug="openid-connect" /> لإدارة الهوية والتحكم في الوصول (access control).
+
+على سبيل المثال، مفتاح عام مُشفر بصيغة PEM:
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx+43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+...يمكن تمثيله كمفتاح JWK:
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+## كيف يعمل المفتاح الشبكي الجاسوني (JWK)؟
+
+بما أن JWK هو صيغة تعتمد على جيسون، فإنه يمكن أن يحمل البيانات الوصفية الغنية حول المفتاح مقارنةً بالصيغ التقليدية مثل PEM. هنا بعض الصفات الشائعة في JWK:
+
+- `kty` (نوع المفتاح): عائلة الخوارزمية التشفيرية المستخدمة مع المفتاح. القيم الشائعة تتضمن `RSA`, `EC`, و`oct`. وقد تم تحديد `EC` كـ "موصى بها+" في [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
+- `use` (استخدام المفتاح العام): الاستخدام المقصود للمفتاح العام. القيم الشائعة تتضمن `sig` (توقيع) و`enc` (تشفير).
+- `key_ops` (عمليات المفتاح): العمليات التي يدعمها المفتاح. القيم الشائعة تشمل `sign`, `verify`, `encrypt`, و`decrypt`.
+- `alg` (الخوارزمية): الخوارزمية المخصصة للاستخدام مع المفتاح. بناءً على نوع المفتاح، قد تختلف الخوارزمية. على سبيل المثال، يمكن استخدام `RS256` مع مفتاح RSA، بينما يمكن استخدام `ES256` مع مفتاح EC.
+- `kid` (معرف المفتاح): معرف فريد للمفتاح. يمكن استخدامه لمطابقة مفتاح معين في مجموعة من المفاتيح.
+
+باستثناء `kty`, جميع الصفات الأخرى اختيارية ويمكن استخدامها لتوفير سياق إضافي حول المفتاح. وفقًا لقيمة `kty`، قد تكون هناك صفات أخرى مطلوبة أو اختيارية. في المثال السابق، يمثل JWK مفتاح ECDSA (`kty: "EC"`) مع منحنى P-384 (`crv: "P-384"`). تحتوي صفتي `x` و`y` على إحداثيات المفتاح العام.
+
+إليك مثال غير معياري لمفتاح عام RSA كـ JWK:
+
+```json
+{
+  "kty": "RSA",
+  "use": "sig",
+  "alg": "RS256",
+  "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+  "e": "AQAB",
+  "kid": "2011-04-29-1234"
+}
+```
+
+لمزيد من المعلومات التفصيلية حول سمات JWK ومعانيها، يُرجى الرجوع إلى [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
+
+## مجموعة مفاتيح شبكية جاسونية (JWKS) ||json-web-key-set-jwks||
+
+عندما تحتاج عدة مفاتيح JWK إلى تجميعها معًا، يتم تنظيمها في مجموعة مفاتيح شبكية جاسونية (JWKS). تعتبر JWKS كائن جيسون يحتوي على مجموعة من مفاتيح JWK. يُستخدم بشكل شائع في استجابة نقطة النهاية `jwks_uri` في <Ref slug="openid-connect-discovery" /> لتوفير المفاتيح العامة للتحقق من <Ref slug="signing-key">المفاتيح الموقعة</Ref> لرموز JWT.
+
+إليك مثال غير معياري على JWKS تحتوي على مفتاحين JWK:
+
+```json
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+      "e": "AQAB",
+      "kid": "2011-04-29-1234"
+    },
+    {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+      "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+    }
+  ]
+}
+```
+
+في هذا المثال، تحتوي JWKS على مفتاحين JWK: مفتاح RSA ومفتاح EC. صفة `keys` هي مجموعة من مفاتيح JWK، كل منها يمثل مفتاحًا مختلفًا.
+
+<SeeAlso slugs={["jwt", "jws", "signing-key", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7517",
+    "https://tools.ietf.org/html/rfc7518",
+    "https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata",
+  ]}
+/>

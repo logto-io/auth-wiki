@@ -1,0 +1,136 @@
+---
+title: توقيع الويب JSON (JSON Web Signature, JWS)
+tags: [oidc, jose]
+description: توقيع الويب JSON (JWS) هو طريقة قياسية لتوقيع والتحقق من البيانات بصيغة JSON. يُستخدم بشكل شائع لضمان سلامة وأصالة رموز الويب JSON (JWTs) في OpenID Connect (OIDC).
+---
+
+## ما هو توقيع الويب JSON (JWS)؟
+
+توقيع الويب JSON (JWS) يحدد طريقة قياسية لتوقيع والتحقق من البيانات في صيغة JSON. يُستخدم على نطاق واسع في التطبيقات الحديثة والمعايير المفتوحة مثل <Ref slug="openid-connect" /> لضمان سلامة وأصالة البيانات المرسلة.
+
+JWS مفيد بشكل خاص عند العمل مع <Ref slug="jwt">رموز الويب JSON (JWTs)</Ref>. على سبيل المثال، يمكن توقيع <Ref slug="id-token" /> أو <Ref slug="access-token" /> باستخدام JWS والتحقق منه من قبل المستلم دون إجراء طلب عبر الشبكة مرة أخرى.
+
+## كيف يعمل JWS؟
+
+يستخدم JWS الخوارزميات التشفيرية لتوقيع البيانات وإنتاج توقيع. هناك مفهومان رئيسيان في JWS: رأس JWS وتسلسل JWS.
+
+### رأس JWS
+
+لدى JWS رأس يحتوي على بيانات وصفية مهمة حول خوارزمية التوقيع وإدارة المفاتيح. تتضمن بعض السمات الشائعة في رأس JWS:
+
+- `alg` (Algorithm): الخوارزمية التشفيرية المستخدمة لتوقيع البيانات.
+- `typ` (Type): نوع الرمز المميز، مثل JWT.
+- `kid` (Key ID): معرف فريد للمفتاح المستخدم في توقيع البيانات.
+- `jku` (JWK Set URL): الرابط الذي يتواجد فيه <Ref slug="jwk" headingId="json-web-key-set-jwks" />.
+
+لقائمة مفصلة بسمات رأس JWS، ارجع إلى [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4).
+
+### تسلسل JWS
+
+لدى JWS تنسيقان للتسلسل: مضغوط وJSON. كل تنسيق له طريقته الخاصة في تمثيل البيانات الموقع عليها.
+
+#### التسلسل المضغوط
+
+في التسلسل المضغوط، يتم تمثيل JWS كسلسلة تحتوي على ثلاثة أجزاء مرمزة بـBase64URL مفصولة بالنقاط (`.`). الأجزاء الثلاثة هي:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+لكل جزء غرض محدد:
+
+- `header`: بيانات وصفية حول خوارزمية التوقيع وإدارة المفاتيح بصيغة Base64URL.
+- `payload`: البيانات الموقع عليها بصيغة Base64URL.
+- `signature`: التوقيع التشفيري للرأس والبيان.
+
+> [!Note]
+> لا يوجد رأس غير محمي مشمول في التسلسل المضغوط.
+
+على سبيل المثال، قد يبدو JWS كما يلي:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+بعد فك ترميز الأجزاء المرمزة بـBase64URL، يتكون JWS مما يلي:
+
+- Header: `{"alg":"HS256","typ":"JWT"}`
+- Payload: `{"sub":"1234567890","name":"Alice"}`
+- Signature: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+الرأس يحدد أن JWS موقعة باستخدام خوارزمية HMAC-SHA256 (`HS256`) ونوع الرمز هو JWT (`typ: "JWT"`) بصيغة JSON. البيان يحتوي على معلومات أساسية حول المستخدم، مثل الموضوع (`sub`) والاسم (`name`).
+
+يتم حساب التوقيع بواسطة:
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  secret
+)
+```
+
+وفقًا للرأس JWS، يتم استخدام خوارزمية HMAC-SHA256 في دالة `Hash`، حيث `secret` هو المفتاح السري المشترك `top-secret` في هذه الحالة.
+
+لمثال مفصل عن كيفية عمل JWS مع JWT، ارجع إلى مقال <Ref slug="signing-key" />.
+
+#### تسلسل JSON
+
+يوفر تسلسل JSON طريقة أكثر تنظيمًا لتمثيل JWS. يتم تمثيل JWS ككائن JSON يحتوي على الخصائص التالية:
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: البيان المرمز بـBase64URL. هذه هي البيانات الموقعة.
+- `signatures`: مصفوفة من كائنات التوقيع، يحتوي كل منها على الرأس المحمي، الرأس، والتوقيع.
+
+  قد يتضمن كل كائن توقيع:
+
+  - `protected`: الرأس المرمز بـBase64URL المحمي (`header` في التسلسل المضغوط).
+  - `header`: الرأس غير المحمي بصيغة JSON. لا يتم تضمين الرأس في التوقيع.
+  - `signature`: التوقيع التشفيري للرأس والبيان (`signature` في التسلسل المضغوط).
+
+على سبيل المثال، قد يبدو JWS في تسلسل JSON كما يلي:
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+في المثال أعلاه، هناك توقيعان (`signatures` مصفوفة) لنفس البيان. يحتوي كل كائن توقيع على الرأس المحمي، الرأس، والتوقيع.
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

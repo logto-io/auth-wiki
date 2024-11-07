@@ -1,0 +1,51 @@
+---
+title: الوصول غير المتصل (Offline access)
+tags: [oauth 2.0, oidc]
+description: الوصول غير المتصل (Offline access) يسمح للعملاء بالحصول على رموز وصول جديدة دون الحاجة إلى إعادة مصادقة المستخدم. إنه مفيد للجلسات الطويلة ولتحسين تجربة المستخدم.
+---
+
+## ما هو الوصول غير المتصل (Offline access)؟
+
+قد يختلف مفهوم الوصول غير المتصل (Offline access) حسب السياق، سنركز على مواصفات OAuth 2.0 و OpenID Connect (OIDC). في هذا السياق، يسمح الوصول غير المتصل للعملاء بالحصول على رموز وصول جديدة باستخدام <Ref slug="refresh-token">رمز تحديث (refresh token)</Ref> دون الحاجة إلى إعادة مصادقة المستخدم. هذه الميزة مفيدة بشكل خاص للجلسات الطويلة وتحسين تجربة المستخدم.
+
+من الجدير بالذكر أن OAuth 2.0 لا يعرّف مصطلح "الوصول غير المتصل" صراحةً؛ إنه يحدد فقط استخدام رموز التحديث للحصول على رموز الوصول الجديدة. ومع ذلك، فإن مصطلح "الوصول غير المتصل" (إلى جانب 'offline_access' scope) تم تبنيه على نطاق واسع في الصناعة للإشارة إلى هذه القدرة، وهو معرف رسميًا في مواصفة <Ref slug="openid-connect" />.
+
+## كيف يعمل الوصول غير المتصل (Offline access)؟
+
+للتبسيط، سنستخدم مصطلحات OAuth 2.0 <Ref slug="authorization-request" /> و <Ref slug="authorization-server" /> لتوضيح كيفية عمل الوصول غير المتصل. المصطلحات البديلة لها في OIDC هي <Ref slug="authentication-request" /> و <Ref slug="openid-connect" headingId="openid-provider-op" />، على التوالي.
+
+هناك خطوتان رئيسيتان متضمنتان في الاستفادة من الوصول غير المتصل:
+
+1. **طلب الوصول غير المتصل**: عندما يقوم <Ref slug="client" /> ببدء طلب تفويض إلى خادم التفويض، فإنه يتضمن النطاق `offline_access` لطلب الوصول غير المتصل. يشير هذا النطاق إلى أن العميل يريد الحصول على رمز تحديث مع رمز الوصول.
+
+   قد يختلف الدعم للوصول غير المتصل عبر خوادم التفويض، وقد يتجاهل خادم التفويض نطاق `offline_access` إذا لم يدعمه. يرجى الرجوع إلى وثائق خادم التفويض لضمان التوافق قبل استخدام هذا النطاق.
+
+2. **استخدام رمز التحديث**: بمجرد اكتمال <Ref slug="oauth-2.0-grant" />، يجب أن يتلقى العميل <Ref slug="refresh-token" /> مع <Ref slug="access-token" />. يمكن للعميل تخزين رمز التحديث بشكل آمن واستخدامه لإرسال <Ref slug="token-request" /> إلى خادم التفويض للحصول على رمز وصول جديد عند انتهاء صلاحية رمز الوصول الحالي.
+
+للحصول على أمثلة تفصيلية عن وصول غير المتصل في العمل، يرجى الرجوع إلى مقالة <Ref slug="refresh-token" />.
+
+## اعتبارات الأمان
+
+تشبه الآثار الأمنية للوصول غير المتصل تلك الخاصة برموز التحديث. يرجى الرجوع إلى قسم <Ref slug="refresh-token" headingId="security-considerations" /> للحصول على التفاصيل.
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "Offline Access in OpenID Connect Core 1.0",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "Refresh Token in OAuth 2.0",
+        ogDescription: "Refresh tokens are credentials used to obtain access tokens."
+      },
+    },
+  ]}
+/>

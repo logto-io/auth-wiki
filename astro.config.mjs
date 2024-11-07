@@ -12,6 +12,7 @@ export const locales = Object.freeze({
   en: 'en',
   zh: 'zh-Hans',
   ko: 'ko',
+  ar: 'ar',
 });
 
 // https://astro.build/config

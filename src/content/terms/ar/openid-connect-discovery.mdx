@@ -1,0 +1,73 @@
+---
+title: اكتشاف OpenID Connect (OIDC)
+tags: [oidc]
+description: اكتشاف OpenID Connect (OIDC) هو آلية تسمح للعميل باكتشاف نقاط النهاية وتكوين موفر OpenID تلقائيًا.
+---
+
+## ما هو اكتشاف OpenID Connect (OIDC)؟
+
+اكتشاف OpenID Connect (OIDC)، المحدد في [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)، هو آلية تسمح لـ <Ref slug="client">العملاء</Ref> باكتشاف نقاط النهاية وتكوين موفر OpenID تلقائيًا. هذه طريقة حديثة لتبسيط الاتصال بين العملاء و<Ref slug="openid-connect" headingId="openid-provider-op">موفري OpenID</Ref>.
+
+اكتشاف OIDC يحتوي على مكونين رئيسيين:
+
+- اكتشاف موفر OpenID issuer: يمكن للعميل اكتشاف موقع (URL) issuer عبر [WebFinger](https://tools.ietf.org/html/rfc7033) أو مستند خارجي.
+- بيانات موفر OpenID الوصفية: يمكن للعميل استرداد ومعالجة المستند الوصفي لفهم قدرات ونقاط نهاية موفر OpenID.
+
+## كيف يعمل اكتشاف OIDC؟
+
+### اكتشاف موفر OpenID issuer
+
+موفر OpenID issuer هو معرف فريد (عادة ما يكون نفسه URL) يمكن للعملاء استخدامه لاكتشاف تكوين موفر OpenID. ومع ذلك، يجب على العملاء معرفة موقع issuer قبل أن يتمكنوا من استرداد المستند الوصفي.
+
+إذا كان موقع issuer معروفًا بالفعل، يمكن للعميل تخطي الخطوة التالية. خلاف ذلك، يمكن للعميل استخدام WebFinger لاكتشاف موقع issuer. المعلومات اللازمة لاكتشاف OIDC issuer هي:
+
+- `host`: مكان استضافة خدمة WebFinger.
+- `resource`: عنوان البريد الإلكتروني أو URL لموفر OpenID.
+- `rel`: نوع العلاقة، والذي يجب أن يكون مضبوطًا على `http://openid.net/specs/connect/1.0/issuer`.
+
+على سبيل المثال، يحاول مستخدم بعنوان البريد الإلكتروني `foo@bar.com` اكتشاف موقع issuer على `example.com`. ستبدو طلبية WebFinger كما يلي:
+
+```http
+GET /.well-known/webfinger?resource=acct%3Afoo%40bar.com&
+  rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: example.com
+```
+
+المعلمة `resource` عند فك ترميزها تكون `acct:foo@bar.com`، ومعلمة `rel` تكون `http://openid.net/specs/connect/1.0/issuer`.
+
+### بيانات موفر OpenID الوصفية
+
+بمجرد أن يعرف العميل موقع issuer، يمكنه استرداد المستند الوصفي من نقطة النهاية المعروفة. المسار إلى المستند الوصفي هو `/.well-known/openid-configuration` نسبياً إلى URL الخاص بـ issuer.
+
+على سبيل المثال، إذا كان URL الخاص بالـ issuer هو `https://oidc.example.com`، يمكن للعميل استرداد المستند الوصفي من `https://oidc.example.com/.well-known/openid-configuration`. هنا مثال غير معياري للاستجابة الوصفية:
+
+```json
+{
+  "issuer": "https://oidc.example.com",
+  "authorization_endpoint": "https://oidc.example.com/authorize",
+  "token_endpoint": "https://oidc.example.com/token",
+  //...
+}
+```
+
+يحتوي المستند الوصفي على الكثير من المعلومات المفيدة حول موفر OpenID. دعونا نبرز بضع حقول رئيسية:
+
+- `issuer`: المعرف الفريد لموفر OpenID. يجب استخدامه للتحقق من صحة الرموز.
+- `authorization_endpoint`: URL لبدء <Ref slug="authentication-request" />.
+- `token_endpoint`: URL لإرسال <Ref slug="token-request" />.
+- `jwks_uri`: URL لاسترداد <Ref slug="jwk" headingId="json-web-key-set-jwks" /> للتحقق من <Ref slug="signing-key" />.
+- `response_types_supported`: أنواع الاستجابة المدعومة لـ <Ref slug="authentication-request" />.
+- `scopes_supported`: <Ref slug="scope">النطاقات</Ref> المدعومة لـ <Ref slug="authentication-request" />.
+- `claims_supported`: <Ref slug="claim">الادعاءات</Ref> المدعومة لـ <Ref slug="id-token" />.
+- `token_endpoint_auth_methods_supported`: طرق تحقيق العميل المدعومة لـ <Ref slug="token-request" />.
+
+للحصول على قائمة شاملة بالحقول الوصفية، يرجى الرجوع إلى مواصفة [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata).
+
+<SeeAlso slugs={["openid-connect", "authentication-request", "jwt", "token-request"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/exploring-oidc-configuration',
+    'https://openid.net/specs/openid-connect-discovery-1_0.html',
+  ]}
+/>
