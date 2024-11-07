@@ -1,0 +1,72 @@
+---
+title: Réclamation (Claim)
+tags: [oauth 2.0, oidc]
+description: Une réclamation (claim) dans un JSON Web Token (JWT) est une paire nom-valeur qui transmet des informations spécifiques. Dans un contexte plus large, une réclamation peut être toute paire nom-valeur qui représente des informations.
+---
+
+## Qu'est-ce qu'une réclamation (claim) ?
+
+Une réclamation (claim) est une paire nom-valeur qui transmet des informations spécifiques. Par exemple, dans un objet JSON :
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+Dans cet exemple, `sub` est une réclamation qui représente l'identifiant du sujet avec la valeur `foo`, et `email` est une réclamation qui représente l'adresse email avec la valeur `foo@bar.com`.
+
+> Nous utilisons *sujet* au lieu de *utilisateur* parce que sans une définition claire, le sujet (`sub`) peut représenter un utilisateur, un appareil, ou toute entité.
+
+### Utilisations des réclamations (claims)
+
+Les réclamations sont largement utilisées dans divers contextes, tels que :
+
+- <Ref slug="jwt" /> : Dans un JWT, les réclamations sont utilisées pour représenter des informations sur le token, telles que l'issuer (`iss`), le sujet (`sub`), et le temps d'expiration (`exp`).
+- <Ref slug="openid-connect" /> : Dans OIDC, les réclamations sont utilisées pour représenter les informations de l'utilisateur dans le <Ref slug="id-token" /> et le <Ref slug="userinfo-endpoint" />, telles que l'adresse email de l'utilisateur (`email`), le nom (`name`), et la photo de profil (`picture`).
+
+### Réclamations standards
+
+Dans JWT et OIDC, il y a des réclamations standards définies par les spécifications. Certaines réclamations standards courantes incluent :
+
+- **`iss`** : L'issuer du token. Par exemple, si le <Ref slug="authorization-server" /> qui a émis le token est `https://example.com`, dans la plupart des cas, la réclamation `iss` sera la même (`https://example.com`).
+- **`sub`** : Le sujet du token. Il représente l'entité à laquelle le token se rapporte. Par exemple, dans un ID token, la réclamation `sub` représente généralement l'identifiant de l'utilisateur.
+- **`aud`** : L'audience du token. Elle indique les destinataires pour lesquels le token est destiné. Par exemple, si le token est destiné à accéder à une API à `https://api.example.com`, la réclamation `aud` sera la même (`https://api.example.com`).
+- **`exp`** : Le temps d'expiration du token. Il indique quand le token ne devrait plus être accepté pour traitement.
+- **`nbf`** : Le temps "not before" du token. Il indique quand le token devrait commencer à être accepté pour le traitement.
+- **`iat`** : Le temps d'émission du token. Il indique quand le token a été émis.
+- **`jti`** : L'ID JWT du token. Il fournit un identifiant unique pour le token.
+
+OIDC définit également des réclamations standards supplémentaires pour les informations utilisateur. Voir [Réclamations](https://openid.net/specs/openid-connect-core-1_0.html#Claims) dans la spécification OIDC pour plus de détails.
+
+### Réclamations personnalisées
+
+En plus des réclamations standards, vous pouvez définir des réclamations personnalisées pour représenter des informations spécifiques à l'application. Par exemple, vous pouvez inclure une réclamation `role` pour représenter le rôle de l'utilisateur dans l'application.
+
+Les réclamations personnalisées peuvent être espacées de noms avec des [Identificateurs Uniformes de Ressource (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) pour éviter les conflits avec d'autres réclamations. Par exemple :
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+Dans cet exemple, la réclamation `role` est espacée de nom avec `https://example.com/claims/` pour assurer son unicité. Alternativement, vous pouvez définir votre propre [Nom Uniforme de Ressource (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) pour les réclamations personnalisées :
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+Dans cet exemple, la réclamation `role` est espacée de nom avec `urn:example:claims:`.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

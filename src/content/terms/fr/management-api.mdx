@@ -1,0 +1,65 @@
+---
+title: API de gestion (Management API)
+tags: [api, integration]
+description: L'API de gestion (Management API) dans le contexte de la gestion de l'identité et de l'accès (IAM) permet la gestion programmatique des ressources telles que les utilisateurs, les applications, les rôles et les permissions. Typiquement RESTful, elle fournit une couche d'abstraction entre le système IAM et l'interface utilisateur, permettant l'automatisation, l'intégration et le développement de fonctionnalités personnalisées.
+---
+
+## Qu'est-ce que l'API de gestion (Management API) ?
+
+La définition de l'API de gestion (Management API) peut varier en fonction du logiciel ou service que vous utilisez. Dans le contexte de la gestion de l'identité et de l'accès (IAM), l'API de gestion (Management API) fait généralement référence à un ensemble d'API qui vous permettent de gérer les ressources liées à l'IAM de manière programmatique. Par exemple, les utilisateurs, les applications, les rôles, les permissions, les organisations, etc.
+
+Bien que le nom ne précise pas la mise en œuvre exacte, l'API de gestion (Management API) est généralement RESTful, compte tenu de sa nature à définir précisément les ressources et les opérations qui peuvent être effectuées sur elles. Cela dit, quand vous voyez `POST /users`, vous pouvez vous attendre à ce que cet appel d'API crée un nouvel utilisateur.
+
+## Pourquoi l'API de gestion (Management API) est-elle importante ?
+
+L'API de gestion (Management API) crée une couche d'abstraction séparée au-dessus du système IAM, mais en dessous de l'interface utilisateur. Cela permet aux développeurs d'automatiser la gestion des ressources IAM, ce qui peut être particulièrement utile dans plusieurs scénarios :
+
+### 1. Automatisation
+
+Comme le suggère le nom, l'API de gestion (Management API) vous permet d'utiliser du code pour gérer les ressources, au lieu de cliquer manuellement à travers l'interface utilisateur. Cela est particulièrement utile lorsque vous avez un grand nombre d'utilisateurs, d'applications ou de rôles à gérer. Par exemple, vous pouvez écrire un script pour importer des utilisateurs à partir d'un fichier CSV et les attribuer aux rôles et permissions corrects.
+
+### 2. Intégration
+
+L'API de gestion (Management API) crée une manière standard pour la communication service-à-service (ou machine-to-machine). Lorsque vous avez plusieurs services qui ont besoin de communiquer avec le système IAM, au lieu de mettre en place des intégrations personnalisées pour chaque service, une API de gestion (Management API) bien conçue peut être utilisée pour tous les services en combinant les appels d'API. Par exemple, un service qui doit lister tous les utilisateurs sous un rôle spécifique peut le faire en appelant `GET /roles/{role_id}/users`.
+
+### 3. Composition et extension des fonctionnalités
+
+En raison de la variété des exigences commerciales, un système IAM peut ne pas être en mesure de fournir toutes les fonctionnalités exactes dont vous avez besoin, surtout lorsqu'il s'agit d'exigences complexes de contrôle d'accès. L'API de gestion (Management API) vous permet de créer des fonctionnalités personnalisées en plus du système IAM existant sans modifier la plateforme ou l'architecture sous-jacentes.
+
+Voyons un exemple quotidien : les utilisateurs finaux ont besoin de changer leur adresse e-mail. Différentes applications peuvent avoir des exigences différentes :
+
+1. L'application A exige que l'utilisateur vérifie à la fois l'ancienne et la nouvelle adresse e-mail.
+2. L'application B exige que l'utilisateur vérifie le mot de passe existant avant de changer l'adresse e-mail.
+3. L'application C exige que l'utilisateur vérifie le mot de passe existant et qu'un administrateur approuve le changement d'adresse e-mail.
+
+Avec l'API de gestion (Management API), vous pouvez construire un service personnalisé qui orchestre ces exigences en appelant les API nécessaires dans l'ordre correct. Vous pouvez même combiner l'API de gestion (Management API) avec l'API de votre service pour réaliser un flux de travail complexe. Prenons l'application C comme exemple :
+
+1. L'utilisateur clique sur "Changer d'e-mail" dans l'application C, qui envoie une requête `POST /email-change-requests` à votre service. Cela crée une nouvelle demande de changement d'e-mail et retourne l'identifiant `foo`.
+2. L'application C affiche une boîte de dialogue à l'utilisateur, lui demandant de saisir le mot de passe existant.
+3. L'utilisateur saisit le mot de passe, et l'application C envoie une requête `PATCH /email-change-requests/foo` à votre service avec le mot de passe. En arrière-plan, votre service vérifie le mot de passe en appelant l'API de gestion (Management API) `POST /users/{user_id}/verify-password`.
+4. Si le mot de passe est correct, votre service crée un enregistrement de vérification de succès dans la demande de changement d'e-mail `foo`.
+5. Dans le panneau d'administration, un administrateur peut voir les demandes de changement d'e-mail en attente avec `GET /email-change-requests?status=pending`.
+6. Si l'administrateur approuve la demande, le panneau d'administration envoie une requête `PATCH /email-change-requests/foo` à votre service avec l'approbation de l'administrateur.
+7. Votre service appellera ensuite l'API de gestion (Management API) `PATCH /users/{user_id}` pour mettre à jour l'adresse e-mail de l'utilisateur. Si l'adresse e-mail ne peut pas être mise à jour, l'API de gestion (Management API) retournera une erreur, et votre service pourra la gérer en conséquence.
+
+Notez que dans l'exemple ci-dessus, nos utilisateurs finaux n'interagissent jamais directement avec l'API de gestion (Management API). Au lieu de cela, ils interagissent avec l'application C, qui orchestre les appels à l'API de gestion (Management API) en arrière-plan pour atteindre le flux de travail souhaité.
+
+## À quoi devrait ressembler une bonne API de gestion (Management API) ?
+
+- **RESTful** : Suivez les principes RESTful pour rendre l'API prévisible et facile à utiliser.
+- **Orientée ressources** : Représentez les ressources comme des noms et utilisez les méthodes HTTP pour effectuer des actions sur celles-ci.
+- **Cohérente** : Utilisez des conventions de nommage cohérentes, une gestion des erreurs et des formats de réponse cohérents.
+- **Sécurisée** : Mettez en œuvre des mécanismes d'authentification et d'autorisation appropriés pour protéger l'API.
+- **Documentée** : Fournissez une documentation claire et concise sur la façon d'utiliser l'API, y compris des exemples et des cas d'utilisation.
+- **Compatible** : Assurez la compatibilité ascendante lors de l'introduction de nouvelles versions de l'API.
+- **Exhaustive** : Couvrez toutes les opérations nécessaires pour gérer les ressources IAM efficacement.
+
+Il existe d'autres aspects tels que la performance et la scalabilité, qui sont plus liés à l'infrastructure qu'au design de l'API elle-même. Cependant, en pratique, une bonne API de gestion (Management API) devrait aussi considérer ces aspects.
+
+<Resources
+  urls={[
+    "https://blog.logto.io/graphql-and-rest-api",
+    "https://blog.logto.io/post-only-debate",
+    "https://swagger.io/specification/",
+  ]}
+/>

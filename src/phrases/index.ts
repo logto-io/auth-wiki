@@ -1,6 +1,7 @@
 import { ar } from './ar';
 import { en } from './en';
 import { es } from './es';
+import { fr } from './fr';
 import { ja } from './ja';
 import { ko } from './ko';
 import { nl } from './nl';
@@ -11,6 +12,7 @@ export const localeDisplay: Readonly<Record<string, string>> = Object.freeze({
   ar: 'العربية',
   en: 'English',
   es: 'Español',
+  fr: 'Français',
   ja: '日本語',
   ko: '한국어',
   nl: 'Nederlands',
@@ -25,6 +27,8 @@ export const getPhrases = (locale: string) => {
       return en;
     case 'es':
       return es;
+    case 'fr':
+      return fr;
     case 'ja':
       return ja;
     case 'ko':

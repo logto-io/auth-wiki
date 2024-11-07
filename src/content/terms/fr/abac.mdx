@@ -1,0 +1,113 @@
+---
+title: Contrôle d'accès basé sur les attributs (Atrribute-based access control, ABAC)
+tags: [authorization]
+description: Le contrôle d'accès basé sur les attributs (ABAC) est un modèle de contrôle d'accès qui utilise des attributs (tels que les rôles d'utilisateur, les propriétés des ressources et les conditions environnementales) pour prendre des décisions de contrôle d'accès. C'est une manière flexible et dynamique de gérer l'accès aux ressources protégées.
+---
+
+## Qu'est-ce que le contrôle d'accès basé sur les attributs (ABAC) ?
+
+ABAC est un modèle de <Ref slug="access-control" /> qui utilise des attributs pour prendre des décisions de contrôle d'accès. Ces attributs peuvent inclure divers facteurs, tels que :
+
+- Attributs utilisateur : par exemple, rôles, département, localisation, etc.
+- Attributs de ressource : par exemple, niveau de sensibilité, propriétaire, type, etc.
+- Attributs environnementaux : par exemple, heure d'accès, localisation, appareil, etc.
+
+En évaluant ces attributs et en les passant à travers un ensemble de règles, l'ABAC peut déterminer si un sujet (par exemple, utilisateur, service) doit se voir accorder l'accès à une ressource. Cette approche permet un contrôle d'accès fin et une application dynamique des politiques en fonction du contexte.
+
+## Comment fonctionne l'ABAC ?
+
+L'ABAC utilise une approche basée sur des politiques pour le contrôle d'accès. Une politique ABAC typique se compose de :
+
+- **Sujet** : L'entité demandant l'accès (par exemple, utilisateur, service, appareil).
+- **Action** : L'opération effectuée sur la ressource (par exemple, lire, écrire, supprimer).
+- **Ressource** : L'entité à laquelle on accède (par exemple, fichier, base de données, API).
+- **Environnement** : Le contexte dans lequel l'accès est demandé (par exemple, heure, localisation, appareil).
+- **Attributs** : Les propriétés du sujet, de la ressource et de l'environnement qui sont évaluées pour prendre des décisions d'accès.
+- **Politiques** : Un ensemble de règles qui définissent les conditions sous lesquelles l'accès est accordé ou refusé.
+
+Les politiques ABAC sont plus complexes que les modèles traditionnels de contrôle d'accès comme le <Ref slug="rbac" />. En revanche, l'ABAC offre plus de flexibilité et de granularité dans les décisions de contrôle d'accès.
+
+### Exemple de politiques ABAC
+
+Par exemple, un système a plusieurs politiques ABAC :
+
+1. **Politique 1** : Autoriser l'accès si :
+
+    - (Sujet) Le rôle du sujet est `manager`.
+    - (Attribut) Le niveau de sensibilité de la ressource est `high`.
+    - (Environnement) La localisation est `internal`.
+    - (Action) Toute action.
+    - (Environnement) L'heure est entre 9h et 17h (heures de bureau).
+
+2. **Politique 2** : Refuser l'accès si :
+
+    - (Sujet) Le rôle du sujet n'est pas `manager`.
+    - (Attribut) Le niveau de sensibilité de la ressource est `high`.
+    - (Environnement) Toute localisation.
+    - (Action) Toute action.
+    - (Environnement) Toute heure.
+
+3. **Politique 3** : Autoriser l'accès si :
+
+    - (Sujet) Le rôle du sujet est `employee` ou `manager`.
+    - (Attribut) Le niveau de sensibilité de la ressource est `low`.
+    - (Environnement) Toute localisation.
+    - (Action) Action `read`.
+    - (Environnement) Toute heure.
+
+Le moteur d'évaluation des politiques vérifiera ces politiques dans l'ordre, et la première politique qui correspondra aux conditions déterminera la décision d'accès. Pendant ce temps, une politique par défaut de refus est appliquée si aucune autre politique ne correspond.
+
+Passons en revue quelques scénarios pour comprendre comment fonctionne l'ABAC :
+
+> **Scénario 1**. Un utilisateur souhaite accéder (effectuer l'action `read`) à un document (ressource) de niveau de sensibilité élevé en dehors du bureau (environnement). Le rôle de l'utilisateur est `manager` enregistré dans le système.
+  
+**Décision** : L'accès est refusé car l'utilisateur est en dehors du bureau (la localisation n'est pas `internal`).
+
+> **Scénario 2**. Un utilisateur souhaite accéder (effectuer l'action `read`) à un document (ressource) de niveau de sensibilité élevé pendant les heures de bureau (environnement) dans le réseau bureautique (localisation=`internal`). Le rôle de l'utilisateur est `manager`.
+
+**Décision** : L'accès est accordé car toutes les conditions de la Politique 1 sont remplies.
+
+> **Scénario 3**. Toutes les conditions du scénario 2 sont les mêmes, mais le rôle de l'utilisateur est `employee` au lieu de `manager`.
+
+**Décision** : L'accès est refusé car le rôle de l'utilisateur ne correspond pas aux conditions de la Politique 1.
+
+> **Scénario 4**. Un utilisateur souhaite accéder (effectuer l'action `read`) à un document (ressource) de niveau de sensibilité faible. Le rôle de l'utilisateur est `employee`.
+
+**Décision** : L'accès est accordé car toutes les conditions de la Politique 3 sont remplies.
+
+> **Scénario 5**. Un utilisateur souhaite supprimer (effectuer l'action `delete`) un document (ressource) de niveau de sensibilité faible. Le rôle de l'utilisateur est `employee`.
+
+**Décision** : L'accès est refusé car il n'existe aucune politique qui autorise l'action `delete` sur les documents de niveau de sensibilité faible.
+
+Vous remarquerez que tous les attributs ne sont pas nécessaires dans chaque politique. Cette flexibilité permet un mécanisme de contrôle d'accès plus dynamique et sensible au contexte.
+
+## Considérations d'implémentation
+
+Bien que l'ABAC offre une manière puissante de gérer le contrôle d'accès, il comporte également certaines considérations d'implémentation :
+
+- Complexité du système : Les politiques ABAC peuvent devenir complexes à mesure que le nombre d'attributs et de règles augmente. Une gestion et un test appropriés des politiques prennent plus de temps que les modèles de contrôle d'accès simples.
+- Performance : L'évaluation de politiques ABAC complexes peut avoir un impact sur la performance du système. Les techniques de mise en cache et d'optimisation peuvent aider à atténuer ce problème.
+- Conflits de politique : Les politiques conflictuelles peuvent entraîner des décisions d'accès imprévisibles. Un examen régulier des politiques et la résolution des conflits devraient faire partie du processus de gestion des politiques.
+
+## ABAC vs. RBAC
+
+Comparer l'ABAC avec le <Ref slug="rbac" /> peut vous aider à comprendre les différences entre les deux modèles :
+
+|                       | RBAC                               | ABAC                                     |
+|-----------------------|------------------------------------|------------------------------------------|
+| Politique de contrôle d'accès | Basée sur des rôles                  | Basée sur des attributs                  |
+| Granularité           | Grossière                          | Fine-grained                             |
+| Flexibilité           | Limitée                            | Très flexible                            |
+| Complexité            | Plus simple                        | Plus complexe                            |
+| Impact sur la performance | Minimal                            | Peut être significatif                   |
+| Gestion des accès     | Gestion des rôles                  | Gestion des politiques                   |
+| Idéal pour            | Structures de permission bien définies | Contrôle d'accès dynamique et sensible au contexte |
+
+<SeeAlso slugs={["access-control", "rbac", "authorization"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/rbac-and-abac",
+    "https://csrc.nist.gov/publications/detail/sp/800-162/final",
+  ]}
+/>

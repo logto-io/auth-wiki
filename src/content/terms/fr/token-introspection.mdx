@@ -1,0 +1,60 @@
+---
+title: Introspection de jeton (Token introspection)
+tags: [oauth 2.0, oidc]
+description: L'introspection de jeton (Token introspection) est une extension OAuth 2.0 qui permet aux clients de demander au serveur d'autorisation de valider les jetons d'accès (access tokens) et de récupérer des métadonnées à leur sujet.
+---
+
+## Qu'est-ce que l'introspection de jeton (Token introspection) ?
+
+L'introspection de jeton (Token introspection) est une extension OAuth 2.0 définie dans [RFC 7662](https://datatracker.ietf.org/doc/html/rfc7662) qui permet aux <Ref slug="client">clients</Ref> de demander au <Ref slug="authorization-server" /> de valider les jetons d'accès (access tokens) et de récupérer des métadonnées à leur sujet. Cette extension est utile lorsque :
+
+- Le client souhaite vérifier la validité d'un jeton d'accès (access token) en temps réel.
+- Le jeton d'accès (access token) est <Ref slug="opaque-token">opaque</Ref> (non autonome) et nécessite que le serveur d'autorisation le valide.
+
+## Comment fonctionne l'introspection de jeton (Token introspection) ?
+
+Voici un exemple non normatif d'une requête d'introspection de jeton (token introspection) :
+
+```http
+POST /introspect HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+token=random-token-value
+  &token_type_hint=access_token
+```
+
+Le paramètre `token_type_hint` est optionnel et doit être défini sur le type de jeton examiné. Si le jeton d'accès (access token) est valide, le serveur d'autorisation répond avec les métadonnées du jeton :
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "active": true,
+  "scope": "read write",
+  "client_id": "client-id",
+  "username": "johndoe",
+  "token_type": "Bearer",
+  "exp": 1634020800,
+  "iat": 1634017200
+}
+```
+
+Il est à noter que tous les serveurs d'autorisation ne prennent pas en charge l'introspection de jeton (token introspection) et que tous les jetons ne sont pas introspectables. Le <Ref slug="authorization-server" /> peut limiter l'utilisation de l'introspection de jeton en fonction de divers facteurs, par exemple, certains serveurs d'autorisation peuvent ne pas prendre en charge l'introspection pour les <Ref slug="jwt">JWTs</Ref>.
+
+### Paramètres clés dans une requête d'introspection de jeton (token introspection)
+
+Voici deux paramètres clés dans une requête d'introspection de jeton (token introspection) :
+
+- **`token`**: Le jeton à introspecter.
+- **`token_type_hint`**: Le type de jeton examiné. Il peut s'agir de `access_token` ou de `refresh_token`.
+
+<SeeAlso slugs={["oauth-2.0", "opaque-token", "jwt"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/oauth2-token-introspection',
+    'https://datatracker.ietf.org/doc/html/rfc7662',
+  ]}
+/>

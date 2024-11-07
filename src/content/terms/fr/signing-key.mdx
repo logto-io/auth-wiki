@@ -1,0 +1,149 @@
+---
+title: Clé de signature (Signing key)
+tags: [oidc]
+description: Une clé de signature est une clé cryptographique utilisée pour signer et vérifier les JSON Web Tokens dans OpenID Connect (OIDC). Elle est utilisée pour garantir l'intégrité et l'authenticité des jetons émis par le fournisseur OpenID.
+---
+
+## Qu'est-ce qu'une clé de signature ?
+
+Dans le contexte de <Ref slug="openid-connect" />, une **clé de signature**, généralement une paire de clés asymétriques, est utilisée pour signer et vérifier les <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref>. Les fournisseurs OpenID utilisent des clés de signature pour signer des jetons comme les <Ref slug="id-token">ID tokens</Ref> et les <Ref slug="access-token">access tokens</Ref> afin d'assurer leur intégrité et leur authenticité.
+
+Bien que le concept de clés de signature puisse être plus large, nous nous concentrerons sur la façon dont elles sont utilisées dans OIDC pour sécuriser les jetons. D'autres cas d'utilisation, comme la signature d'emails, de documents et de paquets logiciels, peuvent dériver des mêmes principes.
+
+## Exemple : signature d'un ID token
+
+Lorsqu'un utilisateur s'authentifie auprès d'un fournisseur OpenID, le fournisseur émet un ID token qui contient des informations utilisateur (<Ref slug="claim">claims</Ref>) et qui est signé par la clé de signature du fournisseur. Étant donné que l'ID token est un JWT, il se compose de trois parties : l'entête, le corps, et la signature.
+
+### 1. Entête
+
+Supposons que l'entête soit :
+
+```json
+{
+  "alg": "ES384",
+  "typ": "JWT"
+}
+```
+
+Le JSON indique que l'ID token est signé en utilisant l'algorithme [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) avec la courbe P-384. Le champ `typ` spécifie que le type de jeton est JWT.
+
+### 2. Corps
+
+Le corps contient des informations utilisateur de base :
+
+```json
+{
+  "sub": "1234567890",
+  "name": "Alice"
+}
+```
+
+Le `sub` claim est l'identifiant unique de l'utilisateur, et `name` est leur nom d'affichage.
+
+### 3. Signer le jeton
+
+Selon le format JWT, l'entête et le corps doivent être encodés en Base64URL et concaténés avec un `.` pour la signature :
+
+```
+{{header}}.{{payload}}
+```
+
+Dans ce cas, la valeur serait :
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0
+```
+
+Supposons que le fournisseur OpenID utilise la clef privée suivante pour signer le jeton :
+
+```
+-----BEGIN PRIVATE KEY-----
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDBW9PDXInlNT2hjOtQr
+g4pkVkyJsKia33dHrsbOG4Z77pfYN7SYZCHh9YdLXTTKinehZANiAAQX/FB1s6Gj
+YnDSGCY08PRUAQ8CCRCt8Ph/VDHfLj1xSbrjp8wFf0NjH7jcfNebpV1fvu4XKbP3
+Ro7h0G6elN1TMsVECJPv4ieDNkYOsgT4UboJypC5E/rmvrlJTMM6Y/k=
+-----END PRIVATE KEY-----
+```
+
+Pour signer le jeton, le fournisseur OpenID doit utiliser la clé privée pour générer une signature par :
+
+```
+signature = sign(header + '.' + payload, private_key)
+```
+
+Puis la signature encodée en Base64URL est :
+
+```
+Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+### 4. Assembler le JWT
+
+Enfin, le fournisseur OpenID assemble le JWT en concaténant l'entête, le corps, et la signature avec `.` :
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+Dans ce cas, l'ID token serait :
+
+```
+eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+L'ID token est maintenant prêt à être envoyé au <Ref slug="client" /> pour un traitement ultérieur.
+
+### 5. Vérifier le jeton
+
+Lorsque le client reçoit l'ID token, il peut vérifier la signature à l'aide de la clé publique du fournisseur OpenID. En général, la clé publique est rendue disponible via le point de terminaison <Ref slug="openid-connect-discovery" /> (`jwks_uri`) sous la forme d'un <Ref slug="jwk" headingId="json-web-key-set-jwks" />.
+
+Pour cet exemple, la clé publique est :
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx-43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+Et la valeur JWK correspondante est :
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+Maintenant, le client peut vérifier la signature en utilisant la clé publique.
+
+## Choisir le bon algorithme
+
+Il existe divers algorithmes disponibles pour signer les JWTs :
+
+- **Algorithmes symétriques** : HMAC avec la famille SHA (par exemple, HS256, HS384, HS512) est un algorithme symétrique qui utilise la même clé pour signer et vérifier. Ce n'est pas recommandé dans la plupart des cas car la clé secrète doit être partagée entre les parties.
+- **Algorithmes asymétriques** : RSA (par exemple, RS256, RS384, RS512) et ECDSA (par exemple, ES256, ES384, ES512) sont des algorithmes asymétriques qui utilisent une paire de clés : une clé privée pour signer et une clé publique pour vérifier.
+  - RSA est largement utilisé et pris en charge par de nombreuses bibliothèques et plateformes. Cependant, il a une taille de clé et une taille de signature bien plus grandes comparées à ECDSA.
+  - ECDSA est plus performant et génère des signatures plus petites, ce qui en fait un meilleur choix pour les environnements contraints. Comme il est moins courant, assurez-vous que votre plateforme le prend en charge.
+
+> ECDSA devrait être le choix privilégié pour les nouvelles applications en raison de ses avantages en termes de performance et de sécurité.
+
+## Autres scénarios de clé de signature
+
+Bien que l'exemple ci-dessus se concentre sur les ID tokens dans OIDC, le concept de clé de signature est largement utilisé dans divers scénarios, tels que la signature d'emails, de documents et de paquets logiciels. Les principes clés restent les mêmes :
+
+- Pour les clés symétriques, la même clé est utilisée pour signer et vérifier. Ceci est adapté aux scénarios où les parties peuvent partager la clé en toute sécurité, ou lorsqu'il y a une seule entité responsable à la fois de la signature et de la vérification.
+- Pour les clés asymétriques, une clé privée est utilisée pour signer, et une clé publique correspondante est utilisée pour vérifier. Ceci est adapté à la plupart des scénarios où les parties signataires et vérificatrices sont des entités différentes.
+
+<SeeAlso slugs={["jwt", "jws", "jwk", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/introduction-to-ec-and-rsa-signing-algorithms-in-jwt",
+    "https://tools.ietf.org/html/rfc7515",
+    "https://tools.ietf.org/html/rfc7517",
+  ]}
+/>

@@ -1,0 +1,56 @@
+---
+title: Authentification (Authentication)
+tags: [authentication]
+description: L'authentification (Authentication) est le processus de vérification de la propriété de l'identité (par exemple, un utilisateur ou un service). C'est la base des systèmes de gestion d'identité et d'accès (IAM) et elle est essentielle pour sécuriser les applications et services.
+---
+
+## Qu'est-ce que l'authentification (Authentication) ?
+
+> **En bref** : L'authentification (Authentication) répond à la question "Quelle identité possédez-vous?"
+
+Voici quelques exemples typiques d'authentification :
+
+- Connexion avec nom d'utilisateur et mot de passe
+- Connexion sociale (par exemple, Se connecter avec Google)
+- Authentification (Authentication) par <Ref slug="machine-to-machine" /> (par exemple, clés API)
+
+Nous n'avons pas utilisé la phrase "Qui es-tu ?" parce que :
+
+- Dans le domaine de l'<Ref slug="iam" />, l'authentification (Authentication) concerne la vérification de la propriété d'une identité, et non l'identification de la personne ou de l'entité. Par exemple, lorsqu'un membre de votre famille utilise vos identifiants pour se connecter à votre compte, il n'est pas vous, mais l'identité pour le système est la même.
+- L'identité peut être un utilisateur, un service ou un appareil. Par exemple, un service peut s'authentifier (authenticate) auprès d'un autre service en utilisant des clés API.
+
+### Différence entre authentification (Authentication) et autorisation (Authorization)
+
+Ces deux termes sont souvent confondus, mais ils sont fondamentalement différents : l'<Ref slug="authorization" /> répond à la question "Que pouvez-vous faire ?". De plus, l'authentification (Authentication) est une condition préalable à l'autorisation (Authorization) car le système doit connaître l'identité avant de décider quelles actions peuvent être effectuées.
+
+## Facteurs d'authentification (Authentication)
+
+L'authentification (Authentication) peut être effectuée en utilisant un ou plusieurs facteurs. Voici quelques facteurs courants :
+
+- **Facteur de connaissance** : Quelque chose que vous savez (par exemple, mot de passe, code PIN)
+- **Facteur de possession** : Quelque chose que vous avez (par exemple, smartphone, jeton de sécurité)
+- **Facteur d'hérédité** : Quelque chose que vous êtes (par exemple, empreinte digitale, reconnaissance faciale)
+
+L'utilisation de <Ref slug="mfa" /> est une pratique courante qui combine plusieurs facteurs pour augmenter la sécurité. Par exemple, lorsque vous vous connectez à votre compte bancaire, vous pouvez avoir besoin de fournir un mot de passe (facteur de connaissance) et un code à usage unique provenant d'une application d'authentification (facteur de possession).
+
+<Ref slug="passkey" /> est un facteur d'authentification (Authentication) moderne qui peut combiner plusieurs facteurs et qui est résistant aux attaques de phishing.
+
+## Cadres (protocoles) d'authentification (Authentication)
+
+Au lieu de construire un système d'authentification (Authentication) artisanal, il est recommandé d'utiliser des cadres et protocoles établis car ils ont été éprouvés et examinés par des experts en sécurité. Il existe divers cadres et protocoles d'authentification (Authentication) qui définissent comment l'authentification (Authentication) doit être réalisée. Deux exemples courants sont :
+
+- <Ref slug="openid-connect" /> : Une couche d'identité construite sur <Ref slug="oauth-2.0" /> qui ajoute des capacités d'authentification (Authentication). Il est relativement moderne et largement utilisé pour les nouvelles applications.
+- <Ref slug="saml" /> : Un protocole pour échanger des données d'authentification (Authentication) et d'autorisation (Authorization) entre parties. Il est couramment utilisé dans les environnements d'entreprise.
+
+Le choix du cadre dépend de votre cas d'utilisation et de vos exigences. Pour les nouvelles applications, OIDC est recommandé en raison de sa conception moderne et de son support pour <Ref slug="jwt" />.
+
+Cependant, travailler directement avec ces protocoles peut encore être complexe et chronophage. Les deux protocoles ont des courbes d'apprentissage abruptes et nécessitent une mise en œuvre minutieuse pour assurer la sécurité. Au lieu de cela, utiliser un <Ref slug="identity-provider" /> qui supporte ou est construit sur ces protocoles peut grandement simplifier le processus d'authentification (Authentication). Un bon fournisseur d'identité offrira également des fonctionnalités supplémentaires telles que <Ref slug="mfa" /> et <Ref slug="single-sign-on" /> pour vos besoins futurs.
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

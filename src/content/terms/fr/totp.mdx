@@ -1,0 +1,34 @@
+---
+title: Mot de passe à usage unique basé sur le temps (Time-based one-time password, TOTP)
+tags: [authentication]
+description: Un mot de passe à usage unique basé sur le temps (TOTP) est un code temporaire et unique généré par un algorithme qui utilise l'heure actuelle comme facteur clé.
+---
+
+## Qu'est-ce que le TOTP ?
+
+Un mot de passe à usage unique basé sur le temps (TOTP) est un code temporaire et unique généré par un algorithme qui utilise l'heure actuelle comme facteur clé. Semblable à un <Ref slug="otp" /> générique, un TOTP est utilisé une seule fois, mais il a une durée de vie fixe, généralement comprise entre 30 et 60 secondes. À l'expiration, un nouveau code est généré automatiquement.
+
+Le standard TOTP est défini par l'Internet Engineering Task Force (IETF) sous [RFC 6238](https://datatracker.ietf.org/doc/html/rfc6238), et il est largement adopté dans divers systèmes d'authentification à deux facteurs (2FA) et d'authentification multi-facteurs (MFA). Parce que les TOTPs reposent sur une synchronisation horaire entre le client (appareil de l'utilisateur) et le serveur, ils offrent un niveau de sécurité élevé et sont difficiles à prédire ou à réutiliser.
+
+## Comment fonctionne le TOTP
+
+La génération d'un TOTP implique les étapes suivantes :
+
+1. Secret partagé : Lors de la configuration initiale, une clé secrète partagée est générée et stockée en toute sécurité à la fois sur le client et le serveur. Cette clé est généralement encodée sous forme de code QR que les utilisateurs scannent à l'aide d'une application d'authentification.
+2. Intervalles de temps : Le temps actuel est divisé en intervalles fixes, généralement de 30 secondes.
+3. Application de l'algorithme : La clé secrète partagée et le timestamp actuel sont introduits dans un algorithme basé sur le hachage (souvent HMAC-SHA1) pour produire un code numérique unique.
+4. Synchronisation : Le client et le serveur génèrent le code indépendamment en utilisant la même clé secrète partagée et le timestamp actuel. Les codes correspondent uniquement si les deux sont synchronisés.
+5. Vérification : Lorsque l'utilisateur se connecte ou effectue une transaction critique, il saisit le TOTP affiché sur son application d'authentification. Le serveur le compare alors avec son TOTP généré en interne pour validation.
+
+## Quand utiliser le TOTP
+
+Dans la plupart des cas, un OTP normal est recommandé, mais dans les cas où il est impossible de "déclencher" un nouveau code d'accès, le TOTP est recommandé.
+
+- Exemple de TOTP : Application Authenticator
+- Exemple d'OTP : Email, SMS
+
+## Quelles sont les différences entre OTP et TOTP ?
+
+La principale différence est que le TOTP est basé sur le temps, il est donc adapté lorsque le dispositif n'est pas connecté au serveur. Le serveur peut facilement envoyer un nouveau code d'accès à une adresse email ou à un numéro de téléphone, mais cela nécessite que l'email ou le téléphone soient en ligne. Cependant, l'application Authenticator peut rester hors ligne et utiliser le "temps" pour vérifier le code d'accès.
+
+<SeeAlso slugs={['otp', 'mfa']} />

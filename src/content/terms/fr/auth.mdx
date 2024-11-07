@@ -1,0 +1,44 @@
+---
+title: Auth (clarification)
+tags: [authentication, authorization]
+description: Le terme "auth" est souvent utilisé comme une abréviation pour authentification ou autorisation. Ces concepts sont liés mais fondamentalement différents.
+---
+
+## Auth
+
+Cette page est une clarification pour le terme "auth". Il est souvent utilisé comme une abréviation pour :
+
+- <Ref slug="authentication" /> : Le processus de vérification de la propriété d'identité (par exemple, utilisateur ou service). Il répond à la question "Quelle identité possédez-vous ?"
+- <Ref slug="authorization" /> : Le processus de détermination des actions qu'une identité peut effectuer sur une ressource. Il répond à la question "Que pouvez-vous faire ?"
+
+> [!Note]
+> Parfois, authentification et autorisation sont appelées respectivement "AuthN" et "AuthZ".
+
+Ces deux concepts sont tous deux essentiels dans le domaine de l' <Ref slug="iam" />, mais ils sont fondamentalement différents. Voyons un exemple : une application web MyStorage a la capacité de télécharger des fichiers et de se connecter à Google Drive. Un flux utilisateur typique serait :
+
+```mermaid
+sequenceDiagram
+    participant Utilisateur
+    participant MyStorage
+    participant Google
+    autonumber
+
+    Utilisateur->>MyStorage: Se connecter à MyStorage
+    MyStorage->>Utilisateur: Bienvenue, Utilisateur !
+    Utilisateur->>MyStorage: Cliquer sur "Connecter Google Drive"
+    MyStorage->>Google: Rediriger vers Google<br />avec une demande d'authorization (authorization request)
+    Google->>Utilisateur: Demander à l'utilisateur de se connecter
+    Utilisateur->>Google: Se connecter à Google
+    Google->>Utilisateur: Demander la permission pour accéder à Google Drive
+    Utilisateur->>Google: Accorder l'accès à MyStorage
+    Google->>MyStorage: Rediriger vers MyStorage<br />avec des données d'authorization (par exemple, access token)
+    MyStorage->>Google: Accéder à Google Drive de l'utilisateur en utilisant l' access token
+```
+
+Dans ce flux, l'utilisateur effectue deux étapes d'authentification : une avec MyStorage (étape 1) et une autre avec Google (étape 6) ; et une étape d'autorisation : accorder l'accès à Google Drive (étape 8).
+
+## De quoi voulez-vous parler ?
+
+Lorsque vous voyez le terme "auth", il est important de préciser s'il se réfère à l'authentification ou à l'autorisation ; sinon, vous pourriez vous attendre à ce que les deux processus soient couverts (tout comme ce site le fait).
+
+<SeeAlso slugs={["authentication", "authorization", "iam", "oauth-2.0", "openid-connect"]} />

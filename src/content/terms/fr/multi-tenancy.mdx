@@ -1,0 +1,111 @@
+---
+title: Multi-location (Multi-tenancy)
+tags: [authentication (authentification), authorization (autorisation)]
+description: Multi-location (Multi-tenancy) est une architecture logicielle où une instance unique d'application dessert plusieurs clients (locataires), gardant leurs données isolées et sécurisées. Cela est courant dans le cloud computing et le SaaS pour optimiser les ressources et simplifier la maintenance.
+---
+
+## Qu'est-ce que le multi-location (multi-tenancy) ?
+
+Le multi-location (multi-tenancy) logiciel est une [architecture logicielle](https://en.wikipedia.org/wiki/Software_architecture) dans laquelle une seule [instance](https://en.wikipedia.org/wiki/Instance_(computer_science)) de [logiciel](https://en.wikipedia.org/wiki/Computer_software) s'exécute sur un serveur et dessert plusieurs locataires. Les systèmes conçus de cette manière sont "partagés" (plutôt que "dédiés" ou "isolés").
+
+![multi_tenant_architecture.webp](https://uploads.strapi.logto.io/multi_tenant_architecture_600f47afe8.webp)
+
+Un locataire est un groupe d'utilisateurs qui partagent un accès commun avec des privilèges spécifiques à l'instance logicielle.
+
+L'architecture multi-location est souvent préférée lorsque les fournisseurs de services offrent des services standardisés à plusieurs clients. Ces services ont généralement peu de personnalisation, et tous les clients partagent la même instance d'application. Lorsque l'application est mise à jour, cela s'applique à tous les clients en même temps.
+
+Par exemple, les systèmes CRM (Customer Relationship Management) utilisent souvent une architecture multi-location pour fournir le même service à tous les clients.
+
+Un principe clé de la multi-location est le "partage". Cela ne signifie pas que **chaque** partie de la solution est partagée ; cela signifie qu'au moins **certains** composants sont réutilisés par plusieurs locataires. Comprendre ce concept plus large peut vous aider à mieux répondre aux besoins de vos clients.
+
+## Quels sont les cas d'utilisation pour les produits multi-location ?
+
+Les applications multi-location sont couramment utilisées dans les produits SaaS (Software-as-a-Service) comme les outils de productivité, les logiciels de collaboration, etc. Dans cette configuration, chaque "locataire" représente généralement un client professionnel, avec plusieurs utilisateurs (typiquement des employés). Dans différents produits, cela peut être désigné comme un locataire, un espace de travail ou un projet, selon le contexte. Une entreprise unique pourrait également avoir plusieurs locataires pour représenter différentes divisions ou organisations.
+
+Dans des cas plus complexes, comme les applications B2B au-delà du SaaS, les applications multi-location fournissent une plateforme partagée pour que diverses équipes, clients d'affaires et entreprises partenaires accèdent à vos services.
+
+## Pourquoi devrais-tu employer la multi-location dans un produit SaaS
+
+### Scalabilité avec la multi-location
+
+Pour les entreprises, la multi-location est la clé pour répondre efficacement à leurs exigences de disponibilité, de gestion des ressources, de gestion des coûts et de sécurité des données. Sur le plan technique, adopter une approche multi-location simplifie vos processus de développement, minimise les défis techniques et favorise une expansion transparente.
+
+### Créer une expérience unifiée
+
+En examinant les racines des produits SaaS, cela ressemble à un immeuble abritant divers appartements. Tous les locataires partagent des utilitaires communs comme l'eau, l'électricité et le gaz, tout en gardant un contrôle indépendant sur la gestion de leur propre espace et ressources. Cette approche simplifie la gestion de la propriété.
+
+### Assurer la sécurité par l'isolation des locataires
+
+Dans une architecture multi-location (multi-tenancy), le terme "locataire" est introduit pour créer des frontières qui séparent et sécurisent les ressources et les données de différents locataires au sein d'une instance partagée. Cela garantit que les données et opérations de chaque locataire restent distinctes et sécurisées, même s'ils utilisent les mêmes ressources sous-jacentes.
+
+## Comment atteindre l'isolation des locataires dans une architecture multi-location ?
+
+Lorsqu'il s'agit d'applications multi-locataires, il est toujours nécessaire d'atteindre **l'isolation des locataires**. Cela signifie garder les données et les ressources de différents locataires séparées et sécurisées au sein d'un système partagé (par exemple, une infrastructure cloud ou une application multi-locataires). Cela empêche toute tentative non autorisée d'accéder aux ressources d'un autre locataire.
+
+Bien que l'explication puisse sembler abstraite, nous utiliserons des exemples et des détails clés pour expliquer davantage la notion d'isolation et les meilleures pratiques pour atteindre l'isolation des locataires.
+
+### L'isolation des locataires ne va pas à l'encontre de l'esprit "partagé" de la multi-location
+
+C'est parce que l'isolation des locataires n'est pas nécessairement une construction au niveau des ressources d'infrastructure. Dans le domaine de la multi-location et de l'isolation, certains considèrent l'isolation comme une division stricte entre les ressources d'infrastructure actuelles. Cela conduit généralement à un modèle où chaque locataire a des bases de données, des instances de calcul, des comptes ou des clouds privés distincts. Dans des scénarios de ressources partagées, comme les applications multi-locataires, la façon d'atteindre l'isolation peut être une construction logique.
+
+Dans la conception de l'architecture, divers degrés d'isolation des ressources entre locataires peuvent être atteints :
+
+En général, plus les ressources sont partagées entre les locataires, plus le coût d'itération et de maintenance du système est bas. Inversement, moins il y a de ressources partagées, plus le coût est élevé.
+
+L'isolation des locataires se concentre exclusivement sur l'utilisation du contexte de "locataire" pour limiter l'accès aux ressources. Elle évalue le contexte du locataire actuel et utilise ce contexte pour déterminer quelles ressources sont accessibles pour ce locataire.
+
+### L'authentification et l'autorisation ne sont pas synonymes d'"isolation"
+
+Utiliser l'authentification et l'autorisation pour contrôler l'accès à vos environnements SaaS est important, mais ce n'est pas suffisant pour une isolation complète. Ces mécanismes ne sont qu'une partie du puzzle de sécurité.
+
+Les gens posent souvent la question, puis-je utiliser des solutions d'autorisation générales et le contrôle d'accès basé sur les rôles pour atteindre l'isolation des locataires ?
+
+Vous pouvez créer une application multi-locataires, mais vous ne pouvez pas dire que vous avez atteint et employé des stratégies d'isolation des locataires comme meilleure pratique. Nous ne le recommandons généralement pas car l'isolation des locataires est distincte de l'authentification et de l'autorisation.
+
+Pour illustrer, considérons une situation où vous avez configuré l'authentification et l'autorisation pour votre système SaaS. Lorsque les utilisateurs se connectent, ils reçoivent un jeton contenant des informations sur leur rôle, dictant ce qu'ils peuvent faire dans l'application. Cette approche améliore la sécurité mais n'assure pas l'isolation.
+
+### Utiliser "organisation" comme contexte pour représenter le locataire du produit SaaS et atteindre l'isolation des locataires
+
+Se fier uniquement à l'authentification et à l'autorisation ne permettra pas d'empêcher un utilisateur ayant le bon rôle d'accéder aux ressources d'un autre locataire. Nous devons donc incorporer un contexte "locataire", tel qu'un ID de locataire, pour restreindre l'accès aux ressources.
+
+C'est là que l'isolation des locataires entre en jeu. Elle utilise des identifiants spécifiques aux locataires pour établir des frontières, un peu comme des murs, portes et serrures, assurant une séparation claire entre les locataires.
+
+## Comment les identités sont-elles gérées dans les applications multi-locataires ?
+
+Nous avons discuté de l'isolation des locataires, mais qu'en est-il des identités ? Comment décider si vos identités doivent être "isolées" ou non ?
+
+Il y a souvent une confusion autour du concept "d'isolation de l'identité". Cela pourrait se référer à des situations où un utilisateur réel a deux identités dans la compréhension générale des gens.
+
+1. Les deux identités peuvent exister au sein d'un même système d'identité. Par exemple, Sarah pourrait avoir un email personnel enregistré aux côtés d'un email d'entreprise connecté via l'authentification unique (SSO).
+2. Les utilisateurs maintiennent deux identités distinctes au sein de systèmes d'identité séparés, représentant des produits entièrement distincts. Ces produits sont complètement indépendants l'un de l'autre.
+
+Parfois, ces scénarios sont appelés "isolation de l'identité", mais ce terme pourrait ne pas aider à la prise de décision.
+
+Au lieu de vous demander si vous avez besoin d'une "isolation de l'identité", réfléchissez à si des parties de votre entreprise ou produit nécessitent des systèmes d'identité distincts. Cela orientera votre conception du système. Pour les applications multi-locataires, dans la plupart des cas, les identités sont partagées, tandis que les ressources de chaque locataire sont gardées séparées.
+
+Dans les applications multi-locataires, les identités sont partagées entre les locataires, contrairement aux ressources et données spécifiques aux locataires. C'est comme être un administrateur de bâtiment — vous ne voudriez pas maintenir deux listes séparées de noms de locataires.
+
+Lorsque vous visez l'isolation des locataires, le terme "organisation" apparaît souvent, car c'est une meilleure pratique pour construire des applications multi-locataires.
+
+En utilisant "organisation" dans de nombreux services CIAM (Customer Identity Management) ou Auth, vous pouvez atteindre l'isolation des locataires dans votre application multi-locataire tout en conservant un système d'identité unifié.
+
+## Comment choisir le bon modèle d'autorisation pour un meilleur contrôle d'accès ?
+
+Lors du choix du bon modèle d'autorisation, considérez ces questions :
+
+1. Développez-vous un produit B2C, B2B ou une combinaison des deux types ?
+2. Votre application a-t-elle une architecture multi-locataires ?
+3. Existe-t-il un besoin d'un certain niveau d'isolation dans votre application, tel que déterminé par l'unité commerciale ?
+4. Quelles permissions et rôles doivent être définis dans le contexte de l'organisation, et lesquels ne le sont pas ?
+
+<Resources
+  urls={[
+    "https://blog.logto.io/implement-multi-tenancy",
+    "https://blog.logto.io/multi-tenant-ultimate-guide",
+    "https://blog.logto.io/case-study-multi-tenancy",
+    "https://blog.logto.io/multi-tenancy-explained",
+    "https://blog.logto.io/are-multi-tenant-apps-equal-saas",
+    "https://blog.logto.io/tenancy-models",
+    "https://blog.logto.io/do-you-need-multiple-tenants-identity-model",
+  ]}
+/>

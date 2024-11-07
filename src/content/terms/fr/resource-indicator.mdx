@@ -1,0 +1,120 @@
+---
+title: Indicateur de ressource (Resource indicator)
+tags: [oauth 2.0]
+description: L'indicateur de ressource dans OAuth 2.0 est un paramètre d'extension défini dans le RFC 8707 qui permet aux clients de spécifier l'emplacement du serveur de ressources dans la requête d'autorisation. Il offre un moyen évolutif de gérer plusieurs serveurs de ressources dans un seul serveur d'autorisation.
+---
+
+## Qu'est-ce qu'un indicateur de ressource ?
+
+Un indicateur de ressource, tel que défini dans l'extension OAuth 2.0 [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707), est un paramètre qui permet aux clients de spécifier l'URI du serveur de ressources dans la <Ref slug="authorization-request" /> (ou <Ref slug="authentication-request" /> dans <Ref slug="openid-connect" />) et la <Ref slug="token-request" />. L'indicateur de ressource est utilisé pour indiquer l'emplacement du serveur de ressources que le client souhaite accéder.
+
+> [!Note]
+> L'indicateur de ressource est un paramètre d'extension qui ne fait pas partie de la spécification de base OAuth 2.0. Veuillez vérifier la documentation de votre <Ref slug="authorization-server" /> pour voir s'il prend en charge ce paramètre.
+
+## Comment fonctionnent les indicateurs de ressources ?
+
+Pour mieux comprendre comment fonctionnent les indicateurs de ressources, considérons un scénario où un <Ref slug="client" /> souhaite accéder à plusieurs <Ref slug="resource-server">serveurs de ressources</Ref> en utilisant un seul serveur d'autorisation.
+
+### 1. Enregistrer les serveurs de ressources
+
+Normalement, le développeur doit enregistrer chaque serveur de ressources auprès du serveur d'autorisation pour les rendre disponibles pour le client. Le processus d'enregistrement réel peut varier selon l'implémentation du serveur d'autorisation. Le nom de la fonctionnalité pourrait être différent, tel que "API resources" ou simplement "resources".
+
+Supposons que le client souhaite accéder à deux serveurs de ressources : `https://api.example.com` et `https://api.another.com`, et qu'ils ont été enregistrés auprès du serveur d'autorisation.
+
+### 2. Définir des scopes pour chaque serveur de ressources
+
+Contrairement aux flux OAuth 2.0 traditionnels, où les <Ref slug="scope">scopes</Ref> sont partagés entre tous les serveurs de ressources, l'extension de l'indicateur de ressource permet au client de spécifier les scopes pour chaque serveur de ressources. Cela devrait également faire partie du processus d'enregistrement. Supposons que les serveurs de ressources disposent des scopes suivants :
+
+| Serveur de ressources     | Scopes           |
+|---------------------------|------------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. Inclure des indicateurs de ressources dans la requête d'autorisation
+
+Pour informer le serveur d'autorisation que nous voulons utiliser l'extension de l'indicateur de ressource, le client doit inclure le paramètre `resource` dans la requête d'autorisation.
+
+Voici un exemple non normatif d'une requête d'autorisation qui inclut un indicateur de ressource :
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+Dans cet exemple, le client inclut le paramètre `resource` avec la valeur encodée `https%3A%2F%2Fapi.example.com` pour indiquer l'emplacement du serveur de ressources (`https://api.example.com`).
+
+Vous remarquerez que nous incluons également des scopes prédéfinis, tels que `openid`, avec les scopes spécifiques à la ressource. Le serveur d'autorisation doit valider les scopes et filtrer les autres scopes qui ne sont pas associés au serveur de ressources demandé. Cela s'appelle **réduction des scopes**.
+
+Voici le tableau des quatre scopes réels que le client est censé recevoir :
+
+| Serveur de ressources     | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                       |
+
+La beauté de l'indicateur de ressource est que le client peut demander plusieurs serveurs de ressources dans une seule requête d'autorisation en répétant le paramètre `resource`. Jetons un œil à un autre exemple :
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+Dans cet exemple, le client demande l'accès à la fois à `https://api.example.com` et `https://api.another.com` avec les scopes respectifs. Le serveur d'autorisation doit valider les scopes pour chaque serveur de ressources, c'est-à-dire effectuer un **produit cartésien** des scopes et des serveurs de ressources. Le résultat devrait être :
+
+| Serveur de ressources     | Scopes                       |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`              |
+| `https://api.another.com` | `read`, `delete`             |
+
+Il y a sept scopes valides au total pour cette requête d'autorisation.
+
+### 4. Inclure des indicateurs de ressources dans la requête de jeton
+
+Une fois que le client reçoit le code d'autorisation, il peut l'échanger contre un access token avec un indicateur de ressource **unique**, si nécessaire. Par exemple :
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+Le paramètre `resource` dans la requête de jeton est optionnel. Si le client l'inclut, le serveur d'autorisation doit valider l'indicateur de ressource par rapport aux scopes associés au grant actuel ; sinon, le serveur d'autorisation doit revenir aux scopes globaux (par exemple, les scopes de <Ref slug="openid-connect" />).
+
+> [!Note]
+> Le serveur d'autorisation doit toujours appliquer le <Ref slug="access-control" /> pour s'assurer que l'access token émis est valide et a été correctement restreint en fonction du contexte actuel du grant.
+
+Vous vous demandez peut-être comment gérer plusieurs serveurs de ressources dans le grant. Étant donné que le code d'autorisation est à usage unique, le client peut utiliser d'autres grants, tels que le grant <Ref slug="refresh-token" />, pour obtenir des access tokens pour d'autres serveurs de ressources.
+
+## Pourquoi avons-nous besoin d'indicateurs de ressources ?
+
+Comme vous pouvez le voir dans les exemples ci-dessus, l'extension de l'indicateur de ressource offre un moyen évolutif de gérer plusieurs serveurs de ressources sans perturber les <Ref slug="scope">scopes</Ref> en se souciant des conflits de scopes. C'est une fonctionnalité puissante qui offre plus de flexibilité aux clients pour accéder aux ressources de différents serveurs de ressources.
+
+Il convient de noter que l'extension de l'indicateur de ressource ne fait pas partie de la spécification de base OAuth 2.0. Assurez-vous que votre serveur d'autorisation prend en charge cette extension avant de l'utiliser dans votre application.
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

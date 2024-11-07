@@ -1,0 +1,51 @@
+---
+title: Accès hors ligne (Offline access)
+tags: [oauth 2.0, oidc]
+description: L'accès hors ligne (offline access) permet aux clients d'obtenir de nouveaux jetons d'accès (access tokens) sans nécessiter que l'utilisateur se réauthentifie. Il est utile pour des sessions de longue durée et une meilleure expérience utilisateur.
+---
+
+## Qu'est-ce que l'accès hors ligne (offline access) ?
+
+Le concept d'accès hors ligne peut varier selon le contexte, nous nous concentrerons sur les spécifications OAuth 2.0 et OpenID Connect (OIDC). Dans ce contexte, l'accès hors ligne permet aux clients d'obtenir de nouveaux <Ref slug="access-token">jetons d'accès (access tokens)</Ref> en utilisant un <Ref slug="refresh-token">jeton de rafraîchissement (refresh token)</Ref> sans nécessiter que l'utilisateur se réauthentifie. Cette fonctionnalité est particulièrement utile pour des sessions de longue durée et une meilleure expérience utilisateur.
+
+Il convient de noter qu'OAuth 2.0 ne définit pas explicitement le terme "accès hors ligne"; il spécifie seulement l'utilisation de jetons de rafraîchissement pour obtenir de nouveaux jetons d'accès. Cependant, le terme "accès hors ligne" (avec le scope `offline_access`) a été largement adopté dans l'industrie pour désigner cette capacité, et il est officiellement défini dans la spécification <Ref slug="openid-connect" />.
+
+## Comment fonctionne l'accès hors ligne (offline access) ?
+
+Pour simplifier, nous allons utiliser les termes OAuth 2.0 <Ref slug="authorization-request" /> et <Ref slug="authorization-server" /> pour illustrer comment fonctionne l'accès hors ligne. Leurs termes alternatifs dans OIDC sont <Ref slug="authentication-request" /> et <Ref slug="openid-connect" headingId="openid-provider-op" />, respectivement.
+
+Il y a deux étapes principales impliquées dans l'utilisation de l'accès hors ligne :
+
+1. **Demander l'accès hors ligne** : Lorsque le <Ref slug="client" /> initie une demande d'autorisation (authorization request) vers le serveur d'autorisation (authorization server), il inclut le scope `offline_access` pour demander l'accès hors ligne. Ce scope indique que le client désire obtenir un jeton de rafraîchissement en plus du jeton d'accès.
+
+   Le support de l'accès hors ligne peut varier entre les serveurs d'autorisation, et le serveur d'autorisation peut ignorer le scope `offline_access` s'il ne le supporte pas. Veuillez consulter la documentation du serveur d'autorisation pour assurer la compatibilité avant d'utiliser ce scope.
+
+2. **Utilisation du jeton de rafraîchissement** : Une fois que l'<Ref slug="oauth-2.0-grant" /> est terminé, le client devrait recevoir un <Ref slug="refresh-token" /> ainsi qu'un <Ref slug="access-token" />. Le client peut stocker le jeton de rafraîchissement de manière sécurisée et l'utiliser pour envoyer une <Ref slug="token-request" /> au serveur d'autorisation pour obtenir un nouveau jeton d'accès lorsque le jeton d'accès actuel expirera.
+
+Pour des exemples détaillés de l'accès hors ligne en action, veuillez vous référer à l'article <Ref slug="refresh-token" />.
+
+## Considérations de sécurité
+
+Les implications de sécurité de l'accès hors ligne sont similaires à celles des jetons de rafraîchissement. Veuillez vous référer à la section <Ref slug="refresh-token" headingId="security-considerations" /> des jetons de rafraîchissement pour plus de détails.
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "Offline Access in OpenID Connect Core 1.0",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "Refresh Token in OAuth 2.0",
+        ogDescription: "Les jetons de rafraîchissement sont des identifiants utilisés pour obtenir des jetons d'accès."
+      },
+    },
+  ]}
+/>

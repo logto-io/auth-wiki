@@ -1,0 +1,50 @@
+---
+title: Point de terminaison userinfo (Userinfo endpoint)
+tags: [oidc]
+description: Le point de terminaison userinfo est un point de terminaison OpenID Connect (OIDC) qui fournit des informations utilisateur aux clients. C'est un point de terminaison supplémentaire au jeton d'identité (ID token) et permet aux clients de récupérer des informations utilisateur supplémentaires.
+---
+
+## Qu'est-ce qu'un point de terminaison userinfo ?
+
+Dans <Ref slug="openid-connect" />, un point de terminaison userinfo est un point de terminaison du <Ref slug="openid-connect" headingId="openid-provider-op" /> qui offre des informations utilisateur aux <Ref slug="client">clients</Ref>. Le point de terminaison userinfo est généralement un point de terminaison supplémentaire au <Ref slug="id-token" /> et permet aux clients de récupérer des informations utilisateur supplémentaires qui ne sont pas incluses dans le jeton d'identité (ID token).
+
+Le point de terminaison userinfo est défini dans la [spécification OpenID Connect Core](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) et est généralement accessible par les clients après qu'ils ont obtenu un jeton d'identité (ID token).
+
+## Comment fonctionne un point de terminaison userinfo ?
+
+Lorsqu'un client fait une demande au point de terminaison userinfo, il doit inclure le jeton d'accès (access token) obtenu à partir de la <Ref slug="token-request" /> et utiliser les méthodes HTTP `GET` ou `POST`. Le point de terminaison userinfo valide le jeton d'accès et renvoie les informations utilisateur dans la réponse.
+
+Voici un exemple non normatif d'une demande d'information utilisateur :
+
+```http
+GET /userinfo HTTP/1.1
+Host: openid-provider.example.com
+Authorization: Bearer some-access-token
+```
+
+Le chemin exact du point de terminaison userinfo peut varier entre différents fournisseurs OpenID. Vous pouvez vous référer à la <Ref slug="openid-connect-discovery" /> du fournisseur pour trouver l'URL du point de terminaison userinfo. Si le jeton d'accès est valide, le point de terminaison userinfo répond avec les informations utilisateur :
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "sub": "user123",
+  "name": "Alice",
+  "email": "alice@foo.com",
+  "birthdate": "1990-01-01",
+  "address": {
+    "street": "1234 Elm St",
+    "city": "Springfield",
+    "country": "US"
+  }
+}
+```
+
+La réponse peut contenir divers attributs utilisateur tels que `name`, `email`, `birthdate` et `address`; et typiquement, elle contient plus de <Ref slug="claim">claims</Ref> que le <Ref slug="id-token" />. Les attributs réels retournés dépendent de la configuration du <Ref slug="openid-connect" headingId="openid-provider-op" /> et du consentement de l'utilisateur. Veuillez vous référer à la documentation de votre fournisseur OpenID pour les attributs spécifiques disponibles.
+
+### Signature et chiffrement
+
+La réponse du point de terminaison userinfo peut être signée et/ou chiffrée pour garantir son intégrité et sa confidentialité. Si l'une ou les deux de ces protections sont appliquées, la réponse du point de terminaison userinfo sera un <Ref slug="jwt" /> au lieu d'un simple objet JSON.
+
+<SeeAlso slugs={["openid-connect", "id-token", "openid-connect-discovery", "jwt", "signing-key"]} />

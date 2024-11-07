@@ -1,0 +1,136 @@
+---
+title: Signature Web JSON (JSON Web Signature, JWS)
+tags: [oidc, jose]
+description: Signature Web JSON (JWS) est une méthode standard pour signer et vérifier les données au format JSON. Elle est souvent utilisée pour garantir l'intégrité et l'authenticité des Jetons Web JSON (JWT) dans OpenID Connect (OIDC).
+---
+
+## Qu'est-ce que Signature Web JSON (JWS) ?
+
+Signature Web JSON (JWS) définit une méthode standard pour signer et vérifier des données au format JSON. Elle est largement utilisée dans les applications modernes et les standards ouverts tels que <Ref slug="openid-connect" /> pour assurer l'intégrité et l'authenticité des données transmises.
+
+JWS est particulièrement utile lorsqu'on travaille avec des <Ref slug="jwt">Jetons Web JSON (JWT)</Ref>. Par exemple, un <Ref slug="id-token" /> ou un <Ref slug="access-token" /> peut être signé en utilisant JWS et vérifié par le destinataire sans faire une autre demande réseau.
+
+## Comment fonctionne JWS ?
+
+JWS utilise des algorithmes cryptographiques pour signer les données et produire une signature. Il y a deux concepts principaux dans JWS : l'en-tête JWS et la sérialisation JWS.
+
+### En-tête JWS
+
+JWS a un en-tête qui contient des métadonnées importantes sur l'algorithme de signature et la gestion des clés. Quelques attributs communs dans un en-tête JWS incluent :
+
+- `alg` (Algorithm): L'algorithme cryptographique utilisé pour signer les données.
+- `typ` (Type): Le type de jeton, tel que JWT.
+- `kid` (Key ID): Un identifiant unique pour la clé utilisée pour signer les données.
+- `jku` (JWK Set URL): L'URL où se trouve le <Ref slug="jwk" headingId="json-web-key-set-jwks" />.
+
+Pour une liste détaillée des attributs d'en-tête JWS, se référer à [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4).
+
+### Sérialisation JWS
+
+JWS a deux formats de sérialisation : compact et JSON. Chaque format a sa propre façon de représenter les données signées.
+
+#### Sérialisation compacte
+
+Dans la sérialisation compacte, le JWS est représenté comme une chaîne avec trois parties encodées en Base64URL séparées par des points (`.`). Les trois parties sont :
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+Chaque partie a un but précis :
+
+- `header`: Métadonnées sur l'algorithme de signature et la gestion des clés en format encodé en Base64URL.
+- `payload`: Les données signées en format encodé en Base64URL.
+- `signature`: La signature cryptographique de l'en-tête et de la charge utile.
+
+> [!Note]
+> Aucun en-tête non protégé n'est inclus dans la sérialisation compacte.
+
+Par exemple, un JWS peut ressembler à ceci :
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+Après avoir décodé les parties encodées en Base64URL, le JWS se compose des éléments suivants :
+
+- En-tête: `{"alg":"HS256","typ":"JWT"}`
+- Charge utile: `{"sub":"1234567890","name":"Alice"}`
+- Signature: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+L'en-tête précise que le JWS est signé en utilisant l'algorithme HMAC-SHA256 (`HS256`) et que le type de jeton est JWT (`typ: "JWT"`) en format JSON. La charge utile contient des informations de base sur l'utilisateur, telles que le sujet (`sub`) et le nom (`name`).
+
+La signature est calculée par :
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  secret
+)
+```
+
+Selon l'en-tête JWS, l'algorithme HMAC-SHA256 est utilisé dans la fonction `Hash`, où le `secret` est la clé secrète partagée `top-secret` dans ce cas.
+
+Pour un exemple détaillé de fonctionnement du JWS avec JWT, se référer à l'article <Ref slug="signing-key" />.
+
+#### Sérialisation JSON
+
+La sérialisation JSON offre une manière plus structurée de représenter le JWS. Le JWS est représenté sous forme d'objet JSON avec les propriétés suivantes :
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: La charge utile encodée en Base64URL. Ce sont les données qui sont signées.
+- `signatures`: Un tableau d'objets de signature, chacun contenant l'en-tête protégé, l'en-tête, et la signature.
+
+  Chaque objet de signature peut inclure :
+
+  - `protected`: L'en-tête protégé encodé en Base64URL (`header` dans la sérialisation compacte).
+  - `header`: L'en-tête non protégé au format JSON. L'en-tête n'est pas inclus dans la signature.
+  - `signature`: La signature cryptographique de l'en-tête et de la charge utile (`signature` dans la sérialisation compacte).
+
+Par exemple, un JWS en sérialisation JSON peut ressembler à ceci :
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+Dans l'exemple ci-dessus, il y a deux signatures (tableau `signatures`) pour la même charge utile. Chaque objet de signature contient l'en-tête protégé, l'en-tête, et la signature.
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

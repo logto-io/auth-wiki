@@ -1,0 +1,73 @@
+---
+title: Provisionnement juste-à-temps (Just-in-time provisioning)
+tags: [authentication, authorization]
+description: Le provisionnement juste-à-temps (JIT) est un processus de gestion des identités et des accès (IAM) où les comptes utilisateurs sont créés de manière dynamique et automatique lorsque l'utilisateur tente d'accéder à un système ou une application pour la première fois. Cette approche aide à rationaliser le processus d'intégration et garantit que les comptes utilisateurs ne sont créés que lorsque nécessaire, réduisant ainsi les charges administratives et améliorant la sécurité.
+---
+
+## Qu'est-ce que le provisionnement juste-à-temps ?
+
+Si tu développes une application SaaS B2B et souhaites supporter des fonctionnalités de gestion des membres, permettant aux membres de rejoindre facilement ton espace de travail (tenant). Tu pourrais avoir besoin de fonctionnalités comme celles du tableau ci-dessous, et le provisionnement juste-à-temps en fait partie, aidant à rationaliser le processus.
+
+| Fonctionnalités | Flux |
+| --- | --- |
+| Invitation initiée par l'admin | Les utilisateurs peuvent recevoir une invitation par email pour rejoindre l'organisation. |
+| Création ou import d'utilisateur à travers l'API | Les utilisateurs peuvent utiliser un compte utilisateur pré-créé pour rejoindre l'organisation. |
+| Provisionnement juste-à-temps | Les utilisateurs qui se connectent à l'application pour la première fois peuvent rejoindre l'organisation. |
+| Synchronisation de répertoire (par ex. SCIM) | Utiliser la fonctionnalité de synchronisation de répertoire de l'IdP pour pré-approvisionner les utilisateurs dans l'application à l'avance. |
+
+Le **provisionnement juste-à-temps (JIT)** est un processus utilisé dans les systèmes de gestion des identités et des accès pour créer des comptes utilisateurs à la volée lorsqu'ils se connectent à un système pour la première fois. Au lieu de pré-approvisionner les comptes pour les utilisateurs à l'avance, le JIT provisioning crée et configure les comptes utilisateurs nécessaires dynamiquement lorsqu'un utilisateur effectue une authentication (authentification). Le provisionnement juste-à-temps est une fonctionnalité populaire avec ses propres caractéristiques, telles que l'efficacité, l'absence d'implication administrative et l'adhésion automatisée à l'organisation, etc.
+
+## Quels sont les cas d'utilisation du provisionnement juste-à-temps ?
+
+Ces cas sont courants lors de la création d'une application B2B impliquant une architecture multi-tenancy (multi-tenant), Enterprise SSO, travaillant avec des entreprises ou nécessitant des fonctionnalités d'intégration d'équipe. Voici quelques scénarios d'exemple que ton client pourrait rencontrer.
+
+### Intégration rapide
+
+Tu as un client qui expérimente des embauches fréquentes ou une croissance rapide peut utiliser le JIT provisioning pour configurer rapidement des comptes utilisateurs pour les nouveaux employés. Voici un exemple :
+
+Sarah est une nouvelle employée chez SuperFantasy, qui utilise Okta comme fournisseur d'identité d'entreprise. L'équipe RH l'ajoute comme une identité professionnelle dans Okta juste une fois. Lorsque Sarah utilise cet email pour se connecter à une application de productivité appelée Smartworkspace utilisée par l'entreprise pour la première fois, le système crée automatiquement un compte et assigne le rôle approprié pour elle au sein de l'espace de travail de l'entreprise. Ainsi, ni Sarah ni l'équipe RH de SuperFantasy n'ont besoin de passer par plusieurs étapes pour la création de compte et l'attribution de rôle.
+
+### Fusions, acquisitions et travailleurs temporaires
+
+Tu as un client confronté à une fusion ou une acquisition, le JIT provisioning peut simplifier le processus d'octroi d'accès aux systèmes de l'entreprise acquérante pour de nombreux nouveaux utilisateurs. Prenons un autre exemple,
+
+Peter travaille pour MagicTech, qui a récemment été acquis par SuperFantasy. MagicTech est une organisation plus petite sans Enterprise SSO mais utilise aussi Smartworkspace où Peter a déjà un compte professionnel.
+
+L'équipe RH peut ajouter Peter dans Okta. Lorsque Peter se connecte à Smartworkspace pour la première fois via Okta, le système lie automatiquement son compte professionnel existant et accorde l'accès approprié à SuperFantasy.
+
+Les scénarios ci-dessus sont idéaux pour la mise en œuvre de la fonctionnalité JIT.
+
+## Est-ce spécifique à SAML et Enterprise SSO ?
+
+Le provisionnement juste-à-temps (JIT) est souvent associé au single sign-on (SSO) dans l'authentication (authentification) SAML, mais il n'est pas exclusif à SAML. Le JIT provisioning peut également être utilisé avec d'autres protocoles d'authentication comme OAuth 2.0 et OpenID Connect, et il ne nécessite pas toujours une configuration Enterprise SSO.
+
+Par exemple, le provisionnement par email basé sur le JIT peut rationaliser l'intégration d'équipe en ajoutant automatiquement les utilisateurs à un espace de travail en fonction de leur domaine email. Cela est particulièrement utile pour les organisations qui manquent de budget et de ressources pour acheter et gérer Enterprise SSO.
+
+L'idée fondamentale derrière le provisionnement juste-à-temps est d'automatiser la création ou la mise à jour des comptes utilisateurs lorsqu'un utilisateur tente pour la première fois d'accéder à un service, quel que soit le protocole spécifique utilisé.
+
+## S'applique-t-il aux nouveaux ou aux utilisateurs existants de l'application ?
+
+Le provisionnement juste-à-temps (JIT) se réfère généralement à la première tentative d'accès à une application. Cependant, différents produits perçoivent cette fonctionnalité différemment. Certains utilisent le JIT provisioning juste pour la création d'identité et de compte, tandis que d'autres incluent également les mises à jour de compte en temps réel, telles que le reprovisionnement et la synchronisation des attributs.
+
+En plus de la création automatique d'utilisateurs, le SAML JIT Provisioning permet d'accorder et de révoquer des adhésions de groupe dans le cadre de l'approvisionnement. Il peut également mettre à jour les utilisateurs approvisionnés pour garder leurs attributs dans le stock de données du fournisseur de service (SP) en synchronisation avec les attributs du stock d'utilisateurs du fournisseur d'identité (IDP).
+
+Si tu veux considérer le scénario de connexion des utilisateurs existants subséquent, assure-toi d'avoir un système d'approvisionnement robuste avec ton système JIT. Par exemple,
+
+- **Résolution de conflit**: Ton système doit avoir une stratégie pour gérer les conflits si un compte existe déjà avec des informations différentes de celles fournies par l'IdP lors du processus JIT. Cela peut nécessiter un contrôle détaillé des politiques de ton organisation et de la configuration de l'IdP.
+- **Traces d’audit**: Il est important de maintenir des journaux des créations de compte et des mises à jour des comptes existants via les processus JIT pour des raisons de sécurité et de conformité.
+- **Performance**: Bien que le JIT provisioning se fasse rapidement, considère l'impact potentiel sur les temps de connexion, en particulier pour les utilisateurs existants si tu mets à jour leurs informations à chaque connexion.
+- **Cohérence des données**: Assure-toi que ton processus de JIT provisioning maintient la cohérence des données, surtout lors de la mise à jour des comptes utilisateurs existants.
+
+## Quelle est la différence entre JIT et SCIM ?
+
+SCIM est un protocole de norme ouverte conçu pour simplifier et automatiser la gestion des identités utilisateurs à travers différents systèmes et domaines. Il est couramment utilisé dans les scénarios de synchronisation de répertoire.
+
+La principale différence entre JIT et SCIM est que JIT crée des comptes lors de la tentative de connexion de l'utilisateur, tandis que SCIM peut provisionner des utilisateurs via un processus automatisé hors ligne, indépendant des tentatives de connexion utilisateur.
+
+Cela signifie que JIT se concentre sur l'intégration des nouveaux utilisateurs, tandis que SCIM se concentre sur la gestion complète du cycle de vie des utilisateurs.
+
+De plus, JIT est souvent une extension de SAML et manque d'une implémentation standardisée à travers les systèmes, tandis que SCIM est un protocole bien défini et standardisé [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) pour la gestion des identités.
+
+Certaines grandes organisations utilisent SCIM pour l'approvisionnement des comptes, en l'intégrant avec leurs propres systèmes. Cela peut être très complexe et varier d'un cas à l'autre. Ces organisations ont souvent un système d'approvisionnement qui implique à la fois des processus automatisés et une implication manuelle de l'administrateur.
+
+<Resources urls={['https://blog.logto.io/jit-provisioning']} />

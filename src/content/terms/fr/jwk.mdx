@@ -1,0 +1,96 @@
+---
+title: Clé Web JSON (JSON Web Key, JWK)
+tags: [oidc, jose]
+description: Une Clé Web JSON (JWK) est un format basé sur JSON utilisé pour représenter des clés cryptographiques. Lorsqu'il est nécessaire de regrouper plusieurs JWKs, ils sont organisés dans un JSON Web Key Set (JWKS).
+---
+
+## Qu'est-ce qu'une Clé Web JSON (JWK) ?
+
+Une Clé Web JSON (JWK) est un format basé sur JSON utilisé pour représenter des clés cryptographiques. Elle est largement utilisée dans le contexte de <Ref slug="jws" /> et <Ref slug="jwe" /> pour valider l'intégrité et la confidentialité des <Ref slug="jwt">Jetons Web JSON</Ref>. Elle est également utilisée dans <Ref slug="openid-connect" /> pour la gestion des identités et des accès (iam).
+
+Par exemple, une clé publique ECDSA encodée en PEM :
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx+43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+...peut être représentée comme une JWK :
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+## Comment fonctionne une JWK ?
+
+Étant donné que JWK est un format basé sur JSON, il peut transporter des métadonnées riches sur la clé par rapport aux formats traditionnels comme PEM. Voici quelques attributs communs dans une JWK :
+
+- `kty` (Type de Clé) : La famille d'algorithmes cryptographiques utilisée avec la clé. Les valeurs courantes incluent `RSA`, `EC`, et `oct`. `EC` a été marqué comme "Recommandé+" dans [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
+- `use` (Utilisation de la Clé Publique) : L'utilisation prévue de la clé publique. Les valeurs courantes incluent `sig` (signature) et `enc` (chiffrement).
+- `key_ops` (Opérations de Clé) : Les opérations de clé prises en charge par la clé. Les valeurs courantes incluent `sign`, `verify`, `encrypt`, et `decrypt`.
+- `alg` (Algorithme) : L'algorithme prévu pour être utilisé avec la clé. Selon le type de clé, l'algorithme peut varier. Par exemple, `RS256` peut être utilisé avec une clé RSA, tandis que `ES256` peut être utilisé avec une clé EC.
+- `kid` (ID de Clé) : Un identifiant unique pour la clé. Il peut être utilisé pour associer une clé spécifique dans un ensemble de clés.
+
+À l'exception de `kty`, tous les autres attributs sont facultatifs et peuvent être utilisés pour fournir un contexte supplémentaire sur la clé. Selon la valeur de `kty`, d'autres attributs peuvent être requis ou optionnels. Dans l'exemple ci-dessus, la JWK représente une clé ECDSA (`kty: "EC"`) avec une courbe de P-384 (`crv: "P-384"`). Les attributs `x` et `y` contiennent les coordonnées de la clé publique.
+
+Voici un autre exemple non normatif d'une clé publique RSA sous forme de JWK :
+
+```json
+{
+  "kty": "RSA",
+  "use": "sig",
+  "alg": "RS256",
+  "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+  "e": "AQAB",
+  "kid": "2011-04-29-1234"
+}
+```
+
+Pour des informations détaillées sur les attributs JWK et leurs significations, référez-vous à [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
+
+## Ensemble de Clés Web JSON (JWKS) ||json-web-key-set-jwks||
+
+Lorsqu'il est nécessaire de regrouper plusieurs JWKs, ils sont organisés dans un JSON Web Key Set (JWKS). Un JWKS est un objet JSON qui contient un tableau de JWKs. Il est couramment utilisé dans la réponse du point de terminaison `jwks_uri` dans <Ref slug="openid-connect-discovery" /> pour fournir les clés publiques pour la validation des <Ref slug="signing-key" /> des JWT.
+
+Voici un exemple non normatif d'un JWKS contenant deux JWKs :
+
+```json
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+      "e": "AQAB",
+      "kid": "2011-04-29-1234"
+    },
+    {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+      "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+    }
+  ]
+}
+```
+
+Dans cet exemple, le JWKS contient deux JWKs : une clé RSA et une clé EC. L'attribut `keys` est un tableau de JWKs, chacune représentant une clé différente.
+
+<SeeAlso slugs={["jwt", "jws", "signing-key", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7517",
+    "https://tools.ietf.org/html/rfc7518",
+    "https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata",
+  ]}
+/>

@@ -12,6 +12,7 @@ export const locales = Object.freeze({
   ar: 'ar',
   en: 'en',
   es: 'es',
+  fr: 'fr',
   ko: 'ko',
   ja: 'ja',
   nl: 'nl',

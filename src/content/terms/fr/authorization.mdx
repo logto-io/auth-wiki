@@ -1,0 +1,50 @@
+---
+title: Autorisation (Authorization)
+tags: [authorization]
+description: L'autorisation est le processus de détermination des actions qu'une identité peut effectuer sur une ressource. C'est un mécanisme de sécurité fondamental pour définir et appliquer des politiques d'accès.
+---
+
+## Qu'est-ce que l'autorisation ?
+
+> **TL;DR** : L'autorisation répond à la question "Qu'est-ce que tu peux faire ?"
+
+L'autorisation est un processus de prise de décision qui détermine si une identité (utilisateur, service ou appareil) a les permissions nécessaires pour effectuer une action spécifique sur une ressource. Voyons quelques exemples :
+
+- Dans un éditeur de documents en ligne, un utilisateur peut partager un document avec d'autres.
+- Dans un service de stockage cloud, un service peut lire et écrire des fichiers dans un dossier spécifique.
+- Dans un système de maison intelligente, un appareil peut allumer les lumières dans le salon.
+
+Tous ces exemples impliquent une identité (sujet) effectuant une action sur une ressource. Bien sûr, l'autorisation peut aussi échouer, par exemple lorsqu'un utilisateur essaie de supprimer un fichier auquel il n'a pas la permission d'accéder.
+
+Le modèle de base pour l'autorisation est simple : si **l'identité** effectue une **action** sur une **ressource**, alors **accepter** ou **refuser**.
+
+### Différence entre l'authentification et l'autorisation
+
+Authentification et autorisation sont souvent confondues, mais elles sont fondamentalement différentes : <Ref slug="authentication" /> répond à la question "Quelle identité possédez-vous ?". De plus, dans la plupart des cas, l'autorisation a lieu après l'authentification, car le système doit connaître l'identité avant de prendre des décisions d'accès.
+
+### Différence entre l'autorisation et le contrôle d'accès
+
+L'autorisation est un sous-ensemble du contrôle d'accès. Le contrôle d'accès est un concept plus large qui inclut l'autorisation et d'autres restrictions sur la gestion des accès. En d'autres termes, le contrôle d'accès est un terme général qui décrit la restriction sélective de l'accès aux ressources, tandis que l'autorisation concerne spécifiquement le processus de prise de décision.
+
+## Comment fonctionne l'autorisation ?
+
+L'autorisation est généralement mise en œuvre en utilisant <Ref slug="access-control" headingId="access-control-models" />. Ils définissent comment les permissions sont attribuées et appliquées dans un système.
+
+## Cadres d'autorisation (protocoles)
+
+Bien que <Ref slug="oauth-2.0" /> soit un cadre très populaire pour l'autorisation, il est important de noter que OAuth 2.0 ne définit pas quel modèle de contrôle d'accès utiliser. Au lieu de cela, il se concentre sur la délégation de l'autorisation et l'émission de jetons d'accès (access tokens).
+
+Cela dit, OAuth 2.0 est adapté aux scénarios d'autorisation tiers où un utilisateur accorde la permission à un client d'accéder à ses ressources. Par exemple, lorsque tu te connectes à un site web en utilisant ton compte Google, tu autorises le site web à accéder à ton profil Google.
+
+Si tu gères l'autorisation en interne (par exemple, au sein de ton application ou organisation), il peut être nécessaire de mettre en œuvre un modèle de contrôle d'accès tel que <Ref slug="rbac" /> ou <Ref slug="abac" />. La combinaison de <Ref slug="openid-connect" /> et des modèles de contrôle d'accès peut fournir une base solide pour l'authentification et l'autorisation.
+
+Au lieu de créer un système d'autorisation interne, il est recommandé d'utiliser un <Ref slug="identity-provider" /> qui offre des capacités d'authentification et d'autorisation. Un bon fournisseur d'identité gérera la complexité du contrôle d'accès et fournira une solution sécurisée et évolutive pour tes applications.
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

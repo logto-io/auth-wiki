@@ -1,0 +1,56 @@
+---
+title: Portée (Scope)
+tags: [authorization]
+description: La portée (Scope) définit les permissions qu'une application demande à un utilisateur pour accéder à ses ressources protégées. C'est un concept fondamental dans OAuth 2.0 et OIDC (OpenID Connect) qui contrôle le niveau d'accès qu'une application peut avoir aux données d'un utilisateur.
+---
+
+## Qu'est-ce qu'une portée (scope) ?
+
+Dans les protocoles <Ref slug="oauth-2.0" /> et <Ref slug="openid-connect" />, une **portée (scope)** est un mécanisme pour limiter l'accès qu'une application a aux ressources d'un utilisateur. Elle définit les permissions que l'application demande à l'utilisateur.
+
+Les portées sont représentées par des chaînes de caractères définies par le serveur d'autorisation (authorization server). Lorsqu'une application demande l'accès aux ressources d'un utilisateur, elle spécifie les portées dont elle a besoin dans la requête d'autorisation (authorization request). L'utilisateur est ensuite invité à accorder ou à refuser ces permissions pendant le processus d'autorisation.
+
+### Pourquoi utiliser des portées ?
+
+- **Contrôle d'accès granulaire** : Les portées permettent aux applications de demander uniquement les permissions dont elles ont besoin pour effectuer des actions spécifiques, réduisant ainsi le risque d'accès non autorisé.
+- **Consentement de l'utilisateur** : Les portées aident les utilisateurs à comprendre quelles données l'application accédera et pourquoi.
+- **Sécurité** : Les portées aident à empêcher les applications de dépasser leurs permissions d'accès, renforçant ainsi la sécurité des données de l'utilisateur.
+
+## Comment fonctionne la portée (scope) ?
+
+Lorsqu'une application initie le processus d'autorisation OAuth 2.0 / OIDC, elle inclut une liste de portées dans la requête d'autorisation (authorization request). Le serveur d'autorisation présente ensuite à l'utilisateur un écran de consentement qui répertorie les portées demandées. L'utilisateur peut choisir d'accorder ou de refuser l'accès à chaque portée. Ce processus est généralement utilisé lorsque l'application est une application tierce nécessitant l'accès aux ressources de l'utilisateur.
+
+Alternativement, si l'application est approuvée par le serveur d'autorisation (authorization server), l'utilisateur pourrait ne pas recevoir de demande de consentement ; un consentement automatique est accordé et toutes les portées demandées sont accordées.
+
+## Définir les portées
+
+Les portées sont généralement définies par le fournisseur d'API. Elles peuvent être :
+- **Portées standard** : Des portées couramment utilisées définies par la spécification OAuth 2.0, partagées par différentes applications et services. Par exemple `openid`, `profile`, `email`.
+- **Portées personnalisées** : Spécifiques à une application ou un service, adaptées à ses exigences uniques. Par exemple `read:orders`, `write:comments`.
+
+## Où les portées peuvent-elles être utilisées dans OIDC et la gestion des identités ?
+
+Les portées peuvent être utilisées dans divers aspects d'OIDC, y compris mais non limité à :
+
+- **Authentification (Authentication)** : Les portées peuvent être utilisées pour demander des informations utilisateur spécifiques au cours du processus d'authentification. Par exemple `profile`, `email`.
+- **Autorisation (Authorization)** : Les portées peuvent être utilisées pour demander l'accès à des ressources spécifiques ou effectuer des actions spécifiques. Par exemple `read:orders`, `write:comments`.
+- **Consentement** : Les portées sont présentées à l'utilisateur durant l'écran de consentement pour l'informer des permissions demandées par l'application.
+- **Émission de jeton (Token issuance)** : Les portées sont incluses dans la réponse de jeton pour indiquer les permissions accordées à l'application.
+- **Validation de jeton (Token validation)** : Les portées peuvent être utilisées pour valider les droits d'accès de l'application lorsqu'elle présente le jeton pour accéder aux ressources protégées.
+- **Serveur de ressources (Resource server)** : Les portées peuvent être utilisées par le serveur de ressources pour appliquer des politiques de contrôle d'accès basées sur les permissions accordées à l'application.
+- **Profil utilisateur (User profile)** : Les portées peuvent être utilisées pour demander des informations supplémentaires sur le profil utilisateur au-delà des déclarations (claims) de base.
+
+## Bonnes pratiques
+
+- **Demander des portées minimales** : Demandez toujours le minimum de portées nécessaires au fonctionnement de votre application. Cela minimise le risque de sur-autorisation et augmente la confiance des utilisateurs.
+- **Expliquer l'utilisation des portées** : Expliquez clairement aux utilisateurs pourquoi chaque portée est nécessaire. La transparence aide à obtenir le consentement des utilisateurs.
+- **Utiliser des portées standard si possible** : Utilisez des portées standard pour garantir la compatibilité et réduire la complexité.
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims",
+  ]}
+/>
