@@ -1,0 +1,96 @@
+---
+title: JSON Web Key (JWK)
+tags: [oidc, jose]
+description: JSON Web Key (JWK) は暗号キーを表現するために使用される JSON ベースのフォーマットです。複数の JWK をまとめる必要がある場合、JSON Web Key Set (JWKS) として整理されます。
+---
+
+## JSON Web Key (JWK) とは？
+
+JSON Web Key (JWK) は暗号キーを表現するために使用される JSON ベースのフォーマットです。<Ref slug="jws" /> や <Ref slug="jwe" /> の文脈で、<Ref slug="jwt">JSON Web Tokens (JWT)</Ref> の安全性と機密性を確認するために広く使用されています。また、<Ref slug="openid-connect" /> におけるアイデンティティおよびアクセス管理にも使用されます。
+
+例えば、PEM エンコードされた ECDSA 公開鍵は次のように表現されます。
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx+43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+...は JWK として次のように表現できます。
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+## JWK はどのように機能しますか？
+
+JWK は JSON ベースのフォーマットであるため、PEM のような従来のフォーマットと比較して、キーに関する豊富なメタデータを含めることができます。JWK の一般的な属性を以下に示します：
+
+- `kty` (Key Type): キーと共に使用される暗号アルゴリズムファミリ。一般的な値には `RSA`、`EC`、および `oct` が含まれます。[RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518) では、`EC` が「推奨+」とされています。
+- `use` (Public Key Use): 公開鍵の意図された使用。一般的な値には `sig` (署名) や `enc` (暗号化) が含まれます。
+- `key_ops` (Key Operations): キーによってサポートされる操作。一般的な値には `sign`、`verify`、`encrypt`、および `decrypt` が含まれます。
+- `alg` (Algorithm): キーと共に使用するためのアルゴリズム。キーのタイプに応じてアルゴリズムは異なります。例えば、RSA キーには `RS256` が、EC キーには `ES256` が使用されます。
+- `kid` (Key ID): キーの一意の識別子。特定のキーをキーの集合の中で一致させるために使用されます。
+
+`kty` を除く他の属性はオプションであり、キーに関する追加のコンテキストを提供するために使用できます。`kty` の値に応じて、他の属性が必須またはオプションとなる場合があります。上記の例では、JWK は P-384 (`crv: "P-384"`) 曲線を持つ ECDSA キー (`kty: "EC"`) を表しています。`x` と `y` 属性には公開鍵座標が含まれています。
+
+もう一つの標準ではない RSA 公開鍵 JWK の例を示します。
+
+```json
+{
+  "kty": "RSA",
+  "use": "sig",
+  "alg": "RS256",
+  "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+  "e": "AQAB",
+  "kid": "2011-04-29-1234"
+}
+```
+
+JWK 属性とその意味についての詳細な情報は、[RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) を参照してください。
+
+## JSON Web Key Set (JWKS)
+
+複数の JWK をまとめる必要がある場合、JSON Web Key Set (JWKS) として整理されます。JWKS は JWK の配列を含む JSON オブジェクトです。これは、<Ref slug="openid-connect-discovery" /> の `jwks_uri` エンドポイントのレスポンスで、JWT <Ref slug="signing-key" /> の検証のための公開鍵を提供する際に一般的に使用されます。
+
+2 つの JWK を含む JWKS の非標準的な例を示します。
+
+```json
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+      "e": "AQAB",
+      "kid": "2011-04-29-1234"
+    },
+    {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+      "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+    }
+  ]
+}
+```
+
+この例では、JWKS は 1 つの RSA キーと 1 つの EC キーを含んでいます。`keys` 属性は JWK の配列であり、それぞれが異なるキーを表しています。
+
+<SeeAlso slugs={["jwt", "jws", "signing-key", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7517",
+    "https://tools.ietf.org/html/rfc7518",
+    "https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata",
+  ]}
+/>

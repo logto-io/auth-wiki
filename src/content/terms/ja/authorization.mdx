@@ -1,0 +1,50 @@
+---
+title: 認可 (Authorization)
+tags: [authorization]
+description: 認可 (Authorization) は、あるアイデンティティがリソース上でどのようなアクションを実行できるかを決定するプロセスです。アクセス ポリシーを定義し、適用するための基本的なセキュリティ メカニズムです。
+---
+
+## 認可 (Authorization) とは何ですか？
+
+> **要約**: 認可 (Authorization) とは「何ができるのか？」という質問に答えるものです。
+
+認可 (Authorization) とは、アイデンティティ（ユーザー、サービス、デバイス）が特定のリソースに対して特定のアクションを実行するための必要な権限を持っているかを判断する意思決定プロセスです。いくつかの例を見てみましょう:
+
+- オンラインドキュメントエディタでは、ユーザーがドキュメントを他の人と共有できます。
+- クラウドストレージサービスでは、サービスが特定のフォルダ内のファイルを読み書きできます。
+- スマートホームシステムでは、デバイスがリビングルームの電気を点灯させることができます。
+
+これらすべての例には、アイデンティティ（主体）がリソースに対してアクションを実行することが含まれます。当然ながら、認可 (Authorization) が失敗することもあります。たとえば、ユーザーがアクセスする権限のないファイルを削除しようとした場合などです。
+
+認可 (Authorization) の基本モデルは簡単です: **アイデンティティ** が **リソース** に対して **アクション** を実行したときに、**許可する** または **拒否する** というものです。
+
+### 認証 (Authentication) と認可 (Authorization) の違い
+
+認証 (Authentication) と認可 (Authorization) はよく混同されますが、本質的に異なります。<Ref slug="authentication" /> が「どのアイデンティティを所有していますか？」という質問に答えるのに対し、認可 (Authorization) はアクセス決定を行う前に、システムがアイデンティティを知る必要があるため、多くの場合、認証後に認可 (Authorization) が行われます。
+
+### 認可 (Authorization) とアクセス制御 (Access Control) の違い
+
+認可 (Authorization) はアクセス制御 (Access Control) の一部です。アクセス制御はより広い概念であり、認可 (Authorization) やその他のアクセス管理制限が含まれます。言い換えれば、アクセス制御はリソースへのアクセスを選択的に制限する一般的な用語であり、認可 (Authorization) は特に意思決定プロセスについてです。
+
+## 認可 (Authorization) はどのように機能しますか？
+
+認可 (Authorization) は通常、<Ref slug="access-control" headingId="access-control-models" /> を使用して実装されます。これらは、システム内での権限の割り当てと適用方法を定義します。
+
+## 認可 (Authorization) フレームワーク（プロトコル）
+
+<Ref slug="oauth-2.0" /> は非常に人気のある認可 (Authorization) フレームワークですが、OAuth 2.0 はどのアクセス制御モデルを使用するかを定義しているわけではないことに注意が必要です。代わりに、認可 (Authorization) の委任とアクセストークンの発行に焦点を当てています。
+
+つまり、OAuth 2.0 は、ユーザーがクライアントに自分のリソースへのアクセス許可を与えるサードパーティーの認可 (Authorization) シナリオに適しています。たとえば、Google アカウントを使用してウェブサイトにサインインする場合、ユーザーはそのウェブサイトが自分の Google プロフィールにアクセスすることを認可 (Authorization) しています。
+
+もしファーストパーティーの認可 (Authorization) に取り組んでいる（例: 自分のアプリケーションや組織内で）場合は、<Ref slug="rbac" /> や <Ref slug="abac" /> などのアクセス制御モデルを実装する必要があるかもしれません。<Ref slug="openid-connect" /> とアクセス制御モデルの組み合わせにより、認証と認可 (Authorization) のための堅実な基盤を提供できます。
+
+独自の認可 (Authorization) システムを構築するのではなく、認証と認可 (Authorization) 機能を提供する <Ref slug="identity-provider" /> を使用することをお勧めします。良いアイデンティティプロバイダーは、アクセス制御の複雑さを処理し、アプリケーションに対して安全でスケーラブルなソリューションを提供します。
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

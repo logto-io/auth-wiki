@@ -13,6 +13,7 @@ export const locales = Object.freeze({
   zh: 'zh-Hans',
   ko: 'ko',
   ar: 'ar',
+  ja: 'ja',
 });
 
 // https://astro.build/config

@@ -1,0 +1,50 @@
+---
+title: Userinfo エンドポイント (Userinfo endpoint)
+tags: [oidc]
+description: Userinfo エンドポイントはクライアントにユーザー情報を提供する OpenID Connect (OIDC) エンドポイントです。これは ID トークンを補完するエンドポイントであり、クライアントが追加のユーザー情報を取得できるようにします。
+---
+
+## Userinfo エンドポイント (Userinfo endpoint) とは？
+
+<Ref slug="openid-connect" /> において、userinfo エンドポイントは<Ref slug="openid-connect" headingId="openid-provider-op" /> のエンドポイントであり、<Ref slug="client">クライアント</Ref>にユーザー情報を提供します。userinfo エンドポイントは通常、<Ref slug="id-token" /> を補完するエンドポイントであり、クライアントが ID トークンに含まれていない追加のユーザー情報を取得できるようにします。
+
+userinfo エンドポイントは [OpenID Connect Core specification](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) に定義されており、クライアントが ID トークンを取得した後にアクセスするのが一般的です。
+
+## Userinfo エンドポイント (Userinfo endpoint) の仕組みは？
+
+クライアントが userinfo エンドポイントにリクエストを送信する際、<Ref slug="token-request" /> から取得したアクセストークン (access token) を含め、`GET` または `POST` HTTP メソッドを使用する必要があります。userinfo エンドポイントはアクセストークン (access token) を検証し、レスポンスでユーザー情報を返します。
+
+userinfo リクエストの非規範的な例を以下に示します：
+
+```http
+GET /userinfo HTTP/1.1
+Host: openid-provider.example.com
+Authorization: Bearer some-access-token
+```
+
+userinfo エンドポイントの正確なパスは異なる OpenID プロバイダーによって異なる場合があります。プロバイダーの <Ref slug="openid-connect-discovery" /> を参照して、userinfo エンドポイントの URL を見つけることができます。アクセストークン (access token) が有効な場合、userinfo エンドポイントは次のようにユーザー情報を返します：
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "sub": "user123",
+  "name": "Alice",
+  "email": "alice@foo.com",
+  "birthdate": "1990-01-01",
+  "address": {
+    "street": "1234 Elm St",
+    "city": "Springfield",
+    "country": "US"
+  }
+}
+```
+
+レスポンスには `name`、`email`、`birthdate`、`address` などのさまざまなユーザー属性が含まれる場合があります。そして通常、<Ref slug="id-token" /> よりも多くの <Ref slug="claim">クレーム (claims)</Ref> を含んでいます。実際に返される属性は、<Ref slug="openid-connect" headingId="openid-provider-op" /> の設定とユーザーの同意に依存します。具体的に利用可能な属性については、OpenID プロバイダーのドキュメントを参照してください。
+
+### 署名と暗号化
+
+userinfo レスポンスは整合性と機密性を確保するために署名および/または暗号化されることがあります。これらの保護が適用されると、userinfo エンドポイントのレスポンスは単なる JSON オブジェクトではなく、<Ref slug="jwt" /> になります。
+
+<SeeAlso slugs={["openid-connect", "id-token", "openid-connect-discovery", "jwt", "signing-key"]} />

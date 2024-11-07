@@ -1,0 +1,156 @@
+---
+title: 不透明トークン (Opaque token)
+tags: [oauth 2.0, oidc]
+description: 不透明トークン (Opaque token) は、形式がissuerによって決定されるトークンの一種で、一般的に文字や数字の列として現れ、直接的な検証に必要なすべての情報を含むのではなく、issuerによる検証が必要です。
+---
+
+## トークンとは何ですか？
+
+不透明トークンを紹介する前に、トークンが何であるかを理解することが重要です：
+
+トークンは、パーティ間で安全な情報を表現および伝達するために使用され、インターネット上でバックグラウンドで発生する大多数の認証 (Authentication) およびauthorizationプロセスをサポートします。Webサービスで最も人気のある2種類のトークンは[RFC 7519: JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519) と不透明トークンです。
+
+## 不透明トークンとは何ですか？
+
+不透明トークンは、アクセスできないプロプライエタリ形式のトークンであり、通常サーバーの永続的なストレージ内の情報への識別子を含んでいます。
+
+不透明トークンは、トークンが取り得る形式の一つであり、access tokens とrefresh tokens は不透明トークンとして存在することがあります。不透明トークンの形式は、そのissuerによって決定され、通常はデータベース内の特定の情報を引き出し、識別するために使用される数字や文字の列です。以下は不透明トークンの例です：
+
+```
+M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
+```
+
+一方、JWTはもう一つの一般的なトークン形式です。これは発行者からの署名と共にすべてのclaims情報を含むJSON文字列です。デフォルトでは暗号化されていませんが、JSON Web Encryption (JWE) 標準を使用して暗号化できます。JWTは通常暗号化されていませんが、その署名の存在によってトークンの内容の整合性が保証され、JWT内のデータの完全な信頼が可能になります。
+
+JWTとは異なり、不透明トークンは直接保護されたリソースで検証するために必要なすべての情報を含んでいません。不透明トークンはその発行者 (通常はauthorization server) によって検証を必要とします。この検証プロセスは通常、トークンインスペクション (token introspection) と呼ばれます。
+
+## JWTとは何ですか？
+
+不透明トークンとは対照的に、JWTは構造化され読みやすい形式で情報を運ぶ自己完結型のステートレストークンです。
+
+JWTは、Base64URLでエンコードされた `header`, `payload`, `signature` の3つの部分で構成されています。
+
+こちらがJWTの例です：
+
+`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+
+- `header` はトークンの種類と署名に使用されたアルゴリズムの情報を含みます。例えば、`{"alg": "HS256", "typ": "JWT"}` のようです。
+- `payload` セクションには、ユーザーやauthorizationについての情報 (claims)、例えば、ユーザーID、有効期限、スコープなどが含まれます。このデータはエンコードされていますが暗号化されていないため、トークンを持っている人は誰でもclaimsをデコードして見ることができますが、署名を無効にしない限り変更することはできません。仕様やauthorization serverの設定に基づいて、さまざまなclaimsがペイロードに含まれることがあります。これがトークンの自己完結的な性質を与えるものです。例えば、`{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}` のようです。
+- `signature` は指定されたアルゴリズムを使用して、ヘッダー、ペイロード、秘密鍵を組み合わせて生成されます。この署名はトークンの整合性を確認し、改ざんされていないことを保証します。
+
+JWTはクライアントまたは任意のサービスがauthorization serverと通信することなく、ローカルでトークンを検証できるため、特に分散システムでは効率的なトークンとして一般に利用されています。複数のサービスがトークンの正当性を独立して検証する必要がある場合に有効です。
+
+しかし、この利便性にはトークンのclaimsが過度に露出されないようにする責任も伴います。claimsはトークンにアクセスする人全員に見えるからです。また、JWTは通常短期間有効であり、有効期限は無期限の正当性を防ぐためにトークンのclaimsに含まれます。
+
+## 不透明access tokenの検証
+
+不透明access tokenは、検証のためにauthorization serverに送り返して検証されます。authorization serverは発行されたトークンの状態を維持し、内部ストレージに基づいてトークンの有効性を確認できます。
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant AS as Logto Authorization Server
+    participant RP as Resource Provider
+
+    C ->> AS: 1. post /oidc/token
+    AS ->> C: 2. 不透明トークン
+    C ->> RP: 3. get /api/resource
+    RP ->> AS: 4. post /oidc/introspect
+    AS ->> RP: 5. トークン情報
+
+```
+
+1. クライアントがauthorization serverにaccess tokenを要求します。
+2. authorization serverが不透明トークンを発行します。
+3. クライアントが不透明トークンをヘッダに付けてリソースアクセスをリクエストします。
+4. リソースプロバイダがauthorization serverにトークンインスペクション ([RFC 7662: OAuth 2.0 Token Introspection](https://datatracker.ietf.org/doc/html/rfc7662)) リクエストを送り、トークンを検証します。
+5. authorization serverがトークン情報を返します。
+
+## JWT access tokenの検証 (オフライン)
+
+JWT access token は、トークンの公開鍵にアクセスできるクライアントまたは任意のサービスによってオフラインで検証できます。
+
+```mermaid
+
+sequenceDiagram
+    participant C as Client
+    participant AS as Logto Authorization Server
+    participant RP as Resource Provider
+
+    RP ->> AS: 0. get /oidc/.well-known/jwks.json
+
+    C ->> AS: 1. post /oidc/token
+    AS ->> C: 2. JWTトークン
+    C ->> RP: 3. get /api/resource
+    RP ->> RP: 4. JWTトークンを検証
+    RP ->> C: 5. 応答200 OK
+
+```
+
+1. リソースプロバイダがOIDCディスカバリーエンドポイントからauthorization serverの公開鍵を事前に取得します。公開鍵はトークンの署名を検証しその整合性を確保するために使用されます。
+2. クライアントがauthorization serverにaccess tokenを要求します。
+3. authorization serverがJWTトークンを発行します。
+4. クライアントがJWTトークンをヘッダに付けてリソースアクセスをリクエストします。
+5. リソースプロバイダがauthorization serverから取得した公開鍵を使用してJWTトークンのデコードと検証を行います。
+6. リソースプロバイダがトークンの有効性に基づいてアクセスを許可します。
+
+## OIDCでのユースケース
+
+OIDC (OpenID Connect) のコンテキストでは、不透明トークンとJWTは異なる目的で使用され、別々のシナリオで用いられます。
+
+### 不透明トークン
+
+1. ユーザープロファイル取得：
+
+クライアントが特定のリソースを指定せずにaccess tokenを要求し、`openid` スコープを含む場合、authorization serverはデフォルトで不透明access tokenを発行します。このトークンは主にOIDCの `/oidc/userinfo` エンドポイントからユーザープロファイル情報を取得するために使用されます。authorization serverは不透明access tokenを含むリクエストを受信した際に、内部のストレージを確認し、関連するauthorization情報を取得し、トークンの有効性を検証してからユーザープロファイルの詳細を応答します。
+
+2. Refresh tokenの交換：
+
+Refresh tokenは、リソースプロバイダと共有されることなく、クライアントとauthorization serverの間でのみ交換されることを意図されています。したがって、Refresh tokenは通常不透明トークンとして発行されます。現在のaccess tokenが期限切れになると、クライアントは不透明refresh tokenを使用して新しいaccess tokenを取得し、ユーザーの再認証なしに連続的なアクセスを確保します。
+
+### JWTs
+
+1. IDトークン：
+
+OIDCにおいて、IDトークンはJWTであり、ユーザー情報を含み、ユーザーを認証するために使用されます。通常、access tokenと共に発行され、クライアントがユーザーのアイデンティティを検証することができます。例えば：
+
+```json
+// IDトークンのデコード済みペイロード
+{
+  "iss": "<https://logto.io>",
+  "sub": "1234567890",
+  "aud": "client_id",
+  "exp": 1630368000,
+  "name": "John Doe",
+  "email": "john.doe@mail.com",
+  "picture": "<https://example.com/johndoe.jpg>"
+}
+
+```
+
+クライアントはIDトークンを検証してユーザーのアイデンティティを確保し、個人化やauthorizationの目的でユーザー情報を抽出することができます。IDトークンは一度のみの利用を目的としており、APIリソースのauthorizationには使用されるべきではありません。
+
+2. APIリソースのアクセス (access tokenを使用)：
+
+クライアントが特定のresource indicatorを持つaccess tokenを要求すると、authorization serverはそのリソースを利用するためのJWT access tokenを発行します。JWTには、リソースプロバイダがクライアントのアクセスを許可するために使用できるclaimsが含まれています。例えば：
+
+```json
+// JWT access tokenのデコード済みペイロード
+{
+  "iss": "<https://dev.logto.app>",
+  "sub": "1234567890",
+  "aud": "<https://api.example.com>",
+  "scope": "read write",
+  "exp": 1630368000
+}
+
+```
+
+リソースプロバイダは以下のclaimsをチェックしてリクエストを検証できます：
+
+- `iss`: トークンが信頼できるauthorization serverによって発行されたことを確認します。
+- `sub`: トークンに関連付けられたユーザーを識別します。
+- `aud`: トークンが特定のリソースを対象としていることを確認します。
+- `scope`: ユーザーに付与されている権限を検証します。
+
+<SeeAlso slugs={['jwt']} />

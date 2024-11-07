@@ -1,0 +1,167 @@
+---
+title: JSON Web Token (JWT)
+tags: [oidc, jose]
+description: JSON Web Token (JWT) は、RFC 7519 で定義されたオープンスタンダードであり、2者間の安全な通信を可能にします。コンパクトでURLセーフであり、自己完結型であるため、サービス間で認証 (Authentication) と認可 (Authorization) のデータを伝送するのに理想的です。
+---
+
+## JSON Web Token (JWT) とは何か？
+
+JSON Web Token (JWT) は、現代のウェブアプリケーションや OpenID Connect のようなオープンスタンダードで広く使用され、認証 (Authentication) と認可 (Authorization) を促進します。公式の [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) は重要な参考文献となりますが、初心者にとって理解するのは難しいかもしれません。この記事では、JWT の核心概念に焦点を当て、シンプルな言葉で例を交えて説明します。
+
+## なぜ JWT が必要なのか？
+
+今日では、2者間で JSON を使用してデータを交換することが非常に一般的です。以下はユーザーを表す JSON オブジェクトの例です：
+
+```json
+{
+  "sub": "foo",
+  "name": "John Doe"
+}
+```
+
+> `sub` は "subject" の略で、これは OpenID Connect における [標準クレーム](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims) で、ユーザー識別子（ユーザー ID）を表します。
+
+この JSON オブジェクトの**整合性**をどのように保証できるでしょうか？つまり、伝送中にデータが改ざんされていないことをどのように確信できますか？一般的な解決策はデジタル署名を使用することです。例えば、[公開鍵暗号](https://en.wikipedia.org/wiki/Public-key_cryptography) を使用することができます：サーバーがその秘密鍵を使って JSON オブジェクトに署名し、クライアントはサーバーの公開鍵でその署名を確認できます。
+
+要するに、JWT は JSON オブジェクトとその署名を表現する標準化されたアプローチを提供します。
+
+> JWT は JSON オブジェクトを暗号化するためにも使用できますが、この記事の焦点ではありません。
+
+## JWT の形式
+
+デジタル署名を作成するアルゴリズムは多く存在するため、JWT 署名に使用されたアルゴリズムを指定する必要があります。これは JSON オブジェクトを構築することで成されます：
+
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+> `alg` は "algorithm" の略で、`typ` は "type" の略です。
+
+通常、`typ` は大文字で `JWT` に設定されます。私たちの例では、`alg` は `HS256` で、これは [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC) を意味し（すぐに説明します）、このアルゴリズムを使用して署名を作成しています。
+
+これで、JWT のすべての要素が揃いました：
+
+- ヘッダー JSON：アルゴリズムとタイプ
+- ペイロード JSON：実際のデータ
+- 署名：ヘッダーとペイロードを含む署名
+
+しかし、スペースや改行のような特定の文字はネットワークの伝送には不向きです。したがって、ヘッダーとペイロードは**Base64URL エンコード**される必要があります。典型的な JWT は次のように見えます：
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+> `.` は区切りとして機能します。
+
+すべてをまとめて JWT を作成しましょう：
+
+### ヘッダー
+
+JSON: `{"alg":"HS256","typ":"JWT"}`
+
+Base64URL エンコード: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`
+
+### ペイロード
+
+JSON: `{"sub":"foo","name":"John Doe"}`
+
+Base64URL エンコード: `eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ`
+
+### 署名
+
+HMAC-SHA256 では、署名は秘密で作成されます：
+
+```
+HMAC-SHA256(base64Url(header) + "." + base64Url(payload), secret)
+```
+
+たとえば、秘密が `some-great-secret` であれば、署名は次のようになります：`XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g`。
+
+### JWT
+
+最終的な JWT は：
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.XM-XSs2Lmp76IcTQ7tVdFcZzN4W_WcoKMNANp925Q9g
+```
+
+この有効な JWT は、秘密を持つ任意のパーティによって検証可能です。
+
+## 署名アルゴリズムを選択する
+
+前述のように、デジタル署名を作成するための様々なアルゴリズムがあります。`HS256` を例に使用しましたが、クライアントとサーバー間で共有される必要があるため、十分に強力ではないかもしれません。
+
+実際のシナリオでは、クライアントに React アプリのような公開アプリケーションが含まれることが多く、秘密を安全に保持することができません。そのため、JWT 署名には公開鍵暗号（すなわち非対称暗号）を利用することが好ましいアプローチです。最も人気のあるアルゴリズムである [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem) から始めましょう。
+
+### RSA
+
+RSA は非対称アルゴリズムで、公開鍵と秘密鍵のペアを使用します。公開鍵は署名の検証に使用され、秘密鍵は署名に使用されます。
+
+RSA のヘッダー JSON は次のようになります：
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+```
+
+> `RS256` は RSA-SHA256 を意味し、これは RSA アルゴリズムと SHA256 ハッシュ関数を使用して署名が作成されます。署名には `RS384` および `RS512` を使用して SHA384 および SHA512 ハッシュ関数を使用することもできます。
+
+署名は秘密鍵で作成されます：
+
+```
+RSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+ここでも、これらの部分を組み合わせて JWT を作成できます。最終的な JWT は次のようになります：
+
+```
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+これで、クライアントは秘密鍵を知らずに署名を検証できます。
+
+### ECDSA
+
+RSA は広く採用されていますが、署名サイズが大きくなることがあり、ヘッダーとペイロードの合計サイズを超えることもあります。楕円曲線デジタル署名アルゴリズム (ECDSA) は別の非対称アルゴリズムであり、よりコンパクトでパフォーマンスの高い署名を作成することができます。
+
+ECDSA の秘密鍵を生成するには曲線を選択する必要があります。この記事の範囲外ですが、詳細は [こちら](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Elliptic_Curve_Digital_Signature_Algorithm) で確認できます。
+
+ECDSA のヘッダー JSON は次のようになります：
+
+```json
+{
+  "alg": "ES256",
+  "typ": "JWT"
+}
+```
+
+> `ES256` は ECDSA-SHA256 を意味し、これは ECDSA アルゴリズムと SHA256 ハッシュ関数を使用して署名が作成されます。署名には `ES384` および `ES512` を使用して SHA384 および SHA512 ハッシュ関数を使用することもできます。
+
+署名は秘密鍵で作成されます：
+
+```
+ECDSA-SHA256(base64Url(header) + "." + base64Url(payload), privateKey)
+```
+
+最終的な JWT は RSA と同じ構造を維持しますが、署名が大幅に短くなります：
+
+```
+eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb28iLCJuYW1lIjoiSm9obiBEb2UifQ.{{signature}}
+```
+
+## JWT の検証
+
+JWT の検証は、JWT の作成プロセスの逆で非常にシンプルです：
+
+1. `. ` デリミタを使用して JWT を 3 つの部分（ヘッダー、ペイロード、署名）に分割します。
+2. ヘッダーとペイロードを Base64URL でデコードします。
+3. ヘッダーで指定されたアルゴリズムと公開鍵（非対称アルゴリズム用）を使用して署名を検証します。
+
+Node.js やウェブブラウザ用の [jose](https://github.com/panva/jose) など、多くのライブラリが JWT 検証を支援するために利用可能です。
+
+<SeeAlso slugs={['opaque-token', 'id-token', 'access-token']} />

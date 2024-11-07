@@ -1,0 +1,72 @@
+---
+title: クレーム (Claim)
+tags: [oauth 2.0, oidc]
+description: JSON Web Token (JWT) におけるクレーム (Claim) は、特定の情報を伝える名前と値のペアです。より広い文脈では、クレームは情報を表す名前と値のペアです。
+---
+
+## クレーム (Claim) とは何か？
+
+クレーム (Claim) は、特定の情報を伝える名前と値のペアです。例えば、JSON オブジェクトでは次のようになります：
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+この例では、`sub` は値 `foo` を持つ主体識別子を表すクレームであり、`email` は値 `foo@bar.com` を持つメールアドレスを表すクレームです。
+
+> *ユーザー (user)* の代わりに *主体 (subject)* を使用するのは、明確な定義がない限り、主体 (`sub`) がユーザー、デバイス、または任意のエンティティを表せるからです。
+
+### クレームの用途
+
+クレームはさまざまな文脈で広く使用されています。例えば：
+
+- <Ref slug="jwt" />: JWT では、クレームはトークンに関する情報を表すために使用されます。例えば、issuer (`iss`)、主体 (`sub`)、有効期限 (`exp`) などです。
+- <Ref slug="openid-connect" />: OIDC では、クレームは <Ref slug="id-token" /> や <Ref slug="userinfo-endpoint" /> でユーザー情報を表すために使用されます。例えば、ユーザーのメールアドレス (`email`)、名前 (`name`)、プロフィール画像 (`picture`) などです。
+
+### 標準クレーム
+
+JWT や OIDC では、仕様によって標準クレームが定義されています。一般的な標準クレームには以下が含まれます：
+
+- **`iss`**: トークンの issuer。例えば、トークンを発行する <Ref slug="authorization-server" /> が `https://example.com` の場合、多くの場合 `iss` クレームも同じになります (`https://example.com`)。
+- **`sub`**: トークンの主体。これはトークンに関するエンティティを表します。例えば、ID トークンでは `sub` クレームは通常ユーザー識別子を表します。
+- **`aud`**: トークンの audience。これはトークンが意図されている受信者を示します。例えば、トークンが `https://api.example.com` での API アクセスに意図されている場合、`aud` クレームも同じになります (`https://api.example.com`)。
+- **`exp`**: トークンの有効期限。これはトークンの処理が受け付けられなくなる時点を示します。
+- **`nbf`**: トークンの "not before" 時間。これはトークンの受け付けが開始される時点を示します。
+- **`iat`**: トークンの発行時刻。これはトークンが発行された時点を示します。
+- **`jti`**: トークンの JWT ID。これはトークンの一意識別子を提供します。
+
+OIDC ではユーザー情報のための追加の標準クレームも定義されています。詳細は OIDC 仕様の [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims) を参照してください。
+
+### カスタムクレーム
+
+標準クレームに加えて、アプリケーション固有の情報を表すためにカスタムクレームを定義することができます。例えば、`role` クレームを含めてアプリケーション内のユーザーの役割を表すことができます。
+
+カスタムクレームは、他のクレームとの競合を避けるために [Uniform Resource Identifiers (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) で名前空間を定義することができます。例えば：
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+この例では、`role` クレームは一意性を確保するために `https://example.com/claims/` で名前空間を定義しています。あるいは、カスタムクレームのために独自の [Uniform Resource Name (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) を定義することもできます：
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+この例では、`role` クレームは `urn:example:claims:` で名前空間を定義しています。
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

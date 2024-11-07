@@ -1,0 +1,73 @@
+---
+title: JSON Web Encryption (JWE)
+tags: [oidc, jose]
+description: JSON Web Encryption (JWE) は JSON 形式のデータを暗号化および復号化する標準的な方法です。これは、JSON Web Tokens (JWTs) 内の機密情報を保護するためによく使用されます。
+---
+
+## JSON Web Encryption (JWE) とは？
+
+RFC 7516 で定義されているように、JSON Web Encryption (JWE) は JSON 形式のデータを暗号化および復号化するためのメカニズムです。データに機密性の層を追加し、信頼できないネットワーク上で機密情報を送信する際に特に有用です。
+
+JWE はしばしば <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref> と組み合わせて、ペイロードデータを保護するために使用されます。たとえば、<Ref slug="id-token" /> や <Ref slug="access-token" /> は JWE を使用して暗号化され、データが送信中にセキュリティが確保されるようにすることができます。
+
+## JWE の仕組み
+
+JWE にはコンパクト形式と JSON 形式の 2 つのシリアライゼーションがあります。各形式には暗号化データを表す独自の方法があります。
+
+### コンパクトシリアライゼーション
+
+コンパクトシリアライゼーションでは、JWE はドット (`.`) で区切られた 5 つの Base64URL エンコードされた部分として表されます。5 つの部分は次の通りです：
+
+```
+{{header}}.{{encrypted-key}}.{{iv}}.{{ciphertext}}.{{tag}}
+```
+
+各部分の目的は次の通りです：
+
+- `header`: 暗号化アルゴリズムとキー管理に関するメタデータを含む。
+- `encrypted-key`: ペイロードを暗号化するために使用される暗号化されたコンテンツ暗号鍵 (CEK)。
+- `iv`: 暗号化プロセスで使用される初期化ベクトル。
+- `ciphertext`: 暗号化されたペイロードデータ。
+- `tag`: 暗号化データの整合性を確認するために使用される認証タグ。
+
+### JSON シリアライゼーション
+
+JSON シリアライゼーションはより冗長で、JWE を表現する構造化された方法を提供します。JWE は次のプロパティを持つ JSON オブジェクトとして表されます：
+
+```json
+{
+  "protected": "{{protected-header}}",
+  "unprotected": "{{unprotected-header}}",
+  "header": "{{header}}",
+  "encrypted_key": "{{encrypted-key}}",
+  "iv": "{{iv}}",
+  "ciphertext": "{{ciphertext}}",
+  "tag": "{{tag}}",
+  "aad": "{{additional-authenticated-data}}"
+}
+```
+
+- `protected`: Base64URL エンコードされた保護ヘッダーを含む。
+- `unprotected`: JWE の共有される保護なしヘッダーを含む。
+- `header`: JWE の各受信者用の保護されないヘッダーを含む。
+- `encrypted_key`: Base64URL エンコードされた暗号化されたコンテンツ暗号鍵 (CEK) を含む。
+- `iv`: Base64URL エンコードされた初期化ベクトルを含む。
+- `ciphertext`: Base64URL エンコードされた暗号文 (暗号化されたペイロード) を含む。
+- `tag`: Base64URL エンコードされた認証タグを含む。
+- `aad`: Base64URL エンコードされた追加認証データを含む。
+
+---
+
+クライアントは適切なキーとアルゴリズムを使用して JWE を復号化できる必要があります。事前にコミュニケーションされたキーやキー合意プロトコルから導出されたキーを用いて JWE を復号化することができます。
+
+たとえば、<Ref slug="id-token" /> が JWE を使用して暗号化され、クライアントは OpenID プロバイダーの `jwks_uri` エンドポイントから得られた適切なキーを使用してこれを復号化できます。
+
+<SeeAlso slugs={["jwt", "jwk", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+    "https://datatracker.ietf.org/doc/html/rfc7518",
+  ]}
+/>

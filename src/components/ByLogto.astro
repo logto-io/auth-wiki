@@ -1,10 +1,13 @@
 ---
 import { Icon } from "astro-icon/components";
+import { defaultLocale, getLocale } from "astro-i18n-aut";
+
+const locale = getLocale(Astro.url);
 ---
 
 <a
   class="solid-button"
-  href="https://logto.io/?ref=auth-wiki"
+  href=`https://logto.io/${locale === defaultLocale ? "" : locale}?ref=auth-wiki`
   target="_blank"
   rel="noopener"
   aria-label="Designed by Logto"

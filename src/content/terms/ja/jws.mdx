@@ -1,0 +1,136 @@
+---
+title: JSON Web Signature (JWS)
+tags: [oidc, jose]
+description: JSON Web Signature (JWS) は、JSON 形式のデータを署名および検証するための標準的な方法です。OpenID Connect (OIDC) で JSON Web トークン (JWT) の完全性および信頼性を確保するために利用されます。
+---
+
+## JSON Web Signature (JWS) とは？
+
+JSON Web Signature (JWS) は、JSON 形式のデータを署名および検証するための標準的な方法を定義します。<Ref slug="openid-connect" /> などのモダンなアプリケーションやオープンスタンダードで、送信されたデータの完全性と信頼性を確保するために広く使用されています。
+
+JWS は特に <Ref slug="jwt">JSON Web トークン (JWT)</Ref> と連携する場合に便利です。例えば、<Ref slug="id-token" /> または <Ref slug="access-token" /> は JWS を使用して署名され、受取側はネットワーク要求を送ることなくその信頼性を検証できます。
+
+## JWS はどのように機能するのか？
+
+JWS は暗号アルゴリズムを使用してデータに署名し、署名を生成します。JWS には主に JWS ヘッダーと JWS シリアライズの2つの概念があります。
+
+### JWS ヘッダー
+
+JWS には、署名アルゴリズムとキー管理に関する重要なメタデータが含まれるヘッダーがあります。JWS ヘッダーの一般的な属性には次のようなものがあります：
+
+- `alg` (Algorithm): データ署名に使用された暗号アルゴリズム。
+- `typ` (Type): JWT などのトークンの種類。
+- `kid` (Key ID): データ署名に使用されたキーのユニークな識別子。
+- `jku` (JWK Set URL): <Ref slug="jwk" headingId="json-web-key-set-jwks" /> が配置されている URL。
+
+JWS ヘッダーの属性の詳細については、[JOSE ヘッダー](https://datatracker.ietf.org/doc/html/rfc7515#section-4)を参照してください。
+
+### JWS シリアライズ
+
+JWS にはコンパクト形式と JSON 形式の2つのシリアライズ形式があります。それぞれの形式は署名されたデータを表現する独自の方法を持っています。
+
+#### コンパクトシリアライズ
+
+コンパクトシリアライズでは、JWS はドット (`.`) で区切られた 3 つの Base64URL エンコードされた部分の文字列として表現されます。3 つの部分は以下の通りです：
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+各部分の目的は次のとおりです：
+
+- `header`: Base64URL エンコードされた形式の署名アルゴリズムとキー管理に関するメタデータ。
+- `payload`: Base64URL エンコードされた形式の署名されるデータ。
+- `signature`: ヘッダーとペイロードの暗号署名。
+
+> [!Note]
+> コンパクトシリアライズには無保護ヘッダーは含まれません。
+
+例えば、JWS は次のように見えるかもしれません：
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+Base64URL エンコードされた部分をデコードすると、JWS は次の要素で構成されています：
+
+- ヘッダー: `{"alg":"HS256","typ":"JWT"}`
+- ペイロード: `{"sub":"1234567890","name":"Alice"}`
+- 署名: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+ヘッダーは JWS が HMAC-SHA256 アルゴリズム (`HS256`) を使用して署名されており、トークンの種類は JWT (`typ: "JWT"`) であることを示しています。ペイロードには、被験者 (`sub`) と名前 (`name`) などの基本的なユーザー情報が含まれています。
+
+署名は以下の方法で計算されます：
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  secret
+)
+```
+
+JWS ヘッダーによると、`Hash` 関数に HMAC-SHA256 アルゴリズムが使用され、`secret` はこの場合、共有された秘密鍵 `top-secret` です。
+
+JWT と JWS の連携の詳細な例については、<Ref slug="signing-key" /> 記事を参照してください。
+
+#### JSON シリアライズ
+
+JSON シリアライズは、JWS をより構造化された形で表現する方法を提供します。JWS は次のプロパティを持つ JSON オブジェクトとして表現されます：
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: Base64URL エンコードされたペイロード。署名されるデータ。
+- `signatures`: 保護されたヘッダー、ヘッダー、署名を含む署名オブジェクトの配列。
+
+  各署名オブジェクトには以下が含まれる場合があります：
+
+  - `protected`: Base64URL エンコードされた保護されたヘッダー（コンパクトシリアライズの `header`）。
+  - `header`: JSON 形式の無保護ヘッダー。ヘッダーは署名に含まれません。
+  - `signature`: ヘッダーとペイロードの暗号署名（コンパクトシリアライズの `signature`）。
+
+例えば、JSON シリアライズ形式の JWS は次のように見えるかもしれません：
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+上記の例では、同じペイロードに対して2つの署名（`signatures` 配列）が存在します。各署名オブジェクトには保護されたヘッダー、ヘッダー、および署名が含まれています。
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

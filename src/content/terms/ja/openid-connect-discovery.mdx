@@ -1,0 +1,73 @@
+---
+title: OpenID Connect (OIDC) ディスカバリー (Discovery)
+tags: [oidc]
+description: OpenID Connect (OIDC) ディスカバリーは、クライアントが OpenID プロバイダのエンドポイントと設定を自動的に発見することを可能にするメカニズムです。
+---
+
+## OpenID Connect (OIDC) ディスカバリーとは何ですか？
+
+OpenID Connect (OIDC) ディスカバリーは、[OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) で定義されており、<Ref slug="client">クライアント</Ref>が OpenID プロバイダのエンドポイントと設定を自動的に発見することを可能にするメカニズムです。これは、クライアントと<Ref slug="openid-connect" headingId="openid-provider-op">OpenID プロバイダ</Ref>間の通信を簡素化するための現代的なアプローチです。
+
+OIDC ディスカバリーには2つの主要なコンポーネントがあります：
+
+- OpenID プロバイダ issuer (イシューア) ディスカバリー: クライアントは [WebFinger](https://tools.ietf.org/html/rfc7033) やアウトオブバンド文書を介して issuer (イシューア) の場所（URL）を発見できます。
+- OpenID プロバイダ メタデータ: クライアントはメタデータ文書を取得して、OpenID プロバイダの機能とエンドポイントについて学ぶことができます。
+
+## OIDC ディスカバリーはどのように機能しますか？
+
+### OpenID プロバイダ issuer (イシューア) ディスカバリー
+
+OpenID プロバイダの issuer (イシューア) はクライアントが OpenID プロバイダの設定を発見するために使用できる一意の識別子です（通常その URL と同じです）。ただし、クライアントはメタデータ文書を取得する前に issuer (イシューア) の場所を知っている必要があります。
+
+もし issuer (イシューア) の場所が既にわかっている場合、クライアントは次のステップに進むことができます。それ以外の場合、クライアントは WebFinger を使用して issuer (イシューア) の場所を発見できます。OIDC issuer (イシューア) ディスカバリーに必要な情報は次のとおりです：
+
+- `host`: WebFinger サービスがホストされている場所。
+- `resource`: OpenID プロバイダのメールアドレスまたは URL。
+- `rel`: 関係タイプで、`http://openid.net/specs/connect/1.0/issuer` に設定する必要があります。
+
+例えば、メールアドレスが `foo@bar.com` のユーザーが `example.com` 上の issuer (イシューア) の場所を発見しようとしている場合、WebFinger リクエストは次のようになります：
+
+```http
+GET /.well-known/webfinger?resource=acct%3Afoo%40bar.com&
+  rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: example.com
+```
+
+デコードされた `resource` パラメータは `acct:foo@bar.com` で、`rel` パラメータは `http://openid.net/specs/connect/1.0/issuer` です。
+
+### OpenID プロバイダ メタデータ
+
+クライアントが issuer (イシューア) の場所を知っていると、well-known エンドポイントからメタデータ文書を取得できます。メタデータ文書へのパスは、issuer (イシューア) の URL に相対的な `/.well-known/openid-configuration` です。
+
+例えば、issuer (イシューア) の URL が `https://oidc.example.com` の場合、クライアントは `https://oidc.example.com/.well-known/openid-configuration` からメタデータ文書を取得できます。以下はメタデータ応答の非規範的な例です：
+
+```json
+{
+  "issuer": "https://oidc.example.com",
+  "authorization_endpoint": "https://oidc.example.com/authorize",
+  "token_endpoint": "https://oidc.example.com/token",
+  //...
+}
+```
+
+メタデータ文書には OpenID プロバイダに関する多くの有用な情報が含まれています。いくつかの主要なフィールドを挙げてみましょう：
+
+- `issuer`: OpenID プロバイダの一意の識別子で、トークンを検証するために使用されるべきです。
+- `authorization_endpoint`: <Ref slug="authentication-request" /> を開始するための URL。
+- `token_endpoint`: <Ref slug="token-request" /> を送信するための URL。
+- `jwks_uri`: <Ref slug="signing-key" /> 検証のための <Ref slug="jwk" headingId="json-web-key-set-jwks" /> を取得するための URL。
+- `response_types_supported`: <Ref slug="authentication-request" /> のサポートされている応答タイプ。
+- `scopes_supported`: <Ref slug="authentication-request" /> のサポートされている <Ref slug="scope">スコープ</Ref>。
+- `claims_supported`: <Ref slug="id-token" /> のサポートされている <Ref slug="claim">クレーム</Ref>。
+- `token_endpoint_auth_methods_supported`: <Ref slug="token-request" /> のサポートされているクライアント認証方法。
+
+メタデータフィールドの完全なリストについては、[OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) 仕様を参照してください。
+
+<SeeAlso slugs={["openid-connect", "authentication-request", "jwt", "token-request"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/exploring-oidc-configuration',
+    'https://openid.net/specs/openid-connect-discovery-1_0.html',
+  ]}
+/>

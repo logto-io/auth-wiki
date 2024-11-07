@@ -1,0 +1,120 @@
+---
+title: リソースインジケーター (Resource indicator)
+tags: [oauth 2.0]
+description: OAuth 2.0 におけるリソースインジケーター(Resource indicator)は、RFC 8707 で定義された拡張パラメーターで、クライアントが認可リクエストにおいてリソースサーバーの場所を指定することを可能にします。これは、単一の認可サーバーで複数のリソースサーバーを扱うためのスケーラブルな方法を提供します。
+---
+
+## リソースインジケーター (Resource indicator)とは？
+
+リソースインジケーター(Resource indicator)は、OAuth 2.0 の拡張 [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707) で定義されているパラメーターで、クライアントが<Ref slug="authorization-request" />（または <Ref slug="openid-connect" /> での <Ref slug="authentication-request" />）や<Ref slug="token-request" />内でリソースサーバーの URI を指定することを可能にします。リソースインジケーターは、クライアントがアクセスしたいリソースサーバーの位置を示すために使用されます。
+
+> [!Note]
+> リソースインジケーター(Resource indicator)は、OAuth 2.0 のコア仕様には含まれない拡張パラメーターです。このパラメーターをサポートしているかどうか、利用する<Ref slug="authorization-server" />のドキュメントを確認してください。
+
+## リソースインジケーターはどのように動作するのか？
+
+リソースインジケーターがどのように機能するかをよりよく理解するために、単一の認可サーバーを使用して複数の<Ref slug="resource-server">リソースサーバー</Ref>にアクセスしたいとする<Ref slug="client" />のシナリオを考えてみましょう。
+
+### 1. リソースサーバーの登録
+
+通常、開発者はクライアントに利用可能にするために、各リソースサーバーを認可サーバーに登録する必要があります。実際の登録プロセスは、認可サーバーの実装によって異なる場合があります。機能名は「API リソース」や単に「リソース」など異なるかもしれません。
+
+クライアントが `https://api.example.com` と `https://api.another.com` の2つのリソースサーバーにアクセスしたいと仮定し、それらが認可サーバーに登録されているとします。
+
+### 2. 各リソースサーバーのスコープを定義
+
+従来の OAuth 2.0 フローでは<Ref slug="scope">スコープ</Ref>がすべてのリソースサーバー間で共有されますが、リソースインジケーター拡張を使用すると、クライアントは各リソースサーバーに対するスコープを指定することができます。これもまた登録プロセスの一部であるべきです。以下のスコープを持つリソースサーバーがあると仮定します：
+
+| リソースサーバー           | スコープ      |
+|---------------------------|--------------|
+| `https://api.example.com` | `read`, `write`  |
+| `https://api.another.com` | `read`, `delete` |
+
+### 3. 認可リクエストにリソースインジケーターを含める
+
+リソースインジケーター拡張を使用したいことを認可サーバーに通知するために、クライアントは認可リクエストに `resource` パラメーターを含めるべきです。
+
+リソースインジケーターを含む認可リクエストの非規範的な例を以下に示します：
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com HTTP/1.1
+```
+
+この例では、クライアントは `resource` パラメーターにエンコードされた値 `https%3A%2F%2Fapi.example.com` を含め、リソースサーバーの位置（`https://api.example.com`）を示しています。
+
+また、`openid` などの事前定義されたスコープとともにリソース固有のスコープも含めていることに注意してください。認可サーバーはスコープを検証し、要求されたリソースサーバーに関連付けられていないその他のスコープをフィルタリングする必要があります。これを **downscoping** と呼びます。
+
+クライアントが受け取ることが期待される実際の4つのスコープの表は次のとおりです：
+
+| リソースサーバー           | スコープ                      |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`                       |
+
+リソースインジケーターの利点は、クライアントが `resource` パラメーターを繰り返すことで、単一の認可リクエストで複数のリソースサーバーを要求できることです。もう一つの例を見てみましょう：
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email%20read%20write%20delete
+  &state=abc123
+  &nonce=123456
+  &resource=https%3A%2F%2Fapi.example.com
+  &resource=https%3A%2F%2Fapi.another.com HTTP/1.1
+```
+
+この例では、クライアントはそれぞれのスコープで `https://api.example.com` と `https://api.another.com` の両方へのアクセスを要求しています。認可サーバーは各リソースサーバーに対するスコープを検証し、つまりスコープとリソースサーバーの **直積 (Cartesian product)** を行う必要があります。その結果は次のようになるはずです：
+
+| リソースサーバー           | スコープ                      |
+|---------------------------|------------------------------|
+| N/A                       | `openid`, `profile`, `email` |
+| `https://api.example.com` | `read`, `write`              |
+| `https://api.another.com` | `read`, `delete`             |
+
+この認可リクエストの有効なスコープは合計で7つです。
+
+### 4. トークンリクエストにリソースインジケーターを含める
+
+クライアントが認可コードを受け取ったら、必要に応じて **単一** のリソースインジケーターでアクセストークンと交換することができます。例えば：
+
+```http
+POST /token HTTP/1.1
+Host: your-authorization-server.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+  &code=AUTHORIZATION_CODE
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &client_id=YOUR_CLIENT_ID
+  &client_secret=YOUR_CLIENT_SECRET
+  &resource=https%3A%2F%2Fapi.example.com
+```
+
+トークンリクエストの `resource` パラメーターはオプションです。クライアントがこれを含めた場合、認可サーバーは現在のグラントに関連付けられたスコープに対してリソースインジケーターを検証するべきです。それ以外の場合は、認可サーバーはグローバルスコープにフォールバックする必要があります（例：<Ref slug="openid-connect" /> スコープ）。
+
+> [!Note]
+> 認可サーバーは常に<Ref slug="access-control" />を適用し、発行されたアクセストークンが有効で、現在のグラントコンテキストに基づいて適切にダウンスコープされていることを確認する必要があります。
+
+グラント内で複数のリソースサーバーをどのように扱うか疑問に思うかもしれません。認可コードは1回限りの使用であるため、クライアントは他のリソースサーバーのアクセストークンを取得するために<Ref slug="refresh-token" />グラントなどを使用することができます。
+
+## なぜリソースインジケーターが必要なのか？
+
+前述の例からわかるように、リソースインジケーター拡張は、スコープの競合を心配することなく、複数のリソースサーバーを処理するためのスケーラブルな方法を提供します。これは、クライアントが異なるリソースサーバーからリソースにアクセスするための柔軟性を提供する強力な機能です。
+
+リソースインジケーター拡張は、OAuth 2.0 のコア仕様の一部ではないことに注意してください。アプリケーションで使用する前に、認可サーバーがこの拡張をサポートしていることを確認してください。
+
+<SeeAlso slugs={['resource-server', 'scope', 'access-control', 'resource-owner']} />
+
+<Resources
+  urls={[
+    'https://datatracker.ietf.org/doc/html/rfc8707',
+    'https://docs.logto.io/docs/references/resources/',
+  ]}
+/>

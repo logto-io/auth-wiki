@@ -1,0 +1,44 @@
+---
+title: 認証 (Auth, disambiguation)
+tags: [authentication, authorization]
+description: 「auth」という用語は、認証 (authentication) または認可 (authorization) の略としてよく使用されます。これらの概念は関連していますが、根本的に異なります。
+---
+
+## 認証 (Auth)
+
+このページは、「auth」という用語の曖昧さを解消するためのものです。この用語は以下のような略語としてよく使用されます：
+
+- <Ref slug="authentication" />: アイデンティティの所有を確認するプロセス（例：ユーザーやサービス）。「どのアイデンティティを所有していますか？」という質問に答えます。
+- <Ref slug="authorization" />: アイデンティティがリソース上でどのアクションを実行できるかを決定するプロセス。「何ができますか？」という質問に答えます。
+
+> [!Note]
+> 時には、認証 (authentication) と認可 (authorization) はそれぞれ「AuthN」および「AuthZ」として言及されることがあります。
+
+これら二つの概念は、<Ref slug="iam" /> 領域においてどちらも重要ですが、根本的に異なります。例を見てみましょう：ウェブアプリケーションの MyStorage には、ファイルをアップロードして Google ドライブに接続する機能があります。典型的なユーザーフローは次のようになります：
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MyStorage
+    participant Google
+    autonumber
+
+    User->>MyStorage: MyStorage にサインイン
+    MyStorage->>User: ようこそ、User さん！
+    User->>MyStorage: 「Google ドライブに接続」をクリック
+    MyStorage->>Google: 認可リクエストとともに Google にリダイレクト
+    Google->>User: ユーザーにサインインを促す
+    User->>Google: Google にサインイン
+    Google->>User: Google ドライブへのアクセス許可を求める
+    User->>Google: MyStorage へのアクセスを許可
+    Google->>MyStorage: 認可データ（例：アクセストークン）とともに MyStorage にリダイレクト
+    MyStorage->>Google: アクセストークンを用いてユーザーの Google ドライブにアクセス
+```
+
+このフローでは、ユーザーは二度の認証 (authentication) ステップを行います：MyStorage での認証 (ステップ 1) と、Google での認証 (ステップ 6) です。また、Google ドライブへのアクセスを許可する一度の認可 (authorization) ステップがあります (ステップ8)。
+
+## どれを意味していますか？
+
+「auth」という用語を目にしたとき、それが認証 (authentication) を指しているのか認可 (authorization) を指しているのかを明確にすることが重要です。そうしないと、両方のプロセスがカバーされていると期待してしまうかもしれません（このウェブサイトがそうしているように）。
+
+<SeeAlso slugs={["authentication", "authorization", "iam", "oauth-2.0", "openid-connect"]} />

@@ -1,0 +1,51 @@
+---
+title: オフラインアクセス (Offline access)
+tags: [oauth 2.0, oidc]
+description: オフラインアクセス (Offline access) により、クライアントはユーザーが再認証することなく新しいアクセス トークン (access tokens) を取得できます。これは、長期間のセッションやより良いユーザーエクスペリエンスに役立ちます。
+---
+
+## オフラインアクセス (Offline access) とは?
+
+オフラインアクセス (Offline access) の概念は、文脈によって異なる場合があります。本記事では、OAuth 2.0 と OpenID Connect (OIDC) の仕様に焦点を当てます。この文脈において、オフラインアクセス (Offline access) は、クライアントがユーザーの再認証を必要とせずに<Ref slug="refresh-token">リフレッシュ トークン (refresh tokens)</Ref>を使用して新しい<Ref slug="access-token">アクセス トークン (access tokens)</Ref>を取得できるようにします。この機能は特に、長期間のセッションやより良いユーザーエクスペリエンスに役立ちます。
+
+なお、OAuth 2.0 は「オフラインアクセス (Offline access)」という用語を明示的に定義していません。その代わりに、新しいアクセス トークン (access tokens) を取得するためのリフレッシュ トークン (refresh tokens) の使用を指定しています。しかし、「オフラインアクセス (Offline access)」（`offline_access` スコープと共に）は業界内でこの機能を指す用語として広く採用されており、<Ref slug="openid-connect" /> 仕様で正式に定義されています。
+
+## オフラインアクセス (Offline access) はどのように機能しますか？
+
+簡単のため、OAuth 2.0 の用語である<Ref slug="authorization-request">承認リクエスト (authorization request)</Ref>および<Ref slug="authorization-server">承認サーバー (authorization server)</Ref>を使用して、オフラインアクセス (Offline access) がどのように機能するかを説明します。OIDCにおける代替用語は、それぞれ<Ref slug="authentication-request">認証リクエスト (authentication request)</Ref>および<Ref slug="openid-connect" headingId="openid-provider-op" />です。
+
+オフラインアクセス (Offline access) を活用するためには、主に2つのステップがあります：
+
+1. **オフラインアクセス (Offline access) の要求**: <Ref slug="client">クライアント (client)</Ref>が承認リクエスト (authorization request) を承認サーバー (authorization server) に送信する際、`offline_access` スコープを含めてオフラインアクセス (Offline access) を要求します。このスコープは、クライアントがアクセス トークン (access tokens) と一緒にリフレッシュ トークン (refresh tokens) を取得したいことを示します。
+
+   オフラインアクセス (Offline access) の対応は承認サーバー (authorization server) によって異なり、承認サーバー (authorization server)がそれをサポートしていない場合、`offline_access` スコープを無視することがあります。このスコープの利用前に、承認サーバー (authorization server) のドキュメントを参照して互換性を確認してください。
+
+2. **リフレッシュ トークン (refresh token) の使用**: <Ref slug="oauth-2.0-grant">OAuth 2.0 認可 (oauth 2.0 grant)</Ref>が完了すると、クライアントは<Ref slug="refresh-token">リフレッシュ トークン (refresh tokens)</Ref>と共に<Ref slug="access-token">アクセス トークン (access tokens)</Ref>を受け取る必要があります。クライアントはリフレッシュ トークン (refresh tokens) を安全に保存し、現在のアクセス トークン (access tokens) が期限切れになったときに新しいアクセス トークン (access tokens) を取得するために、<Ref slug="token-request">トークンリクエスト (token request)</Ref>を承認サーバー (authorization server) に送信することができます。
+
+オフラインアクセス (Offline access) の詳細な例については、<Ref slug="refresh-token">リフレッシュ トークン (refresh tokens)</Ref>の記事を参照してください。
+
+## セキュリティに関する考慮事項
+
+オフラインアクセス (Offline access) のセキュリティへの影響は、リフレッシュ トークン (refresh tokens) に似ています。詳細については、リフレッシュ トークン (refresh tokens) の<Ref slug="refresh-token" headingId="security-considerations">セキュリティに関する考慮事項</Ref>のセクションを参照してください。
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "OpenID Connect Core 1.0 におけるオフラインアクセス (Offline access)",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "OAuth 2.0 におけるリフレッシュトークン (Refresh Token)",
+        ogDescription: "リフレッシュ トークン (refresh tokens) はアクセス トークン (access tokens) を取得するために使用される資格情報です。"
+      },
+    },
+  ]}
+/>

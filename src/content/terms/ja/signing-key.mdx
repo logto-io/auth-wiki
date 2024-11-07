@@ -1,0 +1,149 @@
+---
+title: 署名キー (Signing key)
+tags: [oidc]
+description: 署名キーは、OpenID Connect (OIDC) において JSON Web Tokens の署名と検証に使用される暗号化キーです。OpenID プロバイダーによって発行されたトークンの完全性と真正性を保証するために使用されます。
+---
+
+## 署名キー (Signing key) とは？
+
+<Ref slug="openid-connect" /> の文脈において、**署名キー (Signing key)** は通常、非対称鍵ペアであり、<Ref slug="jwt">JSON Web Tokens (JWT)</Ref>の署名と検証に使用されます。OpenID プロバイダーは、トークンの完全性と真正性を保証するために、<Ref slug="id-token">ID トークン</Ref>や<Ref slug="access-token">アクセス トークン</Ref>のようなトークンに署名するために署名キーを使用します。
+
+署名キーの概念はより広範囲ですが、ここでは OIDC においてトークンを保護するための使用方法に焦点を当てます。メール、文書、ソフトウェアパッケージの署名など、同じ原則に基づく他の使用例もあります。
+
+## 例: ID トークンの署名
+
+ユーザーが OpenID プロバイダーで認証 (Authentication request) を行うと、プロバイダーはユーザー情報 (<Ref slug="claim">クレーム (Claim)</Ref>) を含む ID トークンを発行し、プロバイダーの署名キーで署名します。ID トークンは JWT であるため、ヘッダー、ペイロード、署名の3つの部分で構成されています。
+
+### 1. ヘッダー
+
+例えば、ヘッダーは以下のようになります:
+
+```json
+{
+  "alg": "ES384",
+  "typ": "JWT"
+}
+```
+
+この JSON は、ID トークンが [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) アルゴリズムを P-384 曲線で使用して署名されていることを示しています。`typ` フィールドは、トークンの種類が JWT であることを指定します。
+
+### 2. ペイロード
+
+ペイロードには基本的なユーザー情報が含まれます:
+
+```json
+{
+  "sub": "1234567890",
+  "name": "Alice"
+}
+```
+
+`sub` クレームはユーザーのユニークな識別子であり、`name` は表示名です。
+
+### 3. トークンへの署名
+
+JWT フォーマットに従い、ヘッダーとペイロードは Base64URL エンコードされ、署名のために `.` で連結されるべきです:
+
+```
+{{header}}.{{payload}}
+```
+
+この場合、値は次のようになります:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0
+```
+
+OpenID プロバイダーがトークンに署名するために以下の秘密鍵を使用すると仮定します:
+
+```
+-----BEGIN PRIVATE KEY-----
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDBW9PDXInlNT2hjOtQr
+g4pkVkyJsKia33dHrsbOG4Z77pfYN7SYZCHh9YdLXTTKinehZANiAAQX/FB1s6Gj
+YnDSGCY08PRUAQ8CCRCt8Ph/VDHfLj1xSbrjp8wFf0NjH7jcfNebpV1fvu4XKbP3
+Ro7h0G6elN1TMsVECJPv4ieDNkYOsgT4UboJypC5E/rmvrlJTMM6Y/k=
+-----END PRIVATE KEY-----
+```
+
+OpenID プロバイダーは、次のように秘密鍵を使用して署名を生成する必要があります:
+
+```
+signature = sign(header + '.' + payload, private_key)
+```
+
+その後、Base64URL エンコードされた署名は以下のようになります:
+
+```
+Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+### 4. JWT の組み立て
+
+最後に、OpenID プロバイダーはヘッダー、ペイロード、署名を `.` で連結して JWT を組み立てます:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+この場合、ID トークンは次のようになります:
+
+```
+eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+ID トークンは <Ref slug="client" /> に送られ、さらに処理される準備が整いました。
+
+### 5. トークンの検証
+
+クライアントが ID トークンを受け取った場合、それは OpenID プロバイダーの公開鍵を使用して署名を検証できます。通常、公開鍵は <Ref slug="openid-connect-discovery" /> エンドポイント (`jwks_uri`) を通じて、<Ref slug="jwk" headingId="json-web-key-set-jwks" /> の形式で利用可能にされます。
+
+この例では、公開鍵は次の通りです:
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx-43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+対応する JWK 値は以下の通りです:
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+これで、クライアントは公開鍵を使用して署名を検証できます。
+
+## 適切なアルゴリズムの選択
+
+JWT の署名にはさまざまなアルゴリズムがあります:
+
+- **対称アルゴリズム**: HMAC と SHA 系列 (例: HS256, HS384, HS512) は、署名と検証で同じ鍵を使用する対称アルゴリズムです。秘密鍵を関係者間で共有する必要があるため、多くのケースで推奨されません。
+- **非対称アルゴリズム**: RSA (例: RS256, RS384, RS512) と ECDSA (例: ES256, ES384, ES512) は、署名に秘密鍵、検証に公開鍵を使用する非対称アルゴリズムです。
+  - RSA は広く使用され、多くのライブラリやプラットフォームでサポートされています。しかし、ECDSA と比較してキーサイズと署名サイズが非常に大きくなります。
+  - ECDSA はよりパフォーマンスが良く、署名が小さいため、制約のある環境では優れた選択肢といえます。普及度が低いため、プラットフォームでサポートされていることを確認してください。
+
+> ECDSA は、パフォーマンスとセキュリティ上の利点から、新しいアプリケーションの推奨選択肢です。
+
+## その他の署名キーのシナリオ
+
+上記の例では OIDC における ID トークンに焦点を当てましたが、署名キーの概念はメール、文書、ソフトウェアパッケージの署名など、さまざまなシナリオで広く使用されています。キーの基本原則は同じです:
+
+- 対称キーの場合、署名と検証に同じキーが使用されます。関係者間で安全にキーを共有できるシナリオ、または署名と検証の両方を単一のエンティティが担当するシナリオに適しています。
+- 非対称キーの場合、署名には秘密鍵が使用され、対応する公開鍵が検証に使用されます。署名と検証の当事者が異なるエンティティであるほとんどのシナリオに適しています。
+
+<SeeAlso slugs={["jwt", "jws", "jwk", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/introduction-to-ec-and-rsa-signing-algorithms-in-jwt",
+    "https://tools.ietf.org/html/rfc7515",
+    "https://tools.ietf.org/html/rfc7517",
+  ]}
+/>
