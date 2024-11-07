@@ -64,10 +64,11 @@ const results = await Promise.all(
     }
 
     cache.set(url, { url, result });
-    void fs.writeFile(cachePath, JSON.stringify(Array.from(cache.entries())));
     return { url, result };
   }),
 );
+
+void fs.writeFile(cachePath, JSON.stringify([...cache.entries()]));
 
 const locale = getLocale(Astro.url);
 const phrases = getPhrases(locale);
