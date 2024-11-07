@@ -8,7 +8,7 @@ import fs from "node:fs/promises";
 type UrlMetadata = {
   url: string;
   result: {
-    ogTitle: string;
+    ogTitle?: string;
     ogDescription?: string;
   };
 };
@@ -27,12 +27,12 @@ if (urls.length === 0) {
 }
 
 const cachePath = ".og-cache.json";
-const getCacheFromFile = async () => {
+const getCacheFromFile = async (): Promise<Map<string, UrlMetadata>> => {
   try {
     const data = await fs.readFile(cachePath, "utf-8");
     return new Map(JSON.parse(data));
   } catch {
-    return new Map<string, UrlMetadata>();
+    return new Map();
   }
 };
 const cache = await getCacheFromFile();
@@ -47,8 +47,9 @@ const results = await Promise.all(
       return { url, result: { ogTitle: url } };
     }
 
-    if (cache.has(url)) {
-      return cache.get(url);
+    const cached = cache.get(url);
+    if (cached) {
+      return cached;
     }
 
     const { result, error } = await ogs({ url });
@@ -77,7 +78,7 @@ const phrases = getPhrases(locale);
   {
     results.map(({ url, result }) => (
       <a href={url} class="resource" target="_blank" rel="noopener">
-        <h3>{result.ogTitle}</h3>
+        <h3>{result.ogTitle ?? url}</h3>
         {result.ogDescription && <p>{result.ogDescription}</p>}
       </a>
     ))
