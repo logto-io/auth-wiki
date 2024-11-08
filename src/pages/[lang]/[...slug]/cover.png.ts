@@ -25,7 +25,7 @@ export async function getStaticPaths() {
     terms,
     async ({ slug, data }) => {
       const [locale, ...rest] = slug.split("/");
-      const buffer = await buildCover(browser, data.title);
+      const buffer = await buildCover(browser, data.title, locale ?? defaultLocale);
       const isDefaultLocale = locale === defaultLocale;
 
       console.log(

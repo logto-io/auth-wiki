@@ -1,14 +1,27 @@
 import type { Browser } from "playwright";
 import logoDark from "../../public/logo-dark.svg?raw";
 
-export const buildCover = async (browser: Browser, title: string) => {
+/** Locales that require a specific font. The value is the font suffix for Noto Sans. */
+const localeFonts: Readonly<Record<string, string>> = Object.freeze({
+  ar: 'Arabic',
+  ko: 'KR',
+  zh: 'SC',
+  'zh-hant': 'TC',
+})
+
+export const buildCover = async (browser: Browser, title: string, locale: string) => {
   const page = await browser.newPage();
+  const fontWeight = 600;
+  const additionalFont = localeFonts[locale] ? `&family=Noto+Sans+${localeFonts[locale]}:wght@${fontWeight}` : '';
 
   await page.setContent(`
     <!DOCTYPE html>
-    <html>
+    <html lang="${locale}" dir="${locale === "ar" ? "rtl" : "ltr"}">
       <head>
         <meta charset="utf-8" />
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@${fontWeight}${additionalFont}&display=swap');
+        </style>
       </head>
       <body>
         <div class="cover" id="cover">
@@ -19,18 +32,10 @@ export const buildCover = async (browser: Browser, title: string) => {
         <style>
           :root {
             font-family:
-              "system-ui",
+              "Noto Sans",
+              ${localeFonts[locale] ? `"Noto Sans ${localeFonts[locale]}",` : ''}
               -apple-system,
-              "Segoe UI",
-              Roboto,
-              Oxygen,
-              Ubuntu,
-              Cantarell,
-              "Fira Sans",
-              "Droid Sans",
-              "Helvetica Neue",
-              sans-serif,
-              "System Default";
+              sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: auto;
           }
@@ -40,25 +45,25 @@ export const buildCover = async (browser: Browser, title: string) => {
           .cover {
             position: relative;
             width: 1024px;
-            height: 768px;
+            height: 576px;
             background-color: #040407;
             display: flex;
             flex-direction: column;
-            padding: 64px;
+            padding: 72px;
             justify-content: center;
             align-items: start;
-            gap: 32px;
+            gap: 24px;
           }
           .cover svg {
-            height: 64px;
+            height: 52px;
           }
           .cover h1 {
             color: #fff;
-            font-size: 72px;
-            font-weight: 700;
+            font-size: 64px;
+            font-weight: ${fontWeight};
             margin-block: 0;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
           }
@@ -82,6 +87,7 @@ export const buildCover = async (browser: Browser, title: string) => {
       </body>
     </html>
   `);
+  await page.evaluate(() => document.fonts.ready);
   
   const buffer = await page.locator("#cover").screenshot();
   await page.close();
