@@ -47,7 +47,7 @@ export default defineConfig({
     i18n({
       locales,
       defaultLocale,
-      exclude: ['pages/*.ts']
+      exclude: ['pages/**/*.ts']
     }),
     mdx(),
     sitemap({

@@ -3,10 +3,12 @@ import { AstroSeo } from "@astrolib/seo";
 import { defaultLocale, locales } from "astro-i18n-aut";
 import { getPhrases } from "../phrases";
 import { getLocaleFromUrl, getLocaleUrl } from "../utils/locale";
+import { trimEnd } from "../utils/string";
 
 type Props = {
   title?: string;
   description?: string;
+  coverUrl?: string;
 };
 
 const { props } = Astro;
@@ -17,12 +19,8 @@ const title = props.title ? `${props.title} · Auth Wiki` : "Auth Wiki";
 const description = props.description ?? phrases.site.description;
 // Needs to remove the file extension from the URL since Astro will add it in production when
 // build format is set to "file".
-const canonical = new URL(
-  Astro.url.pathname.endsWith(".html")
-    ? Astro.url.pathname.slice(0, -5)
-    : Astro.url.pathname,
-  Astro.site,
-).href;
+const canonical = new URL(trimEnd(Astro.url.pathname, ".html"), Astro.site)
+  .href;
 ---
 
 <!doctype html>
@@ -38,6 +36,9 @@ const canonical = new URL(
         description,
         url: canonical,
         site_name: "Auth Wiki",
+        ...(props.coverUrl && {
+          images: [{ url: props.coverUrl, alt: title }],
+        }),
       }}
       languageAlternates={[
         ...Object.keys(locales).map((lang) => ({

@@ -1,4 +1,5 @@
 ---
+import path from "node:path";
 import Layout from "../layouts/Layout.astro";
 import Tags from "../components/Tags.astro";
 import Topbar from "../components/Topbar.astro";
@@ -17,6 +18,7 @@ import { getEntry } from "astro:content";
 import { defaultLocale } from "astro-i18n-aut";
 import { getPhrases } from "../phrases";
 import { getLocaleFromUrl } from "../utils/locale";
+import { trimEnd } from "../utils/string";
 
 export async function getStaticPaths() {
   // Only the default locale is needed for generating paths. Other locales will be handled by
@@ -49,6 +51,10 @@ if (!entry) {
   return Astro.redirect("/404");
 }
 
+const coverUrl = new URL(
+  path.join(trimEnd(Astro.url.pathname, ".html"), "cover.png"),
+  Astro.url,
+).href;
 const { title, description, tags } = entry.data;
 const { headings, Content } = await entry.render();
 
@@ -59,7 +65,7 @@ if (headings.some(({ depth }) => depth === 1)) {
 const phrases = getPhrases(locale);
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} coverUrl={coverUrl}>
   <Topbar />
   <FancyHr />
   <main>
