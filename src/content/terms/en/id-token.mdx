@@ -6,9 +6,9 @@ description: An ID token is a JSON Web Token (JWT) issued by an authorization se
 
 ## What is ID token?
 
-An ID token is a specific type of security token that contains information about the authenticated user, delivered to the client application after a successful authentication. ID token is the key feature that distinguishes OpenID Connect (OIDC) from OAuth 2.0. While OAuth 2.0 focuses solely on authorization, OIDC builds on top of it to add user authentication by introducing the ID token.
+An ID token is a specific type of security token that contains information about the authenticated user, delivered to the client application after a successful <Ref slug="authentication" />. ID token is the key feature that distinguishes <Ref slug="openid-connect" /> from <Ref slug="oauth-2.0" />. While OAuth 2.0 focuses solely on authorization, OIDC builds on top of it to add user authentication by introducing the ID token.
 
-In the OIDC authentication process, a client application (relying party) initiates authentication by redirecting the user to an authorization server. After successful authentication, the server responds with an ID token, among other tokens like the access token. The ID token is typically encoded as a JWT (JSON Web Token) and includes key claims such as the user’s identifier (sub), the issuer (iss), audience (aud) and other user specific information.
+In the OIDC authentication process, a client application (relying party) initiates authentication by redirecting the user to an authorization server. After successful authentication, the server responds with an ID token, among other tokens like the <Ref slug="access-token" />. The ID token is typically encoded as a <Ref slug="jwt" /> and includes key claims such as the user’s identifier (sub), the issuer (iss), audience (aud) and other user specific information.
 
 The primary function of the ID token is to verify the user's identity and transmit this information to the client application. This enables the application to authenticate the user without directly handling credentials. As the client only received the ID token after the user has been authenticated by the authorization server, the ID token can be used as a secure way to verify the user's identity.
 
@@ -34,17 +34,17 @@ sequenceDiagram
     Client->>User: Display authenticated user information
 ```
 
-Since OIDC is a popular and standardized protocol, many libraries and frameworks provide built-in support for handling ID tokens. This makes ID tokens easy to integrate into client applications, and widely used in single sign-on (SSO) and federated identity scenarios.
+Since OIDC is a popular and standardized protocol, many libraries and frameworks provide built-in support for handling ID tokens. This makes ID tokens easy to integrate into client applications, and widely used in <Ref slug="single-sign-on" /> and federated identity scenarios.
 
 ## Claims in an ID token
 
-An ID token is a JWT (JSON Web Token) that contains a set of claims about the authenticated user. These claims include both standard JWT claims that are defined in the [JWT specification](https://datatracker.ietf.org/doc/html/rfc7519#section-4), as well as OIDC specific claims that are used to convey user identity information.
+An ID token is a JWT that contains a set of <Ref slug="claim" /> about the authenticated user. These claims include both standard JWT claims that are defined in the [JWT specification](https://datatracker.ietf.org/doc/html/rfc7519#section-4), as well as OIDC specific claims that are used to convey user identity information.
 
 JWT standard token claims:
 
 - **iss (Issuer)**: REQUIRED. The issuer claim identifies the issuer of the ID token. This is typically the URL of the authorization server that issued the token.
 - **sub (Subject)**: REQUIRED. The subject claim identifies the user that the ID token is about. This is typically a unique identifier for the user.
-- **aud (Audience)**: REQUIRED. The audience claim identifies the audience for the ID token. This is typically the client application that requested the token.
+- **aud (Audience)**: REQUIRED. The audience claim identifies the <Ref slug="audience" /> for the ID token. This is typically the client application that requested the token.
 - **exp (Expiration time)**: REQUIRED. The expiration time claim identifies the time at which the token expires. After this time, the token should not be accepted for processing.
 - **iat (Issued at)**: REQUIRED. The issued at claim identifies the time at which the token was issued.
 - **auth_time (Authentication time)**: OPTIONAL. The authentication time claim identifies the time when the user was authenticated. This claim is only present if the user was authenticated during the current session.
@@ -91,7 +91,7 @@ While both ID tokens and access tokens are widely used in OIDC, they serve diffe
 |              | ID token                                                                               | Access token                                                                                                                 |
 | ------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **Purpose**  | Verifies the user's identity and transmits user information to the client application. | Provides access to protected resources on behalf of the user.                                                                |
-| **Format**   | Typically a JWT that contains user identity claims.                                    | Can either be a JWT or an opaque token (random string).                                                                      |
+| **Format**   | Typically a JWT that contains user identity claims.                                    | Can either be a JWT or an <Ref slug="opaque-token" />.                                                                      |
 | **Audience** | Intended for the client application that requested the token.                          | Intended for the resource server that hosts the protected resources.                                                         |
 | **Lifetime** | Short-lived token that is typically valid for a few minutes. One-time use only.        | Longer-lived token that is valid for a longer period (e.g., hours). Can be reused multiple times within its validity period. |
 | **Contents** | Contains user identity information such as name, email, and other user-specific data.  | Contains information about the user's permissions (scopes) to specific resources.                                            |
@@ -104,6 +104,6 @@ When working with ID tokens in OIDC, it is important to follow best practices to
 2. **Use secure channels**: Ensure that ID tokens are transmitted over secure channels (e.g., HTTPS) to prevent interception and tampering.
 3. **Protect sensitive information**: Since JWTs are typically encoded but not encrypted, which makes the content transparent. Avoid including sensitive information in the ID token payload to prevent exposure of sensitive data in case of token leakage.
 4. **Not for authorization**: ID tokens are meant for user authentication and should not be used for authorization purposes. Use access tokens for authorization to access protected resources.
-5. **Single-use**: ID tokens are generally intended for one-time use. Once a client application has validated an ID token, it should not be reused for subsequent requests or session state preservation. To maintain user session state, client applications should employ mechanisms like refresh tokens and token exchange requests. (Refresh tokens are long-lived opaque tokens that can be used to obtain new access tokens and ID tokens when they expire.)
+5. **Single-use**: ID tokens are generally intended for one-time use. Once a client application has validated an ID token, it should not be reused for subsequent requests or session state preservation. To maintain user session state, client applications should employ mechanisms like <Ref slug="refresh-token" /> and token exchange requests. (Refresh tokens are long-lived opaque tokens that can be used to obtain new access tokens and ID tokens when they expire.)
 
 <SeeAlso slugs={["openid-connect", "jwt", "signing-key", "access-token"]} />
