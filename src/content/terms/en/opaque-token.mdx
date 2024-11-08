@@ -8,35 +8,35 @@ description: An opaque token is a type of token whose format is determined by th
 
 Before introducing opaque tokens, it’s important to understand what a token is:
 
-Tokens are used to represent and transmit secure information between parties, and they support the vast majority of authentication and authorization processes that occur on the internet behind the scenes. The two most popular types of tokens in web services are [RFC 7519: JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519) and opaque tokens.
+Tokens are used to represent and transmit secure information between parties, and they support the vast majority of <Ref slug="authentication" /> and <Ref slug="authorization" /> processes that occur on the internet behind the scenes. The two most popular types of tokens in web services are <Ref slug="jwt">JSON Web Tokens (JWT)</Ref> and opaque tokens.
 
 ## What is opaque token?
 
-Opaque tokens are tokens in a proprietary format that you cannot access and typically contain some identifier to information in a server's persistent storage.
+Opaque tokens are tokens in a proprietary format that you cannot access and typically contain some identifier to information in a server's persistent storage.
 
-An opaque token is one form a token can take, and access tokens and refresh tokens can exist as opaque tokens. The format of an opaque token is determined by its issuer, and it is typically a string of numbers and/or characters used to help the issuer retrieve and identify certain information in a database. Here is an example of an opaque token:
+An opaque token is one form a token can take, and <Ref slug="access-token">access tokens</Ref> and <Ref slug="refresh-token">refresh tokens</Ref> can exist as opaque tokens. The format of an opaque token is determined by its issuer, and it is typically a string of numbers and/or characters used to help the issuer retrieve and identify certain information in a database. Here is an example of an opaque token:
 
 ```
 M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
 ```
 
-On the other hand, JWT is another common token format. It is a JSON string that contains all the claims and information, along with a signature from the issuer. By default, it is not encrypted, though it can be encrypted using the JSON Web Encryption (JWE) standard. Even though JWT is typically unencrypted, it does not compromise its security — the presence of the signature ensures the integrity of the token’s contents, allowing full trust in the data inside the JWT.
+On the other hand, JWT is another common token format. It is a JSON string that contains all the claims and information, along with a signature from the issuer. By default, it is not encrypted, though it can be encrypted using the <Ref slug="jwe">JSON Web Encryption (JWE)</Ref> standard. Even though JWT is typically unencrypted, it does not compromise its security — the presence of the signature ensures the integrity of the token’s contents, allowing full trust in the data inside the JWT.
 
-Unlike JWT, which contains all the information necessary to be validated directly at the protected resource, opaque tokens cannot be directly validated by the resource. Instead, they require validation by the issuer of the opaque token (usually the authorization server). This validation process is typically referred to as token introspection.
+Unlike JWT, which contains all the information necessary to be validated directly at the protected resource, opaque tokens cannot be directly validated by the resource. Instead, they require validation by the issuer of the opaque token (usually the <Ref slug="authorization-server" />). This validation process is typically referred to as <Ref slug="token-introspection" />.
 
 ## What is JWT?
 
 In contrast to opaque tokens, a JWT is a self-contained, stateless token that carries information in a structured and readable format.
 
-A JWT is composed of three parts: a `header`, a `payload`, and a `signature`, each encoded in Base64URL.
+A JWT is composed of three parts: a `header`, a `payload`, and a `signature`, each encoded in Base64URL.
 
 Here's an example of a JWT:
 
 `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
 
-- The `header` contains information about the type of token and the algorithm used for signing. For example, `{"alg": "HS256", "typ": "JWT"}`.
-- The `payload` section contains claims—pieces of information about the user or the authorization—such as user ID, expiration time, and scopes. Because this data is encoded but not encrypted, anyone who has the token can decode it to see the claims, though they cannot alter it without invalidating the signature. Based on the specification and authorization server configuration, various claims can be included in the payload. This gives the token its self-contained nature. For example, `{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}`.
-- The `signature` is generated by combining the header, payload, and a secret key using the specified algorithm. This signature is used to verify the integrity of the token and ensure that it has not been tampered with.
+- The `header` contains information about the type of token and the algorithm used for signing. For example, `{"alg": "HS256", "typ": "JWT"}`.
+- The `payload` section contains claims—pieces of information about the user or the authorization—such as user ID, expiration time, and scopes. Because this data is encoded but not encrypted, anyone who has the token can decode it to see the claims, though they cannot alter it without invalidating the signature. Based on the specification and authorization server configuration, various claims can be included in the payload. This gives the token its self-contained nature. For example, `{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}`.
+- The `signature` is generated by combining the header, payload, and a secret key using the specified algorithm. This signature is used to verify the integrity of the token and ensure that it has not been tampered with.
 
 JWTs are commonly used because they can be verified locally by the client or any service, without needing to interact with the authorization server. This makes JWTs particularly efficient for distributed systems, where multiple services might need to verify the token's authenticity independently.
 
@@ -49,7 +49,7 @@ A opaque access token is validated by sending it back to the authorization serve
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant AS as Logto Authorization Server
+    participant AS as Authorization Server
     participant RP as Resource Provider
 
     C ->> AS: 1. post /oidc/token
@@ -63,7 +63,7 @@ sequenceDiagram
 1. The client requests an access token from the authorization server.
 2. The authorization server issues an opaque token.
 3. The client sends the resource access request with the opaque token in the header.
-4. The resource provider sends a token introspection ([RFC 7662: OAuth 2.0 Token Introspection](https://datatracker.ietf.org/doc/html/rfc7662)) request to the authorization server to validate the token.
+4. The resource provider sends a token introspection request to the authorization server to validate the token.
 5. The authorization server responds with the token information.
 
 ## JWT access token validation (offline)
@@ -74,7 +74,7 @@ A JWT access token can be validated offline by the client or any service that ha
 
 sequenceDiagram
     participant C as Client
-    participant AS as Logto Authorization Server
+    participant AS as Authorization Server
     participant RP as Resource Provider
 
     RP ->> AS: 0. get /oidc/.well-known/jwks.json
@@ -87,7 +87,7 @@ sequenceDiagram
 
 ```
 
-1. The resource provider pre-fetches the authorization server's public key from the OIDC discovery endpoint. The public key is used to verify the token's signature and ensure its integrity.
+1. The resource provider pre-fetches the authorization server's public key from the <Ref slug="openid-connect-discovery">OIDC discovery endpoint</Ref>. The public key is used to verify the token's signature and ensure its integrity.
 2. The client requests an access token from the authorization server.
 3. The authorization server issues a JWT token.
 4. The client sends the resource access request with the JWT token in the header.
@@ -96,7 +96,7 @@ sequenceDiagram
 
 ## Use cases in OIDC
 
-In the context of OIDC (OpenID Connect), opaque tokens and JWTs serve different purposes and are used in distinct scenarios.
+In the context of OIDC (<Ref slug="openid-connect">OpenID Connect</Ref>), opaque tokens and JWTs serve different purposes and are used in distinct scenarios.
 
 ### Opaque tokens
 
@@ -117,7 +117,7 @@ In OIDC, the ID token is a JWT that contains user information and is used to aut
 ```json
 // Decoded payload of an ID token
 {
-  "iss": "<https://logto.io>",
+  "iss": "<https://auth.wiki>",
   "sub": "1234567890",
   "aud": "client_id",
   "exp": 1630368000,
@@ -132,12 +132,12 @@ The client can validate the ID token to ensure the user's identity and extract u
 
 2. API resource access (using access token):
 
-When a client requests an access token with a specific resource indicator, the authorization server issues a JWT access token intended for accessing that resource. The JWT contains claims that the resource provider can use to authorize the client's access. For example:
+When a client requests an access token with a specific <Ref slug="resource-indicator">resource indicator</Ref>, the authorization server issues a JWT access token intended for accessing that resource. The JWT contains claims that the resource provider can use to authorize the client's access. For example:
 
 ```json
 // Decoded payload of a JWT access token
 {
-  "iss": "<https://dev.logto.app>",
+  "iss": "<https://auth.wiki>",
   "sub": "1234567890",
   "aud": "<https://api.example.com>",
   "scope": "read write",
