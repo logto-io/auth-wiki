@@ -81,6 +81,71 @@ ABAC 策略比傳統的存取控制模型如 <Ref slug="rbac" /> 更為複雜。
 
 你可能會注意到並非在每個策略中都需要所有屬性。這種靈活性允許更具動態性和上下文認知的存取控制機制。
 
+## 可擴展訪問控制標記語言 (XACML)
+
+XACML 是一種基於 XML 的訪問控制策略標準。雖然它並未定義特定的訪問控制模型，但 XACML 常用於實現 ABAC 策略。讓我們來看一個非規範的例子，展示如何使用 XACML 表示前面例子中的 ABAC 策略：
+
+```xml
+<PolicySet PolicySetId="ABAC_Policies" PolicyCombiningAlgId="urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-overrides">
+  <Description>ABAC Policies</Description>
+  <Policy PolicyId="Policy1" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides">
+    <Description>Employees can read data</Description>
+    <Target>
+      <AnyOf>
+        <AllOf>
+          <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">read</AttributeValue>
+            <AttributeDesignator
+              AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id"
+              Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+              DataType="http://www.w3.org/2001/XMLSchema#string"
+              MustBePresent="true"
+            />
+          </Match>
+        </AllOf>
+      </AnyOf>
+    </Target>
+    <Rule RuleId="Rule1" Effect="Permit">
+      <Target>
+        <AnyOf>
+          <AllOf>
+            <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+              <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">employee</AttributeValue>
+              <AttributeDesignator
+                AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                DataType="http://www.w3.org/2001/XMLSchema#string"
+                MustBePresent="true"
+              />
+            </Match>
+          </AllOf>
+        </AnyOf>
+      </Target>
+    </Rule>
+    <Rule RuleId="Rule2" Effect="Deny">
+      <Target>
+        <AnyOf>
+          <AllOf>
+            <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+              <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">user</AttributeValue>
+              <AttributeDesignator
+                AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                DataType="http://www.w3.org/2001/XMLSchema#string"
+                MustBePresent="true"
+              />
+            </Match>
+          </AllOf>
+        </AnyOf>
+      </Target>
+    </Rule>
+  </Policy>
+  <!-- ...other policies... -->
+</PolicySet>
+```
+
+有關 XACML 的更多資訊，請參閱 <Ref slug="xacml" />。
+
 ## 實施考量
 
 雖然 ABAC 提供了一種強大的方式來管理存取控制，但它也伴隨著一些實施考量：

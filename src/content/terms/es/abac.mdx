@@ -81,6 +81,71 @@ Veamos algunos escenarios para entender cómo funciona el ABAC:
 
 Podrás notar que no se requieren todos los atributos en cada política. Esta flexibilidad permite un mecanismo de control de acceso más dinámico y consciente del contexto.
 
+## Lenguaje Extensible de Control de Acceso (XACML)
+
+XACML es un estándar basado en XML para expresar políticas de control de acceso. Aunque no define un modelo específico de control de acceso, XACML se utiliza a menudo para implementar políticas ABAC. Veamos un ejemplo no normativo de cómo se puede usar XACML para representar las políticas ABAC del ejemplo anterior:
+
+```xml
+<PolicySet PolicySetId="ABAC_Policies" PolicyCombiningAlgId="urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-overrides">
+  <Description>ABAC Policies</Description>
+  <Policy PolicyId="Policy1" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides">
+    <Description>Employees can read data</Description>
+    <Target>
+      <AnyOf>
+        <AllOf>
+          <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">read</AttributeValue>
+            <AttributeDesignator
+              AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id"
+              Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+              DataType="http://www.w3.org/2001/XMLSchema#string"
+              MustBePresent="true"
+            />
+          </Match>
+        </AllOf>
+      </AnyOf>
+    </Target>
+    <Rule RuleId="Rule1" Effect="Permit">
+      <Target>
+        <AnyOf>
+          <AllOf>
+            <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+              <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">employee</AttributeValue>
+              <AttributeDesignator
+                AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                DataType="http://www.w3.org/2001/XMLSchema#string"
+                MustBePresent="true"
+              />
+            </Match>
+          </AllOf>
+        </AnyOf>
+      </Target>
+    </Rule>
+    <Rule RuleId="Rule2" Effect="Deny">
+      <Target>
+        <AnyOf>
+          <AllOf>
+            <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+              <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">user</AttributeValue>
+              <AttributeDesignator
+                AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                DataType="http://www.w3.org/2001/XMLSchema#string"
+                MustBePresent="true"
+              />
+            </Match>
+          </AllOf>
+        </AnyOf>
+      </Target>
+    </Rule>
+  </Policy>
+  <!-- ...other policies... -->
+</PolicySet>
+```
+
+Para más información sobre XACML, consulte <Ref slug="xacml" />.
+
 ## Consideraciones de implementación
 
 Si bien el ABAC ofrece una forma poderosa de gestionar el control de acceso, también presenta algunas consideraciones de implementación:

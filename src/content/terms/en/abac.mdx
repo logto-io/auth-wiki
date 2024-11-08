@@ -81,6 +81,54 @@ Let's go through some scenarios to understand how ABAC works:
 
 You may notice that not all attributes are required in every policy. This flexibility allows for a more dynamic and context-aware access control mechanism.
 
+## eXtensible Access Control Markup Language (XACML)
+
+XACML is an XML-based standard for expressing access control policies. While it doesn't define a specific access control model, XACML is often used to implement ABAC policies. Let's see a non-normative example of how XACML can be used to represent the ABAC policies from the previous example:
+
+```xml
+<PolicySet PolicySetId="ABAC_Policies" PolicyCombiningAlgId="urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-overrides">
+  <Policy PolicyId="Policy1" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides">
+    <Target>
+      <Subjects>
+        <Subject>
+          <SubjectMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">manager</AttributeValue>
+            <SubjectAttributeDesignator AttributeId="role" DataType="http://www.w3.org/2001/XMLSchema#string"/>
+          </SubjectMatch>
+        </Subject>
+      </Subjects>
+      <Resources>
+        <Resource>
+          <ResourceMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">high</AttributeValue>
+            <ResourceAttributeDesignator AttributeId="sensitivity-level" DataType="http://www.w3.org/2001/XMLSchema#string"/>
+          </ResourceMatch>
+        </Resource>
+      </Resources>
+      <Environments>
+        <Environment>
+          <EnvironmentMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">internal</AttributeValue>
+            <EnvironmentAttributeDesignator AttributeId="location" DataType="http://www.w3.org/2001/XMLSchema#string"/>
+          </EnvironmentMatch>
+        </Environment>
+        <Environment>
+          <EnvironmentMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:time-in-range">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#time">09:00:00</AttributeValue>
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#time">17:00:00</AttributeValue>
+            <EnvironmentAttributeDesignator AttributeId="time" DataType="http://www.w3.org/2001/XMLSchema#time"/>
+          </EnvironmentMatch>
+        </Environment>
+      </Environments>
+    </Target>
+    <Rule RuleId="Rule1" Effect="Permit"/>
+  </Policy>
+  <!-- Other policies (Policy 2, Policy 3) -->
+</PolicySet>
+```
+
+For more information on XACML, see <Ref slug="xacml" />.
+
 ## Implementation considerations
 
 While ABAC provides a powerful way to manage access control, it also comes with some implementation considerations:
