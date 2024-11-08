@@ -1,7 +1,11 @@
 import { defaultLocale, locales } from "astro-i18n-aut";
 
+const trimExtension = (path: string) => {
+  return path.replace(/\.[^/.]+$/, '');
+}
+
 export function getLocaleFromUrl(url: URL | string) {
-  const [, lang] = new URL(url).pathname.split('/');
+  const [, lang] = trimExtension(new URL(url).pathname).split('/');
   if (lang && lang in locales) {
     return lang;
   }
@@ -28,7 +32,7 @@ const trimTrailSlash = (pathname: string) => {
 export const getLocaleUrl = (url: URL | string, locale: string) => {
   const isInputPathname = typeof url === 'string' && (url.startsWith('/') || !url.includes(':/'));
   const pathname = getPathnameWithoutLocale(
-    isInputPathname ? url : new URL(url).pathname
+    trimExtension(isInputPathname ? url : new URL(url).pathname)
   );
   
   const newPathname = trimTrailSlash(locale === defaultLocale ? pathname : `/${locale}${pathname}`);
