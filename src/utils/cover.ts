@@ -60,6 +60,7 @@ export const buildCover = async (browser: Browser, title: string, locale: string
           .cover h1 {
             color: #fff;
             font-size: 64px;
+            ${locale === "ar" ? "line-height: 1.6;" : ""}
             font-weight: ${fontWeight};
             margin-block: 0;
             display: -webkit-box;

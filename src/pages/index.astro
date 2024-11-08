@@ -9,6 +9,7 @@ import { getPhrases } from "../phrases";
 import { getCollection } from "astro:content";
 import { defaultLocale } from "astro-i18n-aut";
 import { getLocaleFromUrl } from "../utils/locale";
+import cover from "../assets/cover.png";
 
 const locale = getLocaleFromUrl(Astro.url);
 const defaultEntries = await getCollection("terms", (entry) =>
@@ -50,7 +51,7 @@ const sections = entries
 const phrases = getPhrases(locale);
 ---
 
-<Layout>
+<Layout coverUrl={cover.src}>
   <Topbar />
   <main>
     <header>
