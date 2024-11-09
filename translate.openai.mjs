@@ -1,7 +1,13 @@
 import { OpenAI } from 'openai';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import picocolors from 'picocolors';
 
 const model = 'gpt-4o';
+
+/** @type {typeof console.log} */
+export const log = (...args) => {
+  console.log(picocolors.dim(new Date().toLocaleTimeString()), ...args);
+}
 
 /** 
  * Instructions for the translator. 
@@ -30,7 +36,7 @@ export class OpenAiTranslate {
   /** @param {string[]} terms to be added to the instructions. */
   constructor(terms) {
     if (this.httpProxy) {
-      console.log(`Using HTTP proxy: ${this.httpProxy}`);
+      log(`Using HTTP proxy: ${this.httpProxy}`);
     }
 
     if (!Array.isArray(terms)) {
@@ -62,13 +68,14 @@ export class OpenAiTranslate {
           content: content,
         },
       ],
+      temperature: 0.2,
       stream: true,
     });
 
     if (task) {
       task.output = 'Waiting for response...';
     } else {
-      console.log('Waiting for response...');
+      log('Waiting for response...');
     }
 
     // Extract the translated content from the stream.
@@ -81,7 +88,7 @@ export class OpenAiTranslate {
       if (task) {
         task.output = `Receiving response (${++count} chunks)`;
       } else {
-        console.log(`Receiving response (${++count} chunks)`);
+        log(`Receiving response (${++count} chunks)`);
       }
 
       if (choice0?.finish_reason && choice0.finish_reason !== 'stop') {

@@ -1,24 +1,24 @@
 ---
 title: Doelgroep (Audience)
 tags: [oauth 2.0, oidc]
-description: De doelgroepclaim in een token specificeert de bedoelde ontvanger, meestal de client applicatie of API-resource. Het zorgt ervoor dat het token alleen door de juiste service wordt gebruikt, waardoor de beveiliging wordt verbeterd door ongeoorloofde toegang te voorkomen.
+description: De doelgroep (audience) claim in een token specificeert de beoogde ontvanger, meestal de client applicatie of API bron. Het zorgt ervoor dat het token alleen door de juiste dienst wordt gebruikt, waardoor de beveiliging wordt verbeterd door ongeautoriseerde toegang te voorkomen.
 ---
 
-## Wat is de doelgroep (audience)?
+## Wat is doelgroep (audience)?
 
-In de context van authenticatie (authentication) en autorisatie (authorization) is de doelgroep (audience) een sleutelcomponent die de beoogde ontvangers van een autorisatietoken definieert. Verwezen naar als de [aud](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3) claim in <Ref slug="jwt" />, zorgt deze claim ervoor dat het token alleen wordt geaccepteerd door de aangewezen service of applicatie. Meestal bevat de doelgroepclaim hetzij de client_id van de applicatie waarvoor het token bedoeld is of een URL die de API of resource vertegenwoordigt waarvoor het token geautoriseerd is. Door de doelgroep te specificeren, dient het als een beveiligingscontrole om misbruik door ongeautoriseerde services of gebruikers te voorkomen.
+In de context van <Ref slug="authentication" /> en <Ref slug="authorization" /> is doelgroep (audience) een essentieel onderdeel dat de beoogde ontvangers van een authorization token definieert. Verwezen als de [aud](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3) claim in <Ref slug="jwt" />, zorgt deze claim ervoor dat het token alleen wordt geaccepteerd door de aangewezen dienst of applicatie. Meestal bevat de doelgroepclaim ofwel de client_id van de applicatie waarvoor het token bedoeld is, of een URL die de API of bron vertegenwoordigt waartoe het token gemachtigd is toegang te krijgen. Door de doelgroep te specificeren, dient het als een beveiligingscontrole om misbruik door ongeautoriseerde diensten of gebruikers te voorkomen.
 
-## Hoe werkt de doelgroep (audience)?
+## Hoe werkt doelgroep (audience)?
 
-Wanneer een client een toegangstoken aanvraagt van een autorisatieserver (authorization server), wordt de doelgroepclaim opgenomen in het tokenrespons. Deze doelgroepwaarde wordt vervolgens gevalideerd door de resource server wanneer het token wordt gepresenteerd. De resource server controleert of de doelgroepclaim in het token overeenkomt met zijn eigen identificator of de identificator van de service die het beschermt. Als dit niet zo is, zal het token worden afgewezen, waardoor de beveiliging in gedistribueerde systemen wordt verbeterd, vooral in scenario’s met meerdere microservices of APIs. Door de doelgroepclaim te beheersen, kunnen ontwikkelaars ervoor zorgen dat tokens in de juiste context worden gebruikt, waardoor een extra beveiligingslaag wordt toegevoegd aan de authenticatie- en autorisatieworkflows van hun applicatie.
+Wanneer een client een <Ref slug="access-token" /> aanvraagt bij een authorization server, wordt de doelgroepclaim opgenomen in de tokenresponse. Deze doelgroepwaarde wordt vervolgens gevalideerd door de resource server wanneer het token wordt gepresenteerd. De resource server controleert of de doelgroepclaim in het token overeenkomt met zijn eigen identificator of de identificator van de dienst die het beschermt. Als dat niet het geval is, wordt het token afgewezen, waardoor de beveiliging in gedistribueerde systemen wordt verbeterd, met name in scenario's die meerdere microservices of API's omvatten. Door controle over de doelgroepclaim kunnen ontwikkelaars ervoor zorgen dat tokens in de juiste context worden gebruikt, waardoor een extra beveiligingslaag wordt toegevoegd aan de authentication en authorization workflows van hun applicatie.
 
 - **Aanvrager**: De client applicatie specificeert de doelgroepwaarde wanneer een token wordt aangevraagd.
-- **Issuer**: De autorisatieserver (authorization server) voegt de doelgroepclaim toe aan het tokenrespons.
-- **Verifier**: De ontvanger van het token controleert de doelgroepclaim met zijn eigen identificator. Als de doelgroepclaim overeenkomt met de identificator van de ontvanger, wordt het token als geldig beschouwd. Anders wordt het afgewezen.
+- **Uitgever (Issuer)**: De authorization server neemt de doelgroepclaim op in de tokenresponse.
+- **Verificateur**: De ontvanger van het token controleert de doelgroepclaim tegen zijn eigen identificator. Als de doelgroepclaim overeenkomt met de identificator van de ontvanger, wordt het token als geldig beschouwd. Anders wordt het afgewezen.
 
-## Voorbeeld van doelgroep in JWT
+## Voorbeeld van doelgroep (audience) in JWT
 
-### Doelgroepclaim in een OpenID Connect (OIDC) ID-token
+### Doelgroep (audience) claim in een OpenID Connect (OIDC) ID token
 
 ```json
 {
@@ -42,29 +42,29 @@ Wanneer een client een toegangstoken aanvraagt van een autorisatieserver (author
 }
 ```
 
-Een <Ref slug="id-token" /> in OpenID Connect (OIDC) is een beveiligingstoken dat informatie bevat over de geauthenticeerde gebruiker, geleverd aan de client applicatie na een succesvolle authenticatie. In tegenstelling tot toegangstokens, die worden gebruikt om toestemming te geven voor toegang tot resources, zijn ID-tokens specifiek ontworpen om gebruikersidentiteitsinformatie over te brengen naar de relying party (client). Deze tokens worden meestal gecodeerd als JWT's (JSON Web Tokens) en bevatten claims zoals de gebruikersidentificator (sub-claim), de issuer (iss-claim) en de doelgroep (aud-claim), naast anderen.
+Een <Ref slug="id-token" /> in <Ref slug="openid-connect" /> is een security token dat informatie bevat over de geauthenticeerde gebruiker, geleverd aan de client applicatie na een succesvolle authentication. In tegenstelling tot access tokens, die worden gebruikt om toegang tot resources te verlenen, zijn ID tokens specifiek ontworpen om gebruikersidentiteitsinformatie over te dragen aan de relying party (client). Deze tokens worden meestal gecodeerd als JWTs en omvatten claims zoals de gebruikersidentifier (sub claim), de issuer (iss claim) en de doelgroep (aud claim) onder andere.
 
-In dit geval specificeert de `aud`-claim de bedoelde doelgroep voor het ID-token, namelijk de client applicatie. De waarde van de `aud`-claim komt meestal overeen met de `client_id` van de applicatie die het token heeft aangevraagd. Wanneer de client applicatie het ID-token ontvangt, kan het de doelgroepclaim verifiëren om ervoor te zorgen dat het token is uitgegeven voor zijn consumptie. Deze validatiestap helpt misbruik van tokens en ongeoorloofde toegang tot gebruikersinformatie te voorkomen, waardoor de beveiliging van het authenticatieproces wordt verbeterd.
+In dit geval specificeert de `aud` claim de beoogde doelgroep van het ID token, namelijk de client applicatie. De waarde van de `aud` claim komt meestal overeen met de `client_id` van de applicatie die het token heeft aangevraagd. Wanneer de client applicatie het ID token ontvangt, kan het de doelgroepclaim verifiëren om ervoor te zorgen dat het token voor zijn consumptie is uitgegeven. Deze validatiestap helpt tokenmisbruik en ongeautoriseerde toegang tot gebruikersinformatie te voorkomen, waardoor de beveiliging van het authentication proces wordt versterkt.
 
 ```mermaid
 sequenceDiagram
-    participant Gebruiker
+    participant User
     participant Client
-    participant AutorisatieServer
+    participant AuthorizationServer
 
-    Gebruiker->>Client: Toegang tot applicatie
-    Client->>AutorisatieServer: Stuur authorisatieverzoek met client credentials
-    AutorisatieServer->>Gebruiker: Authenticatie prompt
-    Gebruiker->>AutorisatieServer: Verstrekken van credentials
-    AutorisatieServer-->>Client: Verlenen autorisatiecode
-    Client-->>AutorisatieServer: Wissel autorisatiecode uit voor tokens (response_type=token en scope=openid)
-    AutorisatieServer-->>AutorisatieServer: Verifieer autorisatiecode
-    AutorisatieServer->>Client: Uitgeven ID-token met `client_id` als doelgroep
-    Client->> Client: Valideer ID-token `aud`-claim
-    Client->>Gebruiker: Authenticeren gebruiker
+    User->>Client: Toegang tot de applicatie
+    Client->>AuthorizationServer: Stuur authorization request met client credentials
+    AuthorizationServer->>User: Authentication prompt
+    User->>AuthorizationServer: Verstrek inloggegevens
+    AuthorizationServer-->>Client: Verleen authorization code
+    Client-->>AuthorizationServer: Wissel authorization code in voor tokens (response_type=token en scope=openid)
+    AuthorizationServer-->>AuthorizationServer: Controleer authorization code
+    AuthorizationServer->>Client: Geef een ID token uit met `client_id` als doelgroep
+    Client->> Client: Valideer ID token `aud` claim
+    Client->>User: Authenticeer gebruiker
 ```
 
-### Doelgroepclaim in een toegangstoken
+### Doelgroep (audience) claim in een access token
 
 ```json
 {
@@ -86,40 +86,40 @@ sequenceDiagram
 }
 ```
 
-In tegenstelling tot ID-tokens worden toegangstokens gebruikt om toegang te autoriseren tot beveiligde resources, zoals APIs of services. De `aud`-claim in een toegangstoken specificeert de bedoelde ontvanger van het token, wat meestal de API of service is waar het token voor geautoriseerd is. Meestal heeft de resource server die de API host, een ander domein dan de client applicatie die het token heeft aangevraagd. In dit geval bevat de `aud`-claim in plaats van een `client_id` de URL van het API-eindpunt waarvoor het token bedoeld is. Deze URL staat vaak bekend als de resource-indicator of API-identificator die de doelresource uniek identificeert.
+In tegenstelling tot ID tokens worden <Ref slug="access-token" /> gebruikt om toegang tot beveiligde resources te autoriseren, zoals API's of diensten. De `aud` claim in een access token specificeert de beoogde ontvanger van het token, meestal de API of dienst die het token is geautoriseerd om toegang toe te krijgen. Meestal heeft de resource server die de API host een andere domein dan de client applicatie die het token heeft aangevraagd. In dit geval bevat de `aud` claim in plaats van een `client_id` de URL van het API-endpoint waarvoor het token bedoeld is. Deze URL, vaak bekend als de resource indicator of API identifier, identificeert de doelresource uniek.
 
-Wanneer de resource server een toegangstoken ontvangt, valideert het de `aud`-claim om ervoor te zorgen dat het token bedoeld is voor zijn consumptie. Door de doelgroep te controleren, kan de resource server voorkomen dat ongeoorloofde toegang tot zijn resources wordt verkregen en toegangscontrolestrategieën afdwingen op basis van de bedoelde doelgroep van het token. Dit mechanisme helpt gevoelige gegevens te beschermen en ervoor te zorgen dat toegangstokens in de juiste context worden gebruikt, waardoor de algehele beveiliging van het systeem wordt verbeterd.
+Wanneer de resource server een access token ontvangt, valideert hij de `aud` claim om ervoor te zorgen dat het token voor zijn consumptie is bedoeld. Door de doelgroep te controleren kan de resource server ongeautoriseerde toegang tot zijn resources voorkomen en access control beleidslijnen afdwingen op basis van de bedoelde doelgroep van het token. Dit mechanisme helpt gevoelige data te beschermen en zorgt ervoor dat access tokens in de juiste context worden gebruikt, waardoor de beveiliging van het systeem als geheel wordt verbeterd.
 
 ```mermaid
 sequenceDiagram
-    participant Gebruiker
+    participant User
     participant Client
-    participant AutorisatieServer
+    participant AuthorizationServer
     participant ResourceServer
 
-    Gebruiker->>Client: Toegang tot applicatie
-    Client->>AutorisatieServer: Stuur autorisatieverzoek voor toegang tot een API-resource
-    AutorisatieServer->>Gebruiker: Authenticatie prompt
-    Gebruiker->>AutorisatieServer: Verstrekken van credentials
-    AutorisatieServer-->>Client: Verlenen autorisatiecode
-    Client-->>AutorisatieServer: Wissel autorisatiecode uit voor tokens (response_type=token en resource=<API-identificator>)
-    AutorisatieServer-->>AutorisatieServer: Verifieer autorisatiecode
-    AutorisatieServer->>Client: Uitgeven toegangstoken met API-URL als doelgroep
-    Client->>ResourceServer: Toegang tot beveiligde resource met toegangstoken
-    ResourceServer->>ResourceServer: Valideer toegangstoken `aud`-claim
-    ResourceServer->>Client: Verstrekken van aangevraagde resource
+    User->>Client: Toegang tot de applicatie
+    Client->>AuthorizationServer: Stuur authorization request voor toegang tot een API bron
+    AuthorizationServer->>User: Authentication prompt
+    User->>AuthorizationServer: Verstrek inloggegevens
+    AuthorizationServer-->>Client: Verleen authorization code
+    Client-->>AuthorizationServer: Wissel authorization code in voor tokens (response_type=token en resource=<API identifier>)
+    AuthorizationServer-->>AuthorizationServer: Controleer authorization code
+    AuthorizationServer->>Client: Geef een access token uit met API URL als doelgroep
+    Client->>ResourceServer: Toegang tot beveiligde resource met access token
+    ResourceServer->>ResourceServer: Valideer access token `aud` claim
+    ResourceServer->>Client: Verstrek aangevraagde resource
 ```
 
 ## Veelgestelde vragen
 
-### Waarom is de doelgroepclaim belangrijk in tokenvalidatie?
+### Waarom is de doelgroepclaim belangrijk bij tokenvalidatie?
 
-De doelgroepclaim is cruciaal in tokenvalidatie omdat het ervoor zorgt dat het token alleen wordt geaccepteerd door de bedoelde ontvanger. Door de doelgroepclaim te verifiëren, kan de ontvanger misbruik van tokens en ongeoorloofde toegang tot resources voorkomen. Deze beveiligingscontrole is met name belangrijk in gedistribueerde systemen waar meerdere services met elkaar communiceren, omdat het helpt toegangscontrolestrategieën af te dwingen en gevoelige gegevens te beschermen.
+De doelgroepclaim is cruciaal bij tokenvalidatie omdat het ervoor zorgt dat het token alleen door de beoogde ontvanger wordt geaccepteerd. Door de doelgroepclaim te verifiëren, kan de ontvanger tokenmisbruik en ongeautoriseerde toegang tot resources voorkomen. Deze beveiligingscontrole is vooral belangrijk in gedistribueerde systemen waar meerdere diensten met elkaar communiceren, omdat het helpt access control beleidslijnen af te dwingen en gevoelige data te beschermen.
 
 ### Kan een token meerdere doelgroepen hebben?
 
-Om veiligheidsredenen wordt aanbevolen dat een token een enkele doelgroep heeft om dubbelzinnigheid te voorkomen en ervoor te zorgen dat het token in de juiste context wordt gebruikt. Sommige scenario’s vereisen echter tokens met meerdere doelgroepen, zoals wanneer een token bedoeld is voor meerdere services of APIs binnen hetzelfde domein. In dergelijke gevallen moeten ontwikkelaars zorgvuldig de implicaties van het gebruik van multi-doelgroep tokens overwegen en passende beveiligingsmaatregelen implementeren om mogelijke risico's te beperken.
+Om veiligheidsredenen wordt aanbevolen dat een token een enkele doelgroep heeft om ambiguïteit te voorkomen en ervoor te zorgen dat het token in de juiste context wordt gebruikt. Sommige scenario's kunnen echter tokens met meerdere doelgroepen vereisen, bijvoorbeeld wanneer een token is bedoeld voor meerdere diensten of API's binnen hetzelfde domein. In dergelijke gevallen moeten ontwikkelaars zorgvuldig de implicaties van het gebruik van multi-doelgroep-tokens overwegen en passende beveiligingsmaatregelen implementeren om mogelijke risico's te beperken.
 
-### Wat moet ik gebruiken als mijn API-identificator in de doelgroepclaim?
+### Wat moet ik gebruiken als mijn API identifier in de doelgroepclaim?
 
-Bij het specificeren van de doelgroepclaim in een toegangstoken dat een API of service vertegenwoordigt, wordt aanbevolen een absolute URI te gebruiken die de resource uniek identificeert. Deze URI kan de basis-URL zijn van het API-eindpunt of een specifiek resourcepad waartoe het token bevoegd is om toegang te verlenen. Door een URI als de API-identificator te gebruiken, kun je ervoor zorgen dat de doelgroepclaim eenduidig is en de bedoelde ontvanger van het token nauwkeurig vertegenwoordigt.
+Bij het specificeren van de doelgroepclaim in een access token die een API of dienst vertegenwoordigt, wordt aanbevolen om een absolute URI te gebruiken die de bron uniek identificeert. Deze URI kan de basis-URL van het API-endpoint zijn of een specifiek resourcepad waartoe het token gemachtigd is toegang te krijgen. Door een URI te gebruiken als de API identifier, kun je ervoor zorgen dat de doelgroepclaim ondubbelzinnig is en accuraat de beoogde ontvanger van het token vertegenwoordigt.

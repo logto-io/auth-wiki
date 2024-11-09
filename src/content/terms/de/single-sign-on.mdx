@@ -1,30 +1,30 @@
 ---
-title: Single sign-on (SSO)
+title: Single Sign-on (SSO)
 tags: [authentication]
-description: Single sign-on (SSO) ist eine Authentifizierungsmethode, die es Benutzern ermöglicht, mit einem einzigen Satz von Anmeldedaten auf mehrere Systeme zuzugreifen. Als Schlüsselkomponente von Identitäts- und Zugriffsverwaltungssystemen (IAM) wird SSO häufig in modernen Cloud-basierten Anwendungen und Diensten eingesetzt, um den Benutzerzugriff zu vereinfachen und die Sicherheit zu erhöhen.
+description: Single Sign-on (SSO) ist eine Authentifizierungsmethode, die es Benutzern ermöglicht, mit einem einzigen Satz von Anmeldedaten auf mehrere Systeme zuzugreifen. Als ein Schlüsselelement von Identity and Access Management (IAM) Systemen wird SSO in modernen cloud-basierten Anwendungen und Diensten häufig verwendet, um den Benutzerzugang zu vereinfachen und die Sicherheit zu erhöhen.
 ---
 
-## Was ist Single sign-on (SSO)?
+## Was ist Single Sign-on (SSO)?
 
-Single sign-on (SSO) ist eine Authentifizierungsmethode, die es Benutzern ermöglicht, mit einem einzigen Satz von Anmeldedaten auf mehrere Anwendungen oder Dienste zuzugreifen. Anstatt separate Logins für jedes System zu verwalten, authentifizieren sich Benutzer einmal und werden automatisch bei allen verbundenen Plattformen angemeldet.
+Single Sign-on (SSO) ist eine <Ref slug="authentication" /> Methode, die es Benutzern ermöglicht, mit einem einzigen Satz von Anmeldedaten auf mehrere Anwendungen oder Dienste zuzugreifen. Anstatt separate Logins für jedes System zu verwalten, authentifizieren sich Benutzer einmal und werden automatisch in alle verbundenen Plattformen eingeloggt.
 
-SSO wird häufig sowohl in privaten als auch in geschäftlichen Umgebungen eingesetzt, insbesondere in Unternehmensumgebungen, in denen Mitarbeiter oder Remote-Arbeiter auf verschiedene SaaS-Anwendungen angewiesen sind, um ihre Arbeit zu erledigen. Durch die Implementierung von SSO können Organisationen die Sicherheit erhöhen, das Zugriffsmanagement optimieren und die Produktivität der Benutzer steigern.
+SSO wird häufig sowohl in privaten als auch geschäftlichen Umgebungen eingesetzt, insbesondere in Unternehmensumgebungen, in denen Mitarbeiter oder Fernarbeiter auf verschiedene SaaS-Anwendungen angewiesen sind, um ihre Arbeit zu erledigen. Durch die Implementierung von SSO können Organisationen die Sicherheit erhöhen, das Zugriffsmanagement optimieren und die Produktivität der Benutzer steigern.
 
-Ein bekanntes Beispiel für SSO ist die Dienstesuite von Google, wie Gmail, Google Drive und Google Calendar. Nachdem sie sich in ihrem Google-Konto angemeldet haben, können Benutzer einfach auf all diese Dienste zugreifen, ohne ihre Anmeldedaten erneut eingeben zu müssen.
+Ein bekanntes Beispiel für SSO ist die Google-Dienstesuite, wie Gmail, Google Drive und Google Kalender. Nach der Anmeldung in ihrem Google-Konto können Benutzer leicht auf all diese Dienste zugreifen, ohne ihre Anmeldedaten erneut eingeben zu müssen.
 
-## Wie funktioniert Single sign-on?
+## Wie funktioniert Single Sign-on?
 
-SSO basiert auf einer Vertrauensbeziehung zwischen einer Anwendung oder einem Dienst, bekannt als <Ref slug="service-provider" />, und einem <Ref slug="identity-provider" />. Der IdP übernimmt die Benutzer-Authentifizierung und teilt die erforderlichen Informationen sicher mit dem SP, um den Zugriff zu gewähren. Dieses Vertrauen wird durch einen Prozess namens Föderation hergestellt, bei dem sowohl der SP als auch der IdP sich auf spezifische Standards und Protokolle einigen, um Authentifizierungsdaten sicher auszutauschen.
+SSO basiert auf einer Vertrauensbeziehung zwischen einer Anwendung oder einem Dienst, bekannt als <Ref slug="service-provider" />, und einem <Ref slug="identity-provider" />. Der IdP übernimmt die Benutzerauthentifizierung und teilt dem SP die erforderlichen Informationen sicher mit, um den Zugriff zu gewähren. Dieses Vertrauen wird durch einen Prozess namens Federation hergestellt, bei dem sowohl der SP als auch der IdP sich auf bestimmte Standards und Protokolle einigen, um Authentifizierungsdaten sicher auszutauschen.
 
-Wenn ein Benutzer versucht, auf eine SSO-fähige Anwendung zuzugreifen, leitet der SP ihn zur Authentifizierung an den IdP weiter. Der IdP fordert den Benutzer auf, seine Anmeldedaten einzugeben, überprüft seine Identität und generiert ein Sicherheitstoken oder eine Assertion, die die Informationen des Benutzers enthält. Dieses Token wird zurück an den SP gesendet, der es dann verwendet, um Zugriff zu gewähren.
+Wenn ein Benutzer versucht, auf eine SSO-fähige Anwendung zuzugreifen, leitet der SP ihn zur Authentifizierung an den IdP weiter. Der IdP fordert den Benutzer zur Eingabe seiner Anmeldedaten auf, verifiziert seine Identität und erzeugt ein Sicherheitstoken oder eine Assertion, die die Benutzerinformationen enthält. Dieses Token wird an den SP zurückgesendet, der es dann verwendet, um den Zugriff zu gewähren.
 
-Wenn der Benutzer versucht, auf eine weitere SSO-fähige Anwendung zuzugreifen, wird der Prozess automatisch wiederholt, ohne dass er sich erneut anmelden muss. Der IdP sendet die erforderlichen Authentifizierungsdaten direkt an den SP, wodurch der Benutzer nahtlos auf die neue Anwendung zugreifen kann.
+Versucht der Benutzer, auf eine andere SSO-fähige Anwendung zuzugreifen, wird der Prozess automatisch wiederholt, ohne dass er sich erneut anmelden muss. Der IdP sendet die erforderlichen Authentifizierungsdaten direkt an den SP, wodurch der Benutzer nahtlos auf die neue Anwendung zugreifen kann.
 
-SAML (Security Assertion Markup Language) und OIDC (OpenID Connect) sind zwei weit verbreitete Protokolle zur Implementierung von SSO. Diese Standards definieren, wie Authentifizierungsdaten zwischen dem IsP und dem SP ausgetauscht werden, um eine sichere und zuverlässige Kommunikation zu gewährleisten.
+<Ref slug="saml" /> und <Ref slug="openid-connect" /> sind zwei weit verbreitete Protokolle zur Implementierung von SSO. Diese Standards definieren, wie Authentifizierungsdaten zwischen dem IsP und dem SP ausgetauscht werden, um eine sichere und zuverlässige Kommunikation zu gewährleisten.
 
 ### SAML-basiertes SSO
 
-Beim SAML-basierten SSO, sobald der Benutzer vom IdP authentifiziert wird, wird eine XML-basierte SAML-Assertion generiert, signiert und sicher an den SP gesendet. Der SP validiert dann die Assertion und gewährt Zugriff basierend auf der Identität des Benutzers.
+Im SAML-basierten SSO wird, nachdem der Benutzer vom IdP authentifiziert wurde, eine XML-basierte SAML-Assertion erzeugt, signiert und sicher an den SP gesendet. Der SP validiert dann die Assertion und gewährt basierend auf der Identität des Benutzers den Zugriff.
 
 ```mermaid
 sequenceDiagram
@@ -34,22 +34,22 @@ sequenceDiagram
     participant SP-B
 
     User->>SP-A: Greife auf Anwendung A zu
-    SP-A->>IdP: Leite zum IdP um
-    IdP->>User: Anfrage nach Anmeldedaten
-    User->>IdP: Bereitstellung der Anmeldedaten
-    IdP->>SP-A: Sende SAML-Assertion
-    SP-A-->>SP-A: Validierung der Assertion
-    SP-A->>User: Gewähre Zugriff auf Anwendung A und zeige Benutzerdaten an
+    SP-A->>IdP: Weiterleitung zum IdP
+    IdP->>User: Aufforderung zur Eingabe von Anmeldedaten
+    User->>IdP: Anmeldedaten bereitstellen
+    IdP->>SP-A: SAML-Assertion senden
+    SP-A-->>SP-A: Assertion validieren
+    SP-A->>User: Zugriff auf Anwendung A gewähren und Benutzerdaten anzeigen
     User->>SP-B: Greife auf Anwendung B zu
-    SP-B->>IdP: Leite zum IdP um
-    IdP->>SP-B: Sende SAML-Assertion
-    SP-B-->>SP-B: Validierung der Assertion
-    SP-B->>User: Gewähre Zugriff auf Anwendung B und zeige Benutzerdaten an
+    SP-B->>IdP: Weiterleitung zum IdP
+    IdP->>SP-B: SAML-Assertion senden
+    SP-B-->>SP-B: Assertion validieren
+    SP-B->>User: Zugriff auf Anwendung B gewähren und Benutzerdaten anzeigen
 ```
 
 ### OIDC-basiertes SSO
 
-OIDC hingegen baut auf OAuth 2.0 auf und bietet einen moderneren Ansatz für SSO. Es verwendet JSON Web Tokens (JWT), um Identitätsinformationen zwischen dem IdP und dem SP auszutauschen und bietet erhöhte Sicherheit und größere Flexibilität.
+OIDC hingegen baut auf <Ref slug="oauth-2.0" /> auf und bietet einen moderneren Ansatz für SSO. Es verwendet <Ref slug="jwt" /> zum Austausch von Identitätsinformationen zwischen dem IdP und SP, was eine erhöhte Sicherheit und größere Flexibilität bietet.
 
 ```mermaid
 sequenceDiagram
@@ -59,35 +59,35 @@ sequenceDiagram
     participant SP-B
 
     User->>SP-A: Greife auf Anwendung A zu
-    SP-A->>IdP: Leite zum IdP um
-    IdP->>User: Anfrage nach Anmeldedaten
-    User->>IdP: Bereitstellung der Anmeldedaten
-    IdP->>SP-A: Sende Autorisierungscode
-    SP-A->>IdP: Tausche Code gegen ID-Token
-    SP-A-->>SP-A: Validierung des ID-Tokens
-    SP-A->>User: Gewähre Zugriff auf Anwendung A und zeige Benutzerdaten an
+    SP-A->>IdP: Weiterleitung zum IdP
+    IdP->>User: Aufforderung zur Eingabe von Anmeldedaten
+    User->>IdP: Anmeldedaten bereitstellen
+    IdP->>SP-A: Autorisierungscode senden
+    SP-A->>IdP: Code gegen ID-Token austauschen
+    SP-A-->>SP-A: ID-Token validieren
+    SP-A->>User: Zugriff auf Anwendung A gewähren und Benutzerdaten anzeigen
     User->>SP-B: Greife auf Anwendung B zu
-    SP-B->>IdP: Leite zum IdP um
-    IdP->>SP-B: Sende Autorisierungscode
-    SP-B->>IdP: Tausche Code gegen ID-Token
-    SP-B-->>SP-B: Validierung des ID-Tokens
-    SP-B->>User: Gewähre Zugriff auf Anwendung B und zeige Benutzerdaten an
+    SP-B->>IdP: Weiterleitung zum IdP
+    IdP->>SP-B: Autorisierungscode senden
+    SP-B->>IdP: Code gegen ID-Token austauschen
+    SP-B-->>SP-B: ID-Token validieren
+    SP-B->>User: Zugriff auf Anwendung B gewähren und Benutzerdaten anzeigen
 ```
 
-## Vorteile von Single sign-on
+## Vorteile von Single Sign-on
 
-1. **Erhöhte Sicherheit**: SSO reduziert das Risiko von passwortbezogenen Sicherheitsverletzungen, indem die Anzahl der Anmeldedaten, die sich Benutzer merken müssen, minimiert wird. Es ermöglicht Organisationen auch, stärkere Authentifizierungsmethoden wie Multi-Faktor-Authentifizierung (MFA) durchzusetzen, um Benutzerkonten zu schützen.
+1. **Erhöhte Sicherheit**: SSO reduziert das Risiko von passwortbezogenen Sicherheitsverletzungen, indem es die Anzahl der Anmeldedaten minimiert, die Benutzer sich merken müssen. Es ermöglicht auch Organisationen, stärkere Authentifizierungsmethoden wie <Ref slug="mfa" /> durchzusetzen, um Benutzerkonten zu schützen.
 
-2. **Verbesserte Benutzererfahrung**: Benutzer können nahtlos auf mehrere Anwendungen zugreifen, ohne sich wiederholt anmelden zu müssen, was die Produktivität steigert und Frustration reduziert. SSO vereinfacht den Anmeldeprozess und bietet ein konsistentes Benutzererlebnis auf verschiedenen Plattformen.
+2. **Verbesserte Benutzererfahrung**: Benutzer können nahtlos auf mehrere Anwendungen zugreifen, ohne sich wiederholt anmelden zu müssen, was die Produktivität steigert und Frustrationen verringert. SSO vereinfacht den Anmeldeprozess und bietet eine konsistente Benutzererfahrung über verschiedene Plattformen hinweg.
 
-3. **Zentralisiertes Zugriffsmanagement**: Organisationen können den Benutzerzugriff und -berechtigungen zentral über den IdP verwalten, um konsistente Sicherheitsrichtlinien und Zugriffskontrollen über alle verbundenen Anwendungen hinweg sicherzustellen. Dies vereinfacht die Prozesse der Benutzerbereitstellung, der -entfernung und der -prüfung.
+3. **Zentrales Zugriffsmanagement**: Organisationen können den Benutzerzugriff und die Berechtigungen zentral über den IdP verwalten, was konsistente Sicherheitsrichtlinien und Zugangskontrollen über alle verbundenen Anwendungen hinweg sicherstellt. Dies vereinfacht Prozesse wie Benutzerprovisionierung, -deprovisionierung und Audits.
 
-## Wann sollte Single sign-on verwendet werden
+## Wann sollte man Single Sign-on verwenden
 
-1. **Unternehmens- und organisatorische Umgebungen**: SSO ist besonders vorteilhaft für Unternehmen, die auf mehrere Anwendungen und Dienste angewiesen sind, um Arbeitsabläufe zu optimieren. Es vereinfacht den Benutzerzugriff und reduziert die Belastung der IT-Teams, einzelne Benutzerkonten zu verwalten. Beispielsweise Unternehmen, die mehrere SaaS-Anwendungen verwenden, wie CRM-, HR- und Kollaborationstools.
-2. **Kundenorientierte Anwendungen**: SSO kann auch die Benutzererfahrung für Kunden verbessern, die auf Online-Dienste oder E-Commerce-Plattformen zugreifen. Zum Beispiel, indem Benutzer sich mit ihren Social-Media-Konten oder E-Mail-Adressen anmelden können, anstatt für jeden Dienst neue Konten zu erstellen.
-3. **Mehrproduktdienste**: Unternehmen, die eine Suite von verbundenen Produkten oder Diensten anbieten, können SSO nutzen, um ein nahtloses Benutzererlebnis über ihre Angebote hinweg bereitzustellen. Benutzer können zwischen verschiedenen Anwendungen navigieren, ohne sich wiederholt anmelden zu müssen. Ein Beispiel ist G Suite von Google. Benutzer können sich einmal im Chrome-Browser anmelden und auf mehrere Google-Dienste zugreifen, ohne ihre Anmeldedaten erneut eingeben zu müssen.
+1. **Unternehmens- und organisatorische Umgebungen**: SSO ist besonders vorteilhaft für Unternehmen, die auf mehrere Anwendungen und Dienste angewiesen sind, um Arbeitsabläufe zu optimieren. Es vereinfacht den Benutzerzugang und entlastet die IT-Teams bei der Verwaltung einzelner Benutzerkonten. Zum Beispiel Unternehmen, die mehrere SaaS-Anwendungen wie CRM-, HR- und Kollaborationstools verwenden.
+2. **Kundenfokussierte Anwendungen**: SSO kann auch die Benutzererfahrung für Kunden verbessern, die auf Online-Dienste oder E-Commerce-Plattformen zugreifen. Beispielsweise können Benutzer sich mit ihren Social-Media-Konten oder E-Mail-Adressen anmelden, anstatt neue Konten für jeden Dienst zu erstellen.
+3. **Multi-Produkt-Dienste**: Unternehmen, die eine Suite von miteinander verbundenen Produkten oder Dienstleistungen anbieten, können SSO nutzen, um eine nahtlose Benutzererfahrung über ihre Angebote hinweg zu bieten. Benutzer können zwischen verschiedenen Anwendungen navigieren, ohne sich wiederholt anmelden zu müssen. Zum Beispiel die G Suite von Google. Benutzer können sich einmal in ihrem Chrome-Browser anmelden und auf mehrere Google-Dienste zugreifen, ohne ihre Anmeldedaten erneut eingeben zu müssen.
 
-Der Einsatz von SSO ist nicht auf diese Szenarien beschränkt und kann an verschiedene Anwendungsfälle angepasst werden, die den spezifischen Bedürfnissen einer Organisation oder Anwendung entsprechen. Es wird weithin als Best Practice angesehen, um Sicherheit, Benutzererfahrung und Betriebseffizienz in modernen digitalen Umgebungen zu verbessern.
+Der Einsatz von SSO ist nicht auf diese Szenarien beschränkt und kann an verschiedene Anwendungsfälle angepasst werden, je nach den spezifischen Bedürfnissen einer Organisation oder Anwendung. Es gilt weithin als bewährte Praxis zur Verbesserung von Sicherheit, Benutzererfahrung und betrieblicher Effizienz in modernen digitalen Umgebungen.
 
-<SeeAlso slugs={['enterprise-sso']} />
+<SeeAlso slugs={["enterprise-sso"]} />

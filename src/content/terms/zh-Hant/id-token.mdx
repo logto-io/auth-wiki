@@ -1,20 +1,20 @@
 ---
 title: ID token
 tags: [authentication, oidc]
-description: ID token 是由 authorization server 發給 client application 的 JSON Web Token (JWT)。它包含有關已通過認證用戶的信息，例如他們的唯一標識和 claims。此 token 用於驗證用戶的身份，並允許 client application 代表用戶訪問受保護的資源。
+description: ID Token 是由授权伺服器（authorization server）向客户端应用程序发布的 JSON Web Token (JWT)。它包含经过身份验证的用户的信息，例如其唯一标识符和声明（claims）。此令牌用于验证用户的身份，并允许客户端应用程序代表用户访问受保护的资源。
 ---
 
-## 什麼是 ID token？
+## 什麼是 ID Token？
 
-ID token 是一種特定類型的安全 token，包含有關已認證用戶的信息，並在成功的 authentication (認證) 後傳遞給 client application。ID token 是區分 OpenID Connect (OIDC) 和 OAuth 2.0 的關鍵特徵。儘管 OAuth 2.0 只專注於 authorization (授權)，OIDC 則在其之上添加用戶 authentication (認證)，引入了 ID token。
+ID Token 是一种特定类型的安全令牌，包含有关经过身份验证的用户的信息，在成功<Ref slug="authentication" />后传递给客户端应用程序。ID Token 是区分<Ref slug="openid-connect" />和<Ref slug="oauth-2.0" />的关键功能。虽然 OAuth 2.0 仅专注于授权 (authorization)，但 OIDC 基于它通过引入 ID Token 来添加用户认证 (authentication)。
 
-在 OIDC 的 authentication (認證) 過程中，client application（依賴方）通過將用戶重定向到 authorization server 來啟動 authentication (認證)。在成功的 authentication (認證) 後，伺服器回應一個 ID token，還有其他 token，如 access token。在一般情況下，ID token 會被編碼為 JWT (JSON Web Token)，並包括關鍵 claims，例如用戶的標識符 (sub)、issuer (發行者) (iss)、audience (受眾) (aud) 和其他用戶特定的信息。
+在 OIDC 认证请求 (authentication request)过程中，客户端应用程序（依赖方）通过将用户重定向到授权伺服器（authorization server）来启动认证请求 (authentication request)。经过成功认证后，伺服器响应包括 ID Token 在内的多个令牌，例如<Ref slug="access-token" />。ID Token 通常编码为<Ref slug="jwt" />，并包括关键声明（claims），如用户的标识符（sub）、发行者 (issuer)（iss）、audience (aud) 和其他用户特定信息。
 
-ID token 的主要功能是驗證用戶的身份，並將此信息傳遞給 client application。這使應用程序能夠在不直接處理憑據的情況下驗證用戶。由於 client 僅在用戶已被 authorization server 認證後才接收 ID token，ID token 可以作為驗證用戶身份的安全方式。
+ID Token 的主要功能是验证用户的身份，并将此信息传输给客户端应用程序。这使得应用程序能够在无需直接处理凭证的情况下验证用户身份。由于客户端仅在用户已由授权伺服器进行认证后接收到 ID Token，因此可以用作验证用户身份的安全方式。
 
-## ID token 如何運作？
+## ID Token 如何運作？
 
-client application 通過將用戶重定向到 authorization server 來啟動 authentication (認證) 過程。用戶與伺服器進行身份驗證，然後伺服器簽發一個 ID token，還有其他 token，如 access token。ID token 被返回給 client application，然後可以用來驗證用戶的身份。
+客户端应用程序通过将用户重定向到授权伺服器来启动认证过程。用户通过伺服器进行认证，之后伺服器连同其他令牌例如访问令牌（access token）一起发布 ID Token。ID Token 被返回给客户端应用程序，后者可以使用它来验证用户身份。
 
 ```mermaid
 sequenceDiagram
@@ -23,87 +23,87 @@ sequenceDiagram
     participant AuthorizationServer
 
     User->>Client: 訪問應用程序
-    Client->>AuthorizationServer: 發送 authorization request (授權請求) 與 client credentials
-    AuthorizationServer->>User: 驗證提示
+    Client->>AuthorizationServer: 使用憑證發送授權請求（authorization request）
+    AuthorizationServer->>User: 身份驗證提示
     User->>AuthorizationServer: 提供憑證
-    AuthorizationServer-->>Client: 授予 authorization code (授權碼)
-    Client-->>AuthorizationServer: 使用 authorization code (授權碼) 換取 token (response_type=token 和 scope=openid)
-    AuthorizationServer-->>AuthorizationServer: 驗證 authorization code
-    AuthorizationServer->>Client: 發行 ID token
-    Client->>Client: 驗證 ID token
-    Client->>User: 顯示已通過認證的用戶信息
+    AuthorizationServer-->>Client: 授予授權碼 (authorization code)
+    Client-->>AuthorizationServer: 用授權碼换取令牌（response_type=token and scope=openid）
+    AuthorizationServer-->>AuthorizationServer: 驗證授權碼
+    AuthorizationServer->>Client: 發行 ID Token
+    Client->>Client: 驗證 ID Token
+    Client->>User: 顯示已認證的用戶信息
 ```
 
-由於 OIDC 是一種流行且標準化的協議，許多庫和框架提供對 ID token 的內建支持。這使得 ID token 易於集成到 client application 中，並在 single sign-on (SSO) 和聯合身份場景中廣泛使用。
+由于 OIDC 是一個流行且標準化的協議，許多庫和框架都提供內置支持來處理 ID Token。這使得 ID Token 易於整合到客戶端應用程序中，並廣泛用於<Ref slug="single-sign-on" />和聯合身份（federated identity）場景中。
 
-## ID token 中的 claims
+## ID Token 中的聲明 (Claims)
 
-ID token 是一個 JWT (JSON Web Token)，包含一組有關已認證用戶的 claims。這些 claims 包括在 [JWT 規範](https://datatracker.ietf.org/doc/html/rfc7519#section-4) 中定義的標準 JWT claims，以及用於傳遞用戶身份信息的 OIDC 特定 claims。
+ID Token 是一個JWT，包含一系列有關經過身份認證的用戶的<Ref slug="claim" />。這些声明包括在 [JWT 规范](https://datatracker.ietf.org/doc/html/rfc7519#section-4)中定义的标准 JWT 声明，以及用于传递用户身份信息的 OIDC 特定声明。
 
-JWT 標準 token claims：
+JWT 标准令牌声明：
 
-- **iss (Issuer)**：必需。issuer (發行者) claim 標識 ID token 的發行者。這通常是發行此 token 的 authorization server 的 URL。
-- **sub (Subject)**：必需。subject claim 標識 ID token 的相關用戶。這通常是用戶的唯一標識符。
-- **aud (Audience)**：必需。audience (受眾) claim 標識 ID token 的受眾。這通常是請求此 token 的 client application。
-- **exp (Expiration time)**：必需。expiration time claim 標識 token 到期的時間。過了這個時間，token 不應被接受處理。
-- **iat (Issued at)**：必需。issued at claim 標識 token 發行的時間。
-- **auth_time (Authentication time)**：可選。authentication time claim 標識用戶被認證的時間。此 claim 只有在用戶於當前 session 認證時才會出現。
-- **nonce**：可選。nonce claim 用於將 client session 與 ID token 關聯。通常用於防止重放攻擊。
+- **iss (Issuer)**: REQUIRED. 发行者声明标识 ID token 的发行者。通常是发布令牌的授权伺服器的 URL。
+- **sub (Subject)**: REQUIRED. 主体声明标识 ID token 所涉及的用户。通常是用户的唯一标识符。
+- **aud (Audience)**: REQUIRED. audience 声明标识 ID token 的<Ref slug="audience" />。通常是请求令牌的客户端应用程序。
+- **exp (Expiration time)**: REQUIRED. 过期时间声明标识令牌到期的时间。超过此时间后，令牌不应被接受进行处理。
+- **iat (Issued at)**: REQUIRED. 签发时间声明标识令牌的签发时间。
+- **auth_time (Authentication time)**: OPTIONAL. 认证时间声明标识用户进行认证的时间。仅在用户在当前会话期间经过认证时存在。
+- **nonce**: OPTIONAL. nonce 声明用于将客户机会话与 ID token 关联。通常用于防止重放攻击。
 
-OIDC 標準用戶信息 claims：
+OIDC 标准用户信息声明：
 
-- **name**：用戶的全名。
-- **given_name**：用戶的名字。
-- **family_name**：用戶的姓氏。
-- **middle_name**：用戶的中間名。
-- **nickname**：用戶的暱稱或其他短名。
-- **preferred_username**：用戶的首選用戶名。
-- **profile**：指向用戶個人資料頁面的 URL。
-- **picture**：指向用戶個人資料圖片的 URL。
-- **website**：指向用戶網站的 URL。
-- **email**：用戶的電子郵件地址。
-- **email_verified**：表明用戶的電子郵件地址是否已驗證的布爾值。
-- **gender**：用戶的性別。
-- **birthdate**：用戶的出生日期。表示為 YYYY-MM-DD 格式的字符串。
-- **zoneinfo**：用戶的時區。來自 [IANA 時區數據庫](https://www.iana.org/time-zones) 的字符串。
-- **locale**：用戶的語言區域。代表用戶對格式化日期、時間和數字的首選語言和區域。
-- **phone_number**：用戶的電話號碼。
-- **phone_number_verified**：表示用戶的電話號碼是否已驗證的布爾值。
-- **address**：用戶的郵寄地址。值是一個 JSON 對象，包含用戶的地址信息。
-- **updated_at**：用戶信息最後更新的時間。
+- **name**: 用户的全名。
+- **given_name**: 用户的名字。
+- **family_name**: 用户的姓氏。
+- **middle_name**: 用户的中间名。
+- **nickname**: 用户的昵称或其他简称。
+- **preferred_username**: 用户的首选用户名。
+- **profile**: 指向用户个人资料页面的 URL。
+- **picture**: 用户头像的 URL。
+- **website**: 用户网站的 URL。
+- **email**: 用户的电子邮件地址。
+- **email_verified**: 布尔值，指示用户的电子邮件地址是否已验证。
+- **gender**: 用户的性别。
+- **birthdate**: 用户的出生日期。表示为格式为 YYYY-MM-DD 的字符串。
+- **zoneinfo**: 用户的时区。字符串来自 [IANA 时区数据库](https://www.iana.org/time-zones)。
+- **locale**: 用户的语言环境。表示用户在格式化日期、时间和数字时的首选语言和地区。
+- **phone_number**: 用户的电话号码。
+- **phone_number_verified**: 布尔值，指示用户的电话号码是否已验证。
+- **address**: 用户的邮政地址。该值是包含用户地址信息的 JSON 对象。
+- **updated_at**: 用户信息最后更新的时间。
 
-這些 claims 提供了一種標準化的方式在 ID token 中傳遞用戶身份信息。儘管規範只定義了一組標準 claims，但也可以在 ID token 中包括自定義 claims，以根據需要傳遞其他用戶特定信息。
+这些声明提供了一种在 ID Token 中传递用户身份信息的标准化方式。虽然规范仅定义一组标准声明，但也可以在 ID Token 中包含自定义声明，以根据需要传递其他用户特定信息。
 
-## ID token 驗證
+## ID Token 的驗證
 
-當 client application 接收到 ID token 時，必須驗證此 token 以確保其真實性和完整性。驗證過程通常涉及以下步驟：
+当客户端应用程序收到 ID Token 时，它必须验证此令牌以确保其真实性和完整性。验证过程通常包括以下步骤：
 
-1. **驗證簽名**：client 必須使用 authorization server 的公共密鑰驗證 ID token 的簽名。這保證了 token 未被篡改，並且由預期方發行。
-2. **檢查 issuer (發行者)**：client 應該驗證 ID token 中的 `iss` claim 是否與發行 token 的 authorization server 的 URL 相匹配。這有助於防止 token 替換攻擊。
-3. **檢查 audience (受眾)**：client 應該驗證 ID token 中的 `aud` claim 是否與 client application's `client_id` 相匹配。這保證了 token 是為 client application 發行的。
-4. **檢查過期時間**：client 應該驗證 ID token 中的 `exp` claim 是否未過期。如果 token 過期，則應不被接受。實現可能為時計差提供餘量。
-5. **檢查 nonce**：如果 client 在 authentication request 中包含了一個 `nonce` 參數，則應該驗證 ID token 中的 `nonce` claim 是否與 `nonce` 參數的值相匹配。這有助於防止重放攻擊。
+1. **验证签名**: 客户端必须使用授权伺服器的公钥验证 ID Token 的签名。这确保了令牌没有被篡改，并且是由预期的一方发布的。
+2. **检查发行者**: 客户端应验证 ID Token 中的 `iss` 声明是否与发布令牌的授权伺服器的 URL 相匹配。这有助于防止令牌替换攻击。
+3. **检查受众**: 客户端应验证 ID Token 中的 `aud` 声明是否与客户端应用程序的 `client_id` 相匹配。这确保了令牌是为客户端应用程序发布的。
+4. **检查过期时间**: 客户端应验证 ID Token 中的 `exp` 声明是否未过期。如果令牌已过期，则不应接受。实现可能会提供余地以考虑时钟偏差。
+5. **检查 nonce**: 如果客户端在认证请求中包含了 `nonce` 参数，则应验证 ID Token 中的 `nonce` 声明是否与 `nonce` 参数的值匹配。这有助于防止重放攻击。
 
-## ID token 與 access token 的對比
+## ID Token 与访问令牌的比较
 
-儘管 ID token 和 access token 在 OIDC 中被廣泛使用，但它們服務於不同的目的並且具有不同的特徵：
+虽然 ID Token 和访问令牌在 OIDC 中被广泛使用，但它们的用途不同，并具有不同的特性：
 
-|              | ID token                                                                                | Access token                                                                                                                  |
-| ------------ | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **目的**     | 驗證用戶的身份並將用戶信息傳遞到 client application。   | 提供代表用戶訪問受保護資源的能力。                                                            |
-| **格式**     | 通常是一個包含用戶身份 claims 的 JWT。                                | 可以是 JWT 或者是一個 opaque token (不透明的 token) (隨機字符串)。                                 |
-| **受眾**     | 面向請求 token 的 client application。                            | 面向託管受保護資源的 resource server。                                                              |
-| **存活時間** | 短命 token，通常只能使用數分鐘。一-time 使用。 | 較長存活時間的 token，有效期較長（如數小時）。在其有效期內可以重複多次使用。 |
-| **內容**     | 包含用戶身份信息，如姓名、電子郵件和其他用戶特定數據。               | 包含有關用戶對特定資源的權限 (scopes) 的信息。                                                 |
+|              | ID Token                                                                                             | 访问令牌 (Access Token)                                                                                                   |
+| ------------ | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **用途**     | 验证用户的身份并将用户信息传递给客户端应用程序。                                                          | 代表用户提供对受保护资源的访问。                                                                                             |
+| **格式**     | 通常是包含用户身份声明的 JWT。                                                                          | 可以是 JWT 或<Ref slug="opaque-token" />。                                                                                    |
+| **受众**     | 为请求令牌的客户端应用程序准备的。                                                                      | 为托管受保护资源的资源伺服器准备的。                                                                                         |
+| **生命周期** | 短期有效的令牌，通常有效期仅为几分钟。仅可一次性使用。                                                   | 有效期较长的令牌，有效期更长（例如，数小时）。在其有效期内可以多次重用。                                                     |
+| **内容**     | 包含用户身份信息，如姓名、电子邮件和其他用户特定数据。                                                   | 包含有关用户在特定资源上的权限（scope）的信息。                                                                                |
 
-## 使用 ID token 的最佳實踐
+## 使用 ID Token 的最佳实践
 
-在 OIDC 中使用 ID token 時，遵循最佳實踐以確保 authentication (認證) 過程的安全性和完整性是很重要的。一些關鍵的最佳實踐包括：
+在 OIDC 中使用 ID Token 时，遵循最佳实践以确保认证过程的安全性和完整性是很重要的。一些关键的最佳实践包括：
 
-1. **驗證 ID token**：始終驗證從 authorization server 接收到的 ID token，以確保其真實性和完整性。這有助於防止 token 替換攻擊和未經授權的訪問。
-2. **使用安全通道**：確保 ID tokens 通過安全通道（例如 HTTPS）傳輸，以防止攔截和篡改。
-3. **保護敏感信息**：由於 JWT 通常被編碼但未加密，這使得內容透明。避免在 ID token payload 包含敏感信息，以防止在 token 洩漏的情況下暴露敏感數據。
-4. **不作為授權用**：ID token 用於用戶 authentication (認證)，不應用於 authorization (授權) 目的。應使用 access token 進行授權以訪問受保護資源。
-5. **一次性使用**：ID token 通常是一次性使用的。一旦 client application 驗證了一個 ID token，它不應該在隨後的請求或會話狀態保存中重用。為了維持用戶會話狀態，client application 應採用 refresh token 和 token 換取請求等機制。（Refresh token 是長存活的 opaque token，可以在 access token 和 ID token 過期時用來獲取新的 token。）
+1. **验证 ID Token**: 始终验证从授权伺服器收到的 ID Token 以确保其真实性和完整性。这有助于防止令牌替换攻击和未经授权的访问。
+2. **使用安全通道**: 确保 ID Token 通过安全通道（例如，HTTPS）传输，以防止拦截和篡改。
+3. **保护敏感信息**: 由于 JWTs 通常是编码的但未加密，这使得内容透明。避免在 ID Token 负载中包含敏感信息，以防止令牌泄露时敏感数据的暴露。
+4. **不用于授权**: ID Token 仅用于用户认证 (authentication)，不应用于授权 (authorization)。使用访问令牌来进行授权以访问受保护资源。
+5. **单次使用**: ID Token 通常用于一次性使用。一旦客户端应用程序已验证一个 ID Token，它不应在后续请求中重用或用于会话状态保留。为了维护用户会话状态，客户端应用程序应采用<Ref slug="refresh-token" />和令牌交换请求等机制。（刷新令牌是长期有效的不透明令牌，可以在访问令牌和 ID Token 到期时用于获取新令牌。）
 
 <SeeAlso slugs={["openid-connect", "jwt", "signing-key", "access-token"]} />

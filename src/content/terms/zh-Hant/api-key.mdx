@@ -1,64 +1,64 @@
 ---
-title: API key
-tags: [authentication (Authentication), api]
-description: API 金鑰 (API key) 是用於在存取 API 時驗證和授權客戶端的唯一識別碼。它作為一個包含在 API 請求中的秘密令牌，用於驗證客戶端的身份並允許訪問特定的資源或服務。API 金鑰通常用於伺服器到伺服器的通信或在存取公共資料時使用。
+title: API 金鑰 (API key)
+tags: [authentication, api]
+description: API 金鑰是一種用於在訪問 API 時認證 (Authentication) 和授權 (Authorization)客戶端的唯一標識符。它作為一個秘密令牌包含在 API 請求中，用於驗證客戶端的身份並允許訪問特定資源或服務。API 金鑰通常用於伺服器到伺服器的通信或訪問公共數據。
 ---
 
-## 什麼是 API 金鑰 (API key)？
+## 什麼是 API 金鑰？
 
-API 金鑰 (API key) 用於識別和授權呼叫應用程式或服務。它們通常具有長期效力和穩定性，直到被替換，並且通常具有固定的權限集。它們主要用於伺服器到伺服器的通信或存取公共資料，這些令牌通常不代表特定的使用者。
+API 金鑰用於識別和授權呼叫應用程式或服務。它們通常是長期有效且靜態的，直到被旋轉，並且通常具有一組固定的權限。它們主要用於伺服器到伺服器的通信或訪問公共數據，這些令牌通常不代表特定用戶。
 
-## API 金鑰 (API key) 如何工作？
+## API 金鑰如何運作？
 
-API 金鑰 (API key) 是由 API 提供者生成的長字符串，並與授權用戶共享。此金鑰必須包含在存取 API 時的請求標頭中。API 金鑰 (API key) 在基本安全需求中是簡單而有效的。例如，Google Maps API 和 AWS 等流行服務提供 API 金鑰 (API key) 來控制存取和監控使用情況。
+API 金鑰是一串由 API 提供者生成並與授權用戶共享的長字符串。訪問 API 時，必須將此金鑰包含在請求標頭中。API 金鑰對於基本安全需求來說簡單且有效。例如，像 Google Maps API 和 AWS 這樣的熱門服務提供 API 金鑰來控制訪問和監控使用情況。
 
 ```java
 curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
 ```
 
-API 金鑰 (API key) 不如其他形式的 API 驗證 (Authentication)，例如 OAuth 和 JWT，有效，但它們在幫助 API 生產者監控使用情況方面仍然發揮著重要作用，因為這是最簡單且廣為使用的方式來保護 APIs。
+API 金鑰不如其他形式的 API 認證 (Authentication) 有效，例如 <Ref slug="oauth-2.0" /> 和 <Ref slug="jwt" />，但它們在幫助 API 生產者監控使用情況方面仍然發揮著重要作用，因為這是保護 API 的最簡單和廣泛使用的方法。
 
 ## 它的優缺點是什麼？
 
 ### 優點
 
-- 實施簡單：API 金鑰 (API key) 容易實施和使用。它們涉及將金鑰附加到請求標頭，對於開發人員和客戶來說是一種直接的方法。
-- 易於監控：API 金鑰 (API key) 易於監控。你可以跟踪每個金鑰的使用情況，並在必要時撤銷它們。
-- 有效的速率限制：API 金鑰 (API key) 可以有效地進行速率限制。你可以設置每個金鑰的請求數量限制以防止濫用。
-- 適合非敏感資料：API 金鑰 (API key) 適用於非敏感資料或公開可用的 APIs，在這些情況下安全要求較低。
+- 實施簡單：API 金鑰易於實施和使用。它們涉及將金鑰附加到請求標頭，這對於開發人員和客戶端來說是一種簡單明瞭的方法。
+- 易於監控：API 金鑰易於監控。你可以跟踪每個金鑰的使用情況，並在必要時撤銷它們。
+- 有效的速率限制：API 金鑰對於速率限制是有效的。你可以設置每個金鑰的請求數限制以防止濫用。
+- 適用於非敏感數據：API 金鑰適用於非敏感數據或公開可用的 API，安全要求較低。
 
 ### 缺點
 
-- 安全性有限：API 金鑰 (API key) 對於敏感資料不夠安全，尤其是對於客戶端應用程式。它們通常用於機器對機器 (Machine-to-Machine) 的通信。
-- 不適用於使用者驗證 (Authentication)：API 金鑰 (API key) 與應用程式或系統綁定，而不是個別的使用者，使得識別特定使用者或跟踪他們的行動充滿挑戰。
-- 無令牌到期：API 金鑰 (API key) 通常是靜態的且不會到期。如果一個金鑰被洩露，它可能會被無限期地濫用，除非手動重新生成。
+- 安全性有限：API 金鑰對於敏感數據來說不夠安全，尤其是對於客戶端應用程式。它們通常用於機器對機器的通信。
+- 不適合用戶認證 (Authentication)：API 金鑰與應用程式或系統相關，而不是個別用戶，這使得識別特定用戶或跟踪其行為變得具有挑戰性。
+- 沒有令牌過期：API 金鑰通常是靜態的，不會過期。如果金鑰被洩露，可能會被無限期濫用，除非手動重新生成。
 
-## API 金鑰 (API key) 的使用情境是什麼？
+## API 金鑰的使用案例是什麼？
 
-- 服務到服務通信：API 金鑰 (API key) 適合於需要通過命令行介面與 APIs 直接通信的應用程式場景。例：呼叫 OpenAI APIs。
-- 公開 APIs：在向公眾公開 APIs 時，API 金鑰 (API key) 提供了一種簡單的方法進行存取控制。
-- 簡化的設置：對於快速和簡單的驗證 (Authentication) 需求，特別是在開發階段。與機器對機器 (Machine-to-Machine) 驗證 (Authentication) 不同，API 金鑰 (API key) 不需要事先的客戶端註冊，也不需要換取存取令牌 (Access Token)。你只需在請求中傳遞你的 API 金鑰 (API key) 作為參數，就能正常工作。
+- 服務到服務的通信：API 金鑰適用於應用程式需要通過 CLI 直接與 API 通信的場景。例如，調用 OpenAI API。
+- 公共 API：當向公眾公開 API 時，API 金鑰提供了一種簡單的訪問控制方法。
+- 簡化設置：對於快速和簡單的認證 (Authentication) 需求，尤其是在開發階段。與機器對機器認證 (Authentication) 不同，API 金鑰不需要事先進行客戶端註冊，也不需要交換訪問令牌 (Access Token)。你只需在請求中將 API 金鑰作為參數傳遞，它就能正常工作。
 
-在實際場景中，建立產品的最常見目的是產品集成。以下是一個典型的使用案例：
+在現實世界的場景中，構建產品時最常見的目的是產品集成。以下是一個典型的使用案例：
 
-### 例子：與 Stripe 的集成
+### 示例：與 Stripe 集成
 
-Stripe 使用 API 金鑰 (API key) 來安全地與不同平台和應用程式進行集成。你可以通過開發者儀表板創建、查看、刪除和管理這些金鑰。通過使用 API 金鑰 (API key)，你可以將 Stripe 的結帳和計費功能集成到你的產品中。
+Stripe 使用 API 金鑰與不同平台和應用程式進行安全集成。你可以通過開發者儀表板創建、查看、刪除和管理這些金鑰。通過使用 API 金鑰，你可以將 Stripe 的結帳和計費功能集成到你的產品中。
 
 ![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
 
-## Personal Access Tokens (PAT) 和機器對機器 (Machine-to-Machine, M2M) 的區別是什麼？
+## 個人訪問令牌 (PAT) 和機器對機器 (M2M) 之間的區別是什麼？
 
-談論 API 金鑰 (API key) 時，可以提到個人存取令牌 (Personal Access Tokens) 和機器對機器 (Machine-to-Machine)，因為它們都可以透過命令行介面程式設置程序化存取 API 資源，或在後端服務之間建立通信。
+談到 API 金鑰，個人訪問令牌和 <Ref slug="machine-to-machine" /> 也可以一起提及，因為它們都可以通過 CLI 命令以編程方式訪問 API 資源，或在後端服務之間建立通信。
 
-### 個人存取令牌 (Personal Access Tokens, PATs)
+### 個人訪問令牌 (PATs)
 
-個人存取令牌 (Personal Access Tokens) 也是一個字符串，但表示***特定使用者***的身份和權限，在成功驗證 (Authentication) 或登錄後動態生成，通常有一個有限的生命週期，但可以刷新。它提供了對用戶特定資料和功能的精細訪問控制，通常用於命令行介面工具、腳本或個人的 API 存取。主要區別在於它更具針對性並用於用戶特定的操作。
+個人訪問令牌也是一個字符串，但代表***特定用戶的***身份和權限，並在成功認證 (Authentication) 或登錄後動態生成，通常具有有限的壽命但可以刷新。它提供對用戶特定數據和功能的細粒度訪問控制，通常用於 CLI 工具、腳本或個人 API 訪問。主要區別在於它更具針對性，用於用戶特定的操作。
 
-### 機器對機器 (Machine-to-Machine, M2M)
+### 機器對機器 (M2M)
 
-機器對機器 (Machine-to-Machine) 通信是指設備在沒有人工參與的情況下自動交換數據。
+M2M 通信是指設備在更廣泛的意義上自動交換數據而無需人工干預。
 
-在 OIDC (或 OAuth 2.0) 的上下文中，M2M 應用程式使用客戶端憑證流程 (Client Credentials Flow)，如 [OAuth 2.0 RFC 6749 協定](https://datatracker.ietf.org/doc/html/rfc6749) 中所定義，支持類似的標準協定。它通常涉及客戶端應用程式（即機器或服務）自己或代表用戶存取資源。這對於只有受信任的客戶端可以存取後端服務的情況尤其理想。
+在 <Ref slug="openid-connect" />（或 <Ref slug="oauth-2.0" />）的上下文中，M2M 應用程式使用 <Ref slug="client-credentials-flow" />，如 [OAuth 2.0 RFC 6749 協議](https://datatracker.ietf.org/doc/html/rfc6749) 中所定義，支持類似的標準協議。它通常涉及客戶端應用程式（機器或服務）自行或代表用戶訪問資源。這對於只有受信任的客戶端可以訪問後端服務的情況是理想的。
 
 <SeeAlso slugs={["machine-to-machine"]} />

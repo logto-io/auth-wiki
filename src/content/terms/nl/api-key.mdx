@@ -1,64 +1,64 @@
 ---
 title: API-sleutel (API key)
 tags: [authentication, api]
-description: Een API-sleutel is een unieke identificator die wordt gebruikt om een client te authenticeren en autoriseren bij toegang tot een API. Het dient als een geheim token dat in API-verzoeken wordt opgenomen om de identiteit van de client te verifiëren en toegang te verlenen tot specifieke bronnen of diensten. API-sleutels worden meestal gebruikt in server-naar-servercommunicatie of bij toegang tot openbare gegevens.
+description: Een API-sleutel is een unieke identificatiecode die wordt gebruikt om een client te authenticeren en autoriseren bij toegang tot een API. Het dient als een geheime token die in API-verzoeken wordt opgenomen om de identiteit van de client te verifiëren en toegang te verlenen tot specifieke bronnen of diensten. API-sleutels worden meestal gebruikt in server-naar-server communicatie of bij toegang tot openbare gegevens.
 ---
 
 ## Wat is een API-sleutel?
 
-API-sleutels worden gebruikt om de aanroepende applicatie of service te identificeren en autoriseren. Ze zijn meestal langlevend en statisch totdat ze worden vervangen en hebben vaak een vaste reeks permissies. Ze worden voornamelijk gebruikt voor server-naar-servercommunicatie of toegang tot openbare gegevens; deze tokens vertegenwoordigen over het algemeen geen specifieke gebruiker.
+API-sleutels worden gebruikt om de aanroepende applicatie of dienst te identificeren en te autoriseren. Ze zijn doorgaans langlevend en statisch totdat ze worden vervangen en hebben vaak een vaste set van permissies. Ze worden voornamelijk gebruikt voor server-naar-server communicatie of toegang tot openbare gegevens, deze tokens vertegenwoordigen over het algemeen geen specifieke gebruiker.
 
 ## Hoe werkt een API-sleutel?
 
-Een API-sleutel is een lange reeks tekens die door de API-provider wordt gegenereerd en gedeeld met geautoriseerde gebruikers. Deze sleutel moet in de request header worden opgenomen wanneer de API wordt benaderd. API-sleutels zijn eenvoudig en effectief voor basisbehoeften aan beveiliging. Populaire diensten zoals Google Maps API en AWS bieden bijvoorbeeld API-sleutels om toegang te beheren en gebruik te monitoren.
+Een API-sleutel is een lange reeks tekens die door de API-provider wordt gegenereerd en gedeeld met geautoriseerde gebruikers. Deze sleutel moet in de request header worden opgenomen bij toegang tot de API. API-sleutels zijn eenvoudig en effectief voor basisbeveiligingsbehoeften. Populaire diensten zoals Google Maps API en AWS bieden bijvoorbeeld API-sleutels om toegang te controleren en gebruik te monitoren.
 
 ```java
 curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
 ```
 
-API-sleutels zijn niet zo effectief als andere vormen van API-authenticatie (Authentication), zoals OAuth en JWT, maar ze spelen nog steeds een belangrijke rol bij het helpen van API-producenten om gebruik te monitoren, aangezien het de meest eenvoudige en algemeen gebruikte methode is om API's te beveiligen.
+API-sleutels zijn niet zo effectief als andere vormen van API-authenticatie, zoals <Ref slug="oauth-2.0" /> en <Ref slug="jwt" />, maar ze spelen nog steeds een belangrijke rol bij het helpen van API-producenten om het gebruik te monitoren, aangezien het de meest eenvoudige en veelgebruikte methode is om API's te beveiligen.
 
 ## Wat zijn de voor- en nadelen?
 
 ### Voordelen
 
-- Eenvoudig te implementeren: API-sleutels zijn gemakkelijk te implementeren en te gebruiken. Ze omvatten het toevoegen van een sleutel aan de request header, wat het een eenvoudige methode maakt voor ontwikkelaars en clients om te begrijpen en te gebruiken.
-- Eenvoudig te monitoren: API-sleutels zijn eenvoudig te monitoren. Je kunt het gebruik van elke sleutel bijhouden en deze indien nodig intrekken.
-- Effectieve rate limiting: API-sleutels zijn effectief voor rate limiting. Je kunt een limiet instellen op het aantal verzoeken per sleutel om misbruik te voorkomen.
+- Eenvoudig te implementeren: API-sleutels zijn gemakkelijk te implementeren en te gebruiken. Ze omvatten het toevoegen van een sleutel aan de request header, waardoor het een eenvoudige methode is voor ontwikkelaars en clients om te begrijpen en te gebruiken.
+- Gemakkelijk te monitoren: API-sleutels zijn gemakkelijk te monitoren. Je kunt het gebruik van elke sleutel volgen en ze indien nodig intrekken.
+- Effectieve snelheidsbeperking: API-sleutels zijn effectief voor snelheidsbeperking. Je kunt een limiet instellen op het aantal verzoeken per sleutel om misbruik te voorkomen.
 - Geschikt voor niet-gevoelige gegevens: API-sleutels zijn geschikt voor niet-gevoelige gegevens of openbaar beschikbare API's, waar de beveiligingseisen lager zijn.
 
 ### Nadelen
 
 - Beperkte beveiliging: API-sleutels zijn niet veilig genoeg voor gevoelige gegevens, vooral voor client-side applicaties. Ze worden vaak gebruikt in machine-to-machine communicatie.
-- Niet geschikt voor gebruikersauthenticatie (Authentication): API-sleutels zijn gekoppeld aan applicaties of systemen, niet aan individuele gebruikers, waardoor het moeilijk is om specifieke gebruikers te identificeren of hun acties te volgen.
-- Geen tokenverval: API-sleutels zijn doorgaans statisch en vervallen niet. Als een sleutel gecompromitteerd is, kan deze oneindig worden misbruikt tenzij handmatig opnieuw gegenereerd.
+- Niet geschikt voor gebruikersauthenticatie: API-sleutels zijn gekoppeld aan applicaties of systemen, niet aan individuele gebruikers, waardoor het moeilijk is om specifieke gebruikers te identificeren of hun acties te volgen.
+- Geen tokenverval: API-sleutels zijn doorgaans statisch en verlopen niet. Als een sleutel gecompromitteerd is, kan deze oneindig worden misbruikt tenzij handmatig opnieuw gegenereerd.
 
-## Wat zijn de gebruiksscenario's voor API-sleutels?
+## Wat zijn de gebruikssituaties voor API-sleutels?
 
-- Service-naar-service communicatie: API-sleutels zijn geschikt voor scenario's waarin applicaties rechtstreeks via CLIs met API's moeten communiceren. Bijv. Aanroepen van OpenAI API's.
-- Publieke API's: Bij het blootstellen van API's aan het publiek bieden API-sleutels een eenvoudige methode van toegang controle.
-- Vereenvoudigde installatie: Voor snelle en eenvoudige authenticatie (Authentication) behoeften, vooral in de ontwikkelingsfase. In tegenstelling tot machine-to-machine authenticatie (Authentication) vereisen API-sleutels geen voorafgaande clientregistratie en hoeft niet te worden uitgewisseld voor een access token. Je geeft gewoon je API-sleutel als parameter in je verzoek en het werkt gewoon.
+- Service-naar-service communicatie: API-sleutels zijn geschikt voor scenario's waarin applicaties direct via CLIs met API's moeten communiceren. Bijvoorbeeld het aanroepen van OpenAI API's.
+- Openbare API's: Bij het blootstellen van API's aan het publiek bieden API-sleutels een eenvoudige methode van toegangscontrole.
+- Vereenvoudigde setup: Voor snelle en eenvoudige authenticatiebehoeften, vooral in de ontwikkelingsfase. In tegenstelling tot machine-to-machine authenticatie, vereisen API-sleutels geen voorafgaande clientregistratie en hoeven ze niet te worden ingewisseld voor een access token. Je geeft gewoon je API-sleutel als parameter in je verzoek en het werkt gewoon.
 
-In echte scenario's is het meest voorkomende doel bij het bouwen van producten productintegratie. Hier is een typisch gebruiksscenario:
+In real-world scenario's is het meest voorkomende doel bij het bouwen van producten productintegratie. Hier is een typisch gebruiksscenario:
 
 ### Voorbeeld: Integratie met Stripe
 
-Stripe gebruikt API-sleutels voor veilige integratie met verschillende platforms en applicaties. Je kunt deze sleutels maken, bekijken, verwijderen en beheren via het Developers Dashboard. Door API-sleutels te gebruiken, kun je de betalings- en factureringsfuncties van Stripe in je product integreren.
+Stripe gebruikt API-sleutels voor veilige integratie met verschillende platforms en applicaties. Je kunt deze sleutels maken, bekijken, verwijderen en beheren via het Developers Dashboard. Door API-sleutels te gebruiken, kun je Stripe's checkout- en factureringsfuncties in je product integreren.
 
-![Stripe-integratie-API-sleutels.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
+![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
 
-## Wat is het verschil tussen Persoonlijke Toegang Tokens (PAT) en Machine-to-Machine (M2M)?
+## Wat is het verschil tussen Personal Access Tokens (PAT) en Machine-to-Machine (M2M)?
 
-Bij het bespreken van API-sleutels kunnen persoonlijke toegang tokens en machine-to-machine ook samen worden genoemd, aangezien ze allemaal programmatisch toegang kunnen krijgen tot API-bronnen via CLI-opdrachten, of communicatie tussen backend-services kunnen tot stand brengen.
+Bij het praten over API-sleutels kunnen personal access tokens en <Ref slug="machine-to-machine" /> ook samen worden genoemd, aangezien ze allemaal programmeerbaar toegang kunnen krijgen tot API-bronnen via CLI-opdrachten, of communicatie tussen backend-services kunnen tot stand brengen.
 
-### Persoonlijke Toegang Tokens (PATs)
+### Personal Access Tokens (PATs)
 
-Een persoonlijke toegang token is ook een reeks tekens, maar vertegenwoordigt ***de identiteit en permissies van een specifieke gebruiker***, wordt dynamisch gegenereerd na succesvolle authenticatie (Authentication) of inloggen, en heeft doorgaans een beperkte levensduur maar kan worden vernieuwd. Het biedt fijnmazige toegang controle tot gebruikersspecifieke gegevens en mogelijkheden en wordt vaak gebruikt voor CLI-tools, scripts of persoonlijke API-toegang. Het belangrijkste verschil is dat het specifieker is en wordt gebruikt voor gebruikersspecifieke acties.
+Een personal access token is ook een reeks tekens, maar vertegenwoordigt ***de identiteit en permissies van een specifieke gebruiker***, wordt dynamisch gegenereerd na succesvolle authenticatie of inloggen, en heeft doorgaans een beperkte levensduur maar kan worden vernieuwd. Het biedt fijnmazige toegangscontrole tot gebruikersspecifieke gegevens en mogelijkheden en wordt vaak gebruikt voor CLI-tools, scripts of persoonlijke API-toegang. Het belangrijkste verschil is dat het specifieker is en wordt gebruikt voor gebruikersspecifieke acties.
 
 ### Machine-to-Machine (M2M)
 
 M2M-communicatie is wanneer apparaten automatisch gegevens uitwisselen zonder menselijke tussenkomst in bredere zin.
 
-In de context van OIDC (of OAuth 2.0) gebruiken M2M-applicaties de Client Credentials Flow, zoals gedefinieerd in het [OAuth 2.0 RFC 6749-protocol](https://datatracker.ietf.org/doc/html/rfc6749), dat vergelijkbare standaardprotocollen ondersteunt. Het betreft meestal een clientapplicatie (een machine of service) die bronnen benadert, hetzij op zichzelf, hetzij namens een gebruiker. Het is ideaal voor situaties waarin alleen vertrouwde clients toegang kunnen krijgen tot backend-services.
+In de context van <Ref slug="openid-connect" /> (of <Ref slug="oauth-2.0" />), gebruiken M2M-applicaties de <Ref slug="client-credentials-flow" />, zoals gedefinieerd in het [OAuth 2.0 RFC 6749 protocol](https://datatracker.ietf.org/doc/html/rfc6749), dat vergelijkbare standaardprotocollen ondersteunt. Het omvat meestal een clientapplicatie (een machine of dienst) die bronnen benadert, hetzij op zichzelf, hetzij namens een gebruiker. Het is ideaal voor situaties waarin alleen vertrouwde clients toegang kunnen krijgen tot backend-services.
 
 <SeeAlso slugs={["machine-to-machine"]} />

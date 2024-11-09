@@ -1,73 +1,73 @@
 ---
 title: Just-in-time (JIT) provisioning
 tags: [authentication, authorization]
-description: Just-in-time (JIT) provisioning is een identity en access management (IAM) proces waarbij gebruikersaccounts dynamisch en automatisch worden aangemaakt wanneer een gebruiker voor het eerst probeert toegang te krijgen tot een systeem of applicatie. Deze benadering helpt het onboardingproces te stroomlijnen en zorgt ervoor dat gebruikersaccounts alleen worden aangemaakt wanneer dat nodig is, waardoor administratieve overhead wordt verminderd en de beveiliging wordt verbeterd.
+description: Just-in-time (JIT) provisioning is een proces voor identity en access management (IAM) waarbij gebruikersaccounts dynamisch en automatisch worden aangemaakt wanneer een gebruiker voor het eerst probeert toegang te krijgen tot een systeem of applicatie. Deze benadering helpt het onboardingproces te stroomlijnen en zorgt ervoor dat gebruikersaccounts alleen worden aangemaakt wanneer nodig, wat de administratieve last vermindert en de beveiliging verbetert.
 ---
 
 ## Wat is just-in-time provisioning?
 
-Als je een SaaS B2B-app bouwt en lidmaatschapsfuncties wilt ondersteunen, zodat leden eenvoudig kunnen deelnemen aan je werkruimte (tenant). Je hebt mogelijk functies nodig zoals in de onderstaande tabel, en just-in-time provisioning is een van hen, die helpt het proces te stroomlijnen.
+Als je een SaaS B2B-app bouwt en lidmaatschapsfuncties wilt ondersteunen, zodat leden gemakkelijk je werkruimte (tenant) kunnen betreden. Dan heb je misschien functies zoals in de onderstaande tabel nodig, en just-in-time provisioning is er daar een van, die helpt het proces te stroomlijnen.
 
 | Functies | Flow |
 | --- | --- |
-| Door de beheerder geïnitieerde uitnodiging | Gebruikers kunnen een e-mailuitnodiging ontvangen om lid te worden van de organisatie. |
-| Gebruikerscreatie of import via de API | Gebruikers kunnen een vooraf aangemaakt gebruikersaccount gebruiken om lid te worden van de organisatie. |
-| Just-in-time provisioning | Gebruikers die voor het eerst inloggen in de app kunnen lid worden van de organisatie. |
-| Directory Sync (bijv. SCIM) | Gebruik de Directory Sync-functionaliteit van de IdP om gebruikers vooraf in de app in te richten. |
+| Door de beheerder geïnitieerde uitnodiging | Gebruikers kunnen een e-mailuitnodiging ontvangen om zich bij de organisatie aan te sluiten. |
+| Gebruikerscreatie of -import via API | Gebruikers kunnen een vooraf aangemaakt gebruikersaccount gebruiken om zich bij de organisatie aan te sluiten. |
+| Just-in-time provisioning | Gebruikers die voor de eerste keer in de app inloggen, kunnen zich bij de organisatie aansluiten. |
+| Directory Sync (bijv. SCIM) | Gebruik de Directory Sync-functionaliteit van de IdP om gebruikers vooraf in de app te provisioneren. |
 
-**Just-in-time (JIT) provisioning** is een proces dat wordt gebruikt in identity en access management systemen om gebruikersaccounts direct aan te maken wanneer ze voor het eerst inloggen op een systeem. In plaats van vooraf gebruikersaccounts in te richten, maakt JIT provisioning de nodige gebruikersaccounts dynamisch aan en configureert deze wanneer een gebruiker authenticeert. Just-in-time provisioning is een populaire functie met zijn eigen kenmerken, zoals efficiëntie, geen administratieve betrokkenheid, en geautomatiseerd lidmaatschap van de organisatie, enz. 
+**Just-in-time (JIT) provisioning** is een proces dat wordt gebruikt in identity en access managementsystemen om gebruikersaccounts dynamisch aan te maken wanneer ze voor de eerste keer in een systeem inloggen. In plaats van accounts vooraf voor gebruikers te provisioneren, creëert JIT provisioning de benodigde gebruikersaccounts dynamisch wanneer een gebruiker authenticatie uitvoert. Just-in-time provisioning is een populaire functie met eigen kenmerken zoals efficiëntie, geen administratieve betrokkenheid en geautomatiseerd lidmaatschap van organisaties, enz.
 
-## Wat zijn de gebruiksscenario's voor just-in-time provisioning?
+## Wat zijn de use cases voor just-in-time provisioning?
 
-Deze scenario's zijn gebruikelijk bij het bouwen van een B2B-app die een multi-tenant architectuur, Enterprise SSO (single sign-on) omvat, werkt met bedrijven, of team onboarding-functionaliteiten vereist. Hier zijn enkele voorbeeldscenario's die je klant kan tegenkomen.
+Deze gevallen zijn gebruikelijk bij het bouwen van een B2B-app die multi-tenant architectuur, enterprise sso, samenwerking met ondernemingen of team-onboardingfuncties omvat. Hier zijn enkele voorbeeldscenario's die je klant kan tegenkomen.
 
 ### Snelle onboarding
 
-Je hebt een klant die frequent aanwervingen of snelle groei ervaart en JIT provisioning kan gebruiken om snel gebruikersaccounts voor nieuwe werknemers op te zetten. Hier een voorbeeld:
+Je hebt een klant die frequente aanwervingen ervaart of snel groeit, ze kunnen JIT provisioning gebruiken om snel gebruikersaccounts voor nieuwe medewerkers op te zetten. Hier is een voorbeeld:
 
-Sarah is een nieuwe werknemer bij Company SuperFantasy, dat Okta gebruikt als zijn Enterprise Identity Provider. Het HR-team voegt haar slechts één keer toe als een zakelijke identiteit in Okta. Wanneer Sarah voor het eerst inlogt op een door het bedrijf gebruikte productiviteitsapp genaamd Smartworkspace met deze e-mail, creëert het systeem automatisch een account en wijst de juiste rol toe binnen de werkruimte van het bedrijf. Op deze manier hoeven noch Sarah, noch het HR-team bij SuperFantasy meerdere stappen te doorlopen voor het aanmaken van een account en het toewijzen van rollen.
+Sarah is een nieuwe medewerker bij Company SuperFantasy, dat Okta gebruikt als zijn Enterprise Identity Provider. Het HR-team voegt haar één keer toe als bedrijfsidentiteit in Okta. Wanneer Sarah deze e-mail gebruikt om voor de eerste keer in te loggen op een zakelijk gebruikte productiviteitsapp die Smartworkspace heet, creëert het systeem automatisch een account en voorziet het van de juiste rol binnen de werkruimte van het bedrijf. Zo hoeven noch Sarah noch het HR-team van SuperFantasy meerdere stappen te doorlopen voor accountcreatie en roltoewijzing.
 
 ### Fusies, overnames en tijdelijke werknemers
 
-Je hebt een klant die fusies of overnames ervaart; JIT provisioning kan het proces van het verlenen van toegang tot de systemen van het overnemende bedrijf voor veel nieuwe gebruikers vereenvoudigen. Laten we een ander voorbeeld bekijken:
+Je hebt een klant die fusies of acquisities ervaart, JIT provisioning kan het proces vereenvoudigen van het verlenen van toegang tot de systemen van het overnemende bedrijf voor veel nieuwe gebruikers. Laten we een ander voorbeeld nemen,
 
-Peter werkt voor MagicTech, dat onlangs is overgenomen door SuperFantasy. MagicTech is een kleinere organisatie zonder Enterprise SSO maar gebruikt ook Smartworkspace waar Peter al een zakelijke account heeft.
+Peter werkt voor MagicTech, dat onlangs is overgenomen door SuperFantasy. MagicTech is een kleinere organisatie zonder Enterprise SSO, maar gebruikt ook Smartworkspace, waar Peter al een bedrijfsaccount heeft.
 
-Het HR-team kan Peter toevoegen in Okta. Wanneer Peter voor het eerst inlogt op Smartworkspace via Okta, koppelt het systeem automatisch zijn bestaande zakelijke account en verleent de juiste toegang tot SuperFantasy.
+Het HR-team kan Peter toevoegen in Okta. Wanneer Peter de eerste keer inlogt op Smartworkspace via Okta, koppelt het systeem automatisch zijn bestaande bedrijfsaccount en verleent het de juiste toegang aan SuperFantasy.
 
-De bovenstaande scenario's zijn ideaal voor het implementeren van de JIT-functionaliteit.
+De bovenstaande scenario's zijn ideaal voor het implementeren van de JIT-functie.
 
 ## Is het specifiek voor SAML en Enterprise SSO?
 
-Just-in-time (JIT) provisioning wordt vaak geassocieerd met single sign-on (SSO) bij SAML-authenticatie, maar het is niet exclusief voor SAML. JIT provisioning kan ook worden gebruikt met andere authenticatieprotocollen zoals OAuth 2.0 en OpenID Connect, en vereist niet altijd een Enterprise SSO-opstelling.
+Just-in-time (JIT) provisioning wordt vaak geassocieerd met <Ref slug="enterprise-sso" /> in SAML-authenticatie, maar het is niet exclusief voor <Ref slug="saml" />. JIT provisioning kan ook worden gebruikt met andere authenticatieprotocollen zoals <Ref slug="oauth-2.0" /> en <Ref slug="openid-connect" />, en het vereist niet altijd een <Ref slug="enterprise-sso" />-opstelling.
 
-Bijvoorbeeld, JIT provisioning op basis van e-maildomein kan team onboarding stroomlijnen door automatisch gebruikers toe te voegen aan een werkruimte op basis van hun e-maildomein. Dit is bijzonder nuttig voor organisaties die niet het budget en de middelen hebben om Enterprise SSO aan te schaffen en te beheren.
+E-mailgebaseerde JIT provisioning kan bijvoorbeeld de teamonboarding vereenvoudigen door gebruikers automatisch toe te voegen aan een werkruimte op basis van hun e-maildomein. Dit is bijzonder nuttig voor organisaties die het budget en de middelen missen om Enterprise SSO aan te schaffen en te beheren.
 
-Het fundamentele idee achter JIT provisioning is om gebruikersaccount creatie of updates te automatiseren wanneer een gebruiker voor het eerst probeert toegang te krijgen tot een dienst, ongeacht het specifieke protocol dat wordt gebruikt.
+Het fundamentele idee achter JIT provisioning is om de creatie of update van gebruikersaccounts te automatiseren wanneer een gebruiker voor de eerste keer probeert toegang te krijgen tot een service, ongeacht het specifieke protocol dat wordt gebruikt.
 
 ## Geldt het voor nieuwe of bestaande gebruikers van de app?
 
-Just-in-time (JIT) provisioning verwijst over het algemeen naar de eerste poging om toegang te krijgen tot een app. Echter, verschillende producten hebben verschillende opvattingen over deze functionaliteit. Sommigen gebruiken JIT provisioning alleen voor identiteit en account aanmaak, terwijl anderen ook just-in-time accountupdates omvatten, zoals opnieuw inrichten en attribuutsynchronisatie.
+Just-in-time (JIT) provisioning verwijst over het algemeen naar de eerste toegangspoging tot een app. Verschillende producten geven echter een andere invulling aan deze functionaliteit. Sommige gebruiken JIT provisioning alleen voor identiteit en accountcreatie, terwijl anderen ook just-in-time accountupdates omvatten, zoals re-provisioning en attributiesynchronisatie.
 
-Naast automatische gebruikerscreatie, stelt SAML JIT Provisioning in staat om groepslidmaatschappen toe te kennen en in te trekken als onderdeel van de provisioning. Het kan ook geprovisioneerde gebruikers updaten om hun attributen in de Service Provider (SP) opslag te synchroniseren met de attributen van de Identity Provider (IDP) gebruikersopslag.
+Naast automatische gebruikerscreatie stelt SAML JIT Provisioning ook in staat om groepslidmaatschappen als onderdeel van provisioning toe te kennen en in te trekken. Het kan ook geprovisioneerde gebruikers bijwerken om hun attributen in de <Ref slug="service-provider" />-winkel te synchroniseren met de attributen van de <Ref slug="identity-provider" />-winkel.
 
-Als je het scenario van daarna bestaande gebruiker-aanmelden wilt beschouwen, zorg er dan voor dat je een robuust provisioning systeem hebt naast je JIT-systeem. Bijvoorbeeld,
+Als je het scenario van de latere inlogpogingen door bestaande gebruikers wilt overwegen, zorg dan voor een robuust provisioning-systeem naast je JIT-systeem. Bijvoorbeeld,
 
-- **Conflictoplossing**: Je systeem zou een strategie moeten hebben voor het omgaan met conflicten als er al een account bestaat met andere informatie dan wat de IdP verstrekt tijdens het JIT-proces. Dit kan gedetailleerde controle vereisen van het beleid van je organisatie en de IdP-configuratie.
-- **Audit trails**: Het is belangrijk om logs bij te houden van zowel nieuwe accountcreaties als updates van bestaande accounts via JIT-processen om veiligheids- en nalevingsredenen.
-- **Prestaties**: Terwijl JIT provisioning snel gebeurt, overweeg de mogelijke impact op inlogtijden, vooral voor bestaande gebruikers als je hun informatie bijwerkt bij elke inlog.
-- **Gegevensconsistentie**: Zorg ervoor dat je JIT provisioning proces gegevensconsistentie behoudt, vooral wanneer bestaande gebruikersaccounts worden bijgewerkt.
+- **Conflictresolutie**: Je systeem moet een strategie hebben voor het omgaan met conflicten als er al een account bestaat met andere informatie dan die door de IdP wordt verstrekt tijdens het JIT-proces. Dit kan gedetailleerde controle vereisen over de organisatiebeleid en de configuratie van de IdP.
+- **Audit trails**: Het is belangrijk om logs bij te houden van zowel nieuwe accountcreaties als updates van bestaande accounts via JIT-processen voor veiligheids- en nalevingsdoeleinden.
+- **Prestaties**: Hoewel JIT provisioning snel plaatsvindt, moet je rekening houden met de mogelijke impact op inlogtijden, vooral voor bestaande gebruikers als je hun informatie bij elke inlog wilt bijwerken.
+- **Dataconsistentie**: Zorg ervoor dat je JIT-provisioningproces de dataconsistentie behoudt, vooral bij het bijwerken van bestaande gebruikersaccounts.
 
 ## Wat is het verschil tussen JIT en SCIM?
 
-SCIM is een open standaardprotocol ontworpen om gebruikersidentiteitsbeheer over verschillende systemen en domeinen te vereenvoudigen en te automatiseren. Het wordt vaak gebruikt in Directory Sync-scenario's.
+SCIM is een open standaardprotocol dat is ontworpen om het beheer van gebruikersidentiteiten over verschillende systemen en domeinen te vereenvoudigen en te automatiseren. Het wordt vaak gebruikt in Directory Sync-scenario's.
 
-Het grootste verschil tussen JIT en SCIM is dat JIT accounts creëert tijdens de inlogpoging van de gebruiker, terwijl SCIM gebruikers kan voorzien via een offline geautomatiseerd proces, onafhankelijk van gebruikerslogin-pogingen.
+Het belangrijkste verschil tussen JIT en SCIM is dat JIT accounts aanmaakt tijdens de inlogpoging van de gebruiker, terwijl SCIM gebruikers kan provisioneren via een offline geautomatiseerd proces, onafhankelijk van gebruikersinlogpogingen.
 
-Dit betekent dat JIT zich richt op nieuwe gebruikersonboarding, terwijl SCIM zich richt op volledige levenscyclusbeheer van gebruikers.
+Dit betekent dat JIT zich richt op het onboarden van nieuwe gebruikers, terwijl SCIM zich richt op het volledige levenscyclusbeheer van gebruikers.
 
-Bovendien is JIT vaak een uitbreiding van SAML en ontbreekt het aan een gestandaardiseerde implementatie over systemen, terwijl SCIM een goed gedefinieerd gestandaardiseerd protocol is [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) voor identiteitsbeheer.
+Bovendien is JIT vaak een uitbreiding van SAML en ontbreekt het een gestandaardiseerde implementatie over verschillende systemen, terwijl SCIM een goed gedefinieerd, gestandaardiseerd protocol is [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) voor identiteitsbeheer.
 
-Sommige grotere organisaties gebruiken SCIM voor account provisioning en integreren het met hun eigen systemen. Dit kan erg complex zijn en variëren per geval. Deze organisaties hebben vaak een provisioning systeem dat zowel geautomatiseerde processen als handmatige administratieve betrokkenheid omvat.
+Sommige grotere organisaties gebruiken SCIM voor accountprovisioning en integreren het met hun eigen systemen, wat zeer complex kan zijn en per geval kan verschillen. Deze organisaties hebben vaak een provisioning-systeem dat zowel geautomatiseerde processen als handmatige beheerbetrokkenheid omvat.
 
 <Resources urls={['https://blog.logto.io/jit-provisioning']} />

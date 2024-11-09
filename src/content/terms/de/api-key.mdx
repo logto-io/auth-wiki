@@ -1,64 +1,64 @@
 ---
 title: API-Schlüssel (API key)
 tags: [authentication, api]
-description: Ein API-Schlüssel ist ein einzigartiger Bezeichner, der zur Authentifizierung und Autorisierung eines Clients beim Zugriff auf eine API verwendet wird. Er dient als geheimes Token, das in API-Anfragen enthalten ist, um die Identität des Clients zu überprüfen und Zugriff auf bestimmte Ressourcen oder Dienste zu ermöglichen. API-Schlüssel werden typischerweise in Server-zu-Server-Kommunikationen oder beim Zugriff auf öffentliche Daten verwendet.
+description: Ein API-Schlüssel ist ein eindeutiger Bezeichner, der zur Authentifizierung und Autorisierung eines Clients beim Zugriff auf eine API verwendet wird. Er dient als geheimes Token, das in API-Anfragen enthalten ist, um die Identität des Clients zu überprüfen und den Zugriff auf bestimmte Ressourcen oder Dienste zu ermöglichen. API-Schlüssel werden typischerweise in Server-zu-Server-Kommunikationen oder beim Zugriff auf öffentliche Daten verwendet.
 ---
 
 ## Was ist ein API-Schlüssel?
 
-API-Schlüssel werden verwendet, um die aufrufende Anwendung oder den Dienst zu identifizieren und zu autorisieren. Sie sind in der Regel langanhaltend und statisch bis zur Rotation und haben oft einen festen Satz von Berechtigungen. Sie werden hauptsächlich für Server-zu-Server-Kommunikationen oder den Zugriff auf öffentliche Daten verwendet, diese Tokens repräsentieren im Allgemeinen keinen spezifischen Benutzer.
+API-Schlüssel werden verwendet, um die aufrufende Anwendung oder den Dienst zu identifizieren und zu autorisieren. Sie sind in der Regel langlebig und statisch, bis sie rotiert werden, und haben oft einen festen Satz von Berechtigungen. Sie werden hauptsächlich für Server-zu-Server-Kommunikationen oder den Zugriff auf öffentliche Daten verwendet, diese Tokens repräsentieren im Allgemeinen keinen bestimmten Benutzer.
 
 ## Wie funktioniert ein API-Schlüssel?
 
-Ein API-Schlüssel ist eine lange Zeichenkette, die vom API-Anbieter generiert und mit autorisierten Benutzern geteilt wird. Dieser Schlüssel muss im Anfrage-Header enthalten sein, wenn auf die API zugegriffen wird. API-Schlüssel sind einfach und effektiv für grundlegende Sicherheitsanforderungen. Populäre Dienste wie Google Maps API und AWS stellen beispielsweise API-Schlüssel bereit, um den Zugriff zu kontrollieren und die Nutzung zu überwachen.
+Ein API-Schlüssel ist eine lange Zeichenfolge, die vom API-Anbieter generiert und mit autorisierten Benutzern geteilt wird. Dieser Schlüssel muss im Anforderungsheader enthalten sein, wenn auf die API zugegriffen wird. API-Schlüssel sind einfach und effektiv für grundlegende Sicherheitsanforderungen. Zum Beispiel bieten beliebte Dienste wie Google Maps API und AWS API-Schlüssel an, um den Zugriff zu kontrollieren und die Nutzung zu überwachen.
 
 ```java
 curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
 ```
 
-API-Schlüssel sind nicht so effektiv wie andere Formen der API-Authentifizierung (API Authentication), wie OAuth und JWT, spielen jedoch dennoch eine wichtige Rolle, um API-Anbieter bei der Überwachung der Nutzung zu unterstützen, da es die einfachste und am weitesten verbreitete Methode ist, APIs zu sichern.
+API-Schlüssel sind nicht so effektiv wie andere Formen der API-Authentifizierung (Authentication), wie <Ref slug="oauth-2.0" /> und <Ref slug="jwt" />, aber sie spielen dennoch eine wichtige Rolle dabei, API-Produzenten bei der Überwachung der Nutzung zu helfen, da es die einfachste und am weitesten verbreitete Methode ist, APIs zu sichern.
 
 ## Was sind die Vor- und Nachteile?
 
 ### Vorteile
 
-- Einfach zu implementieren: API-Schlüssel sind einfach zu implementieren und zu verwenden. Sie beinhalten das Anfügen eines Schlüssels an den Anfrage-Header, was eine einfache Methode für Entwickler und Clients darstellt, die sie verstehen und anwenden können.
-- Einfach zu überwachen: API-Schlüssel sind leicht zu überwachen. Man kann die Nutzung jedes Schlüssels nachverfolgen und sie bei Bedarf widerrufen.
-- Effektives Rate Limiting: API-Schlüssel sind effektiv für das Rate Limiting. Man kann ein Limit für die Anzahl der Anfragen pro Schlüssel festlegen, um Missbrauch zu verhindern.
-- Geeignet für nicht-sensible Daten: API-Schlüssel sind geeignet für nicht-sensible Daten oder öffentlich zugängliche APIs, bei denen die Sicherheitsanforderungen geringer sind.
+- Einfach zu implementieren: API-Schlüssel sind einfach zu implementieren und zu verwenden. Sie beinhalten das Anhängen eines Schlüssels an den Anforderungsheader, was es Entwicklern und Clients leicht verständlich und anwendbar macht.
+- Einfach zu überwachen: API-Schlüssel sind einfach zu überwachen. Du kannst die Nutzung jedes Schlüssels verfolgen und sie bei Bedarf widerrufen.
+- Effektive Ratenbegrenzung: API-Schlüssel sind effektiv für die Ratenbegrenzung. Du kannst ein Limit für die Anzahl der Anfragen pro Schlüssel festlegen, um Missbrauch zu verhindern.
+- Geeignet für nicht sensible Daten: API-Schlüssel sind geeignet für nicht sensible Daten oder öffentlich zugängliche APIs, bei denen die Sicherheitsanforderungen geringer sind.
 
 ### Nachteile
 
-- Eingeschränkte Sicherheit: API-Schlüssel sind nicht sicher genug für sensible Daten, insbesondere für client-seitige Anwendungen. Sie werden häufig in Maschine-zu-Maschine-Kommunikationen verwendet.
-- Nicht geeignet für die Benutzer-Authentifizierung (Authentication): API-Schlüssel sind mit Anwendungen oder Systemen verbunden, nicht mit einzelnen Benutzern, was es schwierig macht, spezifische Benutzer zu identifizieren oder ihre Handlungen zu verfolgen.
-- Kein Token-Ablauf: API-Schlüssel sind typischerweise statisch und laufen nicht ab. Wenn ein Schlüssel kompromittiert wird, könnte er unendlich lange missbraucht werden, es sei denn, er wird manuell neu generiert.
+- Begrenzte Sicherheit: API-Schlüssel sind nicht sicher genug für sensible Daten, insbesondere für clientseitige Anwendungen. Sie werden häufig in Machine-to-Machine-Kommunikationen verwendet.
+- Nicht geeignet für Benutzer-Authentifizierung (Authentication): API-Schlüssel sind an Anwendungen oder Systeme gebunden, nicht an einzelne Benutzer, was es schwierig macht, spezifische Benutzer zu identifizieren oder ihre Aktionen zu verfolgen.
+- Kein Token-Ablauf: API-Schlüssel sind typischerweise statisch und laufen nicht ab. Wenn ein Schlüssel kompromittiert wird, könnte er unbegrenzt missbraucht werden, es sei denn, er wird manuell neu generiert.
 
 ## Was sind die Anwendungsfälle für API-Schlüssel?
 
-- Dienst-zu-Dienst-Kommunikation: API-Schlüssel sind geeignet für Szenarien, in denen Anwendungen direkt über CLIs mit APIs kommunizieren müssen. Z. B. Aufrufen von OpenAI APIs.
-- Öffentliche APIs: Beim Offenlegen von APIs an die Öffentlichkeit bieten API-Schlüssel eine einfache Methode der Zugriffskontrolle.
-- Vereinfachtes Setup: Für schnelle und einfache Authentifizierungsanforderungen, insbesondere in der Entwicklungsphase. Im Gegensatz zu Maschine-zu-Maschine Authentication benötigen API-Schlüssel keine vorherige Client-Registrierung und keinen Austausch für ein Zugriffstoken. Du musst deinen API-Schlüssel einfach nur als Parameter in deiner Anfrage angeben, und es funktioniert einfach.
+- Dienst-zu-Dienst-Kommunikation: API-Schlüssel sind geeignet für Szenarien, in denen Anwendungen direkt über CLIs mit APIs kommunizieren müssen. Z.B. Aufrufen von OpenAI APIs.
+- Öffentliche APIs: Beim Bereitstellen von APIs für die Öffentlichkeit bieten API-Schlüssel eine einfache Methode der Zugriffskontrolle.
+- Vereinfachte Einrichtung: Für schnelle und einfache Authentifizierungsanforderungen, insbesondere in der Entwicklungsphase. Im Gegensatz zur Machine-to-Machine-Authentifizierung (Authentication) erfordern API-Schlüssel keine vorherige Client-Registrierung und müssen nicht gegen ein Access Token ausgetauscht werden. Du übergibst einfach deinen API-Schlüssel als Parameter in deiner Anfrage und es funktioniert einfach.
 
-In realen Szenarien ist das häufigste Ziel beim Erstellen von Produkten die Produktintegration. Hier ist ein typischer Anwendungsfall:
+In realen Szenarien ist der häufigste Zweck beim Erstellen von Produkten die Produktintegration. Hier ist ein typischer Anwendungsfall:
 
 ### Beispiel: Integration mit Stripe
 
-Stripe verwendet API-Schlüssel für die sichere Integration mit verschiedenen Plattformen und Anwendungen. Man kann diese Schlüssel über das Entwickler-Dashboard erstellen, anzeigen, löschen und verwalten. Durch die Verwendung von API-Schlüsseln kann man Stripes Checkout- und Abrechnungsfunktionen in sein Produkt integrieren.
+Stripe verwendet API-Schlüssel für die sichere Integration mit verschiedenen Plattformen und Anwendungen. Du kannst diese Schlüssel über das Entwickler-Dashboard erstellen, anzeigen, löschen und verwalten. Durch die Verwendung von API-Schlüsseln kannst du die Checkout- und Abrechnungsfunktionen von Stripe in dein Produkt integrieren.
 
 ![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
 
-## Was ist der Unterschied zwischen persönlichen Zugriffstokens (Personal Access Tokens, PAT) und Maschine-zu-Maschine (M2M)?
+## Was ist der Unterschied zwischen Personal Access Tokens (PAT) und Machine-to-Machine (M2M)?
 
-Beim Sprechen über API-Schlüssel können persönliche Zugriffstokens und Maschine-zu-Maschine ebenfalls erwähnt werden, da sie alle programmatisch auf API-Ressourcen über CLI-Befehle zugreifen oder Kommunikation zwischen Backend-Diensten herstellen können.
+Wenn man über API-Schlüssel spricht, können auch Personal Access Tokens und <Ref slug="machine-to-machine" /> erwähnt werden, da sie alle programmatisch auf API-Ressourcen über CLI-Befehle zugreifen oder die Kommunikation zwischen Backend-Diensten herstellen können.
 
-### Persönliche Zugriffstokens (PATs)
+### Personal Access Tokens (PATs)
 
-Ein persönliches Zugriffstoken ist ebenfalls eine Zeichenkette, repräsentiert jedoch ***die Identität und Berechtigungen eines spezifischen Benutzers***, wird dynamisch nach erfolgreicher Authentifizierung oder Anmeldung generiert und hat typischerweise eine begrenzte Lebensdauer, kann jedoch aktualisiert werden. Es bietet feingranulierte Zugriffskontrolle auf benutzerspezifische Daten und Fähigkeiten und wird häufig für CLI-Tools, Skripte oder persönlichen API-Zugriff verwendet. Der Hauptunterschied besteht darin, dass es spezifischer ist und für benutzerspezifische Aktionen verwendet wird.
+Ein Personal Access Token ist ebenfalls eine Zeichenfolge, repräsentiert jedoch ***die Identität und Berechtigungen eines bestimmten Benutzers***, wird dynamisch nach erfolgreicher Authentifizierung (Authentication) oder Anmeldung generiert und hat typischerweise eine begrenzte Lebensdauer, kann jedoch erneuert werden. Es bietet feingranulare Zugriffskontrolle auf benutzerspezifische Daten und Funktionen und wird häufig für CLI-Tools, Skripte oder persönlichen API-Zugriff verwendet. Der Hauptunterschied besteht darin, dass es spezifischer ist und für benutzerspezifische Aktionen verwendet wird.
 
-### Maschine-zu-Maschine (M2M)
+### Machine-to-Machine (M2M)
 
-Bei M2M-Kommunikation tauschen Geräte automatisch Daten aus, ohne dass ein menschliches Eingreifen erforderlich ist, in einem breiteren Sinne.
+M2M-Kommunikation ist, wenn Geräte automatisch Daten ohne menschliches Eingreifen austauschen.
 
-Im Kontext von OIDC (oder OAuth 2.0) verwenden M2M-Anwendungen den Client Credentials Flow, wie im [OAuth 2.0 RFC 6749-Protokoll](https://datatracker.ietf.org/doc/html/rfc6749) definiert, das ähnliche Standardprotokolle unterstützt. Es beinhaltet normalerweise eine Client-Anwendung (eine Maschine oder ein Dienst), die entweder auf eigene Faust oder im Namen eines Benutzers auf Ressourcen zugreift. Es ist ideal für Situationen, in denen nur vertrauenswürdige Clients auf Backend-Dienste zugreifen können.
+Im Kontext von <Ref slug="openid-connect" /> (oder <Ref slug="oauth-2.0" />) verwenden M2M-Anwendungen den <Ref slug="client-credentials-flow" />, wie im [OAuth 2.0 RFC 6749-Protokoll](https://datatracker.ietf.org/doc/html/rfc6749) definiert, das ähnliche Standardprotokolle unterstützt. Es beinhaltet normalerweise eine Client-Anwendung (eine Maschine oder ein Dienst), die entweder eigenständig oder im Namen eines Benutzers auf Ressourcen zugreift. Es ist ideal für Situationen, in denen nur vertrauenswürdige Clients auf Backend-Dienste zugreifen können.
 
 <SeeAlso slugs={["machine-to-machine"]} />

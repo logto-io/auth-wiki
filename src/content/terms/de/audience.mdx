@@ -1,24 +1,24 @@
 ---
 title: Zielgruppe (Audience)
 tags: [oauth 2.0, oidc]
-description: Der Zielgruppen-Claim (Audience) in einem Token spezifiziert den vorgesehenen Empfänger, typischerweise die Client-Anwendung oder die API-Ressource. Er stellt sicher, dass das Token nur vom richtigen Dienst verwendet wird, was die Sicherheit erhöht, indem unbefugter Zugriff verhindert wird.
+description: Der Audience-Anspruch (Claim) in einem Token gibt den vorgesehenen Empfänger an, typischerweise die Client-Anwendung oder die API-Ressource. Er stellt sicher, dass das Token nur vom richtigen Dienst verwendet wird, was die Sicherheit durch Verhinderung von unbefugtem Zugriff erhöht.
 ---
 
-## Was ist eine Zielgruppe (Audience)?
+## Was ist die Zielgruppe (Audience)?
 
-Im Kontext von Authentifizierung und Autorisierung ist die Zielgruppe (Audience) ein Schlüsselelement, das die vorgesehenen Empfänger eines Autorisierungstokens definiert. Bezeichnet als der [aud](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3) Claim in <Ref slug="jwt" />, stellt dieser Claim sicher, dass das Token nur von dem dafür vorgesehenen Dienst oder der Anwendung akzeptiert wird. Typischerweise enthält der Audience-Claim entweder die client_id der Anwendung, für die das Token bestimmt ist, oder eine URL, die die API oder Ressource repräsentiert, auf die das Token zuzugreifen berechtigt ist. Durch die Angabe der Audience dient es als Sicherheitskontrolle, um den Missbrauch durch unautorisierte Dienste oder Benutzer zu verhindern.
+Im Kontext von <Ref slug="authentication" /> und <Ref slug="authorization" /> ist die Audience ein Schlüsselelement, das die beabsichtigten Empfänger eines Authorization-Tokens definiert. Bezeichnet als [aud](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3) Claim in <Ref slug="jwt" />, stellt dieses Claim sicher, dass das Token nur von dem vorgesehenen Dienst oder der Anwendung akzeptiert wird. Typischerweise enthält das Audience-Claim entweder die client_id der Anwendung, für die das Token bestimmt ist, oder eine URL, die die API oder Ressource repräsentiert, für die das Token autorisiert ist. Durch die Spezifizierung der Audience dient es als Sicherheitskontrolle, um Missbrauch durch unbefugte Dienste oder Benutzer zu verhindern.
 
-## Wie funktioniert die Zielgruppe (Audience)?
+## Wie funktioniert die Audience?
 
-Wenn ein Client ein Zugriffstoken von einem Authorization Server anfordert, wird der Audience-Claim in die Token-Antwort aufgenommen. Dieser Audience-Wert wird dann vom Resource Server validiert, wenn das Token vorgelegt wird. Der Resource Server überprüft, ob der Audience-Claim im Token mit seinem eigenen Bezeichner oder dem Bezeichner des Dienstes übereinstimmt, den er schützt. Andernfalls wird das Token abgelehnt, wodurch die Sicherheit in verteilten Systemen erhöht wird, insbesondere in Szenarien mit mehreren Mikroservices oder APIs. Durch die Kontrolle des Audience-Claims können Entwickler sicherstellen, dass Tokens im richtigen Kontext verwendet werden, und ihrer Anwendung einen zusätzlichen Schutzschicht in den Authentifizierungs- und Autorisierungsworkflows verleihen.
+Wenn ein Client ein <Ref slug="access-token" /> von einem Authorization-Server anfordert, ist das Audience-Claim in der Token-Antwort enthalten. Dieser Audience-Wert wird dann vom Resource-Server validiert, wenn das Token vorgelegt wird. Der Resource-Server überprüft, ob das Audience-Claim im Token mit seinem eigenen Bezeichner oder dem Bezeichner des Dienstes, den er schützt, übereinstimmt. Wenn dies nicht der Fall ist, wird das Token abgelehnt, was die Sicherheit in verteilten Systemen erhöht, insbesondere in Szenarien, die mehrere Microservices oder APIs umfassen. Durch die Kontrolle des Audience-Claims können Entwickler sicherstellen, dass Tokens im richtigen Kontext verwendet werden, was ihrer Anwendung eine zusätzliche Schutzschicht bei Authentication- und Authorization-Workflows hinzufügt.
 
-- **Anfragender**: Die Client-Anwendung gibt den Audience-Wert an, wenn sie ein Token anfordert.
-- **Issuer (Herausgeber)**: Der Authorization Server fügt den Audience-Claim in die Token-Antwort ein.
-- **Prüfer**: Der Empfänger des Tokens überprüft den Audience-Claim gegen seinen eigenen Bezeichner. Wenn der Audience-Claim mit dem Bezeichner des Empfängers übereinstimmt, wird das Token als gültig betrachtet. Andernfalls wird es abgelehnt.
+- **Anforderer**: Die Client-Anwendung gibt den Audience-Wert an, wenn sie ein Token anfordert.
+- **Issuer**: Der Authorization-Server fügt das Audience-Claim in die Token-Antwort ein.
+- **Verifier**: Der Empfänger des Tokens überprüft das Audience-Claim mit seinem eigenen Bezeichner. Wenn das Audience-Claim mit dem Bezeichner des Empfängers übereinstimmt, wird das Token als gültig angesehen. Andernfalls wird es abgelehnt.
 
-## Beispiel für eine Zielgruppe (Audience) in einem JWT
+## Beispiel für die Audience in JWT
 
-### Zielgruppen-Claim (Audience) in einem OpenID Connect (OIDC) ID-Token
+### Audience-Claim in einem OpenID Connect (OIDC) ID-Token
 
 ```json
 {
@@ -42,29 +42,29 @@ Wenn ein Client ein Zugriffstoken von einem Authorization Server anfordert, wird
 }
 ```
 
-Ein <Ref slug="id-token" /> in OpenID Connect (OIDC) ist ein Sicherheitstoken, das Informationen über den authentifizierten Benutzer enthält, die der Client-Anwendung nach einer erfolgreichen Authentifizierung geliefert werden. Im Gegensatz zu Zugriffstokens, die verwendet werden, um Berechtigungen für den Zugriff auf Ressourcen zu gewähren, sind ID-Tokens speziell für die Übermittlung von Benutzeridentitätsinformationen an die vertrauende Partei (Client) ausgelegt. Diese Tokens sind typischerweise als JWTs (JSON Web Tokens) kodiert und enthalten Claims wie den Benutzerbezeichner (sub Claim), den Herausgeber (iss Claim) und die Zielgruppe (aud Claim) unter anderem.
+Ein <Ref slug="id-token" /> in <Ref slug="openid-connect" /> ist ein Sicherheitstoken, das Informationen über den authentifizierten Benutzer enthält und der Client-Anwendung nach einer erfolgreichen Authentifizierung geliefert wird. Anders als Access-Tokens, die zum Erteilen von Berechtigungen zum Zugriff auf Ressourcen verwendet werden, sind ID-Token speziell dafür ausgelegt, Benutzeridentitätsinformationen an die vertrauende Partei (Client) zu übermitteln. Diese Tokens werden typischerweise als JWTs codiert und enthalten Claims wie die Benutzerkennung (sub-Claim), den Issuer (iss-Claim) und die Audience (aud-Claim) unter anderem.
 
-In diesem Fall gibt der `aud` Claim die vorgesehene Zielgruppe für das ID-Token an, nämlich die Client-Anwendung. Der Wert des `aud` Claims entspricht üblicherweise der `client_id` der Anwendung, die das Token angefordert hat. Wenn die Client-Anwendung das ID-Token empfängt, kann sie den Audience-Claim überprüfen, um sicherzustellen, dass das Token für ihren Verbrauch ausgegeben wurde. Dieser Validierungsschritt hilft, den Missbrauch von Tokens und unbefugten Zugriff auf Benutzerinformationen zu verhindern und die Sicherheit des Authentifizierungsprozesses zu erhöhen.
+In diesem Fall gibt das `aud`-Claim die beabsichtigte Audience für das ID-Token an, die die Client-Anwendung ist. Der Wert des `aud`-Claims entspricht normalerweise der `client_id` der Anwendung, die das Token angefordert hat. Wenn die Client-Anwendung das ID-Token erhält, kann sie das Audience-Claim überprüfen, um sicherzustellen, dass das Token für ihren Verbrauch ausgegeben wurde. Dieser Validierungsschritt hilft, Token-Missbrauch und unbefugten Zugriff auf Benutzerinformationen zu verhindern, was die Sicherheit des Authentication-Prozesses erhöht.
 
 ```mermaid
 sequenceDiagram
-    participant Benutzer
+    participant Nutzer
     participant Client
     participant AuthorizationServer
 
-    Benutzer->>Client: Anwendung aufrufen
-    Client->>AuthorizationServer: Autorisierungsanfrage mit Client-Anmeldedaten senden
-    AuthorizationServer->>Benutzer: Authentifizierungsaufforderung
-    Benutzer->>AuthorizationServer: Anmeldedaten bereitstellen
-    AuthorizationServer-->>Client: Autorisierungscode gewähren
-    Client-->>AuthorizationServer: Autorisierungscode gegen Tokens austauschen (response_type=token und scope=openid)
-    AuthorizationServer-->>AuthorizationServer: Autorisierungscode überprüfen
+    Nutzer->>Client: Anwendung aufrufen
+    Client->>AuthorizationServer: Sende Authorization-Request mit Client-Credentials
+    AuthorizationServer->>Nutzer: Authentication-Aufforderung
+    Nutzer->>AuthorizationServer: Zugangsdaten bereitstellen
+    AuthorizationServer-->>Client: Authorization-Code gewähren
+    Client-->>AuthorizationServer: Authorization-Code gegen Tokens tauschen (response_type=token and scope=openid)
+    AuthorizationServer-->>AuthorizationServer: Authorization-Code überprüfen
     AuthorizationServer->>Client: ID-Token mit `client_id` als Audience ausgeben
-    Client->>Client: ID-Token `aud` Claim validieren
-    Client->>Benutzer: Benutzer authentifizieren
+    Client->>Client: ID-Token `aud`-Claim validieren
+    Client->>Nutzer: Nutzer authentifizieren
 ```
 
-### Zielgruppen-Claim (Audience) in einem Zugriffstoken
+### Audience-Claim in einem Access-Token
 
 ```json
 {
@@ -86,40 +86,40 @@ sequenceDiagram
 }
 ```
 
-Im Gegensatz zu ID-Tokens werden Zugriffstokens verwendet, um den Zugriff auf geschützte Ressourcen wie APIs oder Dienste zu autorisieren. Der `aud` Claim in einem Zugriffstoken gibt den vorgesehenen Empfänger des Tokens an, der typischerweise die API oder der Dienst ist, auf den das Token zugreifen darf. Typischerweise hat der Resource Server, der die API hostet, eine andere Domain als die Client-Anwendung, die das Token angefordert hat. In diesem Fall enthält der `aud` Claim anstelle einer `client_id` die URL des API-Endpunkts, für den das Token bestimmt ist. Diese URL ist oft als Ressource-Indikator oder API-Identifier bekannt, der die Zielressource eindeutig identifiziert.
+Im Gegensatz zu ID-Tokens werden <Ref slug="access-token" /> verwendet, um den Zugriff auf geschützte Ressourcen wie APIs oder Dienste zu autorisieren. Das `aud`-Claim in einem Access-Token gibt den beabsichtigten Empfänger des Tokens an, wobei es sich typischerweise um die API oder den Dienst handelt, auf den das Token autorisiert ist. In der Regel hat der Resource-Server, der die API hostet, eine andere Domain als die Client-Anwendung, die das Token angefordert hat. In diesem Fall enthält das `aud`-Claim anstelle einer `client_id` die URL des API-Endpunkts, für den das Token bestimmt ist. Diese URL ist oft als Resource Indicator oder API-Identifier bekannt, der die Zielressource eindeutig identifiziert.
 
-Wenn der Resource Server ein Zugriffstoken erhält, validiert er den `aud` Claim, um sicherzustellen, dass das Token für seinen Verbrauch bestimmt ist. Durch Überprüfung des Audiences kann der Resource Server unbefugten Zugriff auf seine Ressourcen verhindern und Zugriffskontrollrichtlinien basierend auf der vorgesehenen Audience des Tokens durchsetzen. Dieser Mechanismus hilft, sensible Daten zu schützen und sicherzustellen, dass Zugriffstokens im richtigen Kontext verwendet werden, was die Sicherheit des gesamten Systems erhöht.
+Wenn der Resource-Server ein Access-Token erhält, validiert er das `aud`-Claim, um sicherzustellen, dass das Token für seinen Gebrauch bestimmt ist. Durch die Überprüfung der Audience kann der Resource-Server unbefugten Zugriff auf seine Ressourcen verhindern und Access Control Policies basierend auf der beabsichtigten Audience des Tokens durchsetzen. Dieser Mechanismus hilft, sensible Daten zu schützen und stellt sicher, dass Access-Tokens im geeigneten Kontext verwendet werden, was die Sicherheit des Gesamtsystems erhöht.
 
 ```mermaid
 sequenceDiagram
-    participant Benutzer
+    participant Nutzer
     participant Client
     participant AuthorizationServer
     participant ResourceServer
 
-    Benutzer->>Client: Anwendung aufrufen
-    Client->>AuthorizationServer: Autorisierungsanfrage zum Zugriff auf eine API-Ressource senden
-    AuthorizationServer->>Benutzer: Authentifizierungsaufforderung
-    Benutzer->>AuthorizationServer: Anmeldedaten bereitstellen
-    AuthorizationServer-->>Client: Autorisierungscode gewähren
-    Client-->>AuthorizationServer: Autorisierungscode gegen Tokens austauschen (response_type=token und resource=<API-Bezeichner>)
-    AuthorizationServer-->>AuthorizationServer: Autorisierungscode überprüfen
-    AuthorizationServer->>Client: Zugriffstoken mit API-URL als Audience ausgeben
-    Client->>ResourceServer: Geschützte Ressource mit Zugriffstoken aufrufen
-    ResourceServer->>ResourceServer: Zugriffstoken `aud` Claim validieren
+    Nutzer->>Client: Anwendung aufrufen
+    Client->>AuthorizationServer: Sende Authorization-Request für den Zugriff auf eine API-Ressource
+    AuthorizationServer->>Nutzer: Authentication-Aufforderung
+    Nutzer->>AuthorizationServer: Zugangsdaten bereitstellen
+    AuthorizationServer-->>Client: Authorization-Code gewähren
+    Client-->>AuthorizationServer: Authorization-Code gegen Tokens tauschen (response_type=token and resource=<API-Identifier>)
+    AuthorizationServer-->>AuthorizationServer: Authorization-Code überprüfen
+    AuthorizationServer->>Client: Access-Token mit API-URL als Audience ausgeben
+    Client->>ResourceServer: Auf geschützte Ressource mit Access-Token zugreifen
+    ResourceServer->>ResourceServer: Access-Token `aud`-Claim validieren
     ResourceServer->>Client: Angeforderte Ressource bereitstellen
 ```
 
 ## FAQs
 
-### Warum ist der Zielgruppen-Claim (Audience) wichtig für die Token-Validierung?
+### Warum ist das Audience-Claim bei der Token-Validierung wichtig?
 
-Der Audience-Claim ist entscheidend für die Token-Validierung, weil er sicherstellt, dass das Token nur vom vorgesehenen Empfänger akzeptiert wird. Durch die Überprüfung des Audience-Claims kann der Empfänger den Missbrauch des Tokens und unbefugten Zugriff auf Ressourcen verhindern. Diese Sicherheitskontrolle ist besonders wichtig in verteilten Systemen, in denen mehrere Dienste miteinander interagieren, da sie hilft, Zugriffskontrollrichtlinien durchzusetzen und sensible Daten zu schützen.
+Das Audience-Claim ist entscheidend bei der Token-Validierung, weil es sicherstellt, dass das Token nur vom beabsichtigten Empfänger akzeptiert wird. Indem das Audience-Claim überprüft wird, kann der Empfänger Token-Missbrauch und unbefugten Zugriff auf Ressourcen verhindern. Diese Sicherheitskontrolle ist insbesondere in verteilten Systemen wichtig, in denen mehrere Dienste miteinander interagieren, da sie hilft, Access Control Policies durchzusetzen und sensible Daten zu schützen.
 
-### Kann ein Token mehrere Zielgruppen haben?
+### Kann ein Token mehrere Audiences haben?
 
-Aus Sicherheitsgründen wird empfohlen, dass ein Token eine einzelne Zielgruppe hat, um Mehrdeutigkeit zu verhindern und sicherzustellen, dass das Token im richtigen Kontext verwendet wird. Einige Szenarien können jedoch Tokens mit mehreren Zielgruppen erfordern, z. B. wenn ein Token für mehrere Dienste oder APIs innerhalb derselben Domain bestimmt ist. In solchen Fällen sollten Entwickler die Auswirkungen der Verwendung von Multi-Audience-Tokens sorgfältig abwägen und geeignete Sicherheitsmaßnahmen implementieren, um potenzielle Risiken zu mindern.
+Aus Sicherheitsgründen wird empfohlen, dass ein Token eine einzige Audience hat, um Mehrdeutigkeiten zu vermeiden und sicherzustellen, dass das Token im richtigen Kontext verwendet wird. Allerdings können einige Szenarien Tokens mit mehreren Audiences erfordern, wie beispielsweise, wenn ein Token für mehrere Dienste oder APIs innerhalb derselben Domain bestimmt ist. In solchen Fällen sollten Entwickler die Auswirkungen des Einsatzes von Multi-Audience-Tokens sorgfältig abwägen und angemessene Sicherheitsmaßnahmen implementieren, um potenzielle Risiken zu mindern.
 
-### Was sollte ich als meinen API-Bezeichner im Zielgruppen-Claim (Audience) verwenden?
+### Was sollte ich als meinen API-Identifier im Audience-Claim verwenden?
 
-Wenn Sie den Zielgruppen-Claim in einem Zugriffstoken angeben, das eine API oder einen Dienst repräsentiert, wird empfohlen, eine absolute URI zu verwenden, die die Ressource eindeutig identifiziert. Diese URI kann die Basis-URL des API-Endpunkts oder ein spezifischer Ressourcenpfad sein, auf den das Token zugreifen darf. Durch die Verwendung einer URI als API-Bezeichner können Sie sicherstellen, dass der Audience-Claim eindeutig ist und den vorgesehenen Empfänger des Tokens genau darstellt.
+Bei der Spezifizierung des Audience-Claims in einem Access-Token, das eine API oder einen Dienst repräsentiert, wird empfohlen, eine absolute URI zu verwenden, die die Ressource eindeutig identifiziert. Diese URI kann die Basis-URL des API-Endpunkts oder ein spezifischer Ressourcenpfad sein, auf den das Token autorisiert ist zuzugreifen. Durch die Verwendung einer URI als API-Identifier kann sichergestellt werden, dass das Audience-Claim unmissverständlich ist und den beabsichtigten Empfänger des Tokens genau repräsentiert.
