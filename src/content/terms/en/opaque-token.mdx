@@ -8,7 +8,7 @@ description: An opaque token is a type of token whose format is determined by th
 
 Before introducing opaque tokens, it’s important to understand what a token is:
 
-Tokens are used to represent and transmit secure information between parties, and they support the vast majority of <Ref slug="authentication" /> and <Ref slug="authorization" /> processes that occur on the internet behind the scenes. The two most popular types of tokens in web services are <Ref slug="jwt">JSON Web Tokens (JWT)</Ref> and opaque tokens.
+Tokens are used to represent and transmit secure information between parties, and they support the vast majority of <Ref slug="authentication" /> and <Ref slug="authorization" /> processes that occur on the internet behind the scenes. The two most popular types of tokens in web services are <Ref slug="jwt" /> and opaque tokens.
 
 ## What is opaque token?
 
@@ -20,7 +20,7 @@ An opaque token is one form a token can take, and <Ref slug="access-token">acces
 M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
 ```
 
-On the other hand, JWT is another common token format. It is a JSON string that contains all the claims and information, along with a signature from the issuer. By default, it is not encrypted, though it can be encrypted using the <Ref slug="jwe">JSON Web Encryption (JWE)</Ref> standard. Even though JWT is typically unencrypted, it does not compromise its security — the presence of the signature ensures the integrity of the token’s contents, allowing full trust in the data inside the JWT.
+On the other hand, JWT is another common token format. It is a JSON string that contains all the claims and information, along with a signature from the issuer. By default, it is not encrypted, though it can be encrypted using the <Ref slug="jwe" /> standard. Even though JWT is typically unencrypted, it does not compromise its security — the presence of the signature ensures the integrity of the token’s contents, allowing full trust in the data inside the JWT.
 
 Unlike JWT, which contains all the information necessary to be validated directly at the protected resource, opaque tokens cannot be directly validated by the resource. Instead, they require validation by the issuer of the opaque token (usually the <Ref slug="authorization-server" />). This validation process is typically referred to as <Ref slug="token-introspection" />.
 
@@ -87,7 +87,7 @@ sequenceDiagram
 
 ```
 
-1. The resource provider pre-fetches the authorization server's public key from the <Ref slug="openid-connect-discovery">OIDC discovery endpoint</Ref>. The public key is used to verify the token's signature and ensure its integrity.
+1. The resource provider pre-fetches the authorization server's public key from the <Ref slug="openid-connect-discovery" />. The public key is used to verify the token's signature and ensure its integrity.
 2. The client requests an access token from the authorization server.
 3. The authorization server issues a JWT token.
 4. The client sends the resource access request with the JWT token in the header.
@@ -96,7 +96,7 @@ sequenceDiagram
 
 ## Use cases in OIDC
 
-In the context of OIDC (<Ref slug="openid-connect">OpenID Connect</Ref>), opaque tokens and JWTs serve different purposes and are used in distinct scenarios.
+In the context of OIDC (<Ref slug="openid-connect" />), opaque tokens and JWTs serve different purposes and are used in distinct scenarios.
 
 ### Opaque tokens
 
@@ -132,7 +132,7 @@ The client can validate the ID token to ensure the user's identity and extract u
 
 2. API resource access (using access token):
 
-When a client requests an access token with a specific <Ref slug="resource-indicator">resource indicator</Ref>, the authorization server issues a JWT access token intended for accessing that resource. The JWT contains claims that the resource provider can use to authorize the client's access. For example:
+When a client requests an access token with a specific <Ref slug="resource-indicator" />, the authorization server issues a JWT access token intended for accessing that resource. The JWT contains claims that the resource provider can use to authorize the client's access. For example:
 
 ```json
 // Decoded payload of a JWT access token
