@@ -10,7 +10,7 @@ Role-based access control (RBAC) is a widely adopted access control model that i
 
 The core idea behind RBAC is simple yet powerful: instead of directly assigning permissions to users, permissions are assigned to roles, which are then assigned to users. This indirect method of permission allocation greatly simplifies the process of managing access rights.
 
-### Key concepts in RBAC
+## What are the key concepts in RBAC?
 
 The RBAC model revolves around four main elements:
 
@@ -25,9 +25,115 @@ The basic workflow of RBAC can be summarized as follows:
 3. Assign one or more roles to users based on their responsibilities.
 4. When a user attempts to access a resource, the system checks if their assigned roles have the necessary permissions.
 
-### Types of RBAC
+## How is RBAC commonly used in real-world applications?
 
-#### RBAC0: The foundation
+When using RBAC in a typical business application, you can start by answering the following three basic questions:
+
+1. What resources need to be protected in the system?
+2. What operations need to be controlled on those resources?
+3. In real-world scenarios, which roles are responsible for executing these resources and operations?
+
+Take an e-commerce system as an example.
+
+You can first identify the resources that need to be protected:
+
+- Product
+- Order
+
+Then, you can determine which operations need to be controlled on these resources, i.e., define the permissions for these resources:
+
+- Product
+  - `read:product`
+  - `create:product`
+  - `delete:product`
+- Order
+  - `read:order`
+  - `create:order`
+  - `delete:order`
+
+With the above permissions, you can now define the following permission management model based on the roles in real-world scenarios:
+
+- Product administrator
+  - Product
+    - `read:product`
+    - `create:product`
+    - `delete:product`
+- Order administrator
+  - Order
+    - `read:order`
+    - `create:order`
+    - `delete:order`
+
+Finally, assign the roles to users based on their responsibilities:
+
+- Alice: Product administrator
+- Bob: Order administrator
+
+When a user accesses a resource, the system will check if the user's assigned roles have the necessary permissions.
+
+For example, when Alice attempts to read product information, the system first retrieves her role information and discovers that she has the product administrator role.
+
+Then, the system queries the permissions associated with that role, which include `read:product`, `create:product`, and `delete:product`.
+
+The system then checks if the required `read:product` permission exists in her permission list.
+
+Since this permission exists, the system allows Alice to access the product list. If the required permission is not in the list, the system denies the access request.
+
+
+## Why you shouldn't use roles directly for access control
+
+A common mistake in RBAC implementation is using roles directly for access control:
+
+```typescript
+// ❌ Problematic approach
+if (user.hasRole('product_admin')) {
+  await deleteProduct(productId);
+}
+```
+
+While this approach seems simple, it creates problems as your system grows. For example:
+- When marketing team needs to update product descriptions, you'll need to modify code to check for marketing roles.
+- When you want certain product managers to only publish but not delete products, you'll need to create new role checks for related operations.
+- When a new content team needs partial product access, you'll again need to update your code.
+
+Instead, you should always check for specific permissions:
+
+```typescript
+// ✅ Recommended approach
+if (user.hasPermission('delete:product')) {
+  await deleteProduct(productId);
+}
+```
+
+This permission-based approach offers several advantages:
+
+1. Fine-grained permission control: permissions can precisely map to specific resource operations:
+
+- Create product: `create:product`
+- Update product: `update:product`
+- Delete product: `delete:product`
+- Publish product: `publish:product`
+
+2. Flexible role configuration: permissions can be freely combined into roles without code changes:
+
+```typescript
+const roles = {
+  product_admin: ['create:product', 'update:product', 'delete:product', 'publish:product'],
+  content_editor: ['update:product'],
+  publisher: ['publish:product']  // New roles can be easily added
+};
+```
+
+This design makes your system adaptable to business growth:
+- Adding new roles only requires permission configuration
+- Adjusting role permissions is done through configuration
+- New features just need new permission entries
+
+Remember: roles should only be containers of permissions, not the basis for access control decisions. This design allows RBAC to provide maximum value.
+
+## RBAC models and their evolution
+
+### RBAC0: The foundation
 
 RBAC0 is the basic model that defines the core concepts of users, roles, permissions, and sessions. It serves as the foundation for all other RBAC models.
 
@@ -83,7 +189,7 @@ While RBAC0 provides a solid starting point, it has some limitations:
 2. Permission redundancy: Different roles may require similar sets of permissions, leading to duplication.
 3. Lack of hierarchy: It cannot represent inheritance relationships between roles.
 
-#### RBAC1: Introducing role hierarchies
+### RBAC1: Introducing role hierarchies
 
 RBAC1 builds upon RBAC0 by adding the concept of role inheritance.
 
@@ -138,7 +244,7 @@ However, RBAC1 still has some limitations:
 1. Lack of constraint mechanisms: Unable to restrict users from simultaneously holding potentially conflicting roles
 2. Performance considerations: Permission checks may require traversing the entire role hierarchy
 
-#### RBAC2: Implementing constraints
+### RBAC2: Implementing constraints
 
 RBAC2 is also based on RBAC0 but introduces the concept of constraints.
 
