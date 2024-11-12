@@ -1,7 +1,7 @@
 ---
 title: Webhook
 tags: [integration]
-description: Webhooks are a method for web applications to communicate with each other in real-time. They allow one application to send automated messages or information to another application when a specific event occurs. Unlike traditional APIs where one application needs to poll another for updates, webhooks push data to the receiving application as soon as the event happens.
+description: Webhooks are a method for web applications to communicate with each other in real-time. They allow one application to send automated messages or information to another application when a specific event occurs.
 ---
 
 ## What is a webhook?
@@ -33,77 +33,42 @@ sequenceDiagram
 5. The target system returns a response to the source system
 6. If the request fails, the source system may implement a retry mechanism
 
-## What are common use cases for webhooks?
-
-1. Payment systems: Notify order status changes
-2. Version control systems: Notify code commits, merge requests, and other events
-3. CRM systems: Customer information update notifications
-4. IoT devices: Device status change notifications
-5. Social media platforms: New message and comment notifications
-
 ## How do webhooks work in a real-world scenario?
 
-Let's examine a scenario involving an e-commerce platform integrating with a third-party payment system:
+Let's take an application integrated with an auth service as an example. When a new user signs up, the application will send a welcome email to the user.
 
-### Scenario
+Typically, the auth service provides a `user.registered` webhook event that is triggered when a new user completes registration.
 
-An e-commerce platform uses a third-party payment system to process order payments. When a user completes a payment, the payment system needs to notify the e-commerce platform in real-time about the payment status via webhook, allowing the platform to update the order status and trigger subsequent processes.
+The webhook event payload contains the user's information such as email and username, which can be used to send the welcome email:
 
-### Webhook implementation fow
+```json
+// Note: the actual payload structure depends on the auth service.
+{
+  "event": "user.registered",
+  "timestamp": "2024-03-21T08:00:00Z",
+  "data": {
+    "user_id": "u_1234567890",
+    "email": "john@example.com",    // Email address for sending welcome email
+    "username": "johndoe",          // Username to personalize the email
+    "registered_at": "2024-03-21T08:00:00Z"
+  }
+}
+```
+
+Here's how the webhook flow works:
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant E-commerce Platform
-    participant Payment System
-    participant Inventory System
-    participant Logistics System
-
-    User->>E-commerce Platform: Place order
-    E-commerce Platform->>Payment System: Create payment request
-    Payment System-->>E-commerce Platform: Return payment URL
-    E-commerce Platform-->>User: Display payment page
-    User->>Payment System: Complete payment
-    Payment System->>Payment System: Process payment
-    Payment System->>E-commerce Platform: Send payment success webhook
-    E-commerce Platform->>E-commerce Platform: Verify webhook signature
-    E-commerce Platform->>E-commerce Platform: Update order status
-    par Trigger subsequent processes
-        E-commerce Platform->>Inventory System: Update inventory
-        E-commerce Platform->>Logistics System: Create shipping task
-    end
-    E-commerce Platform-->>Payment System: Return 200 OK
-    E-commerce Platform-->>User: Display payment success page
+    participant Auth Service
+    participant App
+    participant Email Service
+    
+    User->>Auth Service: Sign up
+    Auth Service->>App: Send webhook (user.registered)
+    App-->>Email Service: Send welcome email
+    Email Service-->>User: Deliver welcome email
 ```
-
-1. Order creation and payment request:
-   - User places an order on the e-commerce platform.
-   - The platform sends a payment request to the payment system.
-   - The payment system returns a payment URL, which the platform displays to the user.
-
-2. User payment:
-   - User completes the payment on the payment system.
-
-3. Webhook trigger:
-   - The payment system detects the "payment successful" event.
-   - It constructs a webhook payload containing payment details.
-
-4. Sending webhook:
-   - The payment system sends a POST request to the pre-configured e-commerce platform URL.
-
-5. Receiver processing:
-   - The e-commerce platform receives the webhook and first verifies the request signature to ensure security.
-   - After verification, the platform updates the corresponding order status to "paid".
-   - The platform triggers subsequent processes, such as updating inventory and creating shipping tasks.
-
-6. Response handling:
-   - The e-commerce platform immediately returns a 200 OK response upon receiving the webhook.
-   - If errors occur during processing, the platform will retry in the background or involve manual intervention.
-
-7. User experience:
-   - The e-commerce platform displays a payment success page to the user.
-
-This example demonstrates how webhooks enable real-time communication between a third-party payment system and an e-commerce platform. Through webhooks, the payment system can notify the e-commerce platform instantly when a payment is completed, allowing for immediate order status updates and quick triggering of subsequent business processes. This improves the overall system responsiveness and efficiency, ultimately providing a better shopping experience for users.
 
 ## What are best practices for implementing webhooks?
 
