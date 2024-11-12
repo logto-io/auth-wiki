@@ -1,99 +1,34 @@
 ---
 title: Role
 tags: [authorization]
-description: A role is a collection of permissions in access control systems that defines what actions users can perform, providing an efficient way to manage and assign access rights to users.
+description: A role is a core concept in role-based access control (RBAC) systems, representing a collection of permissions that defines what actions users can perform, providing an efficient way to manage and assign access rights to users.
 ---
 
-## What is a role?
+## Role
 
-A role is a core concept in Role-Based Access Control (RBAC) systems. In RBAC, roles are a grouping of permissions that can be assigned to users. They provide a way to aggregate permissions defined for different APIs, making adding, removing, or adjusting permissions more efficient than assigning them individually to users.
+A role is one of the core components in <Ref slug="rbac" />. It serves as a container for permissions that can be assigned to users, acting as an intermediary between users and their access rights.
 
-Roles act as intermediaries between users and permissions, allowing administrators to manage access rights more effectively, especially in large-scale systems.
+```mermaid
+  graph LR
+    Users
+    -->|assigned to| Roles
+    -->|including| Permissions
+```
 
-## How are roles structured?
+A typical role structure contains a name and a set of permissions:
 
-Let's look at an example of an `order_admin` role to understand how roles are typically structured:
+```typescript
+const role = {
+  name: 'order_admin',
+  permissions: [
+    'read:orders',   // View order details
+    'write:orders',  // Edit orders
+    'read:products'  // View products
+  ]
+}
+```
 
-Role: `order_admin`
-Permissions:
-- Order resource:
-   - `read:orders` (view order details)
-   - `write:orders` (edit order information)
-   - `delete:orders` (remove orders from the system)
+> [!Note]
+> Roles are primarily used for permission management. For access control implementation, it's recommended to check permissions directly rather than roles. See <Ref slug="rbac" /> for more information.
 
-- Product resource:
-   - `read:products` (view product information)
-   - `write:products` (edit product details)
-
-This example demonstrates how multiple related permissions can be grouped into a single role, making it easier for administrators to assign permissions to users. By assigning a user to the `order_admin` role, that user gains the necessary permissions to manage both orders and products without the need to assign each permission individually.
-
-## What are permissions?
-
-Permission refers to the authorization to access a resource or perform an action on a resource. In the real world, entities such as orders, products, and documents can be designated as resources, and various actions can be assigned.
-
-Examples of permissions include:
-
-- Resource: Orders
-  - `write:orders`: Edit an order
-- Resource: Documents
-  - `read:documents`: Read a document
-- Resource: Products
-  - `delete:products`: Delete a product
-
-These examples clearly demonstrate the relationship between permissions and specific resources.
-
-## How do roles and permissions work together?
-
-Roles are essentially collections of permissions. When a user is assigned a role, they inherit all the permissions associated with that role. This makes it easier to manage access control on a larger scale.
-
-## Why use roles in access control?
-
-1. **Simplified management**: Administrators can assign roles instead of individual permissions, which is more efficient.
-2. **Consistency**: Roles ensure that users with the same responsibilities have the same set of permissions.
-3. **Scalability**: As systems grow, roles make it easier to manage permissions for a large number of users.
-4. **Flexibility**: Roles can be easily modified, and these changes are immediately reflected for all users assigned to that role.
-5. **Alignment with business logic**: Roles often correspond to job functions or responsibilities within an organization, making them intuitive to set up and manage.
-
-By leveraging roles effectively, RBAC systems can maintain robust security while allowing for efficient permission management and user access control.
-
-## How to effectively organize and manage roles?
-
-When implementing RBAC in your application, it's crucial to organize roles effectively. Here are some best practices to consider:
-
-1. Start with a role hierarchy. For example, in BookHarber:
-   - Base Role: Guest
-   - User Role: Customer
-   - Staff Roles: Customer Service Agent, Books Manager, Marketing Staff
-   - Admin Role: Store Admin
-
-   This hierarchy allows for easier management and inheritance of permissions.
-
-2. Let higher-level roles inherit permissions from lower-level roles. For instance, the Store Admin role could inherit all permissions from other staff roles.
-
-3. Assign only the minimum necessary permissions to each role. This reduces the risk of unauthorized access if a user's account is compromised.
-
-4. Create roles based on actual job responsibilities in your organization. This makes role assignment more intuitive and manageable.
-
-5. For users who need permissions from multiple roles, create composite roles instead of assigning multiple individual roles.
-
-6. Regularly review and audit your role structure to ensure it still aligns with your organization's needs and security requirements.
-
-7. Adjust your user interface based on the user's role. This improves user experience by showing only relevant information and controls.
-
-8. Maintain clear documentation of your roles, their permissions, and the rationale behind your role design. This aids in onboarding new team members and future system maintenance.
-
-9. Choose descriptive role names that clearly indicate the function or level of access, such as "ReadOnlyUser" or "SeniorEditor".
-
-10. Design your role structure to accommodate future growth and changes in your organization.
-
-By following these best practices, you can create a robust and manageable RBAC system that enhances your application's security while providing a smooth user experience.
-
-## Related resources
-
-<Resources
-  urls={[
-    "https://blog.logto.io/rbac-and-abac",
-    "https://blog.logto.io/mastering-rbac",
-    "https://blog.logto.io/organization-and-role-based-access-control",
-  ]}
-/>
+<SeeAlso slugs={["rbac", "authorization", "access-control"]} />
