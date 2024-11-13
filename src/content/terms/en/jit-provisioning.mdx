@@ -6,15 +6,6 @@ description: Just-in-time (JIT) provisioning is an identity and access managemen
 
 ## What is just-in-time provisioning?
 
-If you’re building a SaaS B2B app and want to support membership features, allowing members to easily join your workspace (tenant). You might need features like the table below, and just-in-time provisioning is one of them, helping to streamline the process.
-
-| Features | Flow |
-| --- | --- |
-| Admin initiated invitation | Users can receive an email invitation to join the organization. |
-| User creation or import through API | Users can use a pre-created user account to join the organization. |
-| Just-in-time provisioning | Users who log in the app for the first time can join the organization. |
-| Directory Sync (eg. SCIM) | Use the IdP’s Directory Sync functionality to pre-provision users in the app in advance. |
-
 **Just-in-time (JIT) provisioning** is a process used in identity and access management systems to create user accounts on the fly as they sign in to a system for the first time. Instead of pre-provisioning accounts for users in advance, JIT provisioning creates and configures the necessary user accounts dynamically when a user authenticates. Just-in-time provisioning is a popular feature with its own characteristics, such as efficiency, no administrative involvement, and automated organization membership, etc. 
 
 ## What are the use cases for just-in-time provisioning?
@@ -25,15 +16,45 @@ These cases are common when building a B2B app that involves multi-tenant archit
 
 You have a client experiencing frequent hiring or rapid growth can use JIT provisioning to quickly set up user accounts for new employees. Here is an example:
 
-Sarah is a new employee at Company SuperFantasy, which uses Okta as its Enterprise Identity Provider. The HR team add her as an business identity in Okta just one time. When Sarah uses this email to sign in to a corporate-used productivity app called Smartworkspace for the first time, the system automatically creates an account and provisions the right role for her within the company’s workspace. This way, neither Sarah nor the HR team at SuperFantasy needs to go through multiple steps for account creation and role assignment.
+Sarah is a new employee at SuperFantasy, which uses Google Workspace as its <Ref slug="identity-provider" />. The HR team adds her to Google Workspace once. When Sarah first signs in to SmartWorkspace with her email, the system automatically creates her account and assigns the appropriate role, eliminating extra steps for the HR team.
+
+```mermaid
+sequenceDiagram
+    participant Sarah
+    participant Auth server
+    participant Google Workspace (IdP)
+    participant SuperFantasy Workspace (Organization)
+
+    Sarah ->> Auth server: Sign in with her company email
+    Auth server ->> Google Workspace (IdP): Authenticate Sarah
+    Google Workspace (IdP) ->> Auth server: Return authentication response with user info
+    Auth server ->> Auth server: Check Sarah if has an existing account
+    Note over Auth server: The account does not exist
+    Auth server ->> SuperFantasy Workspace (Organization): Create account and grant appropriate access
+```
 
 ### Mergers, acquisitions, and temporary workers
 
 You have a client experiencing merging or acquiring others, JIT provisioning can simplify the process of granting access to the acquiring company’s systems for many new users. Let’s take another example,
 
-Peter works for MagicTech, which was recently acquired by SuperFantasy. MagicTech is a smaller organization without Enterprise SSO but uses Smartworkspace too where Peter already has a business account.
+Peter works for MagicTech, which was recently acquired by SuperFantasy. Although MagicTech doesn’t have Enterprise SSO, it uses SmartWorkspace, where Peter has a business account with his corporate email.
 
-The HR team can add Peter in Okta. When Peter logs into Smartworkspace for the first time through Okta, the system automatically links his existing business account and grants the appropriate access to SuperFantasy.
+The HR team adds Peter to Google Workspace with the same email. When he signs into SmartWorkspace via Google Workspace, his account links automatically, giving him the correct access for SuperFantasy.
+
+```mermaid
+sequenceDiagram
+    participant Peter
+    participant Auth server
+    participant Google Workspace (IdP)
+    participant SuperFantasy Workspace (Organization)
+
+    Peter ->> Auth server: Sign in via Google Workspace
+    Auth server ->> Google Workspace (IdP): Authenticate Peter
+    Google Workspace (IdP) ->> Auth server: Return authentication response
+    Auth server ->> Auth server: Check if Peter has an existing account
+    Note over Auth server: Existing account found
+   Auth server ->> SuperFantasy Workspace (Organization): Link account and grant appropriate access
+```
 
 The scenarios above are ideal for implementing the JIT feature.
 
@@ -58,7 +79,7 @@ If you do want to consider the subsequent existing user sign-in scenario, make s
 - **Performance**: While JIT provisioning happens quickly, consider the potential impact on sign-in times, especially for existing users if you're updating their information at each sign-in.
 - **Data consistency**: Ensure that your JIT provisioning process maintains data consistency, especially when updating existing user accounts.
 
-## What is the difference between JIT and SCIM?
+## What is the difference between JIT and SCIM (System for Cross-domain Identity Management)?
 
 SCIM is an open standard protocol designed to simplify and automate user identity management across different systems and domains. It is commonly used in Directory Sync scenarios.
 
