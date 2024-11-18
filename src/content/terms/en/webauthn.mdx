@@ -6,9 +6,17 @@ description: WebAuthn is an API for accessing public key credentials, facilitati
 
 ## What is WebAuthn?
 
-WebAuthn (Web Authentication API), developed by the [W3C](https://www.w3.org/) and [FIDO Alliance](https://fidoalliance.org/), is a specification for secure web authentication using FIDO2 standards. WebAuthn provide an API to allow websites to implement <Ref slug="passkey" />, which are phishing-resistant credentials secured by public key cryptography. Passkeys can replace passwords for both passwordless logins and multi-factor authentication (MFA).
+WebAuthn (Web Authentication API), developed by the [W3C](https://www.w3.org/) and [FIDO Alliance](https://fidoalliance.org/), is a specification for secure web authentication using FIDO2 standards. WebAuthn provide an API to allow websites to implement <Ref slug="passkey" />, which are phishing-resistant credentials secured by public key cryptography. Passkeys can replace passwords for both passwordless logins and  <Ref slug="mfa" />.
 
 ## What does the WebAuthn workflow look like?
+
+Here’s a real-world example to understand better. You have a web application MyApp that wants to integrate then WebAuthn API to implement Passkey for multi-factor authentication. 
+
+**Registration phase:** After signing with an email verification and setting a new password, this user is prompt to create a Passkey. They choose to link their device using a fingerprint. This establishes the Passkey securely on their device.
+
+**Authentication phase:** During next sign-in, the user is asked to verify their Passkey after entering their password. With just a quick fingerprint scan, they can easily complete the authentication process.
+
+![WebAuthn use case.png](https://uploads.strapi.logto.io/Web_Authn_use_case_657eb22cef.png)
 
 To provide a more detailed explanation, we can divide the process into two phases: registration and authentication. First, it’s essential to understand the four key entities involved in the WebAuthn flow.
 
@@ -144,6 +152,15 @@ navigator.credentials.get({
 To learn the details, read the spes: https://fidoalliance.org/specifications/download/.
 
 Note: In WebAuthn actions, whether for registration or authentication, the "rp ID" (relying party ID) is a mandatory field. It represents the domain hostname of the current web page. If it doesn't match the current domain, the browser will reject the request. This means that passkeys are bound to a specific domain, and there's currently no way to migrate existing passkeys to a different domain. Additionally, passkeys cannot be used across different domains. 
+
+## WebAuth and OpenID Connect (OIDC)
+
+By combining WebAuthn’s strong security with OIDC’s standardized identity protocol, we can crate a more secure and user-friendly authentication experience.
+
+Learn about how it works:
+
+- **Registration phase**: Users complete a standard <Ref slug="openid-connect" /> registration process (e.g., email verification and password creation). WebAuthn generates a public-private key pair, storing the public key with the OIDC <Ref slug="identity-provider" /> and keeping the private key on the user’s device.
+- **Authentication phase**: Users access an OIDC-protected resource and is redirected to the sign-in page. After providing basic credentials (e.g., email and password), the system invokes WebAuthn for passkey authentication. Once Passkey verified, OIDC issues an Access Token or ID Token for user access.
 
 ## What’s the difference between WebAuthn and CTAP2?
 
