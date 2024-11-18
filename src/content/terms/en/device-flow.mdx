@@ -1,12 +1,12 @@
 ---
 title: Device flow
 tags: [oauth 2.0, oidc]
-description: OAuth 2.0 device authorization flow is a user-friendly sign-in method for input-limited devices or headless applications.  By verifying a unique device code, making it possible for users to authorize the device via a secondary device with a full user interface.
+description: OAuth 2.0 device authorization flow is a user-friendly sign-in method for input-limited devices or headless applications. By verifying a unique device code, making it possible for users to authorize the device via a secondary device with a full user interface.
 ---
 
 ## What is device flow?
 
-The [OAuth Device Authorization Flow](https://www.rfc-editor.org/rfc/rfc8628), also known as Device Flow, is an [OAuth 2.0](https://oauth.net/2/) implementation designed for devices with limited input capabilities (e.g., smart TVs, IoT devices, game consoles) or headless apps (e.g., CLI tools). It allows users to initiate authorization requests on these devices and then complete the process using a more input-capable device like a smartphone or laptop.
+The [OAuth Device Authorization Flow](https://www.rfc-editor.org/rfc/rfc8628), also known as Device Flow, is an [OAuth 2.0](https://auth.wiki/oauth-2.0) implementation designed for devices with limited input capabilities (e.g., smart TVs, IoT devices, game consoles) or headless apps (e.g., CLI tools). It allows users to initiate [authorization requests](https://auth.wiki/authorization-request) on these devices and then complete the process using a more input-capable device like a smartphone or laptop.
 
 ## When to use device flow?
 
@@ -31,13 +31,13 @@ This is the input-limited device or headless application where the user needs to
 
 The basic UI is:
 
-![Device code display device UI.png](https://uploads.strapi.logto.io/Device_code_display_device_UI_759058ede9.png)
+![Device code display device UI.png](https://uploads.strapi.logto.io/Device_code_display_device_default_cda216b1a3.png)
 
 To enhance the user experience, services often generate a QR code for the Verification URL:
 
-![Device code display device UI with QR code.png](https://uploads.strapi.logto.io/device_code_display_device_UI_with_verification_url_438c3b31b9.png)
+![Device code display device UI with QR code.png](https://uploads.strapi.logto.io/Device_code_display_device_QR_code_3c9219e24c.png)
 
-For even more efficiency, replace the QR code resource in the `verification_uri` (e.g., `https://example.com/device`) with `verification_uri_complete` (e.g., `https://example.com/device?user_code=WDJB-MJHT`), which includes the device code in the URL, helping users to pre-fill the device code into fields.
+For even more efficiency, replace the QR code resource in the `verification_uri` (e.g., `https://example.com/device`) with `verification_uri_complete` (e.g., `https://example.com/device?user_code=DSHP-SNCT`), which includes the device code in the URL, helping users to pre-fill the device code into fields.
 
 ### Authorization device
 
@@ -48,6 +48,8 @@ Following the instructions on the sign-in target device, the user will:
 3. If there is no existing sessions on the browser, user will first sign in to the service. 
 4. A consent page will prompt the users to authorize the device sign-in.
 5. Finally, a successfully page will be displayed after authorization.
+
+![Authorization device for OAuth device flows.png](https://uploads.strapi.logto.io/Authorization_device_for_O_Auth_device_flows_f1e7a42fc7.png)
 
 Here are some established products’ device flow Verification URLs for your testing:
 
@@ -87,34 +89,54 @@ When a user use the device flow for authentication, it mainly includes the follo
 
 ```mermaid
 sequenceDiagram
+	autonumber
 	participant User at browser
 	participant Device Client
 	participant Auth Server
 
-	Device Client ->> Auth Server: (1) Request authorization with client identifier
-	Auth Server -->> Device Client: (2) Device code, User code, Verification URI
-	Device Client ->> User at browser: (3) Instruct end user to open the verification URI and enter the user code
-	Device Client ->> Auth Server: (4) Start polling for access tokens with device code and client identifier
-	User at browser ->> Auth Server: (5) Visit verification URI and enter the device code
-	Auth Server -->> User at browser: (6) Redirect the user to the sign in page
-	User at browser ->> Auth Server: (7) Complete the sign in flow and signed in
-	Auth Server -->> User at browser: (8) Redirect the user to the sign-in success page and instruct the user to close the browser
-	Auth Server ->> Device Client: (9) Return access tokens to the client (since the device is polling in step 4)
+	Device Client ->> Auth Server: Request authorization with client identifier
+	Auth Server -->> Device Client: Device code, User code, Verification URI
+	Device Client ->> User at browser: Instruct end user to open the verification URI and enter the user code
+	Device Client ->> Auth Server: Start polling for access tokens with device code and client identifier
+	User at browser ->> Auth Server: Visit verification URI and enter the device code
+	Auth Server -->> User at browser: Redirect the user to the sign in page
+	User at browser ->> Auth Server: Complete the sign in flow and signed in
+	Auth Server -->> User at browser: Redirect the user to the sign-in success page and instruct the user to close the browser
+	Auth Server ->> Device Client: Return access tokens to the client (since the device is polling in step 4)
 ```
 
 1. The device client request authorization from the auth server with a client identifier (usually the client id on the auth server platform).
 2. The auth server responds to the device client with device code, user code and verification URI.
 3. The device client displays the verification URI and user code to the user in the form of text (or a QR code, etc.), instructing the user to visit the URI and enter the code.
-4. At the same time as step 3, the device client start polling for access tokens with device code and client identifier from the auth server and start waiting the user to review the authorization request and complete the user authorization.
+4. At the same time as step 3, the device client start polling for access tokens with device code and client identifier from the auth server and start waiting the user to review the [authorization request](https://auth.wiki/authorization-request) and complete the user authorization.
 5. The user visits the verification URI hosted by the auth server, via a browser in another device, and enter the user code.
 6. The auth server redirects the user to the sign-in page and instructs the user to complete signing in.
 7. The user completed the sign-in flow and signed in successfully.
 8. The auth server redirects the user to the sign-in success page and instructs the user to close the browser
 9. At the same time as step 8, the auth server returns access tokens to the device client since the client has been polling since step 4.
 
-After these processes, the device client will be able to obtain the access token for subsequent services!
+After these processes, the device client will be able to obtain the [access token](https://auth.wiki/access-token) for subsequent services.
 
 For more details, read [RFC 8628 OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3).
+
+## What are the security considerations for device flow?
+
+The device flow involves interaction across two devices, exposing it to potential security risks like device code exposure, brute-force attacks, or man-in-the-middle (MitM) attacks.
+
+While obtaining a device code alone doesn’t immediately grant authorization (since the user must still authenticate and authorize), an attacker could attempt to replay a device code request during its validity period. This could result in unauthorized repeated access. To enhance security, consider the following precautions:
+
+- **Shorten `expires_in` duration:** Reduce the window of opportunity for attacks by minimizing the validity period of the device code.
+- **Limit failed attempts:** Restrict the number of incorrect code entries to prevent brute-force attacks.
+- **Enforce HTTPS:** Ensure all communication between the device and the authorization server is encrypted using HTTPS to prevent man-in-the-middle attacks.
+- **Limit single-use device codes:** Restrict each device code to **a single session** to prevent its reuse by unauthorized parties.
+
+Note that single-use for device codes isn’t a built-in requirement of the OAuth 2.0 Device Flow. It’s an optional best practice. Some developers may intentionally design for concurrent device authorizations with the same code (e.g., on hundreds of devices), but this approach increases security risks and should be carefully evaluated.
+
+## Do OIDC providers support device flow?
+
+While device flow is traditionally associated with OAuth, [OpenID Connect (OIDC)](https://auth.wiki/openid-connect) providers can also support it. OIDC offers additional advantages beyond OAuth's primary focus on authorization. It extends to authentication, allowing applications to obtain both [access token](https://auth.wiki/access-token) and [ID tokens](https://auth.wiki/id-token) in a single flow.
+
+OIDC's robust unified identity management, including token validation and [refresh](https://auth.wiki/refresh-token), makes it well-suited for secure, reliable [authentication](https://auth.wiki/authentication) and (authorization)[https://auth.wiki/authorization] between devices and applications, particularly those with limited input capabilities.
 
 <SeeAlso slugs={['authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
 
