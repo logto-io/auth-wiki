@@ -16,18 +16,47 @@ description: Passkey is a phishing-resistant and convenient credential that repl
 
 ## What does the passkey workflow look like?
 
+Here’s a real-world example to help you understand better. You have a web service MyApp that wants to implement Passkey sign-in instead of password-based sign-in. Users select to current device with fingerprint scanning as Passkey authentication method. 
+
 **Passkeys** work by utilizing public-key cryptography to provide secure credentials. 
 
-- **Registration**
+- **Passkey registration**
     - When you register for a service, your device generates a unique cryptographic key pair linked to that service.
     - The **private key** remains on your device, while the **public key** is shared with the service.
-- **Authentication**
+
+```mermaid
+sequenceDiagram
+	participant Device
+	participant Service
+	
+Device ->> +Service: Request reigstration for a user
+Service -->> -Device: Send challenge & user ID
+Device ->> Device: Generate unique key pair <br> Store private key
+Device ->> +Service: Send public key
+Service ->> Service: Store public key with user ID
+Service ->> -Device: Reigstration successful
+```
+
+- **Passkey authentication**
     - When you attempt to sign in, the service sends a **challenge** to your device.
     - Your device uses the **private key** to generate a cryptographic **signature** based on the challenge.
     - The **signature** is sent back to the service, which verifies it using the **public key**.
     - If the signature is valid, authentication is successful.
 
-Read WebAuthn, an API for implementing passkeys, to learn the details.
+```mermaid
+sequenceDiagram
+    participant Device
+    participant Service
+    
+    Device ->> +Service: Request login for user
+    Service -->> -Device: Send authentication challenge
+    Device ->> Device: Sign challenge with private key
+    Device ->> +Service: Send signed challenge
+    Service ->> Service: Verify signed challenge using stored public key
+    Service ->> -Device: Authentication successful
+```
+
+Read [WebAuthn](https://auth.wiki/webauthn), an API for implementing passkeys, to learn the details.
 
 ## What does the passkey end-user flow look like?
 
@@ -49,6 +78,18 @@ Passkeys are a modern authentication factor that can be used as either a first o
     - When a user attempts to sign in, they first enter their email and password (or other first factors), after which the service prompts them to complete the 2-step verification using a passkey.
     - If there are existing sessions in the browser, the service can directly prompt users to sign in with their passkey without requiring them to enter their password again. This process, known as completing MFA, because passkey is a high-level security by binding to the current device and verifying users through biometrics, PINs, or other hardware methods.
 - **Security verification**: In high-security environments, passkey are often used to double-check user identity. For example, when accessing sensitive financial information or performing critical operations (banking, government, corporate system).
+
+### Why are passkeys the most secure authentication method?
+
+Passkeys are one of the most secure ways for common customers to sign in because they use **public-key cryptography**.  Unlike passwords or one-time codes (TOTPs), your private key never leaves your device. Even if an attacker steals the public key which is freely available, they can't forge a valid login attempt.
+
+Here’s a comparison to illustration why passkeys are significantly more secure:
+
+| Attacks | Passkeys | Software TOTP (Authenticator) |
+| --- | --- | --- |
+| **Phishing attacks** | Highly resistant to phishing, as the private key is never leave the device or entered manually anywhere, making it harder to steal. | Vulnerable to phishing, as Software TOTP is displayed on your screen, so attackers can trick you into revealing on a fake website. |
+| **Man-in-the-middle attacks (MitM)** | Strong protection against MitM, as robust cryptographic protocols make the private keys only stay on your device. | Vulnerable to MitM, as the TOTPs can be intercepted by a MitM attacker who could then use them to sign in as you. |
+| **Replay attacks** | Strong protection against replay attack, as each passkey request is unique, making it useless for an attacker to capture and replay later. | Possible to replay attack, as TOTP change periodically, but if intercepted before expiring, they could be reused for unauthorized access. |
 
 <Resources
   urls={[
