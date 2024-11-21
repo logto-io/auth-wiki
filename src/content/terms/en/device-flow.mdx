@@ -6,7 +6,7 @@ description: OAuth 2.0 device authorization flow is a user-friendly sign-in meth
 
 ## What is device flow?
 
-The [OAuth Device Authorization Flow](https://www.rfc-editor.org/rfc/rfc8628), also known as Device Flow, is an [OAuth 2.0](https://auth.wiki/oauth-2.0) implementation designed for devices with limited input capabilities (e.g., smart TVs, IoT devices, game consoles) or headless apps (e.g., CLI tools). It allows users to initiate [authorization requests](https://auth.wiki/authorization-request) on these devices and then complete the process using a more input-capable device like a smartphone or laptop.
+The [OAuth Device Authorization Flow](https://www.rfc-editor.org/rfc/rfc8628), also known as device flow, is an <Ref slug="oauth-2.0-grant" /> designed for devices with limited input capabilities (e.g., smart TVs, IoT devices, game consoles) or headless apps (e.g., CLI tools). It allows users to initiate <Ref slug="authorization-request">authorization requests</Ref> on these devices and then complete the process using a more input-capable device like a smartphone or laptop.
 
 ## When to use device flow?
 
@@ -108,14 +108,14 @@ sequenceDiagram
 1. The device client request authorization from the auth server with a client identifier (usually the client id on the auth server platform).
 2. The auth server responds to the device client with device code, user code and verification URI.
 3. The device client displays the verification URI and user code to the user in the form of text (or a QR code, etc.), instructing the user to visit the URI and enter the code.
-4. At the same time as step 3, the device client start polling for access tokens with device code and client identifier from the auth server and start waiting the user to review the [authorization request](https://auth.wiki/authorization-request) and complete the user authorization.
+4. At the same time as step 3, the device client start polling for access tokens with device code and client identifier from the auth server and start waiting the user to review the <Ref slug="authorization-request" /> and complete the user authorization.
 5. The user visits the verification URI hosted by the auth server, via a browser in another device, and enter the user code.
 6. The auth server redirects the user to the sign-in page and instructs the user to complete signing in.
 7. The user completed the sign-in flow and signed in successfully.
 8. The auth server redirects the user to the sign-in success page and instructs the user to close the browser
 9. At the same time as step 8, the auth server returns access tokens to the device client since the client has been polling since step 4.
 
-After these processes, the device client will be able to obtain the [access token](https://auth.wiki/access-token) for subsequent services.
+After these processes, the device client will be able to obtain the <Ref slug="access-token" /> for subsequent services.
 
 For more details, read [RFC 8628 OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3).
 
@@ -134,10 +134,10 @@ Note that single-use for device codes isn’t a built-in requirement of the OAut
 
 ## Do OIDC providers support device flow?
 
-While device flow is traditionally associated with OAuth, [OpenID Connect (OIDC)](https://auth.wiki/openid-connect) providers can also support it. OIDC offers additional advantages beyond OAuth's primary focus on authorization. It extends to authentication, allowing applications to obtain both [access token](https://auth.wiki/access-token) and [ID tokens](https://auth.wiki/id-token) in a single flow.
+While device flow is traditionally associated with OAuth, <Ref slug="openid-connect" /> providers can also support it. OIDC offers additional advantages beyond OAuth's primary focus on authorization. It extends to authentication, allowing applications to obtain both <Ref slug="access-token" /> and <Ref slug="id-token" /> in a single flow.
 
-OIDC's robust unified identity management, including token validation and [refresh](https://auth.wiki/refresh-token), makes it well-suited for secure, reliable [authentication](https://auth.wiki/authentication) and [authorization](https://auth.wiki/authorization) between devices and applications, particularly those with limited input capabilities.
+OIDC's robust unified identity management, including token validation and <Ref slug="refresh-token">refresh</Ref>, makes it well-suited for secure, reliable <Ref slug="authentication" /> and <Ref slug="authorization" /> between devices and applications, particularly those with limited input capabilities.
 
-<SeeAlso slugs={['authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
+<SeeAlso slugs={['oauth-2.0-grant', 'authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
 
 <Resources urls={['https://blog.logto.io/a-brief-introduction-to-oauth2-device-flow', 'https://datatracker.ietf.org/doc/html/rfc8628']} />
