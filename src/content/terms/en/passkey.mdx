@@ -56,7 +56,7 @@ sequenceDiagram
     Service ->> -Device: Authentication successful
 ```
 
-Read [WebAuthn](https://auth.wiki/webauthn), an API for implementing passkeys, to learn the details.
+Read <Ref slug="webauthn" />, an API for implementing passkeys, to learn the details.
 
 ## What does the passkey end-user flow look like?
 
@@ -90,6 +90,8 @@ Here’s a comparison to illustration why passkeys are significantly more secure
 | **Phishing attacks** | Highly resistant to phishing, as the private key is never leave the device or entered manually anywhere, making it harder to steal. | Vulnerable to phishing, as Software TOTP is displayed on your screen, so attackers can trick you into revealing on a fake website. |
 | **Man-in-the-middle attacks (MitM)** | Strong protection against MitM, as robust cryptographic protocols make the private keys only stay on your device. | Vulnerable to MitM, as the TOTPs can be intercepted by a MitM attacker who could then use them to sign in as you. |
 | **Replay attacks** | Strong protection against replay attack, as each passkey request is unique, making it useless for an attacker to capture and replay later. | Possible to replay attack, as TOTP change periodically, but if intercepted before expiring, they could be reused for unauthorized access. |
+
+<SeeAlso slugs={["webauthn", "authentication", "authorization"]} />
 
 <Resources
   urls={[
