@@ -1,94 +1,94 @@
 ---
 title: Just-in-time (JIT) provisioning
 tags: [authentication, authorization]
-description: Just-in-time (JIT) provisioning is an identity and access management (IAM) process where user accounts are created dynamically and automatically when a user attempts to access a system or application for the first time. This approach helps streamline the onboarding process and ensures that user accounts are only created when needed, reducing administrative overhead and improving security.
+description: Just-in-time (JIT) provisioning is an identity and access management (IAM) process where user accounts are provisioned dynamically when a user signs in for the first time.
 ---
 
 ## What is just-in-time provisioning?
 
-**Just-in-time (JIT) provisioning** is a process used in identity and access management systems to create user accounts on the fly as they sign in to a system for the first time. Instead of pre-provisioning accounts for users in advance, JIT provisioning creates and configures the necessary user accounts dynamically when a user authenticates. Just-in-time provisioning is a popular feature with its own characteristics, such as efficiency, no administrative involvement, and automated organization membership, etc. 
+Just-in-time (JIT) provisioning is a process used in <Ref slug="iam" /> where user accounts are provisioned according to the user’s identity and the system’s configuration on-the-fly when the user first attempts to sign in.
 
 ## What are the use cases for just-in-time provisioning?
 
-These cases are common when building a B2B app that involves multi-tenant architecture, Enterprise SSO, working with enterprises, or requiring team onboarding features. Here are some sample scenarios your client may encounter.
+These cases are common when building a B2B app that involves multi-tenant architecture, Enterprise SSO, or requiring team onboarding features. Here are some sample scenarios you or your client may encounter.
 
-### Rapid onboarding
+### Employee onboarding
 
-You have a client experiencing frequent hiring or rapid growth can use JIT provisioning to quickly set up user accounts for new employees. Here is an example:
-
-Sarah is a new employee at SuperFantasy, which uses Google Workspace as its <Ref slug="identity-provider" />. The HR team adds her to Google Workspace once. When Sarah first signs in to SmartWorkspace with her email, the system automatically creates her account and assigns the appropriate role, eliminating extra steps for the HR team.
+Imagine one of your clients *SuperFantasy* is experiencing frequent hiring or rapid growth can use JIT provisioning to quickly set up user accounts for new employees. *SuperFantasy* uses Logto for identity and access management and SmartProjects for project management. When a new employee, Sarah, signs in to SmartProjects for the first time, her account is automatically created and configured based on her Logto credentials.
 
 ```mermaid
 sequenceDiagram
     participant Sarah
-    participant Auth server
-    participant Google Workspace (IdP)
-    participant SuperFantasy Workspace (Organization)
+    participant SmartProjects
+    participant Logto
 
-    Sarah ->> Auth server: Sign in with her company email
-    Auth server ->> Google Workspace (IdP): Authenticate Sarah
-    Google Workspace (IdP) ->> Auth server: Return authentication response with user info
-    Auth server ->> Auth server: Check Sarah if has an existing account
-    Note over Auth server: The account does not exist
-    Auth server ->> SuperFantasy Workspace (Organization): Create account and grant appropriate access
+    Sarah ->> SmartProjects: Click sign-in button
+    SmartProjects ->> Logto: Redirect to Logto
+    Logto ->> Sarah: Sign in with Logto
+    Sarah ->> Logto: Authenticate
+    Logto ->> Logto: Provision Sarah to organization A
+    Logto ->> SmartProjects: Return authentication response
+    SmartProjects ->> Logto: Fetch user organizations
+    Logto ->> SmartProjects: Return user organizations (organization A)
 ```
 
-### Mergers, acquisitions, and temporary workers
+According to the diagram above, when Sarah signs in to SmartProjects for the first time, her account is automatically provisioned to organization A in Logto. This process ensures that Sarah has the necessary access to SmartProjects without requiring manual intervention from the IT team.
 
-You have a client experiencing merging or acquiring others, JIT provisioning can simplify the process of granting access to the acquiring company’s systems for many new users. Let’s take another example,
+### Enterprise customer onboarding
 
-Peter works for MagicTech, which was recently acquired by SuperFantasy. Although MagicTech doesn’t have Enterprise SSO, it uses SmartWorkspace, where Peter has a business account with his corporate email.
+Imagine another client *SuperBank* is a financial institution that provides online banking services to its customers. *SuperBank* uses Logto for identity and access management and SuperBankApp for online banking. *SuperBank* has recently signed a contract with a new enterprise customer, *SuperCorp*, to provide online banking services to its employees.
 
-The HR team adds Peter to Google Workspace with the same email. When he signs into SmartWorkspace via Google Workspace, his account links automatically, giving him the correct access for SuperFantasy.
+*SuperCorp* uses Google Workspace for its employee accounts. SuperBankApp needs to ensure that when an employee from *SuperCorp* signs in for the first time, their account is automatically added to the *SuperCorp* organization in Logto.
 
 ```mermaid
 sequenceDiagram
-    participant Peter
-    participant Auth server
-    participant Google Workspace (IdP)
-    participant SuperFantasy Workspace (Organization)
+    participant John
+    participant SuperBankApp
+    participant Logto
+    participant Google Workspace
 
-    Peter ->> Auth server: Sign in via Google Workspace
-    Auth server ->> Google Workspace (IdP): Authenticate Peter
-    Google Workspace (IdP) ->> Auth server: Return authentication response
-    Auth server ->> Auth server: Check if Peter has an existing account
-    Note over Auth server: Existing account found
-   Auth server ->> SuperFantasy Workspace (Organization): Link account and grant appropriate access
+    John ->> SuperBankApp: Click sign-in button
+    SuperBankApp ->> Logto: Redirect to Logto
+    Logto ->> John: Prompt to sign in
+    John ->> Logto: Enter email address
+    Logto ->> Google Workspace: Redirect to Google Workspace
+    Google Workspace ->> John: Authenticate
+    Google Workspace ->> Logto: Return authentication response
+    Logto ->> Logto: Provision John to SuperCorp organization 
+    Logto ->> SuperBankApp: Return authentication response
+    SuperBankApp ->> Logto: Fetch user organizations
+    Logto ->> SuperBankApp: Return user organizations (SuperCorp)
 ```
 
-The scenarios above are ideal for implementing the JIT feature.
+In the diagram above, when John signs in to SuperBankApp for the first time, his account is automatically provisioned to the SuperCorp organization in Logto according to his Google Workspace identity.
 
 ## Is it specific to SAML and Enterprise SSO?
 
 Just-in-time (JIT) provisioning is often associated with <Ref slug="enterprise-sso" /> in SAML authentication, but it is not exclusive to <Ref slug="saml" />. JIT provisioning can also be used with other authentication protocols like <Ref slug="oauth-2.0" /> and <Ref slug="openid-connect" />, and it doesn’t always require an <Ref slug="enterprise-sso" /> set-up.
 
-For instance, email-based JIT provisioning can streamline team onboarding by automatically adding users to a workspace based on their email domain. This is particularly useful for organizations that lack the budget and resources to purchase and manage Enterprise SSO.
-
-The fundamental idea behind JIT provisioning is to automate user account creation or updates when a user first attempts to access a service, regardless of the specific protocol used.
+For instance, email-based JIT provisioning can be used when your <Ref slug="identity-provider" /> supports this feature. In this case, the user’s email address is the only required attribute for provisioning, regardless of the authentication protocol or SSO configuration.
 
 ## Does it apply to new or existing users of the app?
 
 Just-in-time (JIT) provisioning generally refers to the first attempt to access an app. However, different products perceive this functionality differently. Some use JIT provisioning just for identity and account creation, while others also include just-in-time account updates, such as re-provisioning and attribute synchronization.
 
-In addition to automatic user creation, SAML JIT Provisioning allows granting and revoking group memberships as part of provisioning. It can also update provisioned users to keep their attributes in the <Ref slug="service-provider" /> store in sync with the <Ref slug="identity-provider" /> user store attributes.
+For example, SAML JIT Provisioning allows granting and revoking group memberships as part of provisioning. It can also update provisioned users to keep their attributes in the <Ref slug="service-provider" /> store in sync with the <Ref slug="identity-provider" /> user store attributes.
 
-If you do want to consider the subsequent existing user sign-in scenario, make sure you have a robust provisioning system along with your JIT system. For example,
+If you do want to consider the subsequent existing user sign-in scenario, make sure you have a robust provisioning system along with your JIT system. For example:
 
 - **Conflict resolution**: Your system should have a strategy for handling conflicts if an account already exists with different information than what’s provided by the IdP during the JIT process. This may require detailed control of your organization’s policies and IdP configuration.
 - **Audit trails**: It's important to maintain logs of both new account creations and updates to existing accounts through JIT processes for security and compliance reasons.
 - **Performance**: While JIT provisioning happens quickly, consider the potential impact on sign-in times, especially for existing users if you're updating their information at each sign-in.
 - **Data consistency**: Ensure that your JIT provisioning process maintains data consistency, especially when updating existing user accounts.
 
-## What is the difference between JIT and SCIM (System for Cross-domain Identity Management)?
+## What is the difference between JIT and System for Cross-domain Identity Management (SCIM)?
 
-SCIM is an open standard protocol designed to simplify and automate user identity management across different systems and domains. It is commonly used in Directory Sync scenarios.
+SCIM is an open standard protocol designed to simplify and automate user identity management across different systems and domains. It is commonly used in directory sync scenarios.
 
-The main difference between JIT and SCIM is that JIT creates accounts during the user’s sign-in attempt, while SCIM can provision users through an offline automated process, independent of user login attempts.
+The main difference between JIT and SCIM is that JIT often refers to the first attempt to access an app (or new user onboarding), and it is a broad term that describes the process of dynamically provisioning user accounts; while SCIM is a specific protocol for managing user lifecycle across systems and it is not limited to the first sign-in.
 
-This means JIT focuses on new user onboarding, while SCIM focuses on the full lifecycle management of users.
+Furthermore, JIT lacks a standardized implementation across systems, whereas SCIM is a standardized protocol defined [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) for identity management.
 
-Furthermore, JIT is often an extension of SAML and lacks a standardized implementation across systems, whereas SCIM is a well-defined, standardized protocol [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) for identity management.
+Some larger organizations use SCIM for account provisioning, integrating it with their own systems. This can be very complex and vary case by case. For most use cases, JIT provisioning is a simpler and more straightforward approach.
 
-Some larger organizations use SCIM for account provisioning, integrating it with their own systems. This can be very complex and vary case by case. These organizations often have a provisioning system that involves both automated processes and manual admin involvement.
-
-<Resources urls={['https://blog.logto.io/jit-provisioning']} />
+<Resources urls={['https://blog.logto.io/jit-provisioning', 'https://datatracker.ietf.org/doc/html/rfc7644']} />
