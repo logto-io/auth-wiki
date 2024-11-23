@@ -9,6 +9,7 @@ import { getPhrases } from "../phrases";
 import { getCollection } from "astro:content";
 import { defaultLocale } from "astro-i18n-aut";
 import { getLocaleFromUrl } from "../utils/locale";
+import anyAscii from "any-ascii";
 import cover from "../assets/cover.png";
 
 const locale = getLocaleFromUrl(Astro.url);
@@ -30,13 +31,19 @@ const entries = defaultEntries.map((entry) => {
 
 const sections = entries
   .slice()
-  .sort((a, b) => a.data.title.localeCompare(b.data.title))
+  .sort((a, b) =>
+    anyAscii(a.data.title)
+      .toLowerCase()
+      .localeCompare(anyAscii(b.data.title).toLowerCase()),
+  )
   .reduce(
     (acc, article) => {
-      const firstLetter = article.data.title[0]?.toUpperCase();
+      const firstLetter = anyAscii(article.data.title)[0]?.toUpperCase();
 
       if (!firstLetter) {
-        return acc;
+        throw new Error(
+          `No first letter found for article ${article.data.title}`,
+        );
       }
 
       if (!acc[firstLetter]) {
