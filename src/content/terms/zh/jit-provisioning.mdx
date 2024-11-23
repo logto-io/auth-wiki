@@ -1,73 +1,94 @@
 ---
-title: 即时 (Just-in-time, JIT) 供应 (Provisioning)
+title: 即时 (JIT) 供应
 tags: [authentication, authorization]
-description: 即时 (Just-in-time, JIT) 供应是一种身份和访问管理 (IAM) 过程，当用户首次尝试访问系统或应用程序时，用户账户会动态自动创建。这种方法有助于简化入职过程，并确保仅在需要时才创建用户账户，从而减少管理开销，提高安全性。
+description: 即时 (JIT) 供应是一种身份和访问管理 (IAM) 过程，当用户首次登录时，用户账户会动态供应。
 ---
 
 ## 什么是即时供应？
 
-如果你正在构建一个 SaaS B2B 应用，并希望支持会员功能，允许成员轻松加入你的工作区 (租户)，你可能需要下面表格中的功能，其中即时供应就是一种，帮助简化流程。
+即时 (JIT) 供应是在 <Ref slug="iam" /> 中使用的一个过程，当用户首次尝试登录时，根据用户的身份和系统的配置即时供应用户账户。
 
-| 功能 | 流程 |
-| --- | --- |
-| 管理员发起邀请 | 用户可以收到加入组织的电子邮件邀请。 |
-| 通过 API 创建或导入用户 | 用户可以使用预先创建的用户账户加入组织。 |
-| 即时供应 | 用户首次登录应用时可以加入组织。 |
-| 目录同步 (例如 SCIM) | 使用 IdP 的目录同步功能提前在应用中预先供应用户。 |
+## 即时供应的使用场景是什么？
 
-**即时 (Just-in-time, JIT) 供应** 是一种在用户首次登录系统时动态创建用户账户的身份和访问管理系统中使用的过程。与提前为用户预先设置账户不同，JIT 供应在用户进行认证时动态创建和配置必要的用户账户。即时供应是一种受欢迎的功能，其特点包括高效、无需管理人员参与和自动化组织成员资格等。
+这些场景在构建涉及多租户架构、企业 SSO (Enterprise SSO) 或需要团队入职功能的 B2B 应用时很常见。以下是你或你的客户可能遇到的一些示例场景。
 
-## 即时供应的使用案例是什么？
+### 员工入职
 
-这些案例在构建涉及多租户架构、Enterprise SSO、与企业合作或需要团队入职功能的 B2B 应用时很常见。以下是一些你的客户可能遇到的示例场景。
+想象一下，你的一个客户 *SuperFantasy* 正在经历频繁的招聘或快速增长，可以使用 JIT 供应快速为新员工设置用户账户。*SuperFantasy* 使用 Logto 进行身份和访问管理，并使用 SmartProjects 进行项目管理。当新员工 Sarah 第一次登录 SmartProjects 时，她的账户会根据她的 Logto 凭证自动创建和配置。
 
-### 快速入职
+```mermaid
+sequenceDiagram
+    participant Sarah
+    participant SmartProjects
+    participant Logto
 
-你有一个客户，经历频繁招聘或快速增长，可以使用 JIT 供应快速为新员工设置用户账户。以下是一个示例：
+    Sarah ->> SmartProjects: 点击登录按钮
+    SmartProjects ->> Logto: 重定向到 Logto
+    Logto ->> Sarah: 使用 Logto 登录
+    Sarah ->> Logto: 认证
+    Logto ->> Logto: 将 Sarah 供应到组织 A
+    Logto ->> SmartProjects: 返回认证响应
+    SmartProjects ->> Logto: 获取用户组织
+    Logto ->> SmartProjects: 返回用户组织 (组织 A)
+```
 
-Sarah 是一家名为 Company SuperFantasy 的新员工，该公司使用 Okta 作为其企业身份提供者。人力资源团队只需在 Okta 中添加她的一次业务身份。当 Sarah 第一次使用此电子邮件登录名为 Smartworkspace 的公司使用的生产力应用时，系统会自动在公司工作区内为她创建一个账户并分配正确的角色。这样，Sarah 和 SuperFantasy 的人力资源团队都不需要经历多重步骤来创建账户和分配角色。
+根据上面的图表，当 Sarah 第一次登录 SmartProjects 时，她的账户会自动供应到 Logto 中的组织 A。这个过程确保了 Sarah 能够访问 SmartProjects，而无需 IT 团队的人工干预。
 
-### 兼并、收购和临时工
+### 企业客户入职
 
-你有一个客户，正在经历兼并或收购其他公司，JIT 供应可以简化为许多新用户授予访问权的过程。再举一个例子，
+想象另一个客户 *SuperBank* 是一家为其客户提供在线银行服务的金融机构。*SuperBank* 使用 Logto 进行身份和访问管理，并使用 SuperBankApp 进行在线银行服务。*SuperBank* 最近与一个新企业客户 *SuperCorp* 签订了合同，为其员工提供在线银行服务。
 
-Peter 为 MagicTech 工作，而 MagicTech 最近被 SuperFantasy 收购。MagicTech 是一个较小的组织，没有 Enterprise SSO，但也使用 Smartworkspace，而 Peter 已经拥有一个业务账户。
+*SuperCorp* 使用 Google Workspace 进行员工账户管理。SuperBankApp 需要确保当 *SuperCorp* 的员工首次登录时，他们的账户会自动添加到 Logto 中的 *SuperCorp* 组织。
 
-人力资源团队可以在 Okta 中添加 Peter。当 Peter 第一次通过 Okta 登录 Smartworkspace 时，系统会自动链接他的现有业务账户，并授予对 SuperFantasy 的适当访问权限。
+```mermaid
+sequenceDiagram
+    participant John
+    participant SuperBankApp
+    participant Logto
+    participant Google Workspace
 
-上述场景是实施 JIT 功能的理想选择。
+    John ->> SuperBankApp: 点击登录按钮
+    SuperBankApp ->> Logto: 重定向到 Logto
+    Logto ->> John: 提示登录
+    John ->> Logto: 输入电子邮件地址
+    Logto ->> Google Workspace: 重定向到 Google Workspace
+    Google Workspace ->> John: 认证
+    Google Workspace ->> Logto: 返回认证响应
+    Logto ->> Logto: 将 John 供应到 SuperCorp 组织
+    Logto ->> SuperBankApp: 返回认证响应
+    SuperBankApp ->> Logto: 获取用户组织
+    Logto ->> SuperBankApp: 返回用户组织 (SuperCorp)
+```
 
-## 它是否特定于 SAML 和 Enterprise SSO？
+在上面的图表中，当 John 第一次登录 SuperBankApp 时，他的账户会根据他的 Google Workspace 身份自动供应到 Logto 中的 SuperCorp 组织。
 
-即时 (Just-in-time, JIT) 供应通常与 SAML 认证中的 <Ref slug="enterprise-sso" /> 相关联，但它并不限于 <Ref slug="saml" />。JIT 供应也可以用于其他认证协议，如 <Ref slug="oauth-2.0" /> 和 <Ref slug="openid-connect" />，并不总是需要设置 <Ref slug="enterprise-sso" />。
+## 它是否特定于 SAML 和企业 SSO？
 
-例如，基于电子邮件的 JIT 供应可以通过根据用户的电子邮件域自动将其添加到工作区，从而简化团队入职。这对于缺乏预算和资源来购买和管理 Enterprise SSO 的组织特别有用。
+即时 (JIT) 供应通常与 SAML 认证中的 <Ref slug="enterprise-sso" /> 相关联，但它并不局限于 <Ref slug="saml" />。JIT 供应也可以与其他认证协议一起使用，如 <Ref slug="oauth-2.0" /> 和 <Ref slug="openid-connect" />，并且不总是需要 <Ref slug="enterprise-sso" /> 设置。
 
-JIT 供应背后的基本思想是，当用户首次尝试访问服务时，自动创建或更新用户账户，无论使用的是哪种特定协议。
+例如，当你的 <Ref slug="identity-provider" /> 支持此功能时，可以使用基于电子邮件的 JIT 供应。在这种情况下，用户的电子邮件地址是供应所需的唯一属性，无论认证协议或 SSO 配置如何。
 
 ## 它适用于应用的新用户还是现有用户？
 
-即时 (Just-in-time, JIT) 供应通常指用户首次尝试访问应用程序。然而，不同的产品对该功能有不同的理解。一些产品仅将 JIT 供应用于身份和账户创建，而其他产品则包括即时账户更新，例如重新供应和属性同步。
+即时 (JIT) 供应通常指首次尝试访问应用。然而，不同的产品对这一功能的理解不同。有些仅将 JIT 供应用于身份和账户创建，而其他产品还包括即时账户更新，如重新供应和属性同步。
 
-除了自动用户创建之外，SAML JIT 供应允许在供应过程中授予和撤销组成员身份。它还可以更新已供应的用户，以使其属性与 <Ref slug="service-provider" /> 存储中的 <Ref slug="identity-provider" /> 用户存储属性保持同步。
+例如，SAML JIT 供应允许在供应过程中授予和撤销组成员资格。它还可以更新已供应的用户，以保持他们在 <Ref slug="service-provider" /> 存储中的属性与 <Ref slug="identity-provider" /> 用户存储属性同步。
 
-如果你确实想考虑后续现有用户的登录场景，请确保你的 JIT 系统具有强大的供应系统。例如：
+如果你确实想考虑后续现有用户登录的场景，请确保你有一个健全的供应系统以及你的 JIT 系统。例如：
 
-- **冲突解决**：如果账户已经存在且与 IdP 在 JIT 过程中提供的信息不同，你的系统应该有处理冲突的策略。这可能需要对你组织的政策和 IdP 配置进行详细控制。
-- **审计追踪**：维护通过 JIT 过程进行的新账户创建和现有账户更新的日志对于安全和合规性至关重要。
-- **性能**：虽然 JIT 供应发生得很快，但考虑到潜在的对登录时间的影响，尤其是当你在每次登录时更新现有用户信息时。
-- **数据一致性**：确保你的 JIT 供应过程保持数据一致性，尤其是在更新现有用户账户时。
+- **冲突解决**：如果在 JIT 过程中 IdP 提供的信息与现有账户不同，你的系统应该有处理冲突的策略。这可能需要对组织政策和 IdP 配置的详细控制。
+- **审计跟踪**：维护通过 JIT 过程创建新账户和更新现有账户的日志对于安全和合规性很重要。
+- **性能**：虽然 JIT 供应发生得很快，但要考虑对登录时间的潜在影响，特别是对于现有用户，如果你在每次登录时更新他们的信息。
+- **数据一致性**：确保你的 JIT 供应过程保持数据一致性，特别是在更新现有用户账户时。
 
-## JIT 和 SCIM 有什么区别？
+## JIT 和跨域身份管理系统 (SCIM) 有什么区别？
 
-SCIM 是一种开放标准协议，旨在简化和自动化跨不同系统和领域的用户身份管理。它通常用于目录同步场景。
+SCIM 是一个开放标准协议，旨在简化和自动化跨不同系统和域的用户身份管理。它通常用于目录同步场景。
 
-JIT 和 SCIM 的主要区别在于 JIT 在用户尝试登录时创建账户，而 SCIM 可以通过离线自动化过程独立于用户登录尝试来供应用户。
+JIT 和 SCIM 的主要区别在于 JIT 通常指首次尝试访问应用（或新用户入职），它是一个描述动态供应用户账户过程的广义术语；而 SCIM 是一个用于跨系统管理用户生命周期的特定协议，并不限于首次登录。
 
-这意味着 JIT 专注于新用户入职，而 SCIM 专注于用户的整个生命周期管理。
+此外，JIT 缺乏跨系统的标准化实现，而 SCIM 是一个为身份管理定义的标准化协议 [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644)。
 
-此外，JIT 通常是 SAML 的扩展，缺乏跨系统的标准化实现，而 SCIM 是身份管理的一个定义良好的标准化协议 [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644)。
+一些大型组织使用 SCIM 进行账户供应，将其与自己的系统集成。这可能非常复杂，并且因情况而异。对于大多数用例，JIT 供应是一种更简单和直接的方法。
 
-一些大型组织使用 SCIM 进行账户供应，将其与自己的系统集成。这可能非常复杂，并且因案例而异。这些组织的供应系统通常包含自动化过程和手动管理员参与。
-
-<Resources urls={['https://blog.logto.io/jit-provisioning']} />
+<Resources urls={['https://blog.logto.io/jit-provisioning', 'https://datatracker.ietf.org/doc/html/rfc7644']} />

@@ -1,99 +1,34 @@
 ---
-title: Rol (Role)
+title: Rol
 tags: [authorization]
-description: Een rol is een verzameling van permissies in toegangscontrolesystemen die bepaalt welke acties gebruikers kunnen uitvoeren, en biedt een efficiënte manier om toegangsrechten aan gebruikers te beheren en toe te wijzen.
+description: Een rol is een kernconcept in systemen voor op rollen gebaseerde toegangscontrole (RBAC), dat een verzameling machtigingen vertegenwoordigt die bepalen welke acties gebruikers kunnen uitvoeren, en biedt een efficiënte manier om toegangsrechten aan gebruikers te beheren en toe te wijzen.
 ---
 
-## Wat is een rol?
+## Rol
 
-Een rol is een kernconcept in op rollen gebaseerde toegang controle (RBAC) systemen. In RBAC zijn rollen een groepering van permissies die aan gebruikers kunnen worden toegewezen. Ze bieden een manier om permissies voor verschillende API's te aggregeren, waardoor het efficiënter is om permissies toe te voegen, te verwijderen of aan te passen dan ze individueel aan gebruikers toe te wijzen.
+Een rol is een van de kernelementen in <Ref slug="rbac" />. Het dient als een container voor machtigingen die aan gebruikers kunnen worden toegewezen en fungeert als een tussenpersoon tussen gebruikers en hun toegangsrechten.
 
-Rollen fungeren als intermediairs tussen gebruikers en permissies, waardoor beheerders de toegangsrechten effectiever kunnen beheren, vooral in grootschalige systemen.
+```mermaid
+  graph LR
+    Gebruikers
+    -->|toegewezen aan| Rollen
+    -->|inclusief| Machtigingen
+```
 
-## Hoe zijn rollen gestructureerd?
+Een typische rolstructuur bevat een naam en een set machtigingen:
 
-Laten we eens kijken naar een voorbeeld van een `order_admin` rol om te begrijpen hoe rollen meestal zijn gestructureerd:
+```typescript
+const role = {
+  name: 'order_admin',
+  permissions: [
+    'read:orders',   // Bekijk bestelgegevens
+    'write:orders',  // Bewerk bestellingen
+    'read:products'  // Bekijk producten
+  ]
+}
+```
 
-Rol: `order_admin`  
-Permissies:
-- Bestelresource:
-   - `read:orders` (besteldetails bekijken)
-   - `write:orders` (bestelinformatie bewerken)
-   - `delete:orders` (bestellingen uit het systeem verwijderen)
+> [!Opmerking]
+> Rollen worden voornamelijk gebruikt voor machtigingsbeheer. Voor de implementatie van toegangscontrole wordt aanbevolen om machtigingen direct te controleren in plaats van rollen. Zie <Ref slug="rbac" /> voor meer informatie.
 
-- Productresource:
-   - `read:products` (productinformatie bekijken)
-   - `write:products` (productdetails bewerken)
-
-Dit voorbeeld laat zien hoe meerdere gerelateerde permissies in een enkele rol kunnen worden gegroepeerd, waardoor het eenvoudiger is voor beheerders om permissies aan gebruikers toe te wijzen. Door een gebruiker aan de `order_admin` rol toe te wijzen, krijgt die gebruiker de benodigde permissies om zowel bestellingen als producten te beheren zonder dat elke permissie individueel moet worden toegewezen.
-
-## Wat zijn permissies?
-
-Permissie verwijst naar de autorisatie om toegang te krijgen tot een resource of een actie uit te voeren op een resource. In de echte wereld kunnen entiteiten zoals bestellingen, producten en documenten worden aangewezen als resources, en kunnen verschillende acties worden toegewezen.
-
-Voorbeelden van permissies zijn:
-
-- Resource: Bestellingen
-  - `write:orders`: Een bestelling bewerken
-- Resource: Documenten
-  - `read:documents`: Een document lezen
-- Resource: Producten
-  - `delete:products`: Een product verwijderen
-
-Deze voorbeelden demonstreren duidelijk de relatie tussen permissies en specifieke resources.
-
-## Hoe werken rollen en permissies samen?
-
-Rollen zijn in wezen verzamelingen van permissies. Wanneer een gebruiker een rol wordt toegewezen, erft deze gebruiker alle permissies die aan die rol zijn gekoppeld. Dit maakt het gemakkelijker om toegang controle op grotere schaal te beheren.
-
-## Waarom rollen gebruiken in toegang controle?
-
-1. **Verenvoudigd beheer**: Beheerders kunnen rollen in plaats van individuele permissies toewijzen, wat efficiënter is.
-2. **Consistentie**: Rollen zorgen ervoor dat gebruikers met dezelfde verantwoordelijkheden dezelfde set aan permissies hebben.
-3. **Schaalbaarheid**: Naarmate systemen groeien, maken rollen het gemakkelijker om permissies voor een groot aantal gebruikers te beheren.
-4. **Flexibiliteit**: Rollen kunnen eenvoudig worden aangepast en deze wijzigingen worden onmiddellijk weerspiegeld voor alle gebruikers die aan die rol zijn toegewezen.
-5. **Afstemming op bedrijfslogica**: Rollen komen vaak overeen met functieomschrijvingen of verantwoordelijkheden binnen een organisatie, waardoor ze intuïtief zijn om in te stellen en te beheren.
-
-Door rollen effectief te gebruiken, kunnen RBAC-systemen een robuuste beveiliging handhaven terwijl efficiënt beheer van permissies en gebruikers toegangscontrole mogelijk wordt gemaakt.
-
-## Hoe rollen effectief te organiseren en beheren?
-
-Bij het implementeren van RBAC in je applicatie is het cruciaal om rollen effectief te organiseren. Hier zijn enkele best practices om te overwegen:
-
-1. Begin met een rolhiërarchie. Bijvoorbeeld, in BookHarber:
-   - Basisrol: Gast
-   - Gebruikersrol: Klant
-   - Medewerker Rollen: Klantenservicemedewerker, Boekbeheerder, Marketingmedewerker
-   - Admin Rol: Winkelbeheerder
-
-   Deze hiërarchie maakt gemakkelijker beheer en overerving van permissies mogelijk.
-
-2. Laat hogere rollen permissies erven van lagere rollen. De rol van Winkelbeheerder kan bijvoorbeeld alle permissies van andere medewerkersrollen erven.
-
-3. Wijs alleen de minimaal noodzakelijke permissies toe aan elke rol. Dit vermindert het risico van ongeautoriseerde toegang als het account van een gebruiker wordt gecompromitteerd.
-
-4. Creëer rollen op basis van feitelijke functieverantwoordelijkheden in je organisatie. Dit maakt roltoewijzing intuïtiever en beter beheersbaar.
-
-5. Voor gebruikers die permissies van meerdere rollen nodig hebben, creëer samengestelde rollen in plaats van meerdere individuele rollen toe te wijzen.
-
-6. Beoordeel en auditeer regelmatig je rolstructuur om ervoor te zorgen dat deze nog steeds aansluit bij de behoeften en beveiligingseisen van je organisatie.
-
-7. Pas je gebruikersinterface aan op basis van de rol van de gebruiker. Dit verbetert de gebruikerservaring door alleen relevante informatie en bedieningselementen weer te geven.
-
-8. Onderhoud duidelijke documentatie van je rollen, hun permissies en de rationale achter je rolontwerp. Dit helpt bij de inwerking van nieuwe teamleden en toekomstig systeemonderhoud.
-
-9. Kies beschrijvende rolnamen die duidelijk de functie of het toegangslevel aanduiden, zoals "ReadOnlyUser" of "SeniorEditor".
-
-10. Ontwerp je rolstructuur om toekomstige groei en veranderingen in je organisatie te accommoderen.
-
-Door deze best practices te volgen, kun je een robuust en beheersbaar RBAC-systeem creëren dat de beveiliging van je applicatie verbetert terwijl het een soepele gebruikerservaring biedt.
-
-## Gerelateerde bronnen
-
-<Resources
-  urls={[
-    "https://blog.logto.io/rbac-and-abac",
-    "https://blog.logto.io/mastering-rbac",
-    "https://blog.logto.io/organization-and-role-based-access-control",
-  ]}
-/>
+<SeeAlso slugs={["rbac", "authorization", "access-control"]} />

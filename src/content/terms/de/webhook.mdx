@@ -1,7 +1,7 @@
 ---
 title: Webhook
 tags: [integration]
-description: Webhooks sind eine Methode, mit der Webanwendungen in Echtzeit miteinander kommunizieren können. Sie ermöglichen es einer Anwendung, automatisierte Nachrichten oder Informationen an eine andere Anwendung zu senden, wenn ein bestimmtes Ereignis eintritt. Im Gegensatz zu traditionellen APIs, bei denen eine Anwendung eine andere nach Updates abfragen muss, senden Webhooks Daten an die empfangende Anwendung, sobald das Ereignis eintritt.
+description: Webhooks sind eine Methode, mit der Webanwendungen in Echtzeit miteinander kommunizieren können. Sie ermöglichen es einer Anwendung, automatisierte Nachrichten oder Informationen an eine andere Anwendung zu senden, wenn ein bestimmtes Ereignis eintritt.
 ---
 
 ## Was ist ein Webhook?
@@ -16,106 +16,71 @@ sequenceDiagram
     participant Zielsystem
     
     Quellsystem->>Quellsystem: Ereignis tritt ein
-    Quellsystem->>Quellsystem: HTTP POST-Anfrage erstellen
+    Quellsystem->>Quellsystem: HTTP-POST-Anfrage erstellen
     Quellsystem->>Zielsystem: Webhook-Anfrage senden
-    Zielsystem->>Zielsystem: Anfrage-Daten verarbeiten
+    Zielsystem->>Zielsystem: Anfragedaten verarbeiten
     Zielsystem-->>Quellsystem: Antwort zurückgeben (normalerweise 2xx-Statuscode)
     
     alt Anfrage schlägt fehl
-        Quellsystem->>Quellsystem: Retry-Mechanismus implementieren
+        Quellsystem->>Quellsystem: Wiederholungsmechanismus implementieren
     end
 ```
 
-1. Ein bestimmtes Ereignis tritt im Quellsystem auf
-2. Das Quellsystem erstellt eine HTTP POST-Anfrage mit den Ereignisdaten
+1. Ein bestimmtes Ereignis tritt im Quellsystem ein
+2. Das Quellsystem erstellt eine HTTP-POST-Anfrage mit den Ereignisdaten
 3. Das Quellsystem sendet die Anfrage an die vorkonfigurierte URL des Zielsystems
 4. Das Zielsystem empfängt die Anfrage und verarbeitet die Daten
 5. Das Zielsystem gibt eine Antwort an das Quellsystem zurück
-6. Wenn die Anfrage fehlschlägt, kann das Quellsystem einen Retry-Mechanismus implementieren
-
-## Was sind häufige Anwendungsfälle für Webhooks?
-
-1. Bezahlsysteme: Benachrichtigung über Änderungen des Bestellstatus
-2. Versionskontrollsysteme: Benachrichtigung über Code-Commits, Merge-Requests und andere Ereignisse
-3. CRM-Systeme: Benachrichtigungen bei Aktualisierungen von Kundeninformationen
-4. IoT-Geräte: Benachrichtigungen bei Statusänderungen des Geräts
-5. Social-Media-Plattformen: Benachrichtigungen über neue Nachrichten und Kommentare
+6. Wenn die Anfrage fehlschlägt, kann das Quellsystem einen Wiederholungsmechanismus implementieren
 
 ## Wie funktionieren Webhooks in einem realen Szenario?
 
-Betrachten wir ein Szenario, bei dem eine E-Commerce-Plattform mit einem Drittanbieter-Bezahlsystem integriert ist:
+Nehmen wir eine Anwendung, die mit einem Auth-Dienst integriert ist, als Beispiel. Wenn sich ein neuer Benutzer anmeldet, sendet die Anwendung eine Willkommens-E-Mail an den Benutzer.
 
-### Szenario
+Typischerweise bietet der Auth-Dienst ein `user.registered` Webhook-Ereignis, das ausgelöst wird, wenn ein neuer Benutzer die Registrierung abschließt.
 
-Eine E-Commerce-Plattform nutzt ein Drittanbieter-Bezahlsystem, um Zahlungen für Bestellungen zu bearbeiten. Wenn ein Benutzer eine Zahlung abschließt, muss das Bezahlsystem die E-Commerce-Plattform in Echtzeit über den Zahlungsstatus per Webhook benachrichtigen, damit die Plattform den Bestellstatus aktualisieren und nachfolgende Prozesse auslösen kann.
+Die Webhook-Ereignisnutzlast enthält die Informationen des Benutzers wie E-Mail und Benutzernamen, die verwendet werden können, um die Willkommens-E-Mail zu senden:
 
-### Webhook Implementierungsablauf
+```json
+// Hinweis: Die tatsächliche Struktur der Nutzlast hängt vom Auth-Dienst ab.
+{
+  "event": "user.registered",
+  "timestamp": "2024-03-21T08:00:00Z",
+  "data": {
+    "user_id": "u_1234567890",
+    "email": "john@example.com",    // E-Mail-Adresse zum Senden der Willkommens-E-Mail
+    "username": "johndoe",          // Benutzername zur Personalisierung der E-Mail
+    "registered_at": "2024-03-21T08:00:00Z"
+  }
+}
+```
+
+So funktioniert der Webhook-Fluss:
 
 ```mermaid
 sequenceDiagram
     participant Benutzer
-    participant E-Commerce-Plattform
-    participant Bezahlsystem
-    participant Lagerverwaltungssystem
-    participant Logistiksystem
-
-    Benutzer->>E-Commerce-Plattform: Bestellung aufgeben
-    E-Commerce-Plattform->>Bezahlsystem: Zahlungsanfrage erstellen
-    Bezahlsystem-->>E-Commerce-Plattform: Zahlungs-URL zurückgeben
-    E-Commerce-Plattform-->>Benutzer: Zahlungsseite anzeigen
-    Benutzer->>Bezahlsystem: Zahlung abschließen
-    Bezahlsystem->>Bezahlsystem: Zahlung bearbeiten
-    Bezahlsystem->>E-Commerce-Plattform: Webhook für Zahlungserfolg senden
-    E-Commerce-Plattform->>E-Commerce-Plattform: Webhook-Signatur verifizieren
-    E-Commerce-Plattform->>E-Commerce-Plattform: Bestellstatus aktualisieren
-    par Nachfolgende Prozesse auslösen
-        E-Commerce-Plattform->>Lagerverwaltungssystem: Lagerbestand aktualisieren
-        E-Commerce-Plattform->>Logistiksystem: Versandauftrag erstellen
-    end
-    E-Commerce-Plattform-->>Bezahlsystem: 200 OK zurückgeben
-    E-Commerce-Plattform-->>Benutzer: Seite für Zahlungserfolg anzeigen
+    participant Auth-Dienst
+    participant App
+    participant E-Mail-Dienst
+    
+    Benutzer->>Auth-Dienst: Anmelden
+    Auth-Dienst->>App: Webhook senden (user.registered)
+    App-->>E-Mail-Dienst: Willkommens-E-Mail senden
+    E-Mail-Dienst-->>Benutzer: Willkommens-E-Mail zustellen
 ```
 
-1. Auftragserstellung und Zahlungsanfrage:
-   - Der Benutzer gibt eine Bestellung auf der E-Commerce-Plattform auf.
-   - Die Plattform sendet eine Zahlungsanfrage an das Bezahlsystem.
-   - Das Bezahlsystem gibt eine Zahlungs-URL zurück, die die Plattform dem Benutzer anzeigt.
+## Was sind bewährte Praktiken für die Implementierung von Webhooks?
 
-2. Benutzerzahlung:
-   - Der Benutzer schließt die Zahlung auf dem Bezahlsystem ab.
-
-3. Webhook-Auslöser:
-   - Das Bezahlsystem erkennt das Ereignis "Zahlung erfolgreich".
-   - Es erstellt einen Webhook-Nutzlast mit den Zahlungsdetails.
-
-4. Senden des Webhooks:
-   - Das Bezahlsystem sendet eine POST-Anfrage an die vorkonfigurierte URL der E-Commerce-Plattform.
-
-5. Verarbeitung durch den Empfänger:
-   - Die E-Commerce-Plattform empfängt den Webhook und verifiziert zunächst die Anfragesignatur, um die Sicherheit zu gewährleisten.
-   - Nach der Verifizierung aktualisiert die Plattform den entsprechenden Bestellstatus auf "bezahlt".
-   - Die Plattform löst nachfolgende Prozesse aus, wie die Aktualisierung des Lagerbestands und das Erstellen von Versandaufträgen.
-
-6. Antwortverarbeitung:
-   - Die E-Commerce-Plattform gibt sofort eine 200 OK-Antwort zurück, sobald sie den Webhook empfängt.
-   - Wenn während der Verarbeitung Fehler auftreten, wird die Plattform im Hintergrund erneut versuchen oder eine manuelle Intervention erforderlich sein.
-
-7. Benutzererfahrung:
-   - Die E-Commerce-Plattform zeigt dem Benutzer eine Seite für Zahlungserfolg an.
-
-Dieses Beispiel zeigt, wie Webhooks die Echtzeitkommunikation zwischen einem Drittanbieter-Bezahlsystem und einer E-Commerce-Plattform ermöglichen. Über Webhooks kann das Bezahlsystem die E-Commerce-Plattform sofort benachrichtigen, wenn eine Zahlung abgeschlossen ist, was sofortige Bestellstatusaktualisierungen und schnelles Auslösen nachfolgender Geschäftsprozesse ermöglicht. Dies verbessert die Gesamtreaktionsfähigkeit und Effizienz des Systems und bietet letztendlich ein besseres Einkaufserlebnis für die Benutzer.
-
-## Was sind Best Practices für die Implementierung von Webhooks?
-
-Wenn du der Absender (Produzent) von Webhooks bist, berücksichtige bitte die folgenden Aspekte:
+Wenn du der Sender (Produzent) von Webhooks bist, berücksichtige die folgenden Aspekte:
 
 ### Webhook-Design
 
-Entwickle klare und konsistente Webhook-Strukturen:
+Entwerfe klare und konsistente Webhook-Strukturen:
 
 - Definiere klare Ereignistypen: Zum Beispiel `order.created`, `user.updated`, etc.
-- Verwende das standardmäßige JSON-Format: Stelle sicher, dass die Datenstruktur klar und einfach zu parsen ist.
-- Versionskontrolle: Füge Versionsinformationen in den Anfrage-Headern oder im Nutzinhalt ein. Zum Beispiel:
+- Verwende das Standard-JSON-Format: Stelle sicher, dass die Datenstruktur klar und einfach zu parsen ist.
+- Versionskontrolle: Füge Versionsinformationen in die Anfrage-Header oder die Nutzlast ein. Zum Beispiel:
 
   ```javascript
   // In Anfrage-Headern
@@ -124,7 +89,7 @@ Entwickle klare und konsistente Webhook-Strukturen:
     'X-Webhook-Version': '1.0'
   }
   
-  // Oder im Nutzinhalt
+  // Oder in der Nutzlast
   {
     "version": "1.0",
     "event_type": "order.created",
@@ -134,27 +99,27 @@ Entwickle klare und konsistente Webhook-Strukturen:
   }
   ```
 
-- Genügend Kontext bereitstellen: Füge Zeitstempel hinzu, wann Ereignisse auftreten, sowie eindeutige Kennungen für verwandte Ressourcen, etc.
-- Konsistenz beibehalten: Verwende konsistente Namenskonventionen und Datenstrukturen für alle Ereignistypen.
+- Biete ausreichenden Kontext: Füge Zeitstempel hinzu, wann Ereignisse aufgetreten sind, eindeutige Kennungen für verwandte Ressourcen, etc.
+- Halte Konsistenz: Verwende konsistente Namenskonventionen und Datenstrukturen für alle Ereignistypen.
 
 ### Sendemechanismus
 
-Implementiere einen zuverlässigen Mechanismus zum Senden von Webhooks:
+Implementiere einen zuverlässigen Webhook-Sendemechanismus:
 
-- Verwende asynchrone Task-Queues: Vermeide das Blockieren des Hauptprogramms und verbessere die Reaktionsfähigkeit des Systems.
-- Implementiere Retry-Mechanismen: Behandle Netzwerkausfälle oder vorübergehende Nichterreichbarkeit des Empfängers.
+- Verwende asynchrone Aufgabenwarteschlangen: Vermeide das Blockieren des Hauptprogramms und verbessere die Systemreaktionsfähigkeit.
+- Implementiere Wiederholungsmechanismen: Behandle Netzwerkfehler oder vorübergehende Nichtverfügbarkeit des Empfängers.
 
-### Retry-Strategie
+### Wiederholungsstrategie
 
-Entwickle eine geeignete Retry-Strategie:
+Entwerfe eine geeignete Wiederholungsstrategie:
 
 - Implementiere exponentielles Backoff: Vermeide häufige Wiederholungen, die das System und den Empfänger belasten könnten.
-- Setze eine maximale Retry-Anzahl: Vermeide unendliche Wiederholungen, die Systemressourcen verbrauchen könnten.
-- Biete manuelle Retry-Mechanismen: Biete eine Schnittstelle für manuelle Wiederholungen für Webhooks, die letztendlich fehlschlagen.
+- Setze eine maximale Wiederholungsanzahl: Verhindere unendliche Wiederholungen, die Systemressourcen verbrauchen.
+- Biete manuelle Wiederholungsmechanismen: Biete eine Schnittstelle für manuelle Wiederholungen für Webhooks, die letztendlich fehlschlagen.
 
 ### Sicherheitsimplementierung
 
-Implementiere einen Signaturmechanismus, der es Empfängern ermöglicht, die Authentizität von Anfragen zu überprüfen:
+Implementiere einen Signaturmechanismus, um Empfängern zu ermöglichen, die Authentizität von Anfragen zu überprüfen:
 
 ```javascript
 const crypto = require('crypto');
@@ -175,28 +140,28 @@ function sendWebhookWithSignature(url, payload, secret) {
 
 ### Leistungsoptimierung
 
-Optimiere die Leistung beim Senden von Webhooks:
+Optimiere die Leistung des Webhook-Versands:
 
 - Verwende Verbindungspools: Reduziere den Overhead beim Herstellen von Verbindungen und verbessere die Leistung.
-- Implementiere Batch-Verarbeitung: Sende Webhooks in Batches, wenn es angemessen ist, um die Anzahl der Netzwerkinteraktionen zu reduzieren.
+- Implementiere Batch-Verarbeitung: Sende Webhooks in Batches, wenn angemessen, um die Anzahl der Netzwerkinteraktionen zu reduzieren.
 
 ### Dokumentation und Testwerkzeuge
 
-Biete Unterstützung für Webhook-Benutzer:
+Biete Unterstützung für Webhook-Nutzer:
 
 - Detaillierte API-Dokumentation: Füge alle möglichen Ereignistypen, Anfrageformate und Feldbeschreibungen hinzu.
-- Biete Testwerkzeuge an: Implementiere Webhook-Testendpunkte, um Benutzern das Simulieren des Empfangs von Webhook-Benachrichtigungen zu ermöglichen.
-- Beispielcode: Biete Integrationsbeispiele in verschiedenen Programmiersprachen an.
+- Biete Testwerkzeuge: Implementiere Webhook-Testendpunkte, um Nutzern zu ermöglichen, den Empfang von Webhook-Benachrichtigungen zu simulieren.
+- Beispielcode: Biete Integrationsbeispiele in verschiedenen Programmiersprachen.
 
-## Was sind Best Practices für die Verwendung von Webhooks?
+## Was sind bewährte Praktiken für die Nutzung von Webhooks?
 
-Wenn du Webhooks als Empfänger (Konsument) verwendest, berücksichtige bitte die folgenden Aspekte:
+Wenn du Webhooks als Empfänger (Konsument) nutzt, berücksichtige die folgenden Aspekte:
 
 ### Sicherheit
 
-Da Endpunkte zum Empfang von Webhooks allgemein öffentlich zugänglich sind, ist die Sicherheit ein Hauptanliegen. Achte auf folgende Punkte:
+Da Endpunkte zum Empfangen von Webhooks in der Regel öffentlich zugänglich sind, ist Sicherheit ein Hauptanliegen. Achte auf die folgenden Punkte:
 
-- Authentizität der Anfrage überprüfen: Implementiere einen Signaturüberprüfungsmechanismus, um sicherzustellen, dass Anfragen von erwarteten Absendern kommen.
+- Überprüfe die Authentizität der Anfragen: Implementiere einen Signaturüberprüfungsmechanismus, um sicherzustellen, dass Anfragen von erwarteten Absendern stammen.
   
   ```javascript
   const crypto = require('crypto');
@@ -215,42 +180,42 @@ Da Endpunkte zum Empfang von Webhooks allgemein öffentlich zugänglich sind, is
   ```
 
 - Verwende HTTPS: Stelle sicher, dass dein Webhook-Empfangsendpunkt HTTPS verwendet, um zu verhindern, dass Daten während der Übertragung abgefangen oder manipuliert werden.
-- Implementiere eine IP-Whitelist: Akzeptiere nur Webhook-Anfragen von vertrauenswürdigen IP-Adressen, um das Risiko von Angriffen zu reduzieren.
+- Implementiere IP-Whitelisting: Akzeptiere nur Webhook-Anfragen von vertrauenswürdigen IP-Adressen, um das Risiko von Angriffen zu reduzieren.
 
 ### Zuverlässigkeit
 
 Um eine zuverlässige Verarbeitung empfangener Webhooks sicherzustellen:
 
-- Implementiere idempotente Verarbeitung: Gestalte dein System so, dass es doppelte Webhook-Benachrichtigungen korrekt verarbeitet, da Absender fehlerhafte Anfragen möglicherweise wiederholen.
-- Schnell antworten: Gib sofort eine Antwort (normalerweise einen 2xx-Statuscode) zurück, nachdem du eine Webhook-Anfrage erhalten hast, um zu verhindern, dass der Absender die Anfrage als fehlgeschlagen ansieht und einen Retry auslöst.
+- Implementiere idempotente Verarbeitung: Entwerfe dein System so, dass es doppelte Webhook-Benachrichtigungen korrekt verarbeitet, da Absender fehlgeschlagene Anfragen möglicherweise wiederholen.
+- Antworte schnell: Gib eine Antwort (normalerweise ein 2xx-Statuscode) sofort nach dem Empfang einer Webhook-Anfrage zurück, um zu verhindern, dass der Absender die Anfrage als fehlgeschlagen ansieht und eine Wiederholung auslöst.
 
 ### Leistung
 
-Stelle einen effizienten Systembetrieb sicher:
+Erhalte einen effizienten Systembetrieb:
 
-- Asynchrone Verarbeitung: Führe die eigentliche Datenverarbeitung im Hintergrund durch, nachdem du einen Webhook erhalten hast, ohne die Antwort zu blockieren.
-- Setze Timeout-Limits: Setze angemessene Timeout-Zeiträume für die Webhook-Verarbeitung, um zu verhindern, dass lang laufende Aufgaben die Systemleistung beeinträchtigen.
+- Asynchrone Verarbeitung: Führe nach dem Empfang eines Webhooks die tatsächliche Datenverarbeitung im Hintergrund durch, ohne die Antwort zu blockieren.
+- Setze Zeitlimits: Setze angemessene Zeitlimits für die Webhook-Verarbeitung, um zu verhindern, dass langlaufende Aufgaben die Systemleistung beeinträchtigen.
 
 ### Fehlerbehandlung
 
-Behandle mögliche Fehlersituationen angemessen:
+Behandle potenzielle Fehlersituationen angemessen:
 
-- Logging: Führe detaillierte Aufzeichnungen über empfangene Webhook-Anfragen und Verarbeitungsverfahren, um die Untersuchung von Problemen zu erleichtern.
-- Sanfte Degeneration: Implementiere angemessene Fehlerbehandlungsmechanismen, wenn du Webhooks nicht verarbeiten kannst, um sicherzustellen, dass andere Teile des Systems nicht betroffen sind.
+- Protokollierung: Führe detaillierte Aufzeichnungen über empfangene Webhook-Anfragen und Verarbeitungsverfahren, um die Untersuchung von Problemen zu erleichtern.
+- Sanfte Degradierung: Habe geeignete Fehlerbehandlungsmechanismen, wenn du Webhooks nicht verarbeiten kannst, um sicherzustellen, dass andere Teile des Systems nicht betroffen sind.
 
 ### Versionskompatibilität
 
 Da sich Webhook-Formate im Laufe der Zeit ändern können:
 
-- Versionsinformationen verarbeiten: Sei darauf vorbereitet, verschiedene Versionen von Webhook-Formaten zu verarbeiten. In der Regel werden Versionsinformationen in der URL oder in den Anfrage-Headern bereitgestellt.
-- Rückwärtskompatibilität: Stelle beim Aktualisieren deiner Webhook-Verarbeitungslogik sicher, dass weiterhin ältere Formatversionen unterstützt werden.
+- Behandle Versionsinformationen: Sei darauf vorbereitet, verschiedene Versionen von Webhook-Formaten zu verarbeiten. Versionsinformationen werden normalerweise in der URL oder den Anfrage-Headern bereitgestellt.
+- Abwärtskompatibilität: Stelle bei der Aktualisierung deiner Webhook-Verarbeitungslogik sicher, dass die Unterstützung für ältere Formatversionen weiterhin gewährleistet ist.
 
-### Monitoring
+### Überwachung
 
 Überwache kontinuierlich den Empfang und die Verarbeitung von Webhooks:
 
-- Alerts einrichten: Implementiere Echtzeitüberwachung und Benachrichtigungen für ungewöhnliche Situationen (wie hohe Fehlerraten oder ungewöhnlichen Datenverkehr).
-- Leistungsmetriken: Verfolge Leistungsmetriken zur Webhook-Verarbeitung, wie Antwortzeiten und Erfolgsraten.
+- Richte Alarme ein: Implementiere Echtzeitüberwachung und Alarmierung für abnormale Situationen (wie hohe Fehlerraten oder ungewöhnlichen Verkehr).
+- Leistungsmetriken: Verfolge Leistungsmetriken für die Webhook-Verarbeitung, wie Antwortzeit und Erfolgsrate.
 
 <Resources
   urls={[

@@ -1,7 +1,7 @@
 ---
 title: Webhook
 tags: [integration]
-description: Les webhooks sont une méthode permettant aux applications web de communiquer entre elles en temps réel. Ils permettent à une application d'envoyer des messages automatisés ou des informations à une autre application lorsqu'un événement spécifique se produit. Contrairement aux APIs traditionnelles où une application doit interroger une autre pour obtenir des mises à jour, les webhooks envoient des données à l'application réceptrice dès que l'événement se produit.
+description: Les webhooks sont une méthode permettant aux applications web de communiquer entre elles en temps réel. Ils permettent à une application d'envoyer des messages ou des informations automatisés à une autre application lorsqu'un événement spécifique se produit.
 ---
 
 ## Qu'est-ce qu'un webhook ?
@@ -16,106 +16,71 @@ sequenceDiagram
     participant Target System
     
     Source System->>Source System: Un événement se produit
-    Source System->>Source System: Construit une requête POST HTTP
-    Source System->>Target System: Envoie la requête webhook
-    Target System->>Target System: Traite les données de la requête
-    Target System-->>Source System: Retourne une réponse (généralement un code d'état 2xx)
+    Source System->>Source System: Construire une requête HTTP POST
+    Source System->>Target System: Envoyer la requête webhook
+    Target System->>Target System: Traiter les données de la requête
+    Target System-->>Source System: Retourner une réponse (généralement un code de statut 2xx)
     
     alt La requête échoue
-        Source System->>Source System: Implémente un mécanisme de nouvelle tentative
+        Source System->>Source System: Mettre en œuvre un mécanisme de nouvelle tentative
     end
 ```
 
 1. Un événement spécifique se produit dans le système source
-2. Le système source construit une requête POST HTTP contenant les données de l'événement
+2. Le système source construit une requête HTTP POST contenant les données de l'événement
 3. Le système source envoie la requête à l'URL du système cible préconfigurée
 4. Le système cible reçoit la requête et traite les données
 5. Le système cible retourne une réponse au système source
-6. Si la requête échoue, le système source peut implémenter un mécanisme de nouvelle tentative
-
-## Quels sont les cas d'utilisation courants des webhooks ?
-
-1. Systèmes de paiement : Notifier les changements de statut de commande
-2. Systèmes de contrôle de version : Notifier les validations de code, les demandes de fusion et autres événements
-3. Systèmes CRM : Notifications de mise à jour des informations client
-4. Appareils IoT : Notifications de changement de statut des appareils
-5. Plateformes de médias sociaux : Notifications de nouveaux messages et commentaires
+6. Si la requête échoue, le système source peut mettre en œuvre un mécanisme de nouvelle tentative
 
 ## Comment fonctionnent les webhooks dans un scénario réel ?
 
-Examinons un scénario impliquant une plateforme de commerce électronique intégrée à un système de paiement tiers :
+Prenons une application intégrée à un service d'auth (authentification) comme exemple. Lorsqu'un nouvel utilisateur s'inscrit, l'application enverra un email de bienvenue à l'utilisateur.
 
-### Scénario
+En général, le service d'auth (authentification) fournit un événement webhook `user.registered` qui est déclenché lorsqu'un nouvel utilisateur termine son inscription.
 
-Une plateforme de commerce électronique utilise un système de paiement tiers pour traiter les paiements de commande. Lorsqu'un utilisateur termine un paiement, le système de paiement doit notifier en temps réel la plateforme de commerce électronique sur le statut du paiement via un webhook, permettant à la plateforme de mettre à jour le statut de la commande et de déclencher des processus ultérieurs.
+La charge utile de l'événement webhook contient les informations de l'utilisateur telles que l'email et le nom d'utilisateur, qui peuvent être utilisées pour envoyer l'email de bienvenue :
 
-### Flux d'implémentation du webhook
+```json
+// Note : la structure réelle de la charge utile dépend du service d'auth (authentification).
+{
+  "event": "user.registered",
+  "timestamp": "2024-03-21T08:00:00Z",
+  "data": {
+    "user_id": "u_1234567890",
+    "email": "john@example.com",    // Adresse email pour envoyer l'email de bienvenue
+    "username": "johndoe",          // Nom d'utilisateur pour personnaliser l'email
+    "registered_at": "2024-03-21T08:00:00Z"
+  }
+}
+```
+
+Voici comment fonctionne le flux de webhook :
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant E-commerce Platform
-    participant Payment System
-    participant Inventory System
-    participant Logistics System
-
-    User->>E-commerce Platform: Passe une commande
-    E-commerce Platform->>Payment System: Crée une demande de paiement
-    Payment System-->>E-commerce Platform: Retourne l'URL de paiement
-    E-commerce Platform-->>User: Affiche la page de paiement
-    User->>Payment System: Termine le paiement
-    Payment System->>Payment System: Traite le paiement
-    Payment System->>E-commerce Platform: Envoie le webhook de succès de paiement
-    E-commerce Platform->>E-commerce Platform: Vérifie la signature du webhook
-    E-commerce Platform->>E-commerce Platform: Met à jour le statut de la commande
-    par Déclencher des processus ultérieurs
-        E-commerce Platform->>Inventory System: Met à jour l'inventaire
-        E-commerce Platform->>Logistics System: Crée une tâche d'expédition
-    end
-    E-commerce Platform-->>Payment System: Retourne 200 OK
-    E-commerce Platform-->>User: Affiche la page de succès de paiement
+    participant Auth Service
+    participant App
+    participant Email Service
+    
+    User->>Auth Service: Inscription
+    Auth Service->>App: Envoyer le webhook (user.registered)
+    App-->>Email Service: Envoyer l'email de bienvenue
+    Email Service-->>User: Livrer l'email de bienvenue
 ```
-
-1. Création de commande et demande de paiement :
-   - L'utilisateur passe une commande sur la plateforme de commerce électronique.
-   - La plateforme envoie une demande de paiement au système de paiement.
-   - Le système de paiement retourne une URL de paiement, que la plateforme affiche à l'utilisateur.
-
-2. Paiement de l'utilisateur :
-   - L'utilisateur termine le paiement sur le système de paiement.
-
-3. Déclenchement du webhook :
-   - Le système de paiement détecte l'événement "paiement réussi".
-   - Il construit une charge utile webhook contenant les détails du paiement.
-
-4. Envoi du webhook :
-   - Le système de paiement envoie une requête POST à l'URL préconfigurée de la plateforme de commerce électronique.
-
-5. Traitement du récepteur :
-   - La plateforme de commerce électronique reçoit le webhook et vérifie d'abord la signature de la requête pour garantir la sécurité.
-   - Après vérification, la plateforme met à jour le statut de la commande correspondante à "payée".
-   - La plateforme déclenche des processus ultérieurs, tels que la mise à jour de l'inventaire et la création de tâches d'expédition.
-
-6. Gestion de la réponse :
-   - La plateforme de commerce électronique retourne immédiatement une réponse 200 OK après avoir reçu le webhook.
-   - Si des erreurs surviennent lors du traitement, la plateforme peut réessayer en arrière-plan ou impliquer une intervention manuelle.
-
-7. Expérience utilisateur :
-   - La plateforme de commerce électronique affiche une page de succès de paiement à l'utilisateur.
-
-Cet exemple démontre comment les webhooks permettent une communication en temps réel entre un système de paiement tiers et une plateforme de commerce électronique. Grâce aux webhooks, le système de paiement peut informer instantanément la plateforme de commerce électronique lorsqu'un paiement est complété, permettant ainsi des mises à jour immédiates du statut de la commande et un déclenchement rapide des processus commerciaux ultérieurs. Cela améliore la réactivité globale du système et son efficacité, offrant finalement une meilleure expérience d'achat aux utilisateurs.
 
 ## Quelles sont les meilleures pratiques pour implémenter des webhooks ?
 
-Lorsque vous êtes expéditeur (producteur) de webhooks, considérez les aspects suivants :
+Lorsque vous êtes l'expéditeur (producteur) de webhooks, considérez les aspects suivants :
 
 ### Conception de webhook
 
 Concevez des structures de webhook claires et cohérentes :
 
 - Définissez des types d'événements clairs : Par exemple, `order.created`, `user.updated`, etc.
-- Utilisez un format JSON standard : Assurez-vous que la structure des données est claire et facile à analyser.
-- Contrôle de version : Incluez des informations de version dans les en-têtes de requêtes ou la charge utile. Par exemple :
+- Utilisez le format JSON standard : Assurez-vous que la structure des données est claire et facile à analyser.
+- Contrôle de version : Incluez des informations de version dans les en-têtes de requête ou la charge utile. Par exemple :
 
   ```javascript
   // Dans les en-têtes de requête
@@ -134,7 +99,7 @@ Concevez des structures de webhook claires et cohérentes :
   }
   ```
 
-- Fournissez un contexte suffisant : Incluez les horodatages des événements, des identifiants uniques pour les ressources liées, etc.
+- Fournissez un contexte suffisant : Incluez des horodatages des événements, des identifiants uniques pour les ressources associées, etc.
 - Maintenez la cohérence : Utilisez des conventions de nommage et des structures de données cohérentes pour tous les types d'événements.
 
 ### Mécanisme d'envoi
@@ -148,11 +113,11 @@ Implémentez un mécanisme d'envoi de webhook fiable :
 
 Concevez une stratégie de nouvelle tentative appropriée :
 
-- Implémentez un retrait exponentiel : Évitez les réessais fréquents qui pourraient stresser le système et le récepteur.
-- Définissez un nombre maximal de nouvelles tentatives : Évitez les réessais infinis qui consommeraient les ressources système.
+- Implémentez un backoff exponentiel : Évitez les nouvelles tentatives fréquentes qui pourraient surcharger le système et le récepteur.
+- Définissez un nombre maximal de nouvelles tentatives : Empêchez les nouvelles tentatives infinies de consommer les ressources du système.
 - Fournissez des mécanismes de nouvelle tentative manuelle : Offrez une interface pour les nouvelles tentatives manuelles pour les webhooks qui échouent finalement.
 
-### Implémentation de la sécurité
+### Mise en œuvre de la sécurité
 
 Implémentez un mécanisme de signature pour permettre aux récepteurs de vérifier l'authenticité des requêtes :
 
@@ -175,28 +140,28 @@ function sendWebhookWithSignature(url, payload, secret) {
 
 ### Optimisation des performances
 
-Optimisez les performances d'envoi des webhooks :
+Optimisez les performances d'envoi de webhook :
 
-- Utilisez des pools de connexion : Réduisez la surcharge d'établissement de connexions et améliorez les performances.
-- Implémentez le traitement par lots : Envoyez les webhooks par lots si nécessaire pour réduire le nombre d'interactions réseau.
+- Utilisez des pools de connexions : Réduisez la surcharge de l'établissement de connexions et améliorez les performances.
+- Implémentez le traitement par lots : Envoyez les webhooks par lots lorsque cela est approprié pour réduire le nombre d'interactions réseau.
 
 ### Documentation et outils de test
 
-Fournissez une assistance pour les utilisateurs de webhooks :
+Fournissez un support pour les utilisateurs de webhook :
 
-- Documentation API détaillée : Incluez tous les types d'événements possibles, les formats de requête, et les descriptions de champs.
-- Fournissez des outils de test : Implémentez des points de test de webhook pour permettre aux utilisateurs de simuler la réception de notifications webhook.
+- Documentation API détaillée : Incluez tous les types d'événements possibles, les formats de requête et les descriptions de champs.
+- Fournissez des outils de test : Implémentez des points de terminaison de test de webhook pour permettre aux utilisateurs de simuler la réception de notifications de webhook.
 - Code d'exemple : Fournissez des exemples d'intégration dans divers langages de programmation.
 
-## Quelles sont les meilleures pratiques pour utiliser des webhooks ?
+## Quelles sont les meilleures pratiques pour utiliser les webhooks ?
 
-Lorsque vous utilisez des webhooks comme récepteur (consommateur), considérez les aspects suivants :
+Lorsque vous utilisez des webhooks en tant que récepteur (consommateur), considérez les aspects suivants :
 
 ### Sécurité
 
 Étant donné que les points de terminaison pour recevoir des webhooks sont généralement accessibles au public, la sécurité est une préoccupation majeure. Faites attention aux points suivants :
 
-- Vérifiez l'authenticité des requêtes : Implémentez un mécanisme de vérification de signature pour vous assurer que les requêtes proviennent d'expéditeurs attendus.
+- Vérifiez l'authenticité des requêtes : Implémentez un mécanisme de vérification de signature pour vous assurer que les requêtes proviennent des expéditeurs attendus.
   
   ```javascript
   const crypto = require('crypto');
@@ -215,42 +180,42 @@ Lorsque vous utilisez des webhooks comme récepteur (consommateur), considérez 
   ```
 
 - Utilisez HTTPS : Assurez-vous que votre point de terminaison de réception de webhook utilise HTTPS pour empêcher que les données ne soient interceptées ou altérées pendant la transmission.
-- Implémentez une liste blanche d'IP : N'acceptez que les requêtes webhook provenant d'adresses IP de confiance pour réduire le risque d'attaques.
+- Implémentez une liste blanche d'IP : N'acceptez que les requêtes de webhook provenant d'adresses IP de confiance pour réduire le risque d'attaques.
 
 ### Fiabilité
 
-Pour garantir une gestion fiable des webhooks reçus :
+Pour assurer un traitement fiable des webhooks reçus :
 
-- Implémentez un traitement idempotent : Concevez votre système pour gérer correctement les notifications webhook en double, car les expéditeurs peuvent réessayer les requêtes échouées.
-- Répondez rapidement : Retournez une réponse (généralement un code d'état 2xx) immédiatement après avoir reçu une requête webhook pour éviter que l'expéditeur ne considère la requête comme échouée et déclenche une nouvelle tentative.
+- Implémentez un traitement idempotent : Concevez votre système pour gérer correctement les notifications de webhook en double, car les expéditeurs peuvent réessayer les requêtes échouées.
+- Répondez rapidement : Retournez une réponse (généralement un code de statut 2xx) immédiatement après avoir reçu une requête de webhook pour éviter que l'expéditeur ne considère la requête comme échouée et ne déclenche une nouvelle tentative.
 
-### Performances
+### Performance
 
 Maintenez un fonctionnement efficace du système :
 
 - Traitement asynchrone : Après avoir reçu un webhook, effectuez le traitement réel des données en arrière-plan sans bloquer la réponse.
-- Définissez des limites de temps : Fixez des périodes limites raisonnables pour le traitement des webhooks pour empêcher que des tâches à long terme n'affectent les performances du système.
+- Définissez des limites de temps : Fixez des périodes de temps raisonnables pour le traitement des webhooks afin d'éviter que les tâches de longue durée n'affectent les performances du système.
 
 ### Gestion des erreurs
 
 Gérez correctement les situations d'erreur potentielles :
 
-- Journalisation : Conservez des enregistrements détaillés des requêtes webhook reçues et des procédures de traitement pour faciliter la résolution des problèmes.
-- Dégradation harmonieuse : Mettez en œuvre des mécanismes de gestion des erreurs appropriés lorsque vous êtes incapable de traiter les webhooks pour vous assurer que d'autres parties du système ne sont pas affectées.
+- Journalisation : Conservez des enregistrements détaillés des requêtes de webhook reçues et des procédures de traitement pour faciliter l'investigation des problèmes.
+- Dégradation gracieuse : Ayez des mécanismes de gestion des erreurs appropriés lorsque vous ne pouvez pas traiter les webhooks pour vous assurer que les autres parties du système ne sont pas affectées.
 
 ### Compatibilité des versions
 
 Étant donné que les formats de webhook peuvent changer au fil du temps :
 
-- Gérez les informations de version : Soyez préparé à gérer différentes versions des formats de webhook. Les informations de version sont généralement fournies dans l'URL ou les en-têtes de requête.
-- Compatibilité descendante : Lors de la mise à jour de votre logique de traitement de webhook, assurez-vous de maintenir la prise en charge des versions de formats plus anciennes.
+- Gérez les informations de version : Soyez prêt à gérer différentes versions de formats de webhook. Les informations de version sont généralement fournies dans l'URL ou les en-têtes de requête.
+- Compatibilité ascendante : Lors de la mise à jour de votre logique de gestion des webhooks, assurez-vous de continuer à prendre en charge les anciennes versions de format.
 
 ### Surveillance
 
 Surveillez en continu la réception et le traitement des webhooks :
 
-- Mettez en place des alertes : Implémentez une surveillance en temps réel et des alertes pour les situations anormales (comme des taux d'échec élevés ou un trafic inhabituel).
-- Métriques de performance: Suivez les métriques de performance pour le traitement des webhooks, telles que le temps de réponse et le taux de succès.
+- Configurez des alertes : Implémentez une surveillance en temps réel et des alertes pour les situations anormales (telles que des taux d'échec élevés ou un trafic inhabituel).
+- Mesures de performance : Suivez les mesures de performance pour le traitement des webhooks, telles que le temps de réponse et le taux de réussite.
 
 <Resources
   urls={[

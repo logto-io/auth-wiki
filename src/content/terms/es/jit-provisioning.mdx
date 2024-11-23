@@ -1,73 +1,94 @@
 ---
-title: Aprovisionamiento just-in-time (JIT) (Just-in-time provisioning)
+title: Aprovisionamiento Just-in-time (JIT)
 tags: [authentication, authorization]
-description: El aprovisionamiento just-in-time (JIT) es un proceso de gestión de identidad y acceso (IAM) donde las cuentas de usuario se crean de manera dinámica y automática cuando un usuario intenta acceder a un sistema o aplicación por primera vez. Este enfoque ayuda a agilizar el proceso de incorporación y asegura que las cuentas de usuario solo se creen cuando sea necesario, reduciendo la carga administrativa y mejorando la seguridad.
+description: El aprovisionamiento Just-in-time (JIT) es un proceso de gestión de identidades y acceso (IAM) donde las cuentas de usuario se aprovisionan dinámicamente cuando un usuario inicia sesión por primera vez.
 ---
 
 ## ¿Qué es el aprovisionamiento just-in-time?
 
-Si estás construyendo una aplicación SaaS B2B y deseas admitir funciones de membresía, permitiendo que los miembros se unan fácilmente a tu espacio de trabajo (tenant). Podrías necesitar funciones como las del siguiente cuadro, y el aprovisionamiento just-in-time es una de ellas, ayudando a agilizar el proceso.
-
-| Características | Flujo |
-| --- | --- |
-| Invitación iniciada por el admin | Los usuarios pueden recibir una invitación por correo electrónico para unirse a la organización. |
-| Creación o importación de usuarios a través de API | Los usuarios pueden usar una cuenta de usuario precreada para unirse a la organización. |
-| Aprovisionamiento just-in-time | Los usuarios que inician sesión en la aplicación por primera vez pueden unirse a la organización. |
-| Sincronización de Directorio (por ejemplo, SCIM) | Usar la funcionalidad de Sincronización de Directorio del IdP para preaprovisionar usuarios en la aplicación con anticipación. |
-
-**El aprovisionamiento just-in-time (JIT)** es un proceso utilizado en sistemas de gestión de identidad y acceso para crear cuentas de usuario sobre la marcha a medida que se inician sesión en un sistema por primera vez. En lugar de preaprovisionar cuentas para los usuarios con anticipación, el aprovisionamiento JIT crea y configura las cuentas de usuario necesarias de manera dinámica cuando un usuario realiza una autenticación. El aprovisionamiento just-in-time es una característica popular con sus propias características, como la eficiencia, la no participación administrativa y la membresía automática en la organización, etc.
+El aprovisionamiento Just-in-time (JIT) es un proceso utilizado en <Ref slug="iam" /> donde las cuentas de usuario se aprovisionan de acuerdo con la identidad del usuario y la configuración del sistema de manera instantánea cuando el usuario intenta iniciar sesión por primera vez.
 
 ## ¿Cuáles son los casos de uso del aprovisionamiento just-in-time?
 
-Estos casos son comunes al construir una aplicación B2B que involucra arquitectura multi-tenant, Enterprise SSO, trabajar con empresas o requerir funciones de incorporación de equipos. Aquí hay algunos escenarios de muestra que tus clientes pueden enfrentar.
+Estos casos son comunes al construir una aplicación B2B que involucra arquitectura multi-tenant, Enterprise SSO (Enterprise SSO), o que requiere características de incorporación de equipos. Aquí hay algunos escenarios de ejemplo que tú o tu cliente pueden encontrar.
 
-### Incorporación rápida
+### Incorporación de empleados
 
-Tienes un cliente que experimenta contrataciones frecuentes o un rápido crecimiento, puede usar el aprovisionamiento JIT para configurar rápidamente cuentas de usuario para nuevos empleados. Aquí hay un ejemplo:
+Imagina que uno de tus clientes, *SuperFantasy*, está experimentando contrataciones frecuentes o un rápido crecimiento y puede usar el aprovisionamiento JIT para configurar rápidamente cuentas de usuario para nuevos empleados. *SuperFantasy* utiliza Logto para la gestión de identidades y acceso y SmartProjects para la gestión de proyectos. Cuando un nuevo empleado, Sarah, inicia sesión en SmartProjects por primera vez, su cuenta se crea y configura automáticamente en base a sus credenciales de Logto.
 
-Sarah es una nueva empleada en la empresa SuperFantasy, que utiliza Okta como su Proveedor de Identidad Empresarial. El equipo de recursos humanos la agrega como una identidad empresarial en Okta solo una vez. Cuando Sarah usa este correo electrónico para iniciar sesión en una aplicación de productividad de uso corporativo llamada Smartworkspace por primera vez, el sistema crea automáticamente una cuenta y le asigna el rol correcto dentro del espacio de trabajo de la empresa. De esta manera, ni Sarah ni el equipo de recursos humanos de SuperFantasy necesitan pasar por múltiples pasos para la creación de la cuenta y la asignación del rol.
+```mermaid
+sequenceDiagram
+    participant Sarah
+    participant SmartProjects
+    participant Logto
 
-### Fusiones, adquisiciones y trabajadores temporales
+    Sarah ->> SmartProjects: Clic en el botón de inicio de sesión
+    SmartProjects ->> Logto: Redirigir a Logto
+    Logto ->> Sarah: Iniciar sesión con Logto
+    Sarah ->> Logto: Autenticarse
+    Logto ->> Logto: Aprovisionar a Sarah en la organización A
+    Logto ->> SmartProjects: Devolver respuesta de autenticación
+    SmartProjects ->> Logto: Obtener organizaciones de usuario
+    Logto ->> SmartProjects: Devolver organizaciones de usuario (organización A)
+```
 
-Tienes un cliente que experimenta fusiones o adquisiciones de otras empresas, el aprovisionamiento JIT puede simplificar el proceso de otorgar acceso a los sistemas de la empresa adquirente para muchos nuevos usuarios. Veamos otro ejemplo,
+Según el diagrama anterior, cuando Sarah inicia sesión en SmartProjects por primera vez, su cuenta se aprovisiona automáticamente en la organización A en Logto. Este proceso asegura que Sarah tenga el acceso necesario a SmartProjects sin requerir intervención manual del equipo de TI.
 
-Peter trabaja para MagicTech, que fue recientemente adquirida por SuperFantasy. MagicTech es una organización más pequeña sin Enterprise SSO, pero también utiliza Smartworkspace, donde Peter ya tiene una cuenta empresarial.
+### Incorporación de clientes empresariales
 
-El equipo de recursos humanos puede agregar a Peter en Okta. Cuando Peter inicia sesión en Smartworkspace por primera vez a través de Okta, el sistema vincula automáticamente su cuenta empresarial existente y otorga el acceso apropiado a SuperFantasy.
+Imagina que otro cliente, *SuperBank*, es una institución financiera que proporciona servicios de banca en línea a sus clientes. *SuperBank* utiliza Logto para la gestión de identidades y acceso y SuperBankApp para la banca en línea. *SuperBank* ha firmado recientemente un contrato con un nuevo cliente empresarial, *SuperCorp*, para proporcionar servicios de banca en línea a sus empleados.
 
-Los escenarios anteriores son ideales para implementar la función JIT.
+*SuperCorp* utiliza Google Workspace para las cuentas de sus empleados. SuperBankApp necesita asegurarse de que cuando un empleado de *SuperCorp* inicie sesión por primera vez, su cuenta se agregue automáticamente a la organización *SuperCorp* en Logto.
+
+```mermaid
+sequenceDiagram
+    participant John
+    participant SuperBankApp
+    participant Logto
+    participant Google Workspace
+
+    John ->> SuperBankApp: Clic en el botón de inicio de sesión
+    SuperBankApp ->> Logto: Redirigir a Logto
+    Logto ->> John: Solicitar inicio de sesión
+    John ->> Logto: Ingresar dirección de correo electrónico
+    Logto ->> Google Workspace: Redirigir a Google Workspace
+    Google Workspace ->> John: Autenticarse
+    Google Workspace ->> Logto: Devolver respuesta de autenticación
+    Logto ->> Logto: Aprovisionar a John en la organización SuperCorp
+    Logto ->> SuperBankApp: Devolver respuesta de autenticación
+    SuperBankApp ->> Logto: Obtener organizaciones de usuario
+    Logto ->> SuperBankApp: Devolver organizaciones de usuario (SuperCorp)
+```
+
+En el diagrama anterior, cuando John inicia sesión en SuperBankApp por primera vez, su cuenta se aprovisiona automáticamente en la organización SuperCorp en Logto según su identidad de Google Workspace.
 
 ## ¿Es específico de SAML y Enterprise SSO?
 
-El aprovisionamiento just-in-time (JIT) a menudo se asocia con <Ref slug="enterprise-sso" /> en la autenticación SAML, pero no es exclusivo de <Ref slug="saml" />. El aprovisionamiento JIT también se puede usar con otros protocolos de autenticación como <Ref slug="oauth-2.0" /> y <Ref slug="openid-connect" />, y no siempre requiere una configuración de <Ref slug="enterprise-sso" />.
+El aprovisionamiento Just-in-time (JIT) a menudo se asocia con <Ref slug="enterprise-sso" /> en la autenticación SAML, pero no es exclusivo de <Ref slug="saml" />. El aprovisionamiento JIT también se puede utilizar con otros protocolos de autenticación como <Ref slug="oauth-2.0" /> y <Ref slug="openid-connect" />, y no siempre requiere una configuración de <Ref slug="enterprise-sso" />.
 
-Por ejemplo, el aprovisionamiento JIT basado en correo electrónico puede agilizar la incorporación de equipos al agregar automáticamente usuarios a un espacio de trabajo según su dominio de correo electrónico. Esto es particularmente útil para organizaciones que carecen del presupuesto y recursos para adquirir y gestionar Enterprise SSO.
-
-La idea fundamental detrás del aprovisionamiento JIT es automatizar la creación o actualización de cuentas de usuario cuando un usuario intenta acceder a un servicio por primera vez, independientemente del protocolo específico utilizado.
+Por ejemplo, el aprovisionamiento JIT basado en correo electrónico se puede utilizar cuando tu <Ref slug="identity-provider" /> admite esta función. En este caso, la dirección de correo electrónico del usuario es el único atributo requerido para el aprovisionamiento, independientemente del protocolo de autenticación o la configuración de SSO.
 
 ## ¿Se aplica a usuarios nuevos o existentes de la aplicación?
 
-El aprovisionamiento just-in-time (JIT) generalmente se refiere al primer intento de acceso a una aplicación. Sin embargo, diferentes productos perciben esta funcionalidad de manera diferente. Algunos utilizan el aprovisionamiento JIT solo para la creación de identidad y cuentas, mientras que otros también incluyen actualizaciones de cuentas just-in-time, como reprovisionamiento y sincronización de atributos.
+El aprovisionamiento Just-in-time (JIT) generalmente se refiere al primer intento de acceder a una aplicación. Sin embargo, diferentes productos perciben esta funcionalidad de manera diferente. Algunos utilizan el aprovisionamiento JIT solo para la creación de identidad y cuenta, mientras que otros también incluyen actualizaciones de cuenta just-in-time, como reprovisionamiento y sincronización de atributos.
 
-Además de la creación automática de usuarios, el aprovisionamiento SAML JIT permite otorgar y revocar membresías de grupos como parte del aprovisionamiento. También puede actualizar usuarios aprovisionados para mantener sus atributos en el almacén del <Ref slug="service-provider" /> sincronizados con los atributos del almacén del <Ref slug="identity-provider" />.
+Por ejemplo, el aprovisionamiento JIT de SAML permite otorgar y revocar membresías de grupo como parte del aprovisionamiento. También puede actualizar usuarios aprovisionados para mantener sus atributos en el almacén del <Ref slug="service-provider" /> sincronizados con los atributos del almacén de usuarios del <Ref slug="identity-provider" />.
 
-Si deseas considerar el escenario de inicio de sesión de usuarios existentes subsiguiente, asegúrate de tener un sistema de aprovisionamiento robusto junto con tu sistema JIT. Por ejemplo,
+Si deseas considerar el escenario de inicio de sesión de usuario existente posterior, asegúrate de tener un sistema de aprovisionamiento robusto junto con tu sistema JIT. Por ejemplo:
 
 - **Resolución de conflictos**: Tu sistema debe tener una estrategia para manejar conflictos si ya existe una cuenta con información diferente a la proporcionada por el IdP durante el proceso JIT. Esto puede requerir un control detallado de las políticas de tu organización y la configuración del IdP.
-- **Registros de auditoría**: Es importante mantener registros tanto de las nuevas creaciones de cuentas como de las actualizaciones de cuentas existentes a través de procesos JIT por razones de seguridad y cumplimiento.
+- **Rastros de auditoría**: Es importante mantener registros tanto de las nuevas creaciones de cuentas como de las actualizaciones de cuentas existentes a través de procesos JIT por razones de seguridad y cumplimiento.
 - **Rendimiento**: Aunque el aprovisionamiento JIT ocurre rápidamente, considera el impacto potencial en los tiempos de inicio de sesión, especialmente para usuarios existentes si estás actualizando su información en cada inicio de sesión.
 - **Consistencia de datos**: Asegúrate de que tu proceso de aprovisionamiento JIT mantenga la consistencia de los datos, especialmente al actualizar cuentas de usuario existentes.
 
-## ¿Cuál es la diferencia entre JIT y SCIM?
+## ¿Cuál es la diferencia entre JIT y el Sistema para la Gestión de Identidades entre Dominios (SCIM)?
 
-SCIM es un protocolo estándar abierto diseñado para simplificar y automatizar la gestión de identidad de usuarios en diferentes sistemas y dominios. Se utiliza comúnmente en escenarios de Sincronización de Directorios.
+SCIM es un protocolo estándar abierto diseñado para simplificar y automatizar la gestión de identidades de usuario a través de diferentes sistemas y dominios. Se utiliza comúnmente en escenarios de sincronización de directorios.
 
-La principal diferencia entre JIT y SCIM es que JIT crea cuentas durante el intento de inicio de sesión del usuario, mientras que SCIM puede aprovisionar usuarios a través de un proceso automatizado sin conexión, independiente de los intentos de inicio de sesión del usuario.
+La principal diferencia entre JIT y SCIM es que JIT a menudo se refiere al primer intento de acceder a una aplicación (o incorporación de nuevos usuarios), y es un término amplio que describe el proceso de aprovisionamiento dinámico de cuentas de usuario; mientras que SCIM es un protocolo específico para gestionar el ciclo de vida del usuario a través de sistemas y no se limita al primer inicio de sesión.
 
-Esto significa que JIT se enfoca en la incorporación de nuevos usuarios, mientras que SCIM se centra en la gestión completa del ciclo de vida de los usuarios.
+Además, JIT carece de una implementación estandarizada a través de sistemas, mientras que SCIM es un protocolo estandarizado definido por [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) para la gestión de identidades.
 
-Además, JIT es a menudo una extensión de SAML y carece de una implementación estandarizada en todos los sistemas, mientras que SCIM es un protocolo bien definido y estandarizado [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) para la gestión de identidad.
+Algunas organizaciones más grandes utilizan SCIM para el aprovisionamiento de cuentas, integrándolo con sus propios sistemas. Esto puede ser muy complejo y variar caso por caso. Para la mayoría de los casos de uso, el aprovisionamiento JIT es un enfoque más simple y directo.
 
-Algunas organizaciones más grandes usan SCIM para el aprovisionamiento de cuentas, integrándolo con sus propios sistemas. Esto puede ser muy complejo y variar caso por caso. Estas organizaciones a menudo tienen un sistema de aprovisionamiento que involucra tanto procesos automatizados como participación manual del admin.
-
-<Resources urls={['https://blog.logto.io/jit-provisioning']} />
+<Resources urls={['https://blog.logto.io/jit-provisioning', 'https://datatracker.ietf.org/doc/html/rfc7644']} />

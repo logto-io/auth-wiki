@@ -1,12 +1,12 @@
 ---
 title: Webhook
 tags: [integration]
-description: Los webhooks son un método para que las aplicaciones web se comuniquen entre sí en tiempo real. Permiten que una aplicación envíe mensajes automáticos o información a otra aplicación cuando ocurre un evento específico. A diferencia de las APIs tradicionales donde una aplicación necesita consultar a otra para actualizaciones, los webhooks envían datos a la aplicación receptora tan pronto como ocurre el evento.
+description: Los webhooks son un método para que las aplicaciones web se comuniquen entre sí en tiempo real. Permiten que una aplicación envíe mensajes automáticos o información a otra aplicación cuando ocurre un evento específico.
 ---
 
 ## ¿Qué es un webhook?
 
-Un webhook es un mecanismo de devolución de llamadas HTTP que permite a las aplicaciones enviar notificaciones en tiempo real a URLs predefinidas cuando ocurren eventos específicos. Este mecanismo habilita el intercambio automatizado de datos y la comunicación en tiempo real entre sistemas.
+Un webhook es un mecanismo de callback HTTP que permite a las aplicaciones enviar notificaciones en tiempo real a URLs predefinidas cuando ocurren eventos específicos. Este mecanismo habilita el intercambio automatizado de datos y la comunicación en tiempo real entre sistemas.
 
 ## ¿Cómo funcionan los webhooks?
 
@@ -15,110 +15,75 @@ sequenceDiagram
     participant Sistema Fuente
     participant Sistema Destino
     
-    Sistema Fuente->>Sistema Fuente: Ocurre evento
+    Sistema Fuente->>Sistema Fuente: Ocurre un evento
     Sistema Fuente->>Sistema Fuente: Construir solicitud HTTP POST
     Sistema Fuente->>Sistema Destino: Enviar solicitud de webhook
     Sistema Destino->>Sistema Destino: Procesar datos de la solicitud
-    Sistema Destino-->>Sistema Fuente: Devolver respuesta (usualmente código de estado 2xx)
+    Sistema Destino-->>Sistema Fuente: Devolver respuesta (generalmente código de estado 2xx)
     
-    alt Solicitud falla
+    alt La solicitud falla
         Sistema Fuente->>Sistema Fuente: Implementar mecanismo de reintento
     end
 ```
 
-1. Ocurre un evento específico en el sistema fuente.
-2. El sistema fuente construye una solicitud HTTP POST que contiene datos del evento.
-3. El sistema fuente envía la solicitud a la URL del sistema destino preconfigurada.
-4. El sistema destino recibe la solicitud y procesa los datos.
-5. El sistema destino devuelve una respuesta al sistema fuente.
-6. Si la solicitud falla, el sistema fuente puede implementar un mecanismo de reintento.
-
-## ¿Cuáles son los casos de uso comunes para los webhooks?
-
-1. Sistemas de pago: Notificar cambios en el estado de pedidos.
-2. Sistemas de control de versiones: Notificar commits de código, solicitudes de fusión y otros eventos.
-3. Sistemas CRM: Notificaciones de actualizaciones de información del cliente.
-4. Dispositivos IoT: Notificaciones de cambios de estado del dispositivo.
-5. Plataformas de redes sociales: Notificaciones de nuevos mensajes y comentarios.
+1. Ocurre un evento específico en el sistema fuente
+2. El sistema fuente construye una solicitud HTTP POST que contiene los datos del evento
+3. El sistema fuente envía la solicitud a la URL del sistema destino preconfigurada
+4. El sistema destino recibe la solicitud y procesa los datos
+5. El sistema destino devuelve una respuesta al sistema fuente
+6. Si la solicitud falla, el sistema fuente puede implementar un mecanismo de reintento
 
 ## ¿Cómo funcionan los webhooks en un escenario del mundo real?
 
-Examinemos un escenario que involucra una plataforma de comercio electrónico que se integra con un sistema de pago de terceros:
+Tomemos como ejemplo una aplicación integrada con un servicio de auth (autenticación). Cuando un nuevo usuario se registra, la aplicación enviará un correo electrónico de bienvenida al usuario.
 
-### Escenario
+Típicamente, el servicio de auth proporciona un evento de webhook `user.registered` que se activa cuando un nuevo usuario completa el registro.
 
-Una plataforma de comercio electrónico utiliza un sistema de pago de terceros para procesar pagos de pedidos. Cuando un usuario completa un pago, el sistema de pago necesita notificar a la plataforma de comercio electrónico en tiempo real sobre el estado del pago a través de un webhook, permitiendo que la plataforma actualice el estado del pedido y active procesos subsiguientes.
+La carga útil del evento de webhook contiene la información del usuario, como el correo electrónico y el nombre de usuario, que se puede usar para enviar el correo electrónico de bienvenida:
 
-### Flujo de implementación de Webhook
+```json
+// Nota: la estructura real de la carga útil depende del servicio de auth.
+{
+  "event": "user.registered",
+  "timestamp": "2024-03-21T08:00:00Z",
+  "data": {
+    "user_id": "u_1234567890",
+    "email": "john@example.com",    // Dirección de correo electrónico para enviar el correo de bienvenida
+    "username": "johndoe",          // Nombre de usuario para personalizar el correo
+    "registered_at": "2024-03-21T08:00:00Z"
+  }
+}
+```
+
+Así es como funciona el flujo del webhook:
 
 ```mermaid
 sequenceDiagram
     participant Usuario
-    participant Plataforma de Comercio Electrónico
-    participant Sistema de Pago
-    participant Sistema de Inventario
-    participant Sistema de Logística
-
-    Usuario->>Plataforma de Comercio Electrónico: Realizar pedido
-    Plataforma de Comercio Electrónico->>Sistema de Pago: Crear solicitud de pago
-    Sistema de Pago-->>Plataforma de Comercio Electrónico: Devolver URL de pago
-    Plataforma de Comercio Electrónico-->>Usuario: Mostrar página de pago
-    Usuario->>Sistema de Pago: Completar pago
-    Sistema de Pago->>Sistema de Pago: Procesar pago
-    Sistema de Pago->>Plataforma de Comercio Electrónico: Enviar webhook de éxito de pago
-    Plataforma de Comercio Electrónico->>Plataforma de Comercio Electrónico: Verificar firma de webhook
-    Plataforma de Comercio Electrónico->>Plataforma de Comercio Electrónico: Actualizar estado del pedido
-    par Activar procesos subsiguientes
-        Plataforma de Comercio Electrónico->>Sistema de Inventario: Actualizar inventario
-        Plataforma de Comercio Electrónico->>Sistema de Logística: Crear tarea de envío
-    end
-    Plataforma de Comercio Electrónico-->>Sistema de Pago: Devolver 200 OK
-    Plataforma de Comercio Electrónico-->>Usuario: Mostrar página de éxito de pago
+    participant Servicio de Auth
+    participant App
+    participant Servicio de Correo
+    
+    Usuario->>Servicio de Auth: Registrarse
+    Servicio de Auth->>App: Enviar webhook (user.registered)
+    App-->>Servicio de Correo: Enviar correo de bienvenida
+    Servicio de Correo-->>Usuario: Entregar correo de bienvenida
 ```
-
-1. Creación de pedido y solicitud de pago:
-   - El usuario realiza un pedido en la plataforma de comercio electrónico.
-   - La plataforma envía una solicitud de pago al sistema de pago.
-   - El sistema de pago devuelve una URL de pago, que la plataforma muestra al usuario.
-
-2. Pago del usuario:
-   - El usuario completa el pago en el sistema de pago.
-
-3. Activación del webhook:
-   - El sistema de pago detecta el evento "pago exitoso".
-   - Construye una carga útil del webhook que contiene los detalles del pago.
-
-4. Envío del webhook:
-   - El sistema de pago envía una solicitud POST a la URL preconfigurada de la plataforma de comercio electrónico.
-
-5. Procesamiento del receptor:
-   - La plataforma de comercio electrónico recibe el webhook y primero verifica la firma de la solicitud para garantizar la seguridad.
-   - Después de la verificación, la plataforma actualiza el estado del pedido correspondiente a "pagado".
-   - La plataforma activa procesos subsiguientes, como actualizar inventario y crear tareas de envío.
-
-6. Manejo de respuesta:
-   - La plataforma de comercio electrónico devuelve inmediatamente una respuesta 200 OK al recibir el webhook.
-   - Si ocurren errores durante el procesamiento, la plataforma reintentará en segundo plano o involucrará la intervención manual.
-
-7. Experiencia del usuario:
-   - La plataforma de comercio electrónico muestra una página de éxito de pago al usuario.
-
-Este ejemplo demuestra cómo los webhooks permiten la comunicación en tiempo real entre un sistema de pago de terceros y una plataforma de comercio electrónico. A través de los webhooks, el sistema de pago puede notificar a la plataforma de comercio electrónico instantáneamente cuando se completa un pago, permitiendo actualizaciones inmediatas del estado del pedido y la activación rápida de procesos comerciales subsiguientes. Esto mejora la capacidad de respuesta y eficiencia general del sistema, proporcionando una mejor experiencia de compra para los usuarios.
 
 ## ¿Cuáles son las mejores prácticas para implementar webhooks?
 
 Cuando eres el emisor (productor) de webhooks, considera los siguientes aspectos:
 
-### Diseño del Webhook
+### Diseño de webhook
 
 Diseña estructuras de webhook claras y consistentes:
 
 - Define tipos de eventos claros: Por ejemplo, `order.created`, `user.updated`, etc.
-- Usa el formato estándar JSON: Asegúrate de que la estructura de datos sea clara y fácil de analizar.
-- Control de versiones: Incluye información de la versión en los encabezados de la solicitud o carga útil. Por ejemplo:
+- Usa formato JSON estándar: Asegúrate de que la estructura de datos sea clara y fácil de analizar.
+- Control de versiones: Incluye información de versión en los encabezados de la solicitud o en la carga útil. Por ejemplo:
 
   ```javascript
-  // En los encabezados de la solicitud
+  // En encabezados de solicitud
   headers: {
     'Content-Type': 'application/json',
     'X-Webhook-Version': '1.0'
@@ -134,27 +99,27 @@ Diseña estructuras de webhook claras y consistentes:
   }
   ```
 
-- Proporciona suficiente contexto: Incluye marcas de tiempo de cuando ocurrieron los eventos, identificadores únicos para recursos relacionados, etc.
-- Mantén la consistencia: Usa convenciones de nombres y estructuras de datos consistentes en todos los tipos de eventos.
+- Proporciona contexto suficiente: Incluye marcas de tiempo de cuándo ocurrieron los eventos, identificadores únicos para recursos relacionados, etc.
+- Mantén la consistencia: Usa convenciones de nomenclatura y estructuras de datos consistentes en todos los tipos de eventos.
 
 ### Mecanismo de envío
 
-Implementa un mecanismo confiable para el envío de webhooks:
+Implementa un mecanismo de envío de webhooks confiable:
 
-- Usa colas de tareas asincrónicas: Evita bloquear el programa principal y mejora la capacidad de respuesta del sistema.
-- Implementa mecanismos de reintento: Maneja fallas de red o la indisponibilidad temporal del receptor.
+- Usa colas de tareas asíncronas: Evita bloquear el programa principal y mejora la capacidad de respuesta del sistema.
+- Implementa mecanismos de reintento: Maneja fallos de red o indisponibilidad temporal del receptor.
 
 ### Estrategia de reintento
 
 Diseña una estrategia de reintento adecuada:
 
-- Implementa retroceso exponencial: Evita reintentos frecuentes que puedan estresar el sistema y el receptor.
-- Establece un máximo de reintentos: Previene reintentos infinitos que consuman recursos del sistema.
+- Implementa retroceso exponencial: Evita reintentos frecuentes que podrían estresar el sistema y el receptor.
+- Establece un conteo máximo de reintentos: Previene reintentos infinitos que consuman recursos del sistema.
 - Proporciona mecanismos de reintento manual: Ofrece una interfaz para reintentos manuales para webhooks que finalmente fallan.
 
 ### Implementación de seguridad
 
-Implementa un mecanismo de firma para permitir a los receptores verificar la autenticidad de las solicitudes:
+Implementa un mecanismo de firma para permitir que los receptores verifiquen la autenticidad de las solicitudes:
 
 ```javascript
 const crypto = require('crypto');
@@ -175,17 +140,17 @@ function sendWebhookWithSignature(url, payload, secret) {
 
 ### Optimización del rendimiento
 
-Optimiza el rendimiento de envío de webhooks:
+Optimiza el rendimiento del envío de webhooks:
 
-- Usa pools de conexiones: Reduce la sobrecarga de establecer conexiones y mejora el rendimiento.
-- Implementa procesamiento en lotes: Envía webhooks en lotes cuando sea apropiado para reducir el número de interacciones de red.
+- Usa grupos de conexiones: Reduce la sobrecarga de establecer conexiones y mejora el rendimiento.
+- Implementa procesamiento por lotes: Envía webhooks en lotes cuando sea apropiado para reducir el número de interacciones de red.
 
 ### Documentación y herramientas de prueba
 
 Proporciona soporte para los usuarios de webhooks:
 
-- Documentación detallada del API: Incluye todos los posibles tipos de eventos, formatos de solicitud y descripciones de campos.
-- Proporciona herramientas de prueba: Implementa endpoints de prueba de webhook para permitir a los usuarios simular la recepción de notificaciones de webhook.
+- Documentación detallada de la API: Incluye todos los posibles tipos de eventos, formatos de solicitud y descripciones de campos.
+- Proporciona herramientas de prueba: Implementa endpoints de prueba de webhooks para permitir que los usuarios simulen la recepción de notificaciones de webhooks.
 - Código de ejemplo: Proporciona ejemplos de integración en varios lenguajes de programación.
 
 ## ¿Cuáles son las mejores prácticas para usar webhooks?
@@ -194,9 +159,9 @@ Cuando usas webhooks como receptor (consumidor), considera los siguientes aspect
 
 ### Seguridad
 
-Dado que los endpoints para recibir webhooks son generalmente accesibles públicamente, la seguridad es una preocupación principal. Presta atención a los siguientes puntos:
+Dado que los endpoints para recibir webhooks generalmente son accesibles públicamente, la seguridad es una preocupación principal. Presta atención a los siguientes puntos:
 
-- Verifica la autenticidad de las solicitudes: Implementa un mecanismo de verificación de firmas para asegurar que las solicitudes provengan de los emisores esperados.
+- Verifica la autenticidad de la solicitud: Implementa un mecanismo de verificación de firmas para asegurar que las solicitudes provengan de emisores esperados.
   
   ```javascript
   const crypto = require('crypto');
@@ -214,43 +179,43 @@ Dado que los endpoints para recibir webhooks son generalmente accesibles públic
   }
   ```
 
-- Usa HTTPS: Asegúrate de que tu endpoint de recepción de webhooks use HTTPS para prevenir que los datos sean interceptados o alterados durante la transmisión.
-- Implementa lista blanca de IP: Solo acepta solicitudes de webhook de direcciones IP confiables para reducir el riesgo de ataques.
+- Usa HTTPS: Asegúrate de que tu endpoint de recepción de webhooks use HTTPS para evitar que los datos sean interceptados o manipulados durante la transmisión.
+- Implementa listas blancas de IP: Solo acepta solicitudes de webhooks de direcciones IP confiables para reducir el riesgo de ataques.
 
 ### Confiabilidad
 
-Para asegurar un manejo confiable de los webhooks recibidos:
+Para asegurar el manejo confiable de los webhooks recibidos:
 
-- Implementa procesamiento idempotente: Diseña tu sistema para manejar correctamente notificaciones de webhook duplicadas, ya que los emisores pueden reintentar solicitudes fallidas.
-- Responde rápidamente: Devuelve una respuesta (usualmente un código de estado 2xx) inmediatamente después de recibir una solicitud de webhook para evitar que el emisor considere la solicitud fallida y active un reintento.
+- Implementa procesamiento idempotente: Diseña tu sistema para manejar correctamente notificaciones duplicadas de webhooks, ya que los emisores pueden reintentar solicitudes fallidas.
+- Responde rápidamente: Devuelve una respuesta (generalmente un código de estado 2xx) inmediatamente después de recibir una solicitud de webhook para evitar que el emisor considere que la solicitud falló y active un reintento.
 
 ### Rendimiento
 
 Mantén una operación eficiente del sistema:
 
-- Procesamiento asincrónico: Después de recibir un webhook, realiza el procesamiento de datos real en segundo plano sin bloquear la respuesta.
-- Establece límites de tiempo: Establece periodos de tiempo de espera razonables para el procesamiento de webhooks para prevenir que tareas de larga duración afecten el rendimiento del sistema.
+- Procesamiento asíncrono: Después de recibir un webhook, realiza el procesamiento real de datos en segundo plano sin bloquear la respuesta.
+- Establece límites de tiempo de espera: Establece períodos de tiempo de espera razonables para el procesamiento de webhooks para evitar que tareas de larga duración afecten el rendimiento del sistema.
 
 ### Manejo de errores
 
 Maneja adecuadamente las situaciones de error potenciales:
 
-- Registro: Mantén registros detallados de las solicitudes de webhook recibidas y procedimientos de procesamiento para facilitar la investigación de problemas.
-- Degradación elegante: Ten mecanismos de manejo de errores adecuados cuando no pueda procesar webhooks para asegurar que otras partes del sistema no se vean afectadas.
+- Registro: Mantén registros detallados de las solicitudes de webhooks recibidas y los procedimientos de procesamiento para facilitar la investigación de problemas.
+- Degradación elegante: Ten mecanismos de manejo de errores apropiados cuando no puedas procesar webhooks para asegurar que otras partes del sistema no se vean afectadas.
 
 ### Compatibilidad de versiones
 
-Dado que los formatos de webhook pueden cambiar con el tiempo:
+Dado que los formatos de webhooks pueden cambiar con el tiempo:
 
-- Maneja información de versiones: Prepárate para manejar diferentes versiones de formatos de webhook. La información de la versión generalmente se proporciona en la URL o los encabezados de la solicitud.
-- Compatibilidad hacia atrás: Al actualizar tu lógica de manejo de webhooks, asegura soporte continuo para versiones de formatos más antiguas.
+- Maneja la información de versión: Prepárate para manejar diferentes versiones de formatos de webhooks. La información de versión generalmente se proporciona en la URL o en los encabezados de la solicitud.
+- Compatibilidad hacia atrás: Al actualizar tu lógica de manejo de webhooks, asegúrate de seguir soportando versiones de formatos más antiguos.
 
 ### Monitoreo
 
-Monitorea continuamente la recepción y el procesamiento de webhooks:
+Monitorea continuamente la recepción y procesamiento de webhooks:
 
-- Configura alertas: Implementa monitoreo en tiempo real y alertas para situaciones anormales (como altas tasas de falla o tráfico inusual).
-- Métricas de rendimiento: Seguimiento de métricas de rendimiento para el procesamiento de webhooks, como el tiempo de respuesta y la tasa de éxito.
+- Configura alertas: Implementa monitoreo en tiempo real y alertas para situaciones anormales (como altas tasas de fallos o tráfico inusual).
+- Métricas de rendimiento: Rastrea métricas de rendimiento para el procesamiento de webhooks, como el tiempo de respuesta y la tasa de éxito.
 
 <Resources
   urls={[

@@ -1,73 +1,94 @@
 ---
-title: 及時 (Just-in-time, JIT) 供應 (Provisioning)
+title: 即時 (JIT) 供應
 tags: [authentication, authorization]
-description: 及時 (Just-in-time, JIT) 供應是一種身份和訪問管理 (IAM) 過程，當用戶首次嘗試訪問系統或應用程式時，自動動態建立用戶帳戶。這種方法有助於簡化入職流程，確保僅在需要時創建用戶帳戶，從而減少管理負擔並提高安全性。
+description: 即時 (JIT) 供應是一種身份和存取管理 (IAM) 過程，當用戶首次登錄時，動態地供應用戶帳戶。
 ---
 
-## 什麼是及時供應？
+## 什麼是即時供應？
 
-如果你正在構建一款 SaaS B2B 應用程式，並希望支持會員功能，讓會員能夠輕鬆加入你的工作空間 (租戶)。你可能需要以下表格中的功能，而及時供應是其中一種，有助於簡化這個過程。
+即時 (JIT) 供應是一種在 <Ref slug="iam" /> 中使用的過程，當用戶首次嘗試登錄時，根據用戶的身份和系統的配置動態地供應用戶帳戶。
 
-| 功能 | 流程 |
-| --- | --- |
-| 管理員發起邀請 | 用戶可以收到電子郵件邀請加入組織。 |
-| 通過 API 創建或匯入用戶 | 用戶可以使用預先創建的用戶帳戶加入組織。 |
-| 及時供應 | 首次登錄應用程式的用戶可以加入組織。 |
-| 目錄同步 (例如 SCIM) | 使用身份提供者 (IdP) 的目錄同步功能提前在應用中預配置用戶。 |
+## 即時供應的使用案例有哪些？
 
-**及時 (JIT) 供應** 是身份和訪問管理系統中用於在用戶首次登錄系統時動態創建用戶帳戶的過程。與提前預配置帳戶不同，JIT 供應是在用戶身份驗證時動態創建和配置必要的用戶帳戶。及時供應具有其獨特的特點，如高效性、無需管理員參與、自動化的組織成員資格等。
+這些情況在構建涉及多租戶架構、企業 SSO (Enterprise SSO) 或需要團隊入職功能的 B2B 應用時很常見。以下是一些你或你的客戶可能遇到的示例場景。
 
-## 及時供應的使用案例有哪些？
+### 員工入職
 
-這些使用案例在構建涉及多租戶架構、企業單一登入 (Enterprise SSO)、與企業合作或需要團隊入職功能的 B2B 應用程式時常見。以下是一些你的客戶可能遇到的示例場景。
+想像一下，你的一個客戶 *SuperFantasy* 正在經歷頻繁的招聘或快速增長，可以使用 JIT 供應快速為新員工設置用戶帳戶。*SuperFantasy* 使用 Logto 進行身份和存取管理，並使用 SmartProjects 進行項目管理。當新員工 Sarah 第一次登錄 SmartProjects 時，她的帳戶會根據她的 Logto 憑據自動創建和配置。
 
-### 快速入職
+```mermaid
+sequenceDiagram
+    participant Sarah
+    participant SmartProjects
+    participant Logto
 
-如果你的客戶正在經歷頻繁招聘或快速增長，可以使用 JIT 供應來快速設置新員工的用戶帳戶。以下是一個示例：
+    Sarah ->> SmartProjects: 點擊登錄按鈕
+    SmartProjects ->> Logto: 重定向到 Logto
+    Logto ->> Sarah: 使用 Logto 登錄
+    Sarah ->> Logto: 認證
+    Logto ->> Logto: 將 Sarah 供應到組織 A
+    Logto ->> SmartProjects: 返回認證響應
+    SmartProjects ->> Logto: 獲取用戶組織
+    Logto ->> SmartProjects: 返回用戶組織 (組織 A)
+```
 
-Sarah 是一名新員工，供職於使用 Okta 作為企業身份提供者的 SuperFantasy 公司。人力資源團隊只需在 Okta 中將她添加為商業身份一次。當 Sarah 第一次使用這個電子郵件登錄名為 Smartworkspace 的公司用生產力應用程式時，系統會自動為她創建一個帳戶並在公司的工作空間中配置適當的角色。這樣，Sarah 和 SuperFantasy 公司的 HR 團隊都不需要經過多步驟來創建帳戶和分配角色。
+根據上圖，當 Sarah 第一次登錄 SmartProjects 時，她的帳戶會自動供應到 Logto 的組織 A。此過程確保 Sarah 擁有訪問 SmartProjects 的必要權限，而不需要 IT 團隊的手動干預。
 
-### 兼併、收購和臨時工作人員
+### 企業客戶入職
 
-如果你的客戶正在經歷兼併或收購其他公司，JIT 供應可以簡化為許多新用戶授予獲得公司系統訪問權限的過程。我們來看一個示例，
+想像另一個客戶 *SuperBank* 是一家為其客戶提供在線銀行服務的金融機構。*SuperBank* 使用 Logto 進行身份和存取管理，並使用 SuperBankApp 進行在線銀行。*SuperBank* 最近與新企業客戶 *SuperCorp* 簽訂了合同，為其員工提供在線銀行服務。
 
-Peter 供職於最近被 SuperFantasy 收購的 MagicTech。MagicTech 是一個沒有企業單一登入的小型組織，但也使用 Smartworkspace，Peter 已經有一個商業帳戶。
+*SuperCorp* 使用 Google Workspace 作為其員工帳戶。SuperBankApp 需要確保當 *SuperCorp* 的員工首次登錄時，他們的帳戶會自動添加到 Logto 的 *SuperCorp* 組織中。
 
-HR 團隊可以在 Okta 中將 Peter 添加進去。當 Peter 第一次通過 Okta 登錄 Smartworkspace 時，系統會自動連接他的現有商業帳戶，並為他在 SuperFantasy 分配適當的訪問權限。
+```mermaid
+sequenceDiagram
+    participant John
+    participant SuperBankApp
+    participant Logto
+    participant Google Workspace
 
-上述場景是實施 JIT 功能的理想情況。
+    John ->> SuperBankApp: 點擊登錄按鈕
+    SuperBankApp ->> Logto: 重定向到 Logto
+    Logto ->> John: 提示登錄
+    John ->> Logto: 輸入電子郵件地址
+    Logto ->> Google Workspace: 重定向到 Google Workspace
+    Google Workspace ->> John: 認證
+    Google Workspace ->> Logto: 返回認證響應
+    Logto ->> Logto: 將 John 供應到 SuperCorp 組織
+    Logto ->> SuperBankApp: 返回認證響應
+    SuperBankApp ->> Logto: 獲取用戶組織
+    Logto ->> SuperBankApp: 返回用戶組織 (SuperCorp)
+```
 
-## 它是否僅適用於 SAML 和企業單一登入？
+在上圖中，當 John 第一次登錄 SuperBankApp 時，他的帳戶會根據他的 Google Workspace 身份自動供應到 Logto 的 SuperCorp 組織中。
 
-及時 (JIT) 供應通常與 SAML 認證中的<Ref slug="enterprise-sso" />相關，但它並不限於<Ref slug="saml" />。JIT 供應也可以用於其他認證協議，如<Ref slug="oauth-2.0" />和<Ref slug="openid-connect" />，並且不一定需要<Ref slug="enterprise-sso" />的設置。
+## 它是否特定於 SAML 和企業 SSO？
 
-例如，基於電子郵件的 JIT 供應可以通過自動將用戶添加到基於其電子郵件域的工作空間來簡化團隊入職。這對於缺乏預算和資源以購買和管理企業單一登入的組織尤其有用。
+即時 (JIT) 供應通常與 SAML 認證中的 <Ref slug="enterprise-sso" /> 相關聯，但它並不僅限於 <Ref slug="saml" />。JIT 供應也可以與其他認證協議一起使用，如 <Ref slug="oauth-2.0" /> 和 <Ref slug="openid-connect" />，並且不一定需要 <Ref slug="enterprise-sso" /> 設置。
 
-JIT 供應的基本理念是當用戶首次嘗試訪問服務時自動創建或更新用戶帳戶，無論使用何種特定協議。
+例如，當你的 <Ref slug="identity-provider" /> 支持此功能時，可以使用基於電子郵件的 JIT 供應。在這種情況下，用戶的電子郵件地址是供應所需的唯一屬性，無論認證協議或 SSO 配置如何。
 
-## 它適用於應用程式的新用戶還是現有用戶？
+## 它適用於應用的新用戶還是現有用戶？
 
-及時 (JIT) 供應通常指的是用戶首次嘗試訪問應用程式時的情況。不過，針對不同產品，此功能的理解可能有所不同。有些僅將 JIT 供應用於身份和帳戶創建，而其他則包含及時帳戶更新，如重新供應和屬性同步。
+即時 (JIT) 供應通常指首次嘗試訪問應用。然而，不同的產品對此功能的理解不同。有些僅將 JIT 供應用於身份和帳戶創建，而其他則包括即時帳戶更新，如重新供應和屬性同步。
 
-除了自動創建用戶外，SAML JIT 供應可以作為供應的一部分授予和撤銷用戶組成員身份。它還可以更新已供應的用戶，保持<Ref slug="service-provider" />存儲中的屬性與<Ref slug="identity-provider" />用戶存儲屬性同步。
+例如，SAML JIT 供應允許在供應過程中授予和撤銷組成員資格。它還可以更新已供應的用戶，以保持其屬性與 <Ref slug="service-provider" /> 存儲中的屬性與 <Ref slug="identity-provider" /> 用戶存儲屬性同步。
 
-如果你確實想考慮後續的現有用戶登錄場景，請確保你有一個健全的供應系統以及你的 JIT 系統。例如，
+如果你確實想考慮後續現有用戶登錄的情況，請確保你有一個健全的供應系統以及你的 JIT 系統。例如：
 
-- **衝突解決**：如果帳戶已存在但與 IdP 在 JIT 過程中提供的信息不同，你的系統應該有處理衝突的策略。這可能需要對組織的政策和 IdP 配置進行詳細控制。
-- **審計追蹤**：保持 JIT 過程中新帳戶的創建和現有帳戶更新的日誌以進行安全和合規性檢查非常重要。
-- **性能**：雖然 JIT 供應發生得很快，但請考慮可能對登錄時間的影響，尤其是對於現有用戶在每次登錄時更新其信息的情況。
-- **數據一致性**：確保你的 JIT 供應過程在更新現有用戶帳戶時保持數據的一致性。
+- **衝突解決**：如果在 JIT 過程中 IdP 提供的信息與現有帳戶不同，你的系統應該有處理衝突的策略。這可能需要詳細控制你的組織政策和 IdP 配置。
+- **審計跟踪**：維護通過 JIT 過程創建的新帳戶和更新現有帳戶的日誌對於安全和合規性非常重要。
+- **性能**：雖然 JIT 供應發生得很快，但要考慮對登錄時間的潛在影響，特別是對於現有用戶，如果你在每次登錄時更新他們的信息。
+- **數據一致性**：確保你的 JIT 供應過程保持數據一致性，特別是在更新現有用戶帳戶時。
 
-## JIT 和 SCIM 之間的差異是什麼？
+## JIT 和跨域身份管理系統 (SCIM) 有什麼區別？
 
-SCIM 是設計用於簡化和自動化跨不同系統和域的用戶身份管理的開放標準協議。通常用於目錄同步場景。
+SCIM 是一種開放標準協議，旨在簡化和自動化跨不同系統和域的用戶身份管理。它通常用於目錄同步場景。
 
-JIT 與 SCIM 的主要區別在於 JIT 在用戶登錄嘗試時創建帳戶，而 SCIM 可以通過離線自動化過程（與用戶登錄嘗試無關）來供應用戶。
+JIT 和 SCIM 的主要區別在於，JIT 通常指首次嘗試訪問應用（或新用戶入職），它是一個描述動態供應用戶帳戶過程的廣義術語；而 SCIM 是一種特定的協議，用於跨系統管理用戶生命周期，它不限於首次登錄。
 
-這意味著 JIT 專注於新用戶入職，而 SCIM 則專注於用戶的完整生命週期管理。
+此外，JIT 缺乏跨系統的標準化實施，而 SCIM 是一種標準化協議，定義在 [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) 中，用於身份管理。
 
-此外，JIT 通常是 SAML 的擴展，缺乏跨系統的標準實現，而 SCIM 是一個已定義完善的標準協議 [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) 用於身份管理。
+一些大型組織使用 SCIM 進行帳戶供應，將其與自己的系統集成。這可能非常複雜，並且因情況而異。對於大多數使用案例，JIT 供應是一種更簡單和直接的方法。
 
-一些較大的組織使用 SCIM 進行帳戶供應，將其與自身的系統集成。這可能非常複雜，根據不同情況而異。這些組織通常有一個涉及自動流程和管理員手動參與的供應系統。
-
-<Resources urls={['https://blog.logto.io/jit-provisioning']} />
+<Resources urls={['https://blog.logto.io/jit-provisioning', 'https://datatracker.ietf.org/doc/html/rfc7644']} />

@@ -1,12 +1,12 @@
 ---
 title: Webhook
 tags: [integration]
-description: Webhooks zijn een methode voor webapplicaties om in realtime met elkaar te communiceren. Ze stellen één applicatie in staat om geautomatiseerde berichten of informatie naar een andere applicatie te sturen wanneer een specifieke gebeurtenis plaatsvindt. In tegenstelling tot traditionele API's, waarbij een applicatie een andere moet opvragen voor updates, duwen webhooks gegevens naar de ontvangende applicatie zodra de gebeurtenis zich voordoet.
+description: Webhooks zijn een methode voor webapplicaties om in real-time met elkaar te communiceren. Ze stellen één applicatie in staat om geautomatiseerde berichten of informatie naar een andere applicatie te sturen wanneer een specifieke gebeurtenis plaatsvindt.
 ---
 
 ## Wat is een webhook?
 
-Een webhook is een HTTP-callbackmechanisme dat applicaties in staat stelt realtime meldingen te verzenden naar vooraf gedefinieerde URL's wanneer specifieke gebeurtenissen plaatsvinden. Dit mechanisme maakt geautomatiseerde gegevensuitwisseling en realtime communicatie tussen systemen mogelijk.
+Een webhook is een HTTP callback-mechanisme dat applicaties in staat stelt om real-time meldingen te sturen naar vooraf gedefinieerde URL's wanneer specifieke gebeurtenissen plaatsvinden. Dit mechanisme maakt geautomatiseerde gegevensuitwisseling en real-time communicatie tussen systemen mogelijk.
 
 ## Hoe werken webhooks?
 
@@ -16,106 +16,71 @@ sequenceDiagram
     participant Doel Systeem
     
     Bron Systeem->>Bron Systeem: Gebeurtenis vindt plaats
-    Bron Systeem->>Bron Systeem: Opbouwen HTTP POST-aanvraag
-    Bron Systeem->>Doel Systeem: Verstuur webhook-aanvraag
-    Doel Systeem->>Doel Systeem: Verwerk aanvraaggegevens
-    Doel Systeem-->>Bron Systeem: Retourneer antwoord (meestal 2xx-statuscode)
+    Bron Systeem->>Bron Systeem: Construeer HTTP POST-verzoek
+    Bron Systeem->>Doel Systeem: Stuur webhook-verzoek
+    Doel Systeem->>Doel Systeem: Verwerk verzoekgegevens
+    Doel Systeem-->>Bron Systeem: Retourneer antwoord (meestal 2xx statuscode)
     
-    alt Aanvraag mislukt
+    alt Verzoek mislukt
         Bron Systeem->>Bron Systeem: Implementeer retry-mechanisme
     end
 ```
 
 1. Een specifieke gebeurtenis vindt plaats in het bron systeem
-2. Het bron systeem bouwt een HTTP POST-aanvraag met gebeurtenisgegevens op
-3. Het bron systeem verstuurt de aanvraag naar de vooraf geconfigureerde URL van het doel systeem
-4. Het doel systeem ontvangt de aanvraag en verwerkt de gegevens
-5. Het doel systeem stuurt een antwoord naar het bron systeem
-6. Als de aanvraag mislukt, kan het bron systeem een retry-mechanisme implementeren
+2. Het bron systeem construeert een HTTP POST-verzoek met gebeurtenisgegevens
+3. Het bron systeem stuurt het verzoek naar de vooraf geconfigureerde URL van het doel systeem
+4. Het doel systeem ontvangt het verzoek en verwerkt de gegevens
+5. Het doel systeem retourneert een antwoord aan het bron systeem
+6. Als het verzoek mislukt, kan het bron systeem een retry-mechanisme implementeren
 
-## Wat zijn veelvoorkomende gebruiksscenario's voor webhooks?
+## Hoe werken webhooks in een real-world scenario?
 
-1. Betalingssystemen: Meld wijzigingen in orderstatus
-2. Versiebeheersystemen: Meld code commits, merge-aanvragen en andere gebeurtenissen
-3. CRM-systemen: Meldingen over updates van klantinformatie
-4. IoT-apparaten: Meld wijzigingen in apparaatstatus
-5. Sociale media platforms: Meldingen van nieuwe berichten en opmerkingen
+Laten we een applicatie nemen die is geïntegreerd met een auth service als voorbeeld. Wanneer een nieuwe gebruiker zich aanmeldt, zal de applicatie een welkomstmail naar de gebruiker sturen.
 
-## Hoe werken webhooks in een scenario uit de praktijk?
+Typisch biedt de auth service een `user.registered` webhook-gebeurtenis die wordt geactiveerd wanneer een nieuwe gebruiker de registratie voltooit.
 
-Laten we een scenario bekijken waarbij een e-commerceplatform integreert met een extern betalingssysteem:
+De payload van de webhook-gebeurtenis bevat de informatie van de gebruiker, zoals e-mail en gebruikersnaam, die kan worden gebruikt om de welkomstmail te sturen:
 
-### Scenario
+```json
+// Opmerking: de werkelijke payload-structuur hangt af van de auth service.
+{
+  "event": "user.registered",
+  "timestamp": "2024-03-21T08:00:00Z",
+  "data": {
+    "user_id": "u_1234567890",
+    "email": "john@example.com",    // E-mailadres voor het verzenden van de welkomstmail
+    "username": "johndoe",          // Gebruikersnaam om de e-mail te personaliseren
+    "registered_at": "2024-03-21T08:00:00Z"
+  }
+}
+```
 
-Een e-commerce platform gebruikt een extern betalingssysteem om betalingsverzoeken te verwerken. Wanneer een gebruiker een betaling voltooit, moet het betalingssysteem het e-commerceplatform in realtime op de hoogte stellen van de betalingsstatus via een webhook, waardoor het platform de orderstatus kan bijwerken en daaropvolgende processen kan activeren.
-
-### Implementatiestroom van de webhook
+Zo werkt de webhook-flow:
 
 ```mermaid
 sequenceDiagram
     participant Gebruiker
-    participant E-commerce Platform
-    participant Betalingssysteem
-    participant Voorraadsysteem
-    participant Logistiek Systeem
-
-    Gebruiker->>E-commerce Platform: Plaats bestelling
-    E-commerce Platform->>Betalingssysteem: Creëer betalingsverzoek
-    Betalingssysteem-->>E-commerce Platform: Retourneer betaal-URL
-    E-commerce Platform-->>Gebruiker: Toon betalingspagina
-    Gebruiker->>Betalingssysteem: Voltooi betaling
-    Betalingssysteem->>Betalingssysteem: Verwerk betaling
-    Betalingssysteem->>E-commerce Platform: Stuur betalingssucces-webhook
-    E-commerce Platform->>E-commerce Platform: Verifieer webhook-handtekening
-    E-commerce Platform->>E-commerce Platform: Werk orderstatus bij
-    par Initiëer daaropvolgende processen
-        E-commerce Platform->>Voorraadsysteem: Werk voorraad bij
-        E-commerce Platform->>Logistiek Systeem: Creëer verzendtaak
-    end
-    E-commerce Platform-->>Betalingssysteem: Retourneer 200 OK
-    E-commerce Platform-->>Gebruiker: Toon betalingssuccespagina
+    participant Auth Service
+    participant App
+    participant E-mail Service
+    
+    Gebruiker->>Auth Service: Aanmelden
+    Auth Service->>App: Stuur webhook (user.registered)
+    App-->>E-mail Service: Stuur welkomstmail
+    E-mail Service-->>Gebruiker: Lever welkomstmail
 ```
-
-1. Bestelling creatie en betalingsverzoek:
-   - Gebruiker plaatst een bestelling op het e-commerceplatform.
-   - Het platform stuurt een betalingsverzoek naar het betalingssysteem.
-   - Het betalingssysteem retourneert een betaal-URL, die het platform aan de gebruiker toont.
-
-2. Gebruiker betaling:
-   - De gebruiker voltooit de betaling op het betalingssysteem.
-
-3. Webhook activering:
-   - Het betalingssysteem detecteert het "betaling geslaagd" evenement.
-   - Het stelt een webhook-payload samen met betalingsdetails.
-
-4. Verzending van webhook:
-   - Het betalingssysteem verstuurt een POST-aanvraag naar de vooraf geconfigureerde URL van het e-commerceplatform.
-
-5. Ontvanger verwerking:
-   - Het e-commerceplatform ontvangt de webhook en controleert eerst de handtekening van het verzoek om de veiligheid te waarborgen.
-   - Na verificatie werkt het platform de bijbehorende orderstatus bij naar "betaald".
-   - Het platform initieert daaropvolgende processen, zoals het bijwerken van de voorraad en het creëren van verzendtaken.
-
-6. Afhandeling van het antwoord:
-   - Het e-commerceplatform stuurt onmiddellijk een 200 OK-antwoord terug zodra de webhook is ontvangen.
-   - Als er tijdens de verwerking fouten optreden, zal het platform in de achtergrond opnieuw proberen of handmatige tussenkomst noodzakelijk maken.
-
-7. Gebruikerservaring:
-   - Het e-commerceplatform toont een betalingssuccespagina aan de gebruiker.
-
-Dit voorbeeld demonstreert hoe webhooks realtime communicatie mogelijk maken tussen een extern betalingssysteem en een e-commerceplatform. Via webhooks kan het betalingssysteem het e-commerceplatform direct informeren wanneer een betaling is voltooid, waardoor onmiddellijke updates van de orderstatus mogelijk zijn en snelle activering van daaropvolgende bedrijfsprocessen. Dit verbetert de algehele systeemreactiesnelheid en efficiëntie, wat leidt tot een betere winkelervaring voor gebruikers.
 
 ## Wat zijn best practices voor het implementeren van webhooks?
 
 Wanneer je de verzender (producent) van webhooks bent, overweeg dan de volgende aspecten:
 
-### Webhookontwerp
+### Webhook-ontwerp
 
 Ontwerp duidelijke en consistente webhook-structuren:
 
-- Definieer duidelijke evenementtypes: Bijvoorbeeld `order.created`, `user.updated`, enzovoort.
-- Gebruik standaard JSON-formaat: Zorg ervoor dat de datastructuur duidelijk en gemakkelijk te parseren is.
-- Versiebeheer: Voeg versie-informatie toe in de verzoekheaders of payload. Bijvoorbeeld:
+- Definieer duidelijke gebeurtenistypen: Bijvoorbeeld, `order.created`, `user.updated`, etc.
+- Gebruik standaard JSON-formaat: Zorg ervoor dat de gegevensstructuur duidelijk en gemakkelijk te parseren is.
+- Versiebeheer: Voeg versie-informatie toe in de request headers of payload. Bijvoorbeeld:
 
   ```javascript
   // In request headers
@@ -129,28 +94,28 @@ Ontwerp duidelijke en consistente webhook-structuren:
     "version": "1.0",
     "event_type": "order.created",
     "data": {
-      // Event details
+      // Gegevens van de gebeurtenis
     }
   }
   ```
 
-- Bied voldoende context: Voeg tijdstempels toe wanneer evenementen plaatsvinden, unieke identificatoren voor gerelateerde bronnen, enzovoort.
-- Handhaaf consistentie: Gebruik consistente naamgevingsconventies en datastructuren voor alle evenementtypes.
+- Bied voldoende context: Voeg tijdstempels toe van wanneer gebeurtenissen plaatsvonden, unieke identificatoren voor gerelateerde bronnen, etc.
+- Behoud consistentie: Gebruik consistente naamgevingsconventies en gegevensstructuren voor alle gebeurtenistypen.
 
-### Verzending mechanisme
+### Verzendmechanisme
 
-Implementeer een betrouwbaar mechanisme voor het verzenden van webhooks:
+Implementeer een betrouwbaar webhook-verzendmechanisme:
 
-- Gebruik asynchrone taakqueues: Voorkom dat het hoofdprogramma wordt geblokkeerd en verbeter de reactiesnelheid van het systeem.
-- Implementeer retry-mechanismen: Handel netwerkaandoeningen of tijdelijke onbeschikbaarheid van de ontvanger af.
+- Gebruik asynchrone taakwachtrijen: Vermijd het blokkeren van het hoofdprogramma en verbeter de systeemresponsiviteit.
+- Implementeer retry-mechanismen: Behandel netwerkfouten of tijdelijke onbeschikbaarheid van de ontvanger.
 
 ### Retry-strategie
 
-Ontwerp een passende retry-strategie:
+Ontwerp een geschikte retry-strategie:
 
-- Implementeer exponentiële backoff: Voorkom frequente retries die het systeem en de ontvanger kunnen belasten.
-- Stel een maximaal aantal retries in: Voorkom dat eindeloze retries systeembronnen verbruiken.
-- Bied handmatige retry-mechanismen aan: Bied een interface voor handmatige retries voor webhooks die uiteindelijk falen.
+- Implementeer exponentiële backoff: Vermijd frequente retries die het systeem en de ontvanger kunnen belasten.
+- Stel een maximaal aantal retries in: Voorkom oneindige retries die systeembronnen verbruiken.
+- Bied handmatige retry-mechanismen: Bied een interface voor handmatige retries voor webhooks die uiteindelijk falen.
 
 ### Beveiligingsimplementatie
 
@@ -175,28 +140,28 @@ function sendWebhookWithSignature(url, payload, secret) {
 
 ### Prestatie-optimalisatie
 
-Optimaliseer de prestatie van het verzenden van webhooks:
+Optimaliseer de prestaties van het verzenden van webhooks:
 
-- Gebruik connectiepoelen: Verminder de overhead van het maken van verbindingen en verbeter de prestatie.
-- Implementeer batchverwerking: Verstuur webhooks in batches wanneer dat gepast is om het aantal netwerkinteracties te verminderen.
+- Gebruik verbindingspools: Verminder de overhead van het tot stand brengen van verbindingen en verbeter de prestaties.
+- Implementeer batchverwerking: Stuur webhooks in batches wanneer dat gepast is om het aantal netwerkinteracties te verminderen.
 
-### Documentatie en testhulpmiddelen
+### Documentatie en testtools
 
-Bied ondersteuning voor webhookgebruikers:
+Bied ondersteuning voor webhook-gebruikers:
 
-- Gedetailleerde API-documentatie: Bevat alle mogelijke evenementtypes, aanvraagformaten en veldbeschrijvingen.
-- Bied testhulpmiddelen aan: Implementeer testendpoints voor webhooks om gebruikers in staat te stellen webhookmeldingen te simuleren.
+- Gedetailleerde API-documentatie: Inclusief alle mogelijke gebeurtenistypen, requestformaten en veldbeschrijvingen.
+- Bied testtools: Implementeer webhook-testendpoints om gebruikers in staat te stellen het ontvangen van webhook-meldingen te simuleren.
 - Voorbeeldcode: Bied integratievoorbeelden in verschillende programmeertalen.
 
-## Wat zijn best practices voor het gebruiken van webhooks?
+## Wat zijn best practices voor het gebruik van webhooks?
 
 Wanneer je webhooks gebruikt als ontvanger (consument), overweeg dan de volgende aspecten:
 
 ### Beveiliging
 
-Omdat eindpunten voor het ontvangen van webhooks over het algemeen openbaar toegankelijk zijn, is beveiliging een primaire zorg. Let op de volgende punten:
+Aangezien endpoints voor het ontvangen van webhooks over het algemeen openbaar toegankelijk zijn, is beveiliging een primaire zorg. Let op de volgende punten:
 
-- Verifieer de authenticiteit van verzoeken: Implementeer een verificatiemechanisme voor handtekeningen om ervoor te zorgen dat verzoeken van verwachte verzenders komen.
+- Verifieer de authenticiteit van verzoeken: Implementeer een handtekeningverificatiemechanisme om ervoor te zorgen dat verzoeken van verwachte afzenders komen.
   
   ```javascript
   const crypto = require('crypto');
@@ -214,43 +179,43 @@ Omdat eindpunten voor het ontvangen van webhooks over het algemeen openbaar toeg
   }
   ```
 
-- Gebruik HTTPS: Zorg ervoor dat je webhook-ontvangstendpoint HTTPS gebruikt om te voorkomen dat gegevens tijdens de overdracht worden onderschept of gewijzigd.
-- Implementeer IP-vermelding: Accepteer alleen webhook-aanvragen van vertrouwde IP-adressen om het risico op aanvallen te verminderen.
+- Gebruik HTTPS: Zorg ervoor dat je webhook-ontvangend endpoint HTTPS gebruikt om te voorkomen dat gegevens tijdens de overdracht worden onderschept of gemanipuleerd.
+- Implementeer IP-whitelisting: Accepteer alleen webhook-verzoeken van vertrouwde IP-adressen om het risico op aanvallen te verminderen.
 
 ### Betrouwbaarheid
 
-Om betrouwbare verwerking van ontvangen webhooks te garanderen:
+Om een betrouwbare verwerking van ontvangen webhooks te garanderen:
 
-- Implementeer idempotente verwerking: Ontwerp je systeem om dubbele webhookmeldingen correct te verwerken, aangezien verzenders mogelijk mislukte aanvragen opnieuw proberen.
-- Reageer snel: Stuur onmiddellijk een antwoord (meestal een 2xx-statuscode) terug na het ontvangen van een webhookaanvraag om te voorkomen dat de verzender de aanvraag als mislukt beschouwt en een retry start.
+- Implementeer idempotente verwerking: Ontwerp je systeem om dubbele webhook-meldingen correct te verwerken, aangezien afzenders mislukte verzoeken kunnen herhalen.
+- Reageer snel: Retourneer een antwoord (meestal een 2xx statuscode) onmiddellijk na het ontvangen van een webhook-verzoek om te voorkomen dat de afzender het verzoek als mislukt beschouwt en een retry activeert.
 
-### Prestatie
+### Prestaties
 
 Zorg voor een efficiënte werking van het systeem:
 
 - Asynchrone verwerking: Voer na het ontvangen van een webhook de daadwerkelijke gegevensverwerking op de achtergrond uit zonder de reactie te blokkeren.
-- Stel tijdslimieten in: Stel redelijke tijdlimieten voor webhookverwerking in om te voorkomen dat langdurige taken de systeemprestaties beïnvloeden.
+- Stel tijdslimieten in: Stel redelijke tijdslimieten in voor de verwerking van webhooks om te voorkomen dat langlopende taken de systeemprestaties beïnvloeden.
 
 ### Foutafhandeling
 
-Handel mogelijke foutensituaties gepast af:
+Behandel mogelijke foutensituaties op de juiste manier:
 
-- Loggen: Houd gedetailleerde verslagen bij van ontvangen webhook-aanvragen en verwerkingsprocedures om probleemoplossing te vergemakkelijken.
-- Soepele degradatie: Heb geschikte foutafhandelingsmechanismen wanneer webhooks niet kunnen worden verwerkt om ervoor te zorgen dat andere delen van het systeem niet worden beïnvloed.
+- Logging: Houd gedetailleerde records bij van ontvangen webhook-verzoeken en verwerkingsprocedures om probleemonderzoek te vergemakkelijken.
+- Gracieuze degradatie: Zorg voor passende foutafhandelingsmechanismen wanneer het niet mogelijk is om webhooks te verwerken, zodat andere delen van het systeem niet worden beïnvloed.
 
 ### Versiecompatibiliteit
 
-Aangezien webhookformaten in de loop van de tijd kunnen veranderen:
+Aangezien webhook-formaten in de loop van de tijd kunnen veranderen:
 
-- Handel versie-informatie af: Wees voorbereid op het verwerken van verschillende versies van webhookformaten. Versie-informatie wordt meestal in de URL of in de verzoekheaders voorzien.
-- Achterwaartse compatibiliteit: Zorg bij het bijwerken van je webhook-verwerkingslogica ervoor dat je de oudere formaatversies blijft ondersteunen.
+- Behandel versie-informatie: Wees voorbereid om verschillende versies van webhook-formaten te verwerken. Versie-informatie wordt meestal verstrekt in de URL of request headers.
+- Achterwaartse compatibiliteit: Zorg ervoor dat je bij het bijwerken van je webhook-verwerkingslogica oudere formaatversies blijft ondersteunen.
 
 ### Monitoring
 
-Houd voortdurend toezicht op de ontvangst en verwerking van webhooks:
+Houd de ontvangst en verwerking van webhooks continu in de gaten:
 
-- Stel waarschuwingen in: Implementeer realtime bewaking en waarschuwingssystemen voor abnormale situaties (zoals hoge foutpercentages of ongebruikelijke verkeerspatronen).
-- Prestatiestatistieken: Volg prestatiestatistieken voor webhookverwerking, zoals reactietijd en succesratio.
+- Stel waarschuwingen in: Implementeer real-time monitoring en waarschuwingen voor abnormale situaties (zoals hoge faalpercentages of ongebruikelijk verkeer).
+- Prestatiestatistieken: Volg prestatiestatistieken voor de verwerking van webhooks, zoals responstijd en succespercentage.
 
 <Resources
   urls={[

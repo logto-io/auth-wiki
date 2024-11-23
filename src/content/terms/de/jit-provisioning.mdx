@@ -1,73 +1,94 @@
 ---
-title: Just-in-time (JIT) Bereitstellung (Just-in-time provisioning)
+title: Just-in-time (JIT) Bereitstellung
 tags: [authentication, authorization]
-description: Die Just-in-time (JIT) Bereitstellung ist ein Prozess im Identity and Access Management (IAM), bei dem Benutzerkonten dynamisch und automatisch erstellt werden, wenn ein Benutzer versucht, zum ersten Mal auf ein System oder eine Anwendung zuzugreifen. Dieser Ansatz hilft, den Onboarding-Prozess zu optimieren und sicherzustellen, dass Benutzerkonten nur bei Bedarf erstellt werden, wodurch der Verwaltungsaufwand reduziert und die Sicherheit verbessert wird.
+description: Just-in-time (JIT) Bereitstellung ist ein Prozess des Identity and Access Management (IAM), bei dem Benutzerkonten dynamisch bereitgestellt werden, wenn sich ein Benutzer zum ersten Mal anmeldet.
 ---
 
 ## Was ist Just-in-time Bereitstellung?
 
-Wenn du eine SaaS-B2B-App entwickelst und Mitgliedschaftsfunktionen unterstützen möchtest, die es Mitgliedern ermöglichen, leicht deinem Arbeitsbereich (Mandant) beizutreten. Du könntest Funktionen wie die unten stehende Tabelle benötigen, und die Just-in-time Bereitstellung ist eine davon, die hilft, den Prozess zu optimieren.
-
-| Funktionen | Ablauf |
-| --- | --- |
-| Vom Admin initiierte Einladung | Benutzer können eine E-Mail-Einladung erhalten, um der Organisation beizutreten. |
-| Benutzererstellung oder Import über API | Benutzer können ein vorerstelltes Benutzerkonto verwenden, um der Organisation beizutreten. |
-| Just-in-time Bereitstellung | Benutzer, die sich zum ersten Mal in der App anmelden, können der Organisation beitreten. |
-| Directory Sync (z.B. SCIM) | Verwende die Directory Sync-Funktion des IdP, um Benutzer im Voraus in der App bereitzustellen. |
-
-**Just-in-time (JIT) Bereitstellung** ist ein Prozess, der in Identity and Access Management-Systemen verwendet wird, um Benutzerkonten dynamisch zu erstellen, wenn sie sich zum ersten Mal in einem System anmelden. Anstatt Benutzerkonten im Voraus bereitzustellen, erstellt JIT Bereitstellung die erforderlichen Benutzerkonten dynamisch, wenn ein Benutzer authentifiziert wird. Just-in-time Bereitstellung ist eine beliebte Funktion mit eigenen Merkmalen wie Effizienz, keine administrative Beteiligung und automatisierte Organisationsmitgliedschaft, usw.
+Just-in-time (JIT) Bereitstellung ist ein Prozess, der in <Ref slug="iam" /> verwendet wird, bei dem Benutzerkonten basierend auf der Identität des Benutzers und der Konfiguration des Systems dynamisch bereitgestellt werden, wenn der Benutzer sich zum ersten Mal anmeldet.
 
 ## Was sind die Anwendungsfälle für Just-in-time Bereitstellung?
 
-Diese Fälle sind häufig beim Aufbau einer B2B-App, die eine Multi-Tenant-Architektur, Enterprise SSO, die Arbeit mit Unternehmen oder Team-Onboarding-Funktionen erfordert. Hier sind einige beispielhafte Szenarien, denen dein Kunde begegnen könnte.
+Diese Fälle sind häufig beim Erstellen einer B2B-App, die eine Multi-Tenant-Architektur, Enterprise SSO oder Funktionen zur Team-Onboarding erfordert. Hier sind einige Beispielszenarien, denen du oder dein Kunde begegnen könntet.
 
-### Schnelles Onboarding
+### Mitarbeiter-Onboarding
 
-Ein Kunde, der häufige Neueinstellungen oder schnelles Wachstum erlebt, kann JIT Bereitstellung nutzen, um Benutzerkonten für neue Mitarbeiter schnell einzurichten. Hier ist ein Beispiel:
+Stell dir vor, einer deiner Kunden, *SuperFantasy*, erlebt häufige Einstellungen oder schnelles Wachstum und kann die JIT-Bereitstellung nutzen, um Benutzerkonten für neue Mitarbeiter schnell einzurichten. *SuperFantasy* verwendet Logto für Identity and Access Management und SmartProjects für Projektmanagement. Wenn sich eine neue Mitarbeiterin, Sarah, zum ersten Mal bei SmartProjects anmeldet, wird ihr Konto automatisch basierend auf ihren Logto-Anmeldedaten erstellt und konfiguriert.
 
-Sarah ist eine neue Mitarbeiterin bei der Firma SuperFantasy, die Okta als Enterprise Identity Provider nutzt. Das HR-Team fügt sie einmalig als Geschäftsidentität in Okta hinzu. Wenn Sarah diese E-Mail verwendet, um sich zum ersten Mal bei einer unternehmensgenutzten Produktivitäts-App namens Smartworkspace anzumelden, erstellt das System automatisch ein Konto und teilt ihr die richtige Rolle innerhalb des Arbeitsbereichs des Unternehmens zu. Auf diese Weise müssen weder Sarah noch das HR-Team bei SuperFantasy mehrere Schritte für die Kontenerstellung und Rollenvergabe durchlaufen.
+```mermaid
+sequenceDiagram
+    participant Sarah
+    participant SmartProjects
+    participant Logto
 
-### Fusionen, Übernahmen und Zeitarbeiter
+    Sarah ->> SmartProjects: Klick auf Anmeldebutton
+    SmartProjects ->> Logto: Weiterleitung zu Logto
+    Logto ->> Sarah: Anmelden mit Logto
+    Sarah ->> Logto: Authentifizieren
+    Logto ->> Logto: Sarah zur Organisation A bereitstellen
+    Logto ->> SmartProjects: Authentifizierungsantwort zurückgeben
+    SmartProjects ->> Logto: Benutzerorganisationen abrufen
+    Logto ->> SmartProjects: Benutzerorganisationen zurückgeben (Organisation A)
+```
 
-Ein Kunde, der Fusionen oder Übernahmen erlebt, kann mit JIT Bereitstellung den Prozess der Gewährung des Zugriffs auf die Systeme des erwerbenden Unternehmens für viele neue Benutzer vereinfachen. Nehmen wir ein weiteres Beispiel,
+Gemäß dem obigen Diagramm wird Sarahs Konto automatisch zur Organisation A in Logto bereitgestellt, wenn sie sich zum ersten Mal bei SmartProjects anmeldet. Dieser Prozess stellt sicher, dass Sarah den erforderlichen Zugriff auf SmartProjects hat, ohne dass ein manuelles Eingreifen des IT-Teams erforderlich ist.
 
-Peter arbeitet für MagicTech, das kürzlich von SuperFantasy übernommen wurde. MagicTech ist eine kleinere Organisation ohne Enterprise SSO, verwendet jedoch auch Smartworkspace, wo Peter bereits ein Geschäftskonto hat.
+### Onboarding von Unternehmenskunden
 
-Das HR-Team kann Peter in Okta hinzufügen. Wenn sich Peter zum ersten Mal über Okta bei Smartworkspace anmeldet, verknüpft das System automatisch sein bestehendes Geschäftskonto und gewährt den entsprechenden Zugang zu SuperFantasy.
+Stell dir vor, ein weiterer Kunde, *SuperBank*, ist eine Finanzinstitution, die ihren Kunden Online-Banking-Dienste anbietet. *SuperBank* verwendet Logto für Identity and Access Management und SuperBankApp für Online-Banking. *SuperBank* hat kürzlich einen Vertrag mit einem neuen Unternehmenskunden, *SuperCorp*, unterzeichnet, um dessen Mitarbeitern Online-Banking-Dienste bereitzustellen.
 
-Die oben genannten Szenarien sind ideal für die Implementierung der JIT-Funktion.
+*SuperCorp* verwendet Google Workspace für seine Mitarbeiterkonten. SuperBankApp muss sicherstellen, dass, wenn sich ein Mitarbeiter von *SuperCorp* zum ersten Mal anmeldet, sein Konto automatisch zur *SuperCorp*-Organisation in Logto hinzugefügt wird.
+
+```mermaid
+sequenceDiagram
+    participant John
+    participant SuperBankApp
+    participant Logto
+    participant Google Workspace
+
+    John ->> SuperBankApp: Klick auf Anmeldebutton
+    SuperBankApp ->> Logto: Weiterleitung zu Logto
+    Logto ->> John: Aufforderung zur Anmeldung
+    John ->> Logto: E-Mail-Adresse eingeben
+    Logto ->> Google Workspace: Weiterleitung zu Google Workspace
+    Google Workspace ->> John: Authentifizieren
+    Google Workspace ->> Logto: Authentifizierungsantwort zurückgeben
+    Logto ->> Logto: John zur SuperCorp-Organisation bereitstellen 
+    Logto ->> SuperBankApp: Authentifizierungsantwort zurückgeben
+    SuperBankApp ->> Logto: Benutzerorganisationen abrufen
+    Logto ->> SuperBankApp: Benutzerorganisationen zurückgeben (SuperCorp)
+```
+
+Im obigen Diagramm wird Johns Konto automatisch zur SuperCorp-Organisation in Logto bereitgestellt, wenn er sich zum ersten Mal bei SuperBankApp anmeldet, basierend auf seiner Google Workspace-Identität.
 
 ## Ist es spezifisch für SAML und Enterprise SSO?
 
-Just-in-time (JIT) Bereitstellung wird oft mit <Ref slug="enterprise-sso" /> in SAML Authentication in Verbindung gebracht, ist aber nicht ausschließlich auf <Ref slug="saml" /> beschränkt. Die JIT Bereitstellung kann auch mit anderen Authentifizierungsprotokollen wie <Ref slug="oauth-2.0" /> und <Ref slug="openid-connect" /> verwendet werden und erfordert nicht immer eine <Ref slug="enterprise-sso" />-Konfiguration.
+Just-in-time (JIT) Bereitstellung wird oft mit <Ref slug="enterprise-sso" /> in SAML-Authentifizierung in Verbindung gebracht, ist jedoch nicht exklusiv für <Ref slug="saml" />. JIT-Bereitstellung kann auch mit anderen Authentifizierungsprotokollen wie <Ref slug="oauth-2.0" /> und <Ref slug="openid-connect" /> verwendet werden und erfordert nicht immer eine <Ref slug="enterprise-sso" />-Einrichtung.
 
-Zum Beispiel kann E-Mail-basierte JIT Bereitstellung das Team-Onboarding vereinfachen, indem Benutzer automatisch auf Basis ihrer E-Mail-Domäne einem Arbeitsbereich hinzugefügt werden. Dies ist besonders nützlich für Organisationen, die nicht über das Budget und die Ressourcen verfügen, um Enterprise SSO zu kaufen und zu verwalten.
-
-Die grundlegende Idee hinter der JIT Bereitstellung ist die Automatisierung der Benutzerkontoerstellung oder -aktualisierungen, wenn ein Benutzer erstmals versucht, auf einen Dienst zuzugreifen, unabhängig vom verwendeten spezifischen Protokoll.
+Zum Beispiel kann E-Mail-basierte JIT-Bereitstellung verwendet werden, wenn dein <Ref slug="identity-provider" /> diese Funktion unterstützt. In diesem Fall ist die E-Mail-Adresse des Benutzers das einzige erforderliche Attribut für die Bereitstellung, unabhängig vom Authentifizierungsprotokoll oder der SSO-Konfiguration.
 
 ## Gilt es für neue oder bestehende Benutzer der App?
 
-Just-in-time (JIT) Bereitstellung bezieht sich im Allgemeinen auf den ersten Versuch, auf eine App zuzugreifen. Jedoch nehmen verschiedene Produkte diese Funktionalität unterschiedlich wahr. Einige nutzen JIT Bereitstellung nur für Identitäts- und Kontoerstellung, während andere auch Just-in-time Kontoaktualisierungen, wie erneute Bereitstellung und Attributsynchronisation, einschließen.
+Just-in-time (JIT) Bereitstellung bezieht sich im Allgemeinen auf den ersten Versuch, auf eine App zuzugreifen. Verschiedene Produkte nehmen diese Funktionalität jedoch unterschiedlich wahr. Einige verwenden JIT-Bereitstellung nur für Identitäts- und Kontoerstellung, während andere auch Just-in-time-Kontoaktualisierungen, wie Re-Provisioning und Attributsynchronisation, einschließen.
 
-Zusätzlich zur automatischen Benutzererstellung ermöglicht SAML JIT Bereitstellung die Gewährung und den Widerruf von Gruppenmitgliedschaften als Teil der Bereitstellung. Es kann auch bereitgestellte Benutzer aktualisieren, um ihre Attribute im <Ref slug="service-provider" />-Store mit den Benutzerattributen des <Ref slug="identity-provider" />-Stores synchron zu halten.
+Zum Beispiel ermöglicht SAML JIT Provisioning das Gewähren und Widerrufen von Gruppenmitgliedschaften als Teil der Bereitstellung. Es kann auch bereitgestellte Benutzer aktualisieren, um ihre Attribute im <Ref slug="service-provider" />-Speicher mit den Attributen des <Ref slug="identity-provider" />-Benutzerspeichers synchron zu halten.
 
-Wenn du das Szenario der anschließenden Anmeldungen durch bestehende Benutzer in Betracht ziehen möchtest, stelle sicher, dass du ein robustes Bereitstellungssystem zusammen mit deinem JIT-System hast. Zum Beispiel:
+Wenn du das Szenario der nachfolgenden Anmeldung bestehender Benutzer in Betracht ziehen möchtest, stelle sicher, dass du ein robustes Bereitstellungssystem zusammen mit deinem JIT-System hast. Zum Beispiel:
 
-- **Konfliktlösung**: Dein System sollte eine Strategie zur Handhabung von Konflikten haben, wenn bereits ein Konto mit anderen Informationen als denen vorhanden ist, die vom IdP während des JIT-Prozesses zur Verfügung gestellt wurden. Dies kann eine detaillierte Kontrolle der Richtlinien deiner Organisation und der IdP-Konfiguration erfordern.
-- **Prüfpfade**: Es ist wichtig, sowohl neue Kontenerstellungen als auch Updates bestehender Konten durch JIT-Prozesse aus Sicherheits- und Compliance-Gründen zu protokollieren.
-- **Leistung**: Obwohl JIT Bereitstellung schnell erfolgt, sollte der potenzielle Einfluss auf die Anmeldezeiten berücksichtigt werden, insbesondere für bestehende Benutzer, wenn ihre Informationen bei jeder Anmeldung aktualisiert werden.
-- **Datenkonsistenz**: Stelle sicher, dass dein JIT Bereitstellungsprozess die Datenkonsistenz aufrechterhält, insbesondere bei der Aktualisierung bestehender Benutzerkonten.
+- **Konfliktlösung**: Dein System sollte eine Strategie zur Handhabung von Konflikten haben, wenn ein Konto bereits mit anderen Informationen existiert als die, die vom IdP während des JIT-Prozesses bereitgestellt werden. Dies kann eine detaillierte Kontrolle über die Richtlinien deiner Organisation und die IdP-Konfiguration erfordern.
+- **Audit-Trails**: Es ist wichtig, Protokolle sowohl über neue Kontoerstellungen als auch über Aktualisierungen bestehender Konten durch JIT-Prozesse aus Sicherheits- und Compliance-Gründen zu führen.
+- **Leistung**: Während JIT-Bereitstellung schnell erfolgt, berücksichtige die potenziellen Auswirkungen auf die Anmeldezeiten, insbesondere für bestehende Benutzer, wenn du ihre Informationen bei jeder Anmeldung aktualisierst.
+- **Datenkonsistenz**: Stelle sicher, dass dein JIT-Bereitstellungsprozess die Datenkonsistenz aufrechterhält, insbesondere beim Aktualisieren bestehender Benutzerkonten.
 
-## Was ist der Unterschied zwischen JIT und SCIM?
+## Was ist der Unterschied zwischen JIT und System for Cross-domain Identity Management (SCIM)?
 
-SCIM ist ein offenes Standardprotokoll, das entwickelt wurde, um die Verwaltung von Benutzeridentitäten über verschiedene Systeme und Domänen hinweg zu vereinfachen und zu automatisieren. Es wird häufig in Directory Sync-Szenarien verwendet.
+SCIM ist ein offenes Standardprotokoll, das entwickelt wurde, um die Verwaltung von Benutzeridentitäten über verschiedene Systeme und Domänen hinweg zu vereinfachen und zu automatisieren. Es wird häufig in Verzeichnissynchronisationsszenarien verwendet.
 
-Der Hauptunterschied zwischen JIT und SCIM besteht darin, dass JIT Konten während des Anmeldeversuchs des Benutzers erstellt, während SCIM Benutzer über einen offline automatisierten Prozess, unabhängig von Benutzeranmeldeversuchen, bereitstellen kann.
+Der Hauptunterschied zwischen JIT und SCIM besteht darin, dass JIT sich oft auf den ersten Versuch bezieht, auf eine App zuzugreifen (oder das Onboarding neuer Benutzer), und es ist ein allgemeiner Begriff, der den Prozess der dynamischen Bereitstellung von Benutzerkonten beschreibt; während SCIM ein spezifisches Protokoll zur Verwaltung des Benutzerlebenszyklus über Systeme hinweg ist und nicht auf die erste Anmeldung beschränkt ist.
 
-Dies bedeutet, dass sich JIT auf das Onboarding neuer Benutzer konzentriert, während sich SCIM auf das vollständige Lebenszyklus-Management von Benutzern konzentriert.
+Darüber hinaus fehlt JIT eine standardisierte Implementierung über Systeme hinweg, während SCIM ein standardisiertes Protokoll ist, das in [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) für Identitätsmanagement definiert ist.
 
-Darüber hinaus ist JIT oft eine Erweiterung von SAML und fehlt eine standardisierte Implementierung über Systeme hinweg, während SCIM ein gut definiertes, standardisiertes Protokoll [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644) für Identitätsmanagement ist.
+Einige größere Organisationen verwenden SCIM für die Kontobereitstellung und integrieren es in ihre eigenen Systeme. Dies kann sehr komplex sein und von Fall zu Fall variieren. Für die meisten Anwendungsfälle ist JIT-Bereitstellung ein einfacherer und direkterer Ansatz.
 
-Einige größere Organisationen nutzen SCIM für die Kontobereitstellung und integrieren es in ihre eigenen Systeme. Dies kann sehr komplex sein und von Fall zu Fall variieren. Diese Organisationen haben oft ein Bereitstellungssystem, das sowohl automatisierte Prozesse als auch manuelle Eingriffe von Administratoren umfasst.
-
-<Resources urls={['https://blog.logto.io/jit-provisioning']} />
+<Resources urls={['https://blog.logto.io/jit-provisioning', 'https://datatracker.ietf.org/doc/html/rfc7644']} />

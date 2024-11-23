@@ -1,102 +1,102 @@
 ---
-title: Multitenencia (Multi-tenancy)
+title: Multi-tenancy (Multi-tenancy)
 tags: [authentication, authorization]
-description: La multitenencia es una arquitectura de software en la que una única instancia de aplicación sirve a múltiples clientes (inquilinos), manteniendo sus datos aislados y seguros. Es común en la computación en la nube y SaaS para optimizar recursos y simplificar el mantenimiento.
+description: La multi-tenancy (multi-tenancy) es una arquitectura de software donde una sola instancia de aplicación sirve a múltiples clientes (tenants), manteniendo sus datos aislados y seguros. Es común en la computación en la nube y SaaS para optimizar recursos y simplificar el mantenimiento.
 ---
 
-## ¿Qué es la multitenencia?
+## ¿Qué es la multi-tenancy (multi-tenancy)?
 
-La multitenencia de software es una [arquitectura de software](https://en.wikipedia.org/wiki/Software_architecture) en la cual una única [instancia](https://en.wikipedia.org/wiki/Instance_(computer_science)) de un [software](https://en.wikipedia.org/wiki/Computer_software) se ejecuta en un servidor y sirve a múltiples inquilinos. Los sistemas diseñados de esta manera son "compartidos" (en lugar de "dedicados" o "aislados").
+La multi-tenancy (multi-tenancy) de software es un software en el cual una sola instancia de software se ejecuta en un servidor y sirve a múltiples tenants. Los sistemas diseñados de esta manera son "compartidos" (en lugar de "dedicados" o "aislados").
+```mermaid
+ graph TB
+  Client1[Cliente 1] --> MultiTenantApp[Aplicación Multi-Tenant]
+  Client2[Cliente 2] --> MultiTenantApp
+  Client3[Cliente 3] --> MultiTenantApp
 
-![multi_tenant_architecture.webp](https://uploads.strapi.logto.io/multi_tenant_architecture_600f47afe8.webp)
+  MultiTenantApp --> Tenant1[Tenant 1]
+  MultiTenantApp --> Tenant2[Tenant 2]
+  MultiTenantApp --> Tenant3[Tenant 3]
+```
 
-Un inquilino es un grupo de usuarios que comparten un acceso común con privilegios específicos a la instancia de software.
+Un tenant es un grupo de usuarios que comparten acceso común con privilegios específicos a la instancia de software.
 
-La arquitectura multi-inquilino se prefiere a menudo cuando los proveedores de servicios ofrecen servicios estandarizados a múltiples clientes. Estos servicios suelen tener personalización mínima, y todos los clientes comparten la misma instancia de aplicación. Cuando la aplicación se actualiza, se aplica a todos los clientes a la vez.
+Por ejemplo, los sistemas CRM (Customer Relationship Management) a menudo utilizan arquitectura multi-tenant para proporcionar el mismo servicio a todos los clientes.
 
-Por ejemplo, los sistemas CRM (Customer Relationship Management) suelen usar arquitectura multi-inquilino para proporcionar el mismo servicio a todos los clientes.
+Un principio clave de la multi-tenancy (multi-tenancy) es el "compartir". Esto no significa que **todas** las partes de la solución sean compartidas; significa que al menos **algunos** componentes se reutilizan entre múltiples tenants. Comprender este concepto más amplio puede ayudarte a abordar mejor las necesidades de tus clientes.
 
-Un principio clave de la multitenencia es el "compartir". Esto no significa que **todas** las partes de la solución se compartan; significa que al menos **algunos** componentes son reutilizados por múltiples inquilinos. Comprender este concepto más amplio puede ayudarte a abordar mejor las necesidades de tus clientes.
+## ¿Cuáles son los casos de uso para productos multi-tenant?
 
-## ¿Cuáles son los casos de uso para productos multi-inquilinos?
+Las aplicaciones multi-tenant se utilizan comúnmente en productos de software como servicio (SaaS) como herramientas de productividad, software de colaboración, etc. En esta configuración, cada “tenant” generalmente representa a un cliente empresarial, con múltiples usuarios (típicamente empleados). En diferentes productos, puede referirse como un tenant, espacio de trabajo o proyecto, dependiendo del contexto. Un solo negocio también podría tener múltiples tenants para representar diferentes divisiones u organizaciones.
 
-Las aplicaciones multi-inquilino se utilizan comúnmente en productos de software como servicio (SaaS) como herramientas de productividad, software de colaboración, etc. En esta configuración, cada "inquilino" suele representar un cliente comercial, con múltiples usuarios (generalmente empleados). En diferentes productos, puede referirse a un inquilino, espacio de trabajo o proyecto, según el contexto. Un solo negocio también podría tener múltiples inquilinos para representar diferentes divisiones u organizaciones.
+En casos más complejos, como aplicaciones B2B más allá de SaaS, las aplicaciones multi-tenant proporcionan una plataforma compartida para que varios equipos, clientes empresariales y empresas asociadas accedan a tus servicios.
 
-En casos más complejos, como aplicaciones B2B más allá de SaaS, las aplicaciones multi-inquilino proporcionan una plataforma compartida para que varios equipos, clientes empresariales y empresas asociadas accedan a tus servicios.
+## ¿Por qué deberías emplear la multi-tenancy (multi-tenancy) en un producto SaaS?
 
-## ¿Por qué deberías emplear la multitenencia en un producto SaaS?
+### Escalando con multi-tenancy (multi-tenancy)
 
-### Escalando con la multitenencia
-
-Para empresas de nivel empresarial, la multitenencia es clave para cumplir eficazmente sus requisitos de disponibilidad, gestión de recursos, gestión de costos y seguridad de datos. A nivel técnico, adoptar un enfoque multi-inquilino simplifica tus procesos de desarrollo, minimiza los desafíos técnicos y promueve una expansión sin problemas.
+Para las empresas, la multi-tenancy (multi-tenancy) es clave para cumplir efectivamente con sus requisitos de disponibilidad, gestión de recursos, gestión de costos y seguridad de datos. A nivel técnico, adoptar un enfoque multi-tenant agiliza tus procesos de desarrollo, minimiza los desafíos técnicos y promueve una expansión sin problemas.
 
 ### Creando una experiencia unificada
 
-Al examinar las raíces de los productos SaaS, es como un edificio que alberga varios apartamentos. Todos los inquilinos comparten servicios comunes como agua, electricidad y gas, pero mantienen control independiente sobre la gestión de su propio espacio y recursos. Este enfoque simplifica la gestión de la propiedad.
+Al examinar las raíces de los productos SaaS, es similar a un edificio que alberga varios apartamentos. Todos los tenants comparten servicios comunes como agua, electricidad y gas, pero mantienen control independiente sobre la gestión de su propio espacio y recursos. Este enfoque simplifica la gestión de la propiedad.
 
-### Asegurando la seguridad mediante la aislación de inquilinos
+### Asegurando la seguridad a través del aislamiento de tenants
 
-En una arquitectura de multitenencia, se introduce el término "inquilino" para crear límites que separan y aseguran los recursos y datos de diferentes inquilinos dentro de una instancia compartida. Esto asegura que los datos y operaciones de cada inquilino permanezcan distintos y seguros, incluso si están utilizando los mismos recursos subyacentes.
+En una arquitectura de multi-tenancy (multi-tenancy), se introduce el término "tenant" para crear límites que separen y aseguren los recursos y datos de diferentes tenants dentro de una instancia compartida. Esto asegura que los datos y operaciones de cada tenant permanezcan distintos y seguros, incluso si están utilizando los mismos recursos subyacentes.
 
-## ¿Cómo lograr la aislación de inquilinos en la arquitectura de multitenencia?
+## ¿Cómo lograr el aislamiento de tenants en una arquitectura multi-tenant?
 
-Al hablar de aplicaciones multi-inquilino, siempre es necesario lograr la **aislación de inquilinos**. Esto significa mantener separados y seguros los datos y recursos de diferentes inquilinos dentro de un sistema compartido (por ejemplo, una infraestructura en la nube o una aplicación multi-inquilino). Esto previene cualquier intento no autorizado de acceder a los recursos de otro inquilino.
+Al hablar de aplicaciones multi-tenant, siempre es necesario lograr el **aislamiento de tenants**. Esto significa mantener los datos y recursos de diferentes tenants separados y seguros dentro de un sistema compartido (por ejemplo, una infraestructura en la nube o una aplicación multi-tenant). Esto previene cualquier intento no autorizado de acceder a los recursos de otro tenant.
 
-Aunque la explicación pueda parecer abstracta, usaremos ejemplos y detalles clave para explicar más a fondo la mentalidad de aislamiento y la mejor práctica para lograr la aislación de inquilinos.
+### El aislamiento de tenants se alinea con el concepto “compartido” de la multi-tenancy (multi-tenancy)
 
-### La aislación de inquilinos no va en contra de la mentalidad "compartida" de la multitenencia
+Eso se debe a que el aislamiento de tenants no es necesariamente una construcción a nivel de recursos de infraestructura. En el ámbito de la multi-tenancy (multi-tenancy) y el aislamiento, algunos ven el aislamiento como una división estricta entre recursos de infraestructura reales. Esto generalmente conduce a un modelo donde cada tenant tiene bases de datos separadas, instancias de computación, cuentas o nubes privadas. En escenarios de recursos compartidos, como aplicaciones multi-tenant, la forma de lograr el aislamiento puede ser una construcción lógica.
 
-Eso se debe a que la aislación de inquilinos no es necesariamente una construcción a nivel de recursos de infraestructura. En el ámbito de la multitenencia y la aislación, algunos ven la aislación como una división estricta entre recursos de infraestructura reales. Esto usualmente lleva a un modelo donde cada inquilino tiene bases de datos separadas, instancias de cómputo, cuentas o nubes privadas. En escenarios de recursos compartidos, como aplicaciones multi-inquilino, la manera de lograr la aislación puede ser una construcción lógica.
+### La autenticación (authentication) y la autorización (authorization) no son iguales a “aislamiento”
 
-En el diseño de la arquitectura, se pueden lograr varios grados de aislamiento de recursos entre inquilinos:
+Usar autenticación (authentication) y autorización (authorization) para controlar el acceso a tu entorno SaaS es importante, pero no garantiza "aislamiento". El aislamiento significa mantener diferentes usuarios o conjuntos de datos separados para que los datos o acciones de un usuario no interfieran o sean accesibles por otro.
 
-En general, cuantos más recursos se comparten entre los inquilinos, menor es el costo de iteración y mantenimiento del sistema. Por el contrario, cuanto menos recursos se comparten, mayor es el costo.
+Por ejemplo, incluso si has configurado autenticación (authentication) y autorización (authorization), donde los usuarios inician sesión y reciben un token que define sus permisos, esto mejora la seguridad pero no asegura que los usuarios estén completamente aislados entre sí. Se debe introducir otro contexto para lograr el "aislamiento".
 
-La aislación de inquilinos se centra exclusivamente en usar el contexto "inquilino" para limitar el acceso a recursos. Evalúa el contexto del inquilino actual y usa ese contexto para determinar qué recursos son accesibles para ese inquilino.
+### Usa “organización” como un contexto para representar al tenant del producto SaaS, para lograr el aislamiento de tenants
 
-### La authentication y authorization no equivalen a “aislación”
+La autenticación (authentication) y la autorización (authorization) por sí solas no impedirán que un usuario con el rol correcto acceda a los recursos de otro tenant. Para limitar el acceso, necesitamos agregar un contexto de “tenant”, como un ID de tenant, ID de organización o ID de espacio de trabajo. Estos identificadores actúan como paredes, puertas y cerraduras, manteniendo a los tenants separados.
 
-Usar authentication y authorization para controlar el acceso a tus entornos SaaS es importante, pero no es suficiente para una aislación completa. Estos mecanismos son solo una parte del rompecabezas de la seguridad.
+El término “organización” se usa comúnmente para el aislamiento de tenants. Muchos <Ref slug="identity-provider" /> incluyen una función de “organización” para ayudar a aislar a los tenants mientras mantienen un sistema de identidad unificado. El usuario dentro de la organización se llama "miembro".
 
-La gente a menudo hace una pregunta: ¿puedo usar soluciones generales de authorization y role-based access control para lograr la aislación de inquilinos?
+```mermaid
+graph TB
+  IdentityPool[Sistema de Identidad Único] --> Org1[Organización 1]
+  IdentityPool --> Org2[Organización 2]
+  IdentityPool --> Org3[Organización 3]
 
-Puedes construir una aplicación multi-inquilino, pero no puedes decir que has logrado e implementado estrategias de aislación de inquilinos como una mejor práctica. Generalmente, no lo recomendamos porque la aislación de inquilinos está separada de authentication y authorization.
+  Org1 --> Member1_1[Miembro]
+  Org1 --> Member1_2[Miembro]
 
-Para ilustrar, considera una situación en la que has configurado authentication y authorization para tu sistema SaaS. Cuando los usuarios inician sesión, reciben un token que contiene información sobre su rol, dictando lo que pueden hacer en la aplicación. Este enfoque aumenta la seguridad, pero no asegura la aislación.
+  Org2 --> Member2_1[Miembro]
+  Org2 --> Member2_2[Miembro]
 
-### Usa “organización” como un contexto para representar el inquilino del producto SaaS, para lograr la aislación de inquilinos
+  Org3 --> Member3_1[Miembro]
+  Org3 --> Member3_2[Miembro]
+```
 
-Confiar únicamente en authentication y authorization no impedirá que un usuario con el rol correcto acceda a los recursos de otro inquilino. Por lo que necesitamos incorporar un contexto de “inquilino”, como un tenant ID, para restringir el acceso a los recursos.
+## ¿Cómo se gestionan las identidades en aplicaciones multi-tenant?
 
-Aquí es donde entra en juego la aislación de inquilinos. Usa identificadores específicos del inquilino para establecer límites, como paredes, puertas y cerraduras, asegurando una separación clara entre inquilinos.
+La primera pregunta clave es pensar si partes de tu negocio o producto requieren sistemas de identidad separados. Esto guiará el diseño de tu sistema. Aquí hay dos ejemplos:
 
-## ¿Cómo se gestionan las identidades en aplicaciones multi-inquilino?
+1. Un sistema de identidad: Una sola persona puede tener dos identidades dentro del mismo sistema de identidad. Por ejemplo, Sarah podría tener un correo electrónico personal registrado y también usar un correo electrónico corporativo conectado a través de <Ref slug="enterprise-sso" />.
+2. Múltiples sistemas de identidad: Los usuarios también pueden tener dos identidades distintas en sistemas de identidad separados para productos completamente no relacionados.
 
-Discutimos la aislación de inquilinos, pero ¿qué hay de las identidades? ¿Cómo decides si tus identidades deben estar “aisladas” o no?
+En la mayoría de las aplicaciones multi-tenant, las identidades generalmente se gestionan en un solo grupo, mientras que los recursos de cada tenant se mantienen separados.
 
-A menudo hay confusión en torno al concepto de "aislación de identidad". Podría referirse a situaciones donde un usuario del mundo real tiene dos identidades en la comprensión general de las personas.
+## Consideraciones para planificar y construir aplicaciones multi-tenant
 
-1. Ambas identidades pueden existir dentro de un solo sistema de identidad. Por ejemplo, Sarah podría tener un correo electrónico personal registrado junto a un correo electrónico corporativo conectado a través de single sign-on (SSO).
-2. Los usuarios mantienen dos identidades distintas dentro de sistemas de identidad separados, representando productos completamente separados. Estos productos no están relacionados entre sí.
-
-A veces, estos escenarios se llaman "aislación de identidad", pero ese término podría no ayudar en la toma de decisiones.
-
-En lugar de preguntar si necesitas "aislación de identidad", piensa en si partes de tu negocio o producto requieren sistemas de identidad separados. Esto guiará el diseño de tu sistema. Para aplicaciones multi-inquilino, en la mayoría de los casos, las identidades se comparten, mientras que los recursos de cada inquilino se mantienen separados.
-
-En aplicaciones multi-inquilino, las identidades se comparten entre inquilinos, a diferencia de los recursos y datos específicos del inquilino. Es como ser un administrador de edificio: no querrías mantener dos listas separadas de los nombres de los inquilinos.
-
-Al apuntar a la aislación de inquilinos, el término "organización" a menudo aparece, ya que es una mejor práctica para construir aplicaciones multi-inquilino.
-
-Al usar "organización" en muchos servicios CIAM (Customer Identity Management) o Auth, puedes lograr la aislación de inquilinos en tu aplicación multi-inquilino mientras mantienes un sistema de identidad unificado.
-
-## ¿Cómo eliges los modelos de authorization adecuados para un mejor access control?
-
-Al seleccionar el modelo de authorization adecuado, considera estas preguntas:
-
-1. ¿Estás desarrollando un producto B2C, B2B o una combinación de ambos tipos de productos?
-2. ¿Tu aplicación tiene una arquitectura multi-inquilino?
-3. ¿Existe la necesidad de un cierto nivel de aislamiento en tu aplicación, según lo determine la unidad comercial?
-4. ¿Qué permisos y roles necesitan definirse dentro del contexto de la organización, y cuáles no?
+1. Enfócate en tu modelo: B2B o B2C.
+2. ¿Quién manejará las tareas de gestión de identidad: desarrolladores, el administrador de tu cliente o los clientes finales?
+3. Para B2B, ¿necesitan tus clientes gestionar las identidades de su organización?
+4. Identifica qué permisos (<Ref slug="scope" />) y <Ref slug="role" /> necesitan definirse para la organización y cuáles no.
+5. ¿Tu cliente requiere <Ref slug="enterprise-sso" />?
+6. Considera agregar funciones de colaboración, como invitaciones.
 
 <Resources
   urls={[

@@ -1,75 +1,77 @@
 ---
 title: Apparaatstroom (Device flow)
 tags: [oauth 2.0, oidc]
-description: OAuth 2.0 apparaatautorisatieflow (device authorization flow) is een gebruiksvriendelijke inlogmethode voor apparaten met beperkte invoer of headless applicaties. Door een unieke apparaatcode te verifiëren, kunnen gebruikers het apparaat autoriseren via een secundair apparaat met een volledige gebruikersinterface.
+description: OAuth 2.0 apparaat autorisatie stroom is een gebruiksvriendelijke inlogmethode voor apparaten met beperkte invoermogelijkheden of toepassingen zonder interface. Door een unieke apparaatcode te verifiëren, kunnen gebruikers het apparaat autoriseren via een secundair apparaat met een volledige gebruikersinterface.
 ---
 
 ## Wat is apparaatstroom (device flow)?
 
-De [OAuth Device Authorization Flow](https://www.rfc-editor.org/rfc/rfc8628), ook bekend als Device Flow, is een implementatie van [OAuth 2.0](https://oauth.net/2/) ontworpen voor apparaten met beperkte invoermogelijkheden (bijv. smart-tv's, IoT-apparaten, spelconsoles) of headless apps (bijv. CLI-tools). Het stelt gebruikers in staat om autorisatieverzoeken op deze apparaten te starten en vervolgens het proces te voltooien met behulp van een apparaat dat meer invoermogelijkheden heeft, zoals een smartphone of laptop.
+De [OAuth Apparaat Autorisatie Stroom](https://www.rfc-editor.org/rfc/rfc8628), ook bekend als apparaatstroom (device flow), is een <Ref slug="oauth-2.0-grant" /> ontworpen voor apparaten met beperkte invoermogelijkheden (bijv. smart-tv's, IoT-apparaten, spelconsoles) of toepassingen zonder interface (bijv. CLI-tools). Het stelt gebruikers in staat om <Ref slug="authorization-request">autorisatieverzoeken</Ref> op deze apparaten te initiëren en vervolgens het proces te voltooien met behulp van een apparaat met meer invoermogelijkheden, zoals een smartphone of laptop.
 
 ## Wanneer gebruik je apparaatstroom (device flow)?
 
-1. **Apparaten met beperkte invoer**
-    - Inloggen op Smart-TV's (bijv. media-apps)
-    - Inloggen op spelconsoles (bijv. spelsysteem of media-apps)
-    - Inloggen op Meet-apparaten (bijv. officiële apps of videovergadering-apps)
-    - Inloggen op draagbare apparaten (bijv. smartwatches met beperkte invoer)
+1. **Apparaten met beperkte invoermogelijkheden**
+    - Inloggen op Smart-tv's (bijv. media-apps)
+    - Inloggen op Spelconsoles (bijv. spelsystemen of media-apps)
+    - Inloggen op Vergaderapparaten (bijv. officiële apps of videovergaderapps)
+    - Inloggen op Draagbare Apparaten (bijv. smartwatches met beperkte invoer)
     - Toegang tot IoT-apparaten (bijv. printers, video-encoders of luidsprekers)
-2. **Headless applicaties**
+2. **Toepassingen zonder interface**
     - Command-Line Interface inloggen (bijv. GitHub CLI of Stripe CLI)
-3. **QR-code inloggen voor desktopapplicaties**
-    - Snel en veilig inloggen op desktopapplicaties door een QR-code te scannen met je smartphone (bijv. Telegram, Steam-inlog op desktop). Deze QR-code inlogstroom kan worden beschouwd als een variant van de traditionele OAuth 2.0 apparaatstroom.
+3. **QR-code inloggen voor Desktoptoepassingen**
+    - Snel en veilig inloggen op desktoptoepassingen door een QR-code te scannen met je smartphone (bijv. Telegram, Steam inloggen op desktop). Deze QR-code inlogstroom kan worden beschouwd als een variant van de traditionele OAuth 2.0 apparaatstroom.
 
 ## Hoe ziet de eindgebruikersstroom van apparaatstroom (device flow) eruit?
 
-Als we de QR-code inlogvariant negeren, laten we ons richten op de standaard OAuth 2.0 apparaatstroom. Er zijn twee soorten apparaten betrokken:
+Als we de QR-code inlogvariant negeren, richten we ons op de standaard OAuth 2.0 apparaatstroom. Er zijn twee soorten apparaten betrokken:
 
-### Apparaatcodeweergave-apparaat
+### Apparaatcode weergaveapparaat
 
-Dit is het apparaat met beperkte invoer of headless applicatie waar de gebruiker toegang moet autoriseren. Het toont de [apparaatcode en verificatie-URI](#wat-ziet-apparaatstroom-werkstroom-eruit), en begeleidt de gebruiker hoe verder te gaan.
+Dit is het apparaat met beperkte invoer of de toepassing zonder interface waar de gebruiker toegang moet autoriseren. Het toont de [apparaatcode en verificatie-URI](#what-does-device-flow-workflow-look-like), en begeleidt de gebruiker over hoe verder te gaan.
 
 De basis UI is:
 
-![Apparaatcodeweergave-apparaat UI.png](https://uploads.strapi.logto.io/Device_code_display_device_UI_759058ede9.png)
+![Device code display device UI.png](https://uploads.strapi.logto.io/Device_code_display_device_default_cda216b1a3.png)
 
-Om de gebruikerservaring te verbeteren, genereren diensten vaak een QR-code voor de verificatie-URL:
+Om de gebruikerservaring te verbeteren, genereren diensten vaak een QR-code voor de Verificatie-URL:
 
-![Apparaatcodeweergave-apparaat UI met QR-code.png](https://uploads.strapi.logto.io/device_code_display_device_UI_with_verification_url_438c3b31b9.png)
+![Device code display device UI with QR code.png](https://uploads.strapi.logto.io/Device_code_display_device_QR_code_3c9219e24c.png)
 
-Voor nog meer efficiëntie, vervang de QR-codebron in de `verification_uri` (bijv. `https://example.com/device`) met `verification_uri_complete` (bijv. `https://example.com/device?user_code=WDJB-MJHT`), die de apparaatcode in de URL bevat, waardoor gebruikers de apparaatcode in velden kunnen vooraf invullen.
+Voor nog meer efficiëntie, vervang de QR-codebron in de `verification_uri` (bijv. `https://example.com/device`) met `verification_uri_complete` (bijv. `https://example.com/device?user_code=DSHP-SNCT`), die de apparaatcode in de URL bevat, waardoor gebruikers de apparaatcode vooraf kunnen invullen in velden.
 
-### Autorisatie-apparaat
+### Autorisatieapparaat
 
-Volgend op de instructies op het inlogdoelapparaat, zal de gebruiker:
+Volgens de instructies op het inlogdoelapparaat zal de gebruiker:
 
-1. Een ander apparaat gebruiken met browsertoegang en invoermogelijkheden om de verificatie-URL te openen.
+1. Een ander apparaat met browsertoegang en invoermogelijkheden gebruiken om de Verificatie-URL te openen.
 2. De weergegeven apparaatcode invoeren (die mogelijk vooraf is ingevuld) en doorgaan.
-3. Als er geen bestaande sessies in de browser zijn, moet de gebruiker eerst inloggen bij de dienst.
-4. Een toestemmingspagina zal gebruikers vragen om de apparaat-inlog te autoriseren.
-5. Ten slotte wordt een pagina met succes weergegeven na autorisatie.
+3. Als er geen bestaande sessies in de browser zijn, zal de gebruiker eerst inloggen op de dienst.
+4. Een toestemmingspagina zal de gebruikers vragen om de apparaat inlog te autoriseren.
+5. Ten slotte zal een succesvolle pagina worden weergegeven na autorisatie.
 
-Hier zijn enkele gevestigde producten met apparaatstroom Verificatie-URL's voor je testen:
+![Authorization device for OAuth device flows.png](https://uploads.strapi.logto.io/Authorization_device_for_O_Auth_device_flows_f1e7a42fc7.png)
 
-- Inloggen bij [YouTube op smart-tv's](https://www.youtube.com/watch?v=yTcuazSy5Cs): [youtube.com/activate](https://youtube.com/activate)
-- Inloggen bij Disney+ op smart-tv: [disneyplus.com/begin](https://disneyplus.com/begin)
-- Inloggen bij [Shopify op Samsung Galaxy Watch](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html): [spotify.com/pair](https://spotify.com/pair)
-- Inloggen bij [Zoom op vergaderapparaten](https://developers.zoom.us/blog/device-authorization/): [zoom.us/oauth_device](https://zoom.us/oauth_device)
-- Inloggen bij [GitHub CLI](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow): [github.com/login/device](https://github.com/login/device)
-- Gebruik de [Google apparaatstroom](https://www.oauth.com/oauth2-servers/device-flow/user-flow/): https://www.google.com/device
+Hier zijn enkele gevestigde producten' apparaatstroom Verificatie-URL's voor je testen:
 
-## Hoe ziet de werkstroom van apparaatstroom (device flow) eruit?
+- Log in op [YouTube op smart-tv's](https://www.youtube.com/watch?v=yTcuazSy5Cs): [youtube.com/activate](https://youtube.com/activate)
+- Log in op Disney+ op smart-tv: [disneyplus.com/begin](https://disneyplus.com/begin)
+- Log in op [Shopify op Samsung Galaxy Watch](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html): [spotify.com/pair](https://spotify.com/pair)
+- Log in op [Zoom op vergaderapparaten](https://developers.zoom.us/blog/device-authorization/): [zoom.us/oauth_device](https://zoom.us/oauth_device)
+- Log in op [GitHub CLI](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow): [github.com/login/device](https://github.com/login/device)
+- Gebruik [Google apparaatstroom](https://www.oauth.com/oauth2-servers/device-flow/user-flow/): https://www.google.com/device
 
-Ten eerste moet je de parameters van het apparaatautorisatierespons begrijpen, die worden gebruikt om de informatie weer te geven op het apparaatcodeweergave-apparaat:
+## Hoe ziet het workflow van apparaatstroom (device flow) eruit?
+
+Ten eerste moet je de parameters van de apparaat autorisatie respons begrijpen, die worden gebruikt om de informatie op het apparaatcode weergaveapparaat te verwerken:
 
 | Parameter                              | Beschrijving                                                                                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `device_code`                          | De verificatiecode van het apparaat.                                                                                                                                            |
-| `user_code`                            | De verificatiecode van de eindgebruiker.                                                                                                                                        |
-| `verification_uri`                     | De verificatie-URI van de eindgebruiker op de autorisatieserver. De URI moet kort en gemakkelijk te onthouden zijn, omdat eindgebruikers gevraagd zullen worden deze handmatig in te typen in hun user agent. |
-| `verification_uri_complete` (optioneel) | Een verificatie-URI die de "user_code" bevat (of andere informatie met dezelfde functie als de "user_code"), welke is ontworpen voor niet-tekstuele transmissie.             |
+| `device_code`                          | De apparaat verificatiecode.                                                                                                                                                  |
+| `user_code`                            | De eindgebruikers verificatiecode.                                                                                                                                                |
+| `verification_uri`                     | De eindgebruikers verificatie-URI op de autorisatieserver. De URI moet kort en gemakkelijk te onthouden zijn, aangezien eindgebruikers worden gevraagd deze handmatig in te typen in hun user agent. |
+| `verification_uri_complete` (optioneel) | Een verificatie-URI die de "user_code" bevat (of andere informatie met dezelfde functie als de "user_code"), die is ontworpen voor niet-tekstuele transmissie.             |
 | `expires_in`                           | De levensduur in seconden van de "device_code" en "user_code".                                                                                                                  |
-| `interval`                             | De minimale tijd in seconden die de client MOET wachten tussen de pollingverzoeken naar de token endpoint. Als er geen waarde is opgegeven, MOETEN clients 5 als standaard gebruiken. |
+| `interval`                             | De minimale hoeveelheid tijd in seconden die de client MOET wachten tussen pollingverzoeken naar het token endpoint. Als er geen waarde is opgegeven, MOETEN clients 5 als standaard gebruiken. |
 
 ```json
 {
@@ -83,39 +85,59 @@ Ten eerste moet je de parameters van het apparaatautorisatierespons begrijpen, d
 }
 ```
 
-Wanneer een gebruiker de apparaatstroom voor authenticatie gebruikt, omvat het voornamelijk de volgende stappen:
+Wanneer een gebruiker de apparaatstroom gebruikt voor authenticatie, omvat dit voornamelijk de volgende stappen:
 
 ```mermaid
 sequenceDiagram
-	participant Gebruiker in browser
-	participant Apparaat Client
+	autonumber
+	participant User at browser
+	participant Device Client
 	participant Auth Server
 
-	Apparaat Client ->> Auth Server: (1) Verzoek om autorisatie met clientidentificator
-	Auth Server -->> Apparaat Client: (2) Apparaten code, Gebruikerscode, Verificatie URI
-	Apparaat Client ->> Gebruiker in browser: (3) Instructeer eindgebruiker om de verificatie-URI te openen en de gebruikerscode in te voeren
-	Apparaat Client ->> Auth Server: (4) Begin met het polleren naar toegangstokens met apparaatcode en clientidentificator
-	Gebruiker in browser ->> Auth Server: (5) Bezoek de verificatie-URI en voer de apparaatcode in
-	Auth Server -->> Gebruiker in browser: (6) Redirect de gebruiker naar de inlogpagina
-	Gebruiker in browser ->> Auth Server: (7) Voltooi de inlogstroom en ingelogd
-	Auth Server -->> Gebruiker in browser: (8) Redirect de gebruiker naar de suksespagina en instrueer de gebruiker om de browser te sluiten
-	Auth Server ->> Apparaat Client: (9) Retourneer toegangstokens aan de client (aangezien het apparaat is aan het polleren vanaf stap 4)
+	Device Client ->> Auth Server: Vraag autorisatie aan met client identifier
+	Auth Server -->> Device Client: Apparaatcode, Gebruikerscode, Verificatie-URI
+	Device Client ->> User at browser: Instrueer eindgebruiker om de verificatie-URI te openen en de gebruikerscode in te voeren
+	Device Client ->> Auth Server: Start polling voor toegangstokens met apparaatcode en client identifier
+	User at browser ->> Auth Server: Bezoek verificatie-URI en voer de apparaatcode in
+	Auth Server -->> User at browser: Leid de gebruiker om naar de inlogpagina
+	User at browser ->> Auth Server: Voltooi de inlogstroom en ingelogd
+	Auth Server -->> User at browser: Leid de gebruiker om naar de inlogsuccespagina en instrueer de gebruiker om de browser te sluiten
+	Auth Server ->> Device Client: Retourneer toegangstokens aan de client (aangezien het apparaat aan het pollen is in stap 4)
 ```
 
-1. De apparaatclient vraagt autorisatie van de auth server met een clientidentificator (meestal de client-ID op het auth serverplatform).
-2. De auth server reageert op de apparaatclient met apparaatcode, gebruikerscode en verificatie-URI.
-3. De apparaatclient toont de verificatie-URI en gebruikerscode aan de gebruiker in de vorm van tekst (of een QR-code, enz.), en instrueert de gebruiker om de URI te bezoeken en de code in te voeren.
-4. Tegelijkertijd met stap 3 begint de apparaatclient te polleren naar toegangstokens met apparaatcode en clientidentificator van de auth server en begint te wachten tot de gebruiker het autorisatieverzoek beoordeelt en de gebruikersautorisatie voltooit.
+1. De apparaatclient vraagt autorisatie aan bij de auth server met een client identifier (meestal de client id op het auth server platform).
+2. De auth server reageert naar de apparaatclient met apparaatcode, gebruikerscode en verificatie-URI.
+3. De apparaatclient toont de verificatie-URI en gebruikerscode aan de gebruiker in de vorm van tekst (of een QR-code, etc.), en instrueert de gebruiker om de URI te bezoeken en de code in te voeren.
+4. Tegelijkertijd met stap 3, start de apparaatclient met pollen voor toegangstokens met apparaatcode en client identifier van de auth server en begint te wachten tot de gebruiker de <Ref slug="authorization-request" /> beoordeelt en de gebruikersautorisatie voltooit.
 5. De gebruiker bezoekt de verificatie-URI gehost door de auth server, via een browser op een ander apparaat, en voert de gebruikerscode in.
-6. De auth server leidt de gebruiker naar de inlogpagina en instrueert de gebruiker om de inlogstroom te voltooien.
-7. De gebruiker heeft de inlogstroom voltooid en is succesvol ingelogd.
-8. De auth server leidt de gebruiker naar de inlogsuccespagina en instrueert de gebruiker om de browser te sluiten.
-9. Tegelijkertijd met stap 8 retourneert de auth server toegangstokens aan de apparaatclient, aangezien de client heeft gepollt sinds stap 4.
+6. De auth server leidt de gebruiker om naar de inlogpagina en instrueert de gebruiker om het inloggen te voltooien.
+7. De gebruiker voltooit de inlogstroom en is succesvol ingelogd.
+8. De auth server leidt de gebruiker om naar de inlogsuccespagina en instrueert de gebruiker om de browser te sluiten.
+9. Tegelijkertijd met stap 8, retourneert de auth server toegangstokens aan de apparaatclient aangezien de client aan het pollen is sinds stap 4.
 
-Na deze processen kan de apparaatclient het access token verkrijgen voor volgende diensten!
+Na deze processen zal de apparaatclient in staat zijn om de <Ref slug="access-token" /> te verkrijgen voor volgende diensten.
 
-Voor meer details, lees [RFC 8628 OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3).
+Voor meer details, lees [RFC 8628 OAuth 2.0 Apparaat Autorisatie Grant](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3).
 
-<SeeAlso slugs={['authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
+## Wat zijn de beveiligingsoverwegingen voor apparaatstroom (device flow)?
+
+De apparaatstroom omvat interactie tussen twee apparaten, waardoor het blootgesteld wordt aan potentiële beveiligingsrisico's zoals apparaatcodeblootstelling, brute-force aanvallen of man-in-the-middle (MitM) aanvallen.
+
+Hoewel het verkrijgen van een apparaatcode alleen niet onmiddellijk autorisatie verleent (aangezien de gebruiker nog steeds moet authenticeren en autoriseren), kan een aanvaller proberen een apparaatcodeverzoek te herhalen tijdens de geldigheidsperiode. Dit kan resulteren in ongeautoriseerde herhaalde toegang. Om de beveiliging te verbeteren, overweeg de volgende voorzorgsmaatregelen:
+
+- **Verkort de `expires_in` duur:** Verminder het venster voor aanvallen door de geldigheidsperiode van de apparaatcode te minimaliseren.
+- **Beperk mislukte pogingen:** Beperk het aantal onjuiste code-invoeringen om brute-force aanvallen te voorkomen.
+- **Handhaaf HTTPS:** Zorg ervoor dat alle communicatie tussen het apparaat en de autorisatieserver is versleuteld met HTTPS om man-in-the-middle aanvallen te voorkomen.
+- **Beperk eenmalig gebruik van apparaatcodes:** Beperk elke apparaatcode tot **een enkele sessie** om hergebruik door ongeautoriseerde partijen te voorkomen.
+
+Merk op dat eenmalig gebruik voor apparaatcodes geen ingebouwde vereiste is van de OAuth 2.0 Apparaatstroom. Het is een optionele beste praktijk. Sommige ontwikkelaars kunnen opzettelijk ontwerpen voor gelijktijdige apparaatautorisaties met dezelfde code (bijv. op honderden apparaten), maar deze aanpak verhoogt de beveiligingsrisico's en moet zorgvuldig worden geëvalueerd.
+
+## Ondersteunen OIDC-providers apparaatstroom (device flow)?
+
+Hoewel apparaatstroom traditioneel wordt geassocieerd met OAuth, kunnen <Ref slug="openid-connect" /> providers het ook ondersteunen. OIDC biedt extra voordelen naast OAuth's primaire focus op autorisatie. Het breidt zich uit naar authenticatie, waardoor toepassingen zowel <Ref slug="access-token" /> als <Ref slug="id-token" /> in een enkele stroom kunnen verkrijgen.
+
+OIDC's robuuste geïntegreerde identiteitsbeheer, inclusief tokenvalidatie en <Ref slug="refresh-token">verversing</Ref>, maakt het goed geschikt voor veilige, betrouwbare <Ref slug="authentication" /> en <Ref slug="authorization" /> tussen apparaten en toepassingen, met name die met beperkte invoermogelijkheden.
+
+<SeeAlso slugs={['oauth-2.0-grant', 'authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
 
 <Resources urls={['https://blog.logto.io/a-brief-introduction-to-oauth2-device-flow', 'https://datatracker.ietf.org/doc/html/rfc8628']} />

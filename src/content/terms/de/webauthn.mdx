@@ -1,165 +1,175 @@
 ---
 title: WebAuthn
 tags: [authentication, authorization]
-description: WebAuthn ist eine API für den Zugriff auf öffentliche Schlüssel-Credentials und erleichtert die Implementierung von Passwörtern (Passkeys).
+description: WebAuthn ist eine API zum Zugriff auf öffentliche Schlüsselanmeldeinformationen und erleichtert die Implementierung von Passkeys.
 ---
 
 ## Was ist WebAuthn?
 
-WebAuthn (Web Authentication API), entwickelt von der [W3C](https://www.w3.org/) und der [FIDO Alliance](https://fidoalliance.org/), ist eine Spezifikation für sichere Web-Authentifizierung unter Verwendung der FIDO2-Standards. WebAuthn bietet eine API, die es Websites ermöglicht, <Ref slug="passkey" /> zu implementieren, die phishing-resistente Credentials sind, gesichert durch Public-Key-Kryptografie. Passwörter (Passkeys) können Passwörter sowohl für passwortlose Logins als auch für Multi-Faktor-Authentifizierung (MFA) ersetzen.
+WebAuthn (Web Authentication API), entwickelt von der [W3C](https://www.w3.org/) und der [FIDO Alliance](https://fidoalliance.org/), ist eine Spezifikation für sichere Web-Authentifizierung unter Verwendung der FIDO2-Standards. WebAuthn bietet eine API, die es Websites ermöglicht, <Ref slug="passkey" /> zu implementieren, die phishing-resistente Anmeldeinformationen sind, die durch öffentliche Schlüssel-Kryptographie gesichert sind. Passkeys können Passwörter sowohl für passwortlose Anmeldungen als auch für <Ref slug="mfa" /> ersetzen.
 
 ## Wie sieht der WebAuthn-Workflow aus?
 
-Um eine detailliertere Erklärung zu bieten, können wir den Prozess in zwei Phasen unterteilen: Registrierung und Authentifizierung. Zunächst ist es wichtig, die vier Schlüsselentitäten im WebAuthn-Flow zu verstehen.
+Hier ist ein Beispiel aus der realen Welt, um es besser zu verstehen. Du hast eine Webanwendung MyApp, die die WebAuthn API integrieren möchte, um Passkey für die Multi-Faktor-Authentifizierung zu implementieren.
+
+**Registrierungsphase:** Nach der Anmeldung mit einer E-Mail-Verifizierung und dem Festlegen eines neuen Passworts wird dieser Benutzer aufgefordert, einen Passkey zu erstellen. Sie entscheiden sich, ihr Gerät mit einem Fingerabdruck zu verknüpfen. Dies stellt den Passkey sicher auf ihrem Gerät her.
+
+**Authentifizierungsphase:** Bei der nächsten Anmeldung wird der Benutzer aufgefordert, seinen Passkey zu verifizieren, nachdem er sein Passwort eingegeben hat. Mit nur einem schnellen Fingerabdruck-Scan können sie den Authentifizierungsprozess einfach abschließen.
+
+![WebAuthn use case.png](https://uploads.strapi.logto.io/Web_Authn_use_case_657eb22cef.png)
+
+Um eine detailliertere Erklärung zu bieten, können wir den Prozess in zwei Phasen unterteilen: Registrierung und Authentifizierung. Zuerst ist es wichtig, die vier Schlüsselentitäten zu verstehen, die am WebAuthn-Flow beteiligt sind.
 
 ### 4 Schlüsselentitäten
 
-1. **Nutzer:** Die Person, die versucht, auf eine Webanwendung zuzugreifen.
-2. **User-Agent:** Der Webbrowser, der die API-Aufrufe von WebAuthn verarbeitet und den Authentifizierungsprozess zwischen dem Nutzer, der anfragenden Partei und dem Authenticator verwaltet.
-3. **Anfragende Partei:** Der Dienst, die Anwendung oder der API-Server, auf den der Nutzer zugreifen möchte.
-4. **Authenticator:** Die Hardware- oder Softwarekomponente, die zur Überprüfung der Identität des Nutzers verwendet wird. Er kann je nach Plattform- oder Browserfähigkeiten verschiedene Formen annehmen, wie z. B. Sicherheitsschlüssel (wie Yubikeys), Telefone oder Tablets (verbunden über Bluetooth, NFC oder USB), gerätebasierte Biometrie oder PINs, usw.
+1. **Benutzer:** Die Person, die versucht, auf eine Webanwendung zuzugreifen.
+2. **Benutzeragent:** Der Webbrowser, der die WebAuthn API-Aufrufe bearbeitet und den Authentifizierungsprozess zwischen dem Benutzer, der vertrauenden Partei und dem Authentifikator verwaltet.
+3. **Vertrauende Partei:** Der Dienst, die Anwendung oder der API-Server, auf den der Benutzer zugreifen möchte.
+4. **Authentifikator:** Die Hardware- oder Softwarekomponente, die zur Überprüfung der Identität des Benutzers verwendet wird. Sie kann je nach Plattform- oder Browserfähigkeit verschiedene Formen annehmen, wie Sicherheitsschlüssel (wie Yubikeys), Telefone oder Tablets (verbunden über Bluetooth, NFC oder USB), gerätebasierte Biometrie oder PINs usw.
 
 ### WebAuthn-Registrierung
 
-Asymmetrische Public-Key-Kryptografie ist der Kernprozess.
+Asymmetrische öffentliche Schlüssel-Kryptographie ist der Kernprozess.
 
-1. **Schlüsselpaar-Generierung:** 
-Der User-Agent generiert ein öffentlich-privates Schlüsselpaar.
-   - **Öffentlicher Schlüssel:** Wird mit der anfragenden Partei geteilt.
-   - **Privater Schlüssel:** Bleibt sicher im Authenticator des Nutzers gespeichert.
-2. **Registrierungsherausforderung:** 
-Wenn der Nutzer versucht, ein Passwort (Passkey) zu registrieren, sendet die anfragende Partei eine Registrierungsherausforderung an den User-Agent.
-3. **Nutzerverifizierung:** 
-Der User-Agent leitet die Herausforderung an den Authenticator weiter, der den Nutzer zur Verifizierung auffordert (z. B. biometrische Authentifizierung oder ein Hardware-Sicherheitsschlüssel).
-4. **Kryptographische Signatur:** 
-Der Authenticator verwendet seinen privaten Schlüssel, um die Herausforderung zu signieren und eine kryptografische Signatur zu erstellen.
-5. **Verifizierung und Zugriff:** 
-Der User-Agent sendet die signierte Herausforderung zurück an die anfragende Partei, die die Signatur mit dem öffentlichen Schlüssel verifiziert und den Registrierungsprozess abschließt.
+1. **Schlüsselpaar-Generierung:** 
+Der Benutzeragent generiert ein öffentlich-privates Schlüsselpaar.
+   - **Öffentlicher Schlüssel:** Wird mit der vertrauenden Partei geteilt.
+   - **Privater Schlüssel:** Bleibt sicher im Authentifikator des Benutzers gespeichert.
+2. **Registrierungsherausforderung:** 
+Wenn der Benutzer versucht, einen Passkey zu registrieren, sendet die vertrauende Partei eine Registrierungsherausforderung an den Benutzeragenten.
+3. **Benutzerverifizierung:** 
+Der Benutzeragent leitet die Herausforderung an den Authentifikator weiter, der den Benutzer zur Verifizierung auffordert (z. B. biometrische Authentifizierung oder ein Hardware-Sicherheitsschlüssel).
+4. **Kryptografische Signatur:** 
+Der Authentifikator verwendet seinen privaten Schlüssel, um die Herausforderung zu signieren und eine kryptografische Signatur zu erstellen.
+5. **Verifizierung und Zugriff:** 
+Der Benutzeragent sendet die signierte Herausforderung zurück an die vertrauende Partei, die die Signatur mit dem öffentlichen Schlüssel verifiziert und den Registrierungsprozess abschließt.
 
 ```mermaid
 sequenceDiagram
-	participant Nutzer
-	participant User-Agent (Client)
-	participant Anfragende Partei (API-Server) 
-	participant Authenticator
+	participant Benutzer
+	participant Benutzeragent (Client)
+	participant Vertrauende Partei (API-Server) 
+	participant Authentifikator
 
-	Nutzer ->> User-Agent (Client): Fordert die Registrierung eines neuen Passworts (Passkey) an
-	User-Agent (Client) ->> Anfragende Partei (API-Server): Fordert Registrierung an
-	Anfragende Partei (API-Server) -->> User-Agent (Client): Sendet Herausforderung und Registrierungsoptionen
-	User-Agent (Client) ->> Authenticator: Fordert Nutzerinteraktion an
-	Authenticator -->> User-Agent (Client): Signiert Herausforderung und erstellt Credential
-	User-Agent (Client) ->> Anfragende Partei (API-Server): Sendet signierte Herausforderung und Credential
-	Anfragende Partei (API-Server) -->> User-Agent (Client): Verifiziert und speichert Credential
-	User-Agent (Client) ->> Nutzer: Registrierung erfolgreich
+	Benutzer ->> Benutzeragent (Client): Fordere Registrierung eines neuen Passkeys an
+	Benutzeragent (Client) ->> Vertrauende Partei (API-Server): Fordere Registrierung an
+	Vertrauende Partei (API-Server) -->> Benutzeragent (Client): Sende Herausforderung und Registrierungsoptionen
+	Benutzeragent (Client) ->> Authentifikator: Fordere Benutzerinteraktion an
+	Authentifikator -->> Benutzeragent (Client): Signiere Herausforderung und erstelle Anmeldeinformation
+	Benutzeragent (Client) ->> Vertrauende Partei (API-Server): Sende signierte Herausforderung und Anmeldeinformation
+	Vertrauende Partei (API-Server) -->> Benutzeragent (Client): Verifiziere und speichere Anmeldeinformation
+	Benutzeragent (Client) ->> Benutzer: Registrierung erfolgreich
 ```
 
 ### WebAuthn-Authentifizierung
 
 1. **Authentifizierungsherausforderung:**
-Wenn der Nutzer versucht, sich anzumelden, sendet die anfragende Partei eine Authentifizierungsherausforderung an den User-Agent.
-2. **Nutzerverifizierung:**
-Der User-Agent sendet die Herausforderung an den Authenticator, der den Nutzer zur Verifizierung auffordert (z. B. biometrische Authentifizierung oder ein Hardware-Sicherheitsschlüssel).
-3. **Kryptographische Signatur:**
-Der Authenticator verwendet seinen privaten Schlüssel, um die Herausforderung zu signieren und eine kryptografische Signatur zu erstellen.
+Wenn der Benutzer versucht, sich anzumelden, sendet die vertrauende Partei eine Authentifizierungsherausforderung an den Benutzeragenten.
+2. **Benutzerverifizierung:**
+Der Benutzeragent sendet die Herausforderung an den Authentifikator, der den Benutzer zur Verifizierung auffordert (z. B. biometrische Authentifizierung oder ein Hardware-Sicherheitsschlüssel).
+3. **Kryptografische Signatur:**
+Der Authentifikator verwendet seinen privaten Schlüssel, um die Herausforderung zu signieren und eine kryptografische Signatur zu erstellen.
 4. **Verifizierung und Zugriff:**
-Der User-Agent verifiziert die Signatur mit dem öffentlichen Schlüssel und informiert die anfragende Partei über eine erfolgreiche Authentifizierung. Der Zugriff wird gewährt, wenn die Verifizierung erfolgreich ist.
+Der Benutzeragent verifiziert die Signatur mit dem öffentlichen Schlüssel und informiert die vertrauende Partei über eine erfolgreiche Authentifizierung. Der Zugriff wird gewährt, wenn die Verifizierung erfolgreich ist.
 
 ```mermaid
 sequenceDiagram
-	participant Nutzer
-	participant User-Agent (Client)
-	participant Anfragende Partei (API-Server)
-	participant Authenticator
+	participant Benutzer
+	participant Benutzeragent (Client)
+	participant Vertrauende Partei (API-Server)
+	participant Authentifikator
 
-	Nutzer ->> User-Agent (Client): Initiieren Anmeldung
-	User-Agent (Client) ->> Anfragende Partei (API-Server): Fordern Authentifizierung an
-	Anfragende Partei (API-Server) -->> User-Agent (Client): Sendet Herausforderung
-	User-Agent (Client) ->> Authenticator: Fordert Nutzerinteraktion an
-	Authenticator -->> User-Agent (Client): Signiert Herausforderung
-	User-Agent (Client) ->> Anfragende Partei (API-Server): Sendet signierte Herausforderung
-	Anfragende Partei (API-Server) -->> User-Agent (Client): Verifiziert Signatur und authentifiziert Nutzer
-	User-Agent (Client) ->> Nutzer: Authentifizierung erfolgreich
+	Benutzer ->> Benutzeragent (Client): Starte Anmeldung
+	Benutzeragent (Client) ->> Vertrauende Partei (API-Server): Fordere Authentifizierung an
+	Vertrauende Partei (API-Server) -->> Benutzeragent (Client): Sende Herausforderung
+	Benutzeragent (Client) ->> Authentifikator: Fordere Benutzerinteraktion an
+	Authentifikator -->> Benutzeragent (Client): Signiere Herausforderung
+	Benutzeragent (Client) ->> Vertrauende Partei (API-Server): Sende signierte Herausforderung
+	Vertrauende Partei (API-Server) -->> Benutzeragent (Client): Verifiziere Signatur und authentifiziere Benutzer
+	Benutzeragent (Client) ->> Benutzer: Authentifizierung erfolgreich
 ```
 
 ## Wie verwendet man WebAuthn?
 
-Die WebAuthn-API kann verwendet werden, um Passwort Anmeldungen (Passkey sign-in) oder die 2-Schritt-Verifizierung zu implementieren. Weitere Informationen finden Sie in der Passwörter-Erfahrung.
+Die WebAuthn API kann verwendet werden, um Passkey-Anmeldung oder 2-Schritt-Verifizierung zu implementieren. Siehe Passkey-Erfahrung, um mehr Details zu erfahren.
 
-Um die Web Authentication API (WebAuthn) für sichere Authentifizierung zu nutzen, musst du zwei Hauptprozesse abwickeln: Registrierung und Authentifizierung. Hier sind einfache Code-Beispiele, wie du diese Prozesse mit JavaScript implementieren könntest.
+Um die Web Authentication API (WebAuthn) für sichere Authentifizierung zu verwenden, musst du zwei Hauptprozesse handhaben: Registrierung und Authentifizierung. Hier sind einfache Codebeispiele, wie du diese Prozesse mit JavaScript implementieren könntest.
 
 **Registrierung**
 
-Die anfragende Partei (deine Webanwendung) initiiert den Registrierungsprozess, indem sie die Methode `navigator.credentials.create()` aufruft.
+Die vertrauende Partei (deine Webanwendung) initiiert den Registrierungsprozess, indem sie die Methode `navigator.credentials.create()` aufruft.
 
 ```jsx
 // Registrierung
 navigator.credentials.create({
   publicKey: {
     rp: {
-      name: "Dein Relying Party Name",
-      id: "deine-relying-party-id"
+      name: "Dein Name der vertrauenden Partei",
+      id: "deine-vertrauende-partei-id"
     },
     user: {
-      id: "user-id",
-      displayName: "User Name",
-      name: "User Name"
+      id: "benutzer-id",
+      displayName: "Benutzername",
+      name: "Benutzername"
     },
-    challenge: "dein-challenge-wert",
+    challenge: "dein-herausforderungswert",
     timeout: 60000 // 60 Sekunden
   }
 }).then(credential => {
-  // Speichere die ID des Credentials für zukünftige Authentifizierungen
+  // Speichere die ID der Anmeldeinformation für zukünftige Authentifizierung
   localStorage.setItem("credentialId", credential.id);
 }).catch(error => {
   console.error("Registrierungsfehler:", error);
 });
 ```
 
-Die anfragende Partei initiiert den Authentifizierungsprozess, indem sie die Methode `navigator.credentials.get()` aufruft.
+Die vertrauende Partei initiiert den Authentifizierungsprozess, indem sie die Methode `navigator.credentials.get()` aufruft.
 
 ```jsx
 // Authentifizierung
 navigator.credentials.get({
   publicKey: {
     rp: {
-      name: "Dein Relying Party Name",
-      id: "deine-relying-party-id"
+      name: "Dein Name der vertrauenden Partei",
+      id: "deine-vertrauende-partei-id"
     },
-    challenge: "dein-challenge-wert",
+    challenge: "dein-herausforderungswert",
     timeout: 60000 // 60 Sekunden
   }
 }).then(credential => {
-  // Überprüfe die ID des Credentials und andere Eigenschaften
+  // Verifiziere die ID der Anmeldeinformation und andere Eigenschaften
   if (credential.id === localStorage.getItem("credentialId")) {
     // Authentifizierung erfolgreich
-    console.log("Nutzer erfolgreich authentifiziert");
+    console.log("Benutzer erfolgreich authentifiziert");
   } else {
-    console.error("Ungültiges Credential");
+    console.error("Ungültige Anmeldeinformation");
   }
 }).catch(error => {
   console.error("Authentifizierungsfehler:", error);
 });
 ```
 
-Für mehr Details lies die Spezifikation: https://fidoalliance.org/specifications/download/.
+Um die Details zu erfahren, lies die Spezifikationen: https://fidoalliance.org/specifications/download/.
 
-Hinweis: In WebAuthn-Aktionen, sei es für Registrierung oder Authentifizierung, ist das "rp ID" (Relying Party ID) ein obligatorisches Feld. Es repräsentiert den Domain-Hostname der aktuellen Webseite. Wenn es nicht mit der aktuellen Domain übereinstimmt, lehnt der Browser die Anfrage ab. Dies bedeutet, dass Passwörter (Passkeys) an eine spezifische Domain gebunden sind und es derzeit keine Möglichkeit gibt, bestehende Passwörter an eine andere Domain zu migrieren. Außerdem können Passwörter nicht über unterschiedliche Domains hinweg verwendet werden.
+Hinweis: Bei WebAuthn-Aktionen, sei es für die Registrierung oder Authentifizierung, ist die "rp ID" (relying party ID) ein Pflichtfeld. Sie repräsentiert den Domain-Hostname der aktuellen Webseite. Wenn sie nicht mit der aktuellen Domain übereinstimmt, wird der Browser die Anfrage ablehnen. Das bedeutet, dass Passkeys an eine spezifische Domain gebunden sind und es derzeit keine Möglichkeit gibt, bestehende Passkeys auf eine andere Domain zu migrieren. Außerdem können Passkeys nicht über verschiedene Domains hinweg verwendet werden.
+
+## WebAuthn und OpenID Connect (OIDC)
+
+Durch die Kombination der starken Sicherheit von WebAuthn mit dem standardisierten Identitätsprotokoll von OIDC können wir ein sichereres und benutzerfreundlicheres Authentifizierungserlebnis schaffen.
+
+Erfahre, wie es funktioniert:
+
+- **Registrierungsphase:** Benutzer durchlaufen einen standardmäßigen <Ref slug="openid-connect" />-Registrierungsprozess (z. B. E-Mail-Verifizierung und Passworterstellung). WebAuthn generiert ein öffentlich-privates Schlüsselpaar, speichert den öffentlichen Schlüssel beim OIDC <Ref slug="identity-provider" /> und behält den privaten Schlüssel auf dem Gerät des Benutzers.
+- **Authentifizierungsphase:** Benutzer greifen auf eine OIDC-geschützte Ressource zu und werden zur Anmeldeseite umgeleitet. Nach Eingabe der grundlegenden Anmeldeinformationen (z. B. E-Mail und Passwort) ruft das System WebAuthn zur Passkey-Authentifizierung auf. Sobald der Passkey verifiziert ist, stellt OIDC ein Access Token oder ID Token für den Benutzerzugriff aus.
 
 ## Was ist der Unterschied zwischen WebAuthn und CTAP2?
 
-**WebAuthn** und **CTAP2** sind beide essenzielle Komponenten des FIDO2-Standards, aber sie dienen unterschiedlichen Zwecken:
+**WebAuthn** und **CTAP2** sind beide wesentliche Komponenten des FIDO2-Standards, dienen jedoch unterschiedlichen Zwecken:
 
-- **CTAP2 (Client to Authenticator Protocol 2):** Dieses Protokoll definiert, wie ein Gerät, wie z. B. ein Sicherheitsschlüssel oder Smartphone, mit einer Webanwendung kommuniziert. Es stellt einen sicheren Kanal zwischen dem **Authenticator** und dem **Gerät des Nutzers** her und sorgt dafür, dass sensible Authentifizierungsdaten geschützt werden.
-- **WebAuthn (Web Authentication API):** Diese API bietet eine standardisierte Möglichkeit für Webanwendungen, mit CTAP2-konformen Authenticators zu interagieren. Sie behandelt den Authentifizierungsprozess, einschließlich des Austauschs von Authentifizierungsdaten zwischen dem **Gerät des Nutzers** und der **anfragenden Partei**.
+- **CTAP2 (Client to Authenticator Protocol 2):** Dieses Protokoll definiert, wie ein Gerät, wie ein Sicherheitsschlüssel oder Smartphone, mit einer Webanwendung kommuniziert. Es stellt einen sicheren Kanal zwischen dem **Authentifikator** und dem **Gerät des Benutzers** her und sorgt dafür, dass sensible Authentifizierungsdaten geschützt sind.
+- **WebAuthn (Web Authentication API):** Diese API bietet eine standardisierte Möglichkeit für Webanwendungen, mit CTAP2-kompatiblen Authentifikatoren zu interagieren. Sie verwaltet den Authentifizierungsprozess, einschließlich des Austauschs von Authentifizierungsdaten zwischen dem **Gerät des Benutzers** und der **vertrauenden Partei**.
 
-## Begriffe, die man kennen sollte
-
-- <Ref slug="passkey" />
-- FIDO
-- FIDO2
-- CTAP2
-- MFA
-- Authenticator
+<SeeAlso slugs={["passkey", "mfa", "openid-connect"]} />
 
 <Resources
   urls={[

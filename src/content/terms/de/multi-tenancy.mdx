@@ -1,102 +1,102 @@
 ---
-title: Multi-Tenancy (Multi-tenancy)
+title: Multi-Tenancy (Multi-Tenancy)
 tags: [authentication, authorization]
-description: Multi-Tenancy (Multi-tenancy) ist eine Softwarearchitektur, bei der eine einzelne Instanz einer Anwendung mehreren Kunden (Tenants) dient und deren Daten isoliert und sicher hält. Es ist üblich im Cloud-Computing und SaaS, um Ressourcen zu optimieren und die Wartung zu vereinfachen.
+description: Multi-Tenancy (Multi-Tenancy) ist eine Softwarearchitektur, bei der eine einzelne Anwendungsinstanz mehreren Kunden (Mandanten) dient und deren Daten isoliert und sicher hält. Es ist in der Cloud-Computing und SaaS üblich, um Ressourcen zu optimieren und die Wartung zu vereinfachen.
 ---
 
-## Was ist Multi-Tenancy?
+## Was ist Multi-Tenancy (Multi-Tenancy)?
 
-Software-Multi-Tenancy ist eine [Softwarearchitektur](https://en.wikipedia.org/wiki/Software_architecture), bei der eine einzelne [Instanz](https://en.wikipedia.org/wiki/Instance_(computer_science)) von [Software](https://en.wikipedia.org/wiki/Computer_software) auf einem Server läuft und mehreren Tenants dient. Systeme, die auf diese Weise entwickelt wurden, sind "geteilt" (anstatt "dediziert" oder "isoliert").
+Software-Multi-Tenancy ist eine Software, bei der eine einzelne Instanz der Software auf einem Server läuft und mehreren Mandanten dient. Systeme, die auf diese Weise entworfen sind, sind "geteilt" (anstatt "dediziert" oder "isoliert").
+```mermaid
+ graph TB
+  Client1[Kunde 1] --> MultiTenantApp[Multi-Tenant-Anwendung]
+  Client2[Kunde 2] --> MultiTenantApp
+  Client3[Kunde 3] --> MultiTenantApp
 
-![multi_tenant_architecture.webp](https://uploads.strapi.logto.io/multi_tenant_architecture_600f47afe8.webp)
+  MultiTenantApp --> Tenant1[Mandant 1]
+  MultiTenantApp --> Tenant2[Mandant 2]
+  MultiTenantApp --> Tenant3[Mandant 3]
+```
 
-Ein Tenant ist eine Gruppe von Benutzern, die gemeinsam auf die Softwareinstanz mit spezifischen Berechtigungen zugreifen.
+Ein Mandant ist eine Gruppe von Benutzern, die gemeinsamen Zugang mit spezifischen Privilegien zur Softwareinstanz teilen.
 
-Multi-Tenant-Architektur wird häufig bevorzugt, wenn Dienstleister standardisierte Dienste für mehrere Kunden anbieten. Diese Dienste haben in der Regel minimale Anpassungen, und alle Kunden teilen sich die gleiche Anwendungsinstanz. Wenn die Anwendung aktualisiert wird, gilt dies für alle Kunden gleichzeitig.
+Zum Beispiel verwenden CRM-Systeme (Customer Relationship Management) oft eine Multi-Tenant-Architektur, um allen Kunden denselben Service bereitzustellen.
 
-Zum Beispiel verwenden CRM (Customer Relationship Management)-Systeme oft eine Multi-Tenant-Architektur, um denselben Service allen Kunden bereitzustellen.
+Ein Schlüsselprinzip von Multi-Tenancy (Multi-Tenancy) ist "Teilen". Dies bedeutet nicht, dass **jeder** Teil der Lösung geteilt wird; es bedeutet, dass zumindest **einige** Komponenten über mehrere Mandanten hinweg wiederverwendet werden. Das Verständnis dieses breiteren Konzepts kann dir helfen, die Bedürfnisse deiner Kunden besser zu adressieren.
 
-Ein Schlüsselprinzip von Multi-Tenancy ist "Teilen". Das bedeutet nicht, dass **jeder** Teil der Lösung geteilt wird; es bedeutet, dass mindestens **einige** Komponenten über mehrere Tenants hinweg wiederverwendet werden. Dieses umfassendere Konzept zu verstehen, kann dir helfen, die Bedürfnisse deiner Kunden besser zu adressieren.
+## Was sind die Anwendungsfälle für Multi-Tenant-Produkte?
 
-## Welche Anwendungsfälle gibt es für Multi-Tenant-Produkte?
+Multi-Tenant-Apps werden häufig in Software-as-a-Service (SaaS)-Produkten wie Produktivitätstools, Kollaborationssoftware usw. verwendet. In diesem Setup repräsentiert jeder "Mandant" normalerweise einen Geschäftskunden mit mehreren Benutzern (typischerweise Mitarbeiter). In verschiedenen Produkten kann es je nach Kontext als Mandant, Arbeitsbereich oder Projekt bezeichnet werden. Ein einzelnes Unternehmen könnte auch mehrere Mandanten haben, um verschiedene Abteilungen oder Organisationen darzustellen.
 
-Multi-Tenant-Apps werden häufig in Software-as-a-Service (SaaS)-Produkten wie Produktivitätstools, Kollaborationssoftware usw. verwendet. In diesem Setup stellt jeder „Tenant“ in der Regel einen Geschäftskunden dar, mit mehreren Benutzern (typischerweise Mitarbeitern). In verschiedenen Produkten kann es je nach Kontext als Tenant, Workspace oder Projekt bezeichnet werden. Ein einzelnes Unternehmen könnte auch mehrere Tenants haben, um verschiedene Abteilungen oder Organisationen darzustellen.
+In komplexeren Fällen, wie B2B-Anwendungen jenseits von SaaS, bieten Multi-Tenant-Apps eine gemeinsame Plattform für verschiedene Teams, Geschäftskunden und Partnerunternehmen, um auf deine Dienste zuzugreifen.
 
-In komplexeren Fällen, wie B2B-Anwendungen über SaaS hinaus, bieten Multi-Tenant-Apps eine gemeinsame Plattform für verschiedene Teams, Geschäftskunden und Partnerunternehmen, um auf deine Dienste zuzugreifen.
+## Warum solltest du Multi-Tenancy (Multi-Tenancy) in einem SaaS-Produkt einsetzen?
 
-## Warum solltest du Multi-Tenancy in SaaS-Produkten einsetzen?
+### Skalierung mit Multi-Tenancy (Multi-Tenancy)
 
-### Skalierung mit Multi-Tenancy
-
-Für Unternehmensgeschäfte ist Multi-Tenancy der Schlüssel, um ihre Anforderungen an Verfügbarkeit, Ressourcenmanagement, Kostenmanagement und Datensicherheit effektiv zu erfüllen. Auf technischer Ebene rationalisiert ein Multi-Tenant-Ansatz deine Entwicklungsprozesse, minimiert technische Herausforderungen und fördert eine nahtlose Expansion.
+Für Unternehmensgeschäfte ist Multi-Tenancy (Multi-Tenancy) der Schlüssel, um ihre Anforderungen an Verfügbarkeit, Ressourcenmanagement, Kostenmanagement und Datensicherheit effektiv zu erfüllen. Auf technischer Ebene vereinfacht die Einführung eines Multi-Tenant-Ansatzes deine Entwicklungsprozesse, minimiert technische Herausforderungen und fördert eine nahtlose Expansion.
 
 ### Schaffung eines einheitlichen Erlebnisses
 
-Wenn man die Wurzeln von SaaS-Produkten untersucht, ist es ähnlich einem Gebäude, das verschiedene Apartments beherbergt. Alle Tenants teilen sich gemeinsame Versorgungsleistungen wie Wasser, Strom und Gas, haben jedoch die unabhängige Kontrolle über die Verwaltung ihres eigenen Raums und ihrer Ressourcen. Dieser Ansatz vereinfacht das Immobilienmanagement.
+Wenn man die Wurzeln von SaaS-Produkten untersucht, ist es vergleichbar mit einem Gebäude, das verschiedene Wohnungen beherbergt. Alle Mieter teilen sich gemeinsame Versorgungsleistungen wie Wasser, Strom und Gas, behalten jedoch die unabhängige Kontrolle über die Verwaltung ihres eigenen Raums und ihrer Ressourcen. Dieser Ansatz vereinfacht das Immobilienmanagement.
 
-### Sicherheit durch Tenant-Isolation gewährleisten
+### Sicherstellung der Sicherheit durch Mandantenisolation
 
-In einer Multi-Tenancy-Architektur wird der Begriff "Tenant" eingeführt, um Grenzen zu schaffen, die die Ressourcen und Daten unterschiedlicher Tenants innerhalb einer gemeinsamen Instanz trennen und sichern. Dies stellt sicher, dass die Daten und Vorgänge jedes Tenants getrennt und sicher bleiben, auch wenn sie dieselben zugrunde liegenden Ressourcen nutzen.
+In einer Multi-Tenancy-Architektur wird der Begriff "Mandant" eingeführt, um Grenzen zu schaffen, die die Ressourcen und Daten verschiedener Mandanten innerhalb einer gemeinsamen Instanz trennen und sichern. Dies stellt sicher, dass die Daten und Operationen jedes Mandanten getrennt und sicher bleiben, auch wenn sie dieselben zugrunde liegenden Ressourcen nutzen.
 
-## Wie erreicht man Tenant-Isolation in einer Multi-Tenancy-Architektur?
+## Wie erreicht man Mandantenisolation in einer Multi-Tenancy-Architektur?
 
-Wenn man über Multi-Tenant-Anwendungen spricht, ist es immer notwendig, **Tenant-Isolation** zu erreichen. Dies bedeutet, die Daten und Ressourcen verschiedener Tenants in einem gemeinsamen System (zum Beispiel in einer Cloud-Infrastruktur oder einer Multi-Tenant-Anwendung) getrennt und sicher aufzubewahren. Dies verhindert unautorisierte Versuche, auf die Ressourcen eines anderen Tenants zuzugreifen.
+Wenn man über Multi-Tenant-Anwendungen spricht, ist es immer notwendig, **Mandantenisolation** zu erreichen. Dies bedeutet, die Daten und Ressourcen verschiedener Mandanten innerhalb eines gemeinsamen Systems (zum Beispiel einer Cloud-Infrastruktur oder einer Multi-Tenant-Anwendung) getrennt und sicher zu halten. Dies verhindert unbefugte Versuche, auf die Ressourcen eines anderen Mandanten zuzugreifen.
 
-Während die Erklärung abstrakt erscheinen mag, verwenden wir Beispiele und wichtige Details, um die Isolation-Mentalität und die bewährte Praxis zur Erreichung der Tenant-Isolation weiter zu erklären.
+### Mandantenisolation stimmt mit dem "geteilten" Konzept von Multi-Tenancy (Multi-Tenancy) überein
 
-### Tenant-Isolation steht dem Gedanken des "Teilens" in Multi-Tenancy nicht entgegen
+Das liegt daran, dass Mandantenisolation nicht unbedingt eine Infrastrukturressourcenebene ist. Im Bereich von Multi-Tenancy (Multi-Tenancy) und Isolation sehen einige Isolation als strikte Trennung zwischen tatsächlichen Infrastrukturressourcen. Dies führt normalerweise zu einem Modell, bei dem jeder Mandant separate Datenbanken, Recheninstanzen, Konten oder private Clouds hat. In Szenarien mit geteilten Ressourcen, wie Multi-Tenant-Apps, kann der Weg zur Erreichung von Isolation eine logische Konstruktion sein.
 
-Das liegt daran, dass Tenant-Isolation nicht zwingend ein Infrastrukturressourcen-Level-Konzept ist. Im Bereich Multi-Tenancy und Isolation sehen einige Isolation als strikte Trennung zwischen tatsächlichen Infrastrukturressourcen. Dies führt in der Regel zu einem Modell, bei dem jeder Tenant separate Datenbanken, Recheninstanzen, Konten oder private Clouds hat. In Szenarien mit geteilten Ressourcen, wie Multi-Tenant-Apps, kann der Weg zur Isolation ein logisches Konstrukt sein.
+### Authentifizierung und Autorisierung sind nicht gleichbedeutend mit "Isolation"
 
-In der Architektur können verschiedene Grade der Ressourcenteilung zwischen Tenants erreicht werden:
+Die Verwendung von Authentifizierung und Autorisierung zur Steuerung des Zugriffs auf deine SaaS-Umgebung ist wichtig, garantiert jedoch keine "Isolation". Isolation bedeutet, verschiedene Benutzer oder Datensätze getrennt zu halten, sodass die Daten oder Aktionen eines Benutzers nicht die eines anderen beeinträchtigen oder darauf zugegriffen werden können.
 
-Im Allgemeinen gilt: Je mehr Ressourcen unter Tenants geteilt werden, desto geringer sind die Kosten für Systemiteration und Wartung. Umgekehrt, je weniger geteilte Ressourcen, desto höher die Kosten.
+Zum Beispiel, selbst wenn du Authentifizierung und Autorisierung eingerichtet hast, bei denen sich Benutzer anmelden und ein Token erhalten, das ihre Berechtigungen definiert, verbessert dies die Sicherheit, stellt jedoch nicht sicher, dass Benutzer vollständig voneinander isoliert sind. Ein weiterer Kontext sollte eingeführt werden, um "Isolation" zu erreichen.
 
-Tenant-Isolation konzentriert sich ausschließlich darauf, den Zugriff auf Ressourcen unter Verwendung des „Tenant“-Kontextes einzuschränken. Sie bewertet den Kontext des aktuellen Tenants und verwendet diesen Kontext, um zu bestimmen, welche Ressourcen für diesen Tenant zugänglich sind.
+### Verwende "Organisation" als Kontext, um den SaaS-Produktmandanten darzustellen, um Mandantenisolation zu erreichen
 
-### Authentication und Authorization sind nicht gleichbedeutend mit „Isolation“
+Authentifizierung und Autorisierung allein verhindern nicht, dass ein Benutzer mit der richtigen Rolle auf die Ressourcen eines anderen Mandanten zugreift. Um den Zugriff zu begrenzen, müssen wir einen "Mandanten"-Kontext hinzufügen, wie eine Mandanten-ID, Organisations-ID oder Arbeitsbereichs-ID. Diese Kennungen wirken wie Wände, Türen und Schlösser, die Mandanten trennen.
 
-Authentication und Authorization zu verwenden, um den Zugriff auf deine SaaS-Umgebungen zu steuern, ist wichtig, aber es reicht nicht aus für vollständige Isolation. Diese Mechanismen sind nur ein Teil des Sicherheitspuzzles.
+Der Begriff "Organisation" wird häufig für Mandantenisolation verwendet. Viele <Ref slug="identity-provider" /> enthalten eine "Organisations"-Funktion, um Mandanten zu isolieren und gleichzeitig ein einheitliches Identitätssystem beizubehalten. Der Benutzer innerhalb der Organisation wird als "Mitglied" bezeichnet.
 
-Eine oft gestellte Frage lautet: Kann ich allgemeine Authorization-Lösungen und rollenbasierte Zugangskontrolle verwenden, um Tenant-Isolation zu erreichen?
+```mermaid
+graph TB
+  IdentityPool[Einheitliches Identitätssystem] --> Org1[Organisation 1]
+  IdentityPool --> Org2[Organisation 2]
+  IdentityPool --> Org3[Organisation 3]
 
-Du kannst eine Multi-Tenant-App erstellen, aber du kannst nicht behaupten, dass du Tenant-Isolation-Strategien als bewährte Praxis erreicht und eingesetzt hast. Wir empfehlen es im Allgemeinen nicht, weil Tenant-Isolation getrennt von Authentication und Authorization ist.
+  Org1 --> Member1_1[Mitglied]
+  Org1 --> Member1_2[Mitglied]
 
-Um dies zu veranschaulichen, betrachte eine Situation, in der du Authentication und Authorization für dein SaaS-System eingerichtet hast. Wenn sich Benutzer anmelden, erhalten sie ein Token mit Informationen über ihre Rolle, die vorschreiben, was sie in der Anwendung tun können. Dieser Ansatz erhöht die Sicherheit, gewährleistet jedoch keine Isolation.
+  Org2 --> Member2_1[Mitglied]
+  Org2 --> Member2_2[Mitglied]
 
-### Verwende „Organisation“ als Kontext zur Darstellung des SaaS-Produkt-Tenants, um Tenant-Isolation zu erreichen
-
-Sich nur auf Authentication und Authorization zu verlassen, wird nicht verhindern, dass ein Benutzer mit der richtigen Rolle auf die Ressourcen eines anderen Tenants zugreift. Daher müssen wir einen „Tenant“-Kontext wie eine Tenant-ID einbeziehen, um den Zugriff auf Ressourcen einzuschränken.
-
-Hier kommt die Tenant-Isolation ins Spiel. Sie verwendet tenantspezifische Kennungen, um Grenzen zu schaffen, ähnlich wie Wände, Türen und Schlösser, und eine klare Trennung zwischen den Tenants sicherzustellen.
+  Org3 --> Member3_1[Mitglied]
+  Org3 --> Member3_2[Mitglied]
+```
 
 ## Wie werden Identitäten in Multi-Tenant-Apps verwaltet?
 
-Wir haben über Tenant-Isolation gesprochen, aber was ist mit Identitäten? Wie entscheidest du, ob deine Identitäten „isoliert“ sein sollten oder nicht?
+Die erste wichtige Frage ist, ob Teile deines Geschäfts oder Produkts separate Identitätssysteme erfordern. Dies wird dein Systemdesign leiten. Hier sind zwei Beispiele:
 
-Es gibt oft Verwirrung rund um das Konzept der "Identitätsisolation". Es könnte sich auf Situationen beziehen, in denen ein realer Benutzer zwei Identitäten im allgemeinen Verständnis der Menschen hat.
+1. Ein Identitätssystem: Eine einzelne Person kann zwei Identitäten innerhalb desselben Identitätssystems haben. Zum Beispiel könnte Sarah eine persönliche E-Mail registriert haben und auch eine Unternehmens-E-Mail verwenden, die über <Ref slug="enterprise-sso" /> verbunden ist.
+2. Mehrere Identitätssysteme: Benutzer können auch zwei unterschiedliche Identitäten über separate Identitätssysteme für völlig unabhängige Produkte haben.
 
-1. Beide Identitäten können innerhalb eines einzigen Identitätssystems existieren. Beispielsweise könnte Sarah neben einer Unternehmens-E-Mail eine persönliche E-Mail registriert haben, die durch Single Sign-On (SSO) verbunden ist.
-2. Benutzer unterhalten zwei verschiedene Identitäten innerhalb getrennter Identitätssysteme, die völlig getrennte Produkte darstellen. Diese Produkte stehen in keinerlei Zusammenhang zueinander.
+In den meisten Multi-Tenant-Apps werden Identitäten normalerweise in einem einzigen Pool verwaltet, während die Ressourcen jedes Mandanten getrennt gehalten werden.
 
-Manchmal werden diese Szenarien als "Identitätsisolation" bezeichnet, aber dieser Begriff hilft möglicherweise nicht bei der Entscheidungsfindung.
+## Überlegungen zur Planung und Erstellung von Multi-Tenant-Apps
 
-Anstatt zu fragen, ob du "Identitätsisolation" benötigst, überlege, ob Teile deines Geschäfts oder Produkts separate Identitätssysteme erfordern. Das wird dein Systemdesign leiten. Für Multi-Tenant-Apps sind Identitäten in den meisten Fällen geteilt, während die Ressourcen jedes Tenants getrennt gehalten werden.
-
-In Multi-Tenant-Apps sind Identitäten über die Tenants hinweg geteilt, im Gegensatz zu Tenant-spezifischen Ressourcen und Daten. Es ist wie ein Gebäudeadministrator — du würdest keine zwei separaten Listen der Namen von Tenants führen wollen.
-
-Wenn man nach Tenant-Isolation strebt, taucht oft der Begriff "Organisation" auf, da es eine bewährte Praxis für den Aufbau von Multi-Tenant-Apps ist.
-
-Indem du "Organisation" in vielen CIAM (Customer Identity Management) oder Auth-Diensten verwendest, kannst du Tenant-Isolation in deiner Multi-Tenant-App erreichen und dabei ein einheitliches Identitätssystem beibehalten.
-
-## Wie wählst du die richtigen Authorization-Modelle für besseren access control?
-
-Beim Auswählen des richtigen Authorization-Modells berücksichtige folgende Fragen:
-
-1. Entwickelst du ein B2C-, B2B- oder eine Kombination aus beiden Arten von Produkten?
-2. Hat deine App eine Multi-Tenant-Architektur?
-3. Gibt es in deiner App einen Bedarf an einem bestimmten Isolationsgrad, bestimmt durch die Geschäftseinheit?
-4. Welche Berechtigungen und Rollen müssen im Kontext der Organisation definiert werden und welche nicht?
+1. Konzentriere dich auf dein Modell: B2B oder B2C.
+2. Wer wird die Aufgaben des Identitätsmanagements übernehmen: Entwickler, der Administrator deines Kunden oder Endkunden?
+3. Müssen deine B2B-Kunden die Identitäten ihrer Organisation verwalten?
+4. Identifiziere, welche Berechtigungen (<Ref slug="scope" />) und <Ref slug="role" /> für die Organisation definiert werden müssen und welche nicht.
+5. Benötigt dein Kunde <Ref slug="enterprise-sso" />?
+6. Erwäge das Hinzufügen von Kollaborationsfunktionen, wie Einladungen.
 
 <Resources
   urls={[

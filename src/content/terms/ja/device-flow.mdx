@@ -1,75 +1,77 @@
 ---
 title: デバイスフロー (Device flow)
 tags: [oauth 2.0, oidc]
-description: OAuth 2.0 デバイス認証フローは、入力が制限されたデバイスやヘッドレスアプリケーションのためのユーザーフレンドリーなサインイン方法です。ユニークなデバイスコードを確認することで、ユーザーがフルユーザーインターフェイスを持つセカンダリデバイスを通してデバイスを認証することが可能になります。
+description: OAuth 2.0 デバイス認可フローは、入力が制限されたデバイスやヘッドレスアプリケーションに対するユーザーフレンドリーなサインイン方法です。ユニークなデバイスコードを検証することで、ユーザーが完全なユーザーインターフェースを持つセカンダリデバイスを介してデバイスを認可することが可能になります。
 ---
 
 ## デバイスフロー (Device flow) とは？
 
-[OAuth Device Authorization Flow](https://www.rfc-editor.org/rfc/rfc8628)、別名デバイスフロー (Device flow) は、入力能力が制限されたデバイス（例: スマートテレビ、IoT デバイス、ゲームコンソール）やヘッドレスアプリ（例: CLI ツール）向けに設計された [OAuth 2.0](https://oauth.net/2/) の実装です。これにより、これらのデバイスで認証リクエストを開始し、スマートフォンやラップトップのようなより入力能力のあるデバイスを使用してプロセスを完了することができます。
+[OAuth デバイス認可フロー](https://www.rfc-editor.org/rfc/rfc8628)、別名デバイスフロー (Device flow) は、入力機能が制限されたデバイス（例：スマートテレビ、IoT デバイス、ゲームコンソール）やヘッドレスアプリ（例：CLI ツール）向けに設計された <Ref slug="oauth-2.0-grant" /> です。これにより、ユーザーはこれらのデバイスで <Ref slug="authorization-request">認可リクエスト</Ref> を開始し、スマートフォンやラップトップなどのより入力が可能なデバイスを使用してプロセスを完了することができます。
 
-## デバイスフロー (Device flow) を使用する場面は？
+## デバイスフロー (Device flow) を使用するタイミングは？
 
 1. **入力が制限されたデバイス**
-    - スマートテレビでのサインイン（例: メディアアプリ）
-    - ゲームコンソールでのサインイン（例: ゲームシステムやメディアアプリ）
-    - ミーティングデバイスでのサインイン（例: 公式アプリやビデオミーティングアプリ）
-    - ウェアラブルデバイスでのサインイン（例: 入力が限られたスマートウォッチ）
-    - IoT デバイスへのアクセス（例: プリンター、ビデオエンコーダー、スピーカー）
+    - スマートテレビでのサインイン（例：メディアアプリ）
+    - ゲームコンソールでのサインイン（例：ゲームシステムやメディアアプリ）
+    - ミートデバイスでのサインイン（例：公式アプリやビデオ会議アプリ）
+    - ウェアラブルデバイスでのサインイン（例：入力が制限されたスマートウォッチ）
+    - IoT デバイスへのアクセス（例：プリンター、ビデオエンコーダー、スピーカー）
 2. **ヘッドレスアプリケーション**
-    - コマンドラインインターフェースでのログイン（例: GitHub CLI や Stripe CLI）
+    - コマンドラインインターフェースでのログイン（例：GitHub CLI や Stripe CLI）
 3. **デスクトップアプリケーションの QR コードログイン**
-    - スマートフォンで QR コードをスキャンして、デスクトップアプリケーションに素早く安全にサインイン（例: Telegram、Steam のデスクトップでのサインイン）。この QR コードサインインフローは、従来の OAuth 2.0 デバイスフローの一種と見なされます。
+    - スマートフォンで QR コードをスキャンしてデスクトップアプリケーションに迅速かつ安全にサインイン（例：Telegram、Steam のデスクトップでのサインイン）。この QR コードサインインフローは、従来の OAuth 2.0 デバイスフローのバリエーションと見なすことができます。
 
-## デバイスフロー (Device flow) エンドユーザーフローはどのように見えるのか？
+## デバイスフロー (Device flow) のエンドユーザーフローはどのように見えるか？
 
-QR コードサインインのバリエーションは無視して、標準の OAuth 2.0 デバイスフローに焦点を当てましょう。ここでは 2 種類のデバイスが関与します：
+QR コードサインインのバリエーションを無視して、標準的な OAuth 2.0 デバイスフローに焦点を当てましょう。関与するデバイスには 2 種類あります：
 
 ### デバイスコード表示デバイス
 
-これは、ユーザーがアクセスを認証する必要がある入力が制限されたデバイスまたはヘッドレスアプリケーションです。これには[デバイスコードと検証 URI](#what-does-device-flow-workflow-look-like) を表示し、ユーザーに進行方法を案内します。
+これは、ユーザーがアクセスを認可する必要がある入力制限のあるデバイスまたはヘッドレスアプリケーションです。これには、[デバイスコードと検証 URI](#what-does-device-flow-workflow-look-like) が表示され、ユーザーに進行方法を案内します。
 
 基本的な UI は次のとおりです：
 
-![Device code display device UI.png](https://uploads.strapi.logto.io/Device_code_display_device_UI_759058ede9.png)
+![デバイスコード表示デバイス UI.png](https://uploads.strapi.logto.io/Device_code_display_device_default_cda216b1a3.png)
 
-ユーザーエクスペリエンスを向上させるために、サービスはしばしば検証 URL の QR コードを生成します：
+ユーザーエクスペリエンスを向上させるために、サービスは検証 URL の QR コードを生成することがよくあります：
 
-![Device code display device UI with QR code.png](https://uploads.strapi.logto.io/device_code_display_device_UI_with_verification_url_438c3b31b9.png)
+![QR コード付きデバイスコード表示デバイス UI.png](https://uploads.strapi.logto.io/Device_code_display_device_QR_code_3c9219e24c.png)
 
-さらに効率を高めるために、`verification_uri` の QR コードリソース（例: `https://example.com/device`）を `verification_uri_complete`（例: `https://example.com/device?user_code=WDJB-MJHT`）に置き換えます。これにより、デバイスコードを URL に含めることができ、ユーザーがデバイスコードをフィールドに事前入力するのを助けます。
+さらに効率を高めるために、`verification_uri` の QR コードリソース（例：`https://example.com/device`）を `verification_uri_complete`（例：`https://example.com/device?user_code=DSHP-SNCT`）に置き換え、URL にデバイスコードを含めることで、ユーザーがフィールドにデバイスコードを事前入力できるようにします。
 
-### 認証デバイス
+### 認可デバイス
 
-サインイン対象デバイスの指示に従って、ユーザーは次の操作を実行します：
+サインイン対象デバイスの指示に従って、ユーザーは次のことを行います：
 
-1. ブラウザアクセスと入力能力を持つ別のデバイスで検証 URL を開きます。
-2. 表示されたデバイスコードを入力し（事前入力されている場合もあります）、続行します。
-3. ブラウザ上に既存のセッションがない場合、ユーザーはまずサービスにサインインします。
-4. 同意ページが表示され、ユーザーにデバイスサインインを認証するよう求められます。
-5. 最後に、認証が完了すると成功のページが表示されます。
+1. ブラウザアクセスと入力機能を持つ別のデバイスを使用して検証 URL を開きます。
+2. 表示されたデバイスコードを入力（事前入力されている可能性があります）し、続行します。
+3. ブラウザに既存のセッションがない場合、ユーザーはまずサービスにサインインします。
+4. 同意ページが表示され、ユーザーにデバイスサインインを認可するよう促します。
+5. 最後に、認可後に成功ページが表示されます。
 
-以下はあなたのテスト用に確立された製品のデバイスフロー検証 URL の一例です：
+![OAuth デバイスフローの認可デバイス.png](https://uploads.strapi.logto.io/Authorization_device_for_O_Auth_device_flows_f1e7a42fc7.png)
 
-- [スマートテレビで YouTube にログイン](https://www.youtube.com/watch?v=yTcuazSy5Cs): [youtube.com/activate](https://youtube.com/activate)
-- スマートテレビで Disney+ にログイン: [disneyplus.com/begin](https://disneyplus.com/begin)
-- [Samsung Galaxy Watch で Shopify にログイン](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html): [spotify.com/pair](https://spotify.com/pair)
-- [ミーティングデバイスで Zoom にログイン](https://developers.zoom.us/blog/device-authorization/): [zoom.us/oauth_device](https://zoom.us/oauth_device)
-- [GitHub CLI にログイン](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow): [github.com/login/device](https://github.com/login/device)
-- [Google デバイスフロー](https://www.oauth.com/oauth2-servers/device-flow/user-flow/): https://www.google.com/device
+以下は、テスト用のいくつかの確立された製品のデバイスフロー検証 URL です：
 
-## デバイスフロー (Device flow) ワークフローはどのように見えるのか？
+- スマートテレビで [Youtube にログイン](https://www.youtube.com/watch?v=yTcuazSy5Cs)：[youtube.com/activate](https://youtube.com/activate)
+- スマートテレビで Disney+ にログイン：[disneyplus.com/begin](https://disneyplus.com/begin)
+- [Samsung Galaxy Watch で Shopify にログイン](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html)：[spotify.com/pair](https://spotify.com/pair)
+- ミートデバイスで [Zoom にログイン](https://developers.zoom.us/blog/device-authorization/)：[zoom.us/oauth_device](https://zoom.us/oauth_device)
+- [GitHub CLI にログイン](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow)：[github.com/login/device](https://github.com/login/device)
+- [Google デバイスフロー](https://www.oauth.com/oauth2-servers/device-flow/user-flow/) を利用：https://www.google.com/device
 
-まず、デバイスコード表示デバイスに表示される情報を処理するためのデバイス認証応答のパラメータを理解する必要があります：
+## デバイスフロー (Device flow) のワークフローはどのように見えるか？
 
-| Parameter                              | Description                                                                                                                                                                    |
+まず、デバイスコード表示デバイスに表示される情報を処理するために使用されるデバイス認可応答のパラメータを理解する必要があります：
+
+| パラメータ                              | 説明                                                                                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `device_code`                          | デバイス検証コード。                                                                                                                                                              |
-| `user_code`                            | エンドユーザー検証コード。                                                                                                                                                      |
-| `verification_uri`                     | 認証サーバー上のエンドユーザー検証 URI。この URI は短く覚えやすいものでなければならず、エンドユーザーはこれをユーザーエージェントに手動で入力するよう求められます。                  |
-| `verification_uri_complete` (optional) | 「user_code」またはその機能を持つ他の情報を含む検証 URI で、非テキスト形式の伝達を目的としています。                                                                        |
-| `expires_in`                           | 「device_code」および「user_code」の有効期間（秒）。                                                                                                                                |
-| `interval`                             | クライアントがトークンエンドポイントへのポーリングリクエストの間に待機する最低秒数。値が提供されない場合、クライアントはデフォルトとして 5 を使用する必要があります。                                           |
+| `device_code`                          | デバイス検証コード。                                                                                                                                                  |
+| `user_code`                            | エンドユーザー検証コード。                                                                                                                                                |
+| `verification_uri`                     | 認可サーバー上のエンドユーザー検証 URI。エンドユーザーがユーザーエージェントに手動で入力するよう求められるため、URI は短く覚えやすいものであるべきです。 |
+| `verification_uri_complete` (オプション) | "user_code"（または "user_code" と同じ機能を持つ他の情報）を含む検証 URI で、非テキスト伝送用に設計されています。             |
+| `expires_in`                           | "device_code" と "user_code" の有効期間（秒単位）。                                                                                                                  |
+| `interval`                             | クライアントがトークンエンドポイントへのポーリングリクエストの間に待機すべき最小時間（秒単位）。値が提供されない場合、クライアントはデフォルトとして 5 を使用する必要があります。 |
 
 ```json
 {
@@ -83,39 +85,59 @@ QR コードサインインのバリエーションは無視して、標準の O
 }
 ```
 
-ユーザーが認証のためにデバイスフロー (Device flow) を使用する際、主に以下のステップを含みます：
+ユーザーがデバイスフローを使用して認証を行う場合、主に以下のステップが含まれます：
 
 ```mermaid
 sequenceDiagram
+	autonumber
 	participant User at browser
 	participant Device Client
 	participant Auth Server
 
-	Device Client ->> Auth Server: (1) クライアント識別子で認証をリクエスト
-	Auth Server -->> Device Client: (2) デバイスコード、ユーザーコード、検証 URI
-	Device Client ->> User at browser: (3) ユーザーに検証 URI を開きユーザーコードを入力するよう指示
-	Device Client ->> Auth Server: (4) デバイスコードとクライアント識別子でアクセス トークンをポーリング開始
-	User at browser ->> Auth Server: (5) 検証 URI を訪れデバイスコードを入力
-	Auth Server -->> User at browser: (6) サインインページにユーザーをリダイレクト
-	User at browser ->> Auth Server: (7) サインインフローを完了し、サインイン成功
-	Auth Server -->> User at browser: (8) サインイン成功ページにリダイレクトしブラウザを閉じるよう指示
-	Auth Server ->> Device Client: (9) アクセストークンをクライアントに返す（ステップ 4 でデバイスがポーリング中）
+	Device Client ->> Auth Server: クライアント識別子で認可をリクエスト
+	Auth Server -->> Device Client: デバイスコード、ユーザーコード、検証 URI
+	Device Client ->> User at browser: エンドユーザーに検証 URI を開いてユーザーコードを入力するよう指示
+	Device Client ->> Auth Server: デバイスコードとクライアント識別子でアクセストークンのポーリングを開始
+	User at browser ->> Auth Server: 検証 URI を訪問しデバイスコードを入力
+	Auth Server -->> User at browser: ユーザーをサインインページにリダイレクト
+	User at browser ->> Auth Server: サインインフローを完了しサインイン
+	Auth Server -->> User at browser: ユーザーをサインイン成功ページにリダイレクトし、ブラウザを閉じるよう指示
+	Auth Server ->> Device Client: クライアントにアクセストークンを返す（ステップ 4 でデバイスがポーリングしているため）
 ```
 
-1. デバイスクライアントはクライアント識別子（通常は認証サーバープラットフォーム上のクライアント ID）を使用して認証サーバーに認証をリクエストします。
-2. 認証サーバーは、デバイスコード、ユーザーコード、検証 URI をデバイスクライアントに返します。
-3. デバイスクライアントは検証 URI とユーザーコードをテキスト（または QR コードなど）として表示し、ユーザーに URI を訪問しコードを入力するよう指示します。
-4. ステップ 3 と同時に、デバイスクライアントはデバイスコードとクライアント識別子を使用して認証サーバーからアクセス トークンをポーリングし始め、ユーザーが認証リクエストを確認し認証を完了するのを待ちます。
-5. ユーザーは別のデバイスのブラウザを介して認証サーバーによってホストされる検証 URI を訪れ、ユーザーコードを入力します。
-6. 認証サーバーはユーザーをサインインページにリダイレクトし、サインインを完了するよう指示します。
+1. デバイスクライアントは、クライアント識別子（通常は auth サーバープラットフォーム上のクライアント ID）を使用して auth サーバーから認可をリクエストします。
+2. auth サーバーは、デバイスクライアントにデバイスコード、ユーザーコード、および検証 URI を応答します。
+3. デバイスクライアントは、検証 URI とユーザーコードをテキスト（または QR コードなど）の形式でユーザーに表示し、URI を訪問してコードを入力するよう指示します。
+4. ステップ 3 と同時に、デバイスクライアントは auth サーバーからデバイスコードとクライアント識別子でアクセストークンのポーリングを開始し、ユーザーが <Ref slug="authorization-request" /> を確認し、ユーザー認可を完了するのを待ちます。
+5. ユーザーは、別のデバイスのブラウザを介して auth サーバーがホストする検証 URI を訪問し、ユーザーコードを入力します。
+6. auth サーバーは、ユーザーをサインインページにリダイレクトし、サインインを完了するよう指示します。
 7. ユーザーはサインインフローを完了し、正常にサインインします。
-8. 認証サーバーはユーザーをサインイン成功ページにリダイレクトし、ユーザーにブラウザを閉じるよう指示します。
-9. ステップ 8 と同時に、認証サーバーはステップ 4 以降ポーリングしているクライアントにアクセストークンを返します。
+8. auth サーバーは、ユーザーをサインイン成功ページにリダイレクトし、ブラウザを閉じるよう指示します。
+9. ステップ 8 と同時に、auth サーバーはステップ 4 からポーリングしているデバイスクライアントにアクセストークンを返します。
 
-これらのプロセスの後、デバイスクライアントはその後のサービスのためのアクセストークンを取得できるようになります！
+これらのプロセスの後、デバイスクライアントは後続のサービスのために <Ref slug="access-token" /> を取得できるようになります。
 
-詳細については、[RFC 8628 OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3) をお読みください。
+詳細については、[RFC 8628 OAuth 2.0 デバイス認可グラント](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3) を参照してください。
 
-<SeeAlso slugs={['authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
+## デバイスフロー (Device flow) のセキュリティ考慮事項は？
+
+デバイスフローは、2 つのデバイス間の相互作用を伴うため、デバイスコードの露出、ブルートフォース攻撃、または中間者 (MitM) 攻撃などの潜在的なセキュリティリスクにさらされます。
+
+デバイスコードを取得するだけでは直ちに認可を得ることはできません（ユーザーはまだ認証と認可を行う必要があります）が、攻撃者は有効期間中にデバイスコードリクエストを再生しようとする可能性があります。これにより、認可されていない繰り返しアクセスが発生する可能性があります。セキュリティを強化するために、次の予防策を考慮してください：
+
+- **`expires_in` の期間を短縮する：** デバイスコードの有効期間を短縮することで、攻撃の機会を減らします。
+- **失敗した試行を制限する：** ブルートフォース攻撃を防ぐために、誤ったコード入力の回数を制限します。
+- **HTTPS を強制する：** デバイスと認可サーバー間のすべての通信が HTTPS を使用して暗号化されていることを確認し、中間者攻撃を防ぎます。
+- **シングルユースのデバイスコードを制限する：** 各デバイスコードを **1 回のセッション** に制限し、認可されていない第三者による再利用を防ぎます。
+
+デバイスコードのシングルユースは、OAuth 2.0 デバイスフローの組み込み要件ではないことに注意してください。これはオプションのベストプラクティスです。一部の開発者は、同じコードでの同時デバイス認可（例：数百のデバイスで）を意図的に設計する場合がありますが、このアプローチはセキュリティリスクを増大させるため、慎重に評価する必要があります。
+
+## OIDC プロバイダーはデバイスフロー (Device flow) をサポートしているか？
+
+デバイスフローは伝統的に OAuth に関連付けられていますが、<Ref slug="openid-connect" /> プロバイダーもそれをサポートすることができます。OIDC は、OAuth の主な焦点である認可を超えた追加の利点を提供します。それは認証にまで拡張され、アプリケーションが <Ref slug="access-token" /> と <Ref slug="id-token" /> の両方を単一のフローで取得できるようにします。
+
+OIDC の堅牢な統一アイデンティティ管理、トークン検証や <Ref slug="refresh-token">リフレッシュ</Ref> を含む、は、特に入力機能が制限されたデバイスとアプリケーション間の安全で信頼性の高い <Ref slug="authentication" /> と <Ref slug="authorization" /> に適しています。
+
+<SeeAlso slugs={['oauth-2.0-grant', 'authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
 
 <Resources urls={['https://blog.logto.io/a-brief-introduction-to-oauth2-device-flow', 'https://datatracker.ietf.org/doc/html/rfc8628']} />

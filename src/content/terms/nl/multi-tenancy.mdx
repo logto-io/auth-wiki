@@ -1,102 +1,102 @@
 ---
 title: Multi-tenancy
 tags: [authentication, authorization]
-description: Multi-tenancy is een software-architectuur waarbij een enkele applicatie-instantie meerdere klanten (huurders) bedient, waarbij hun data geïsoleerd en veilig blijft. Het is gebruikelijk in cloud computing en SaaS om middelen te optimaliseren en onderhoud te vereenvoudigen.
+description: Multi-tenancy is een softwarearchitectuur waarbij een enkele applicatie-instantie meerdere klanten (tenants) bedient, waarbij hun gegevens geïsoleerd en veilig worden gehouden. Het is gebruikelijk in cloud computing en SaaS om middelen te optimaliseren en onderhoud te vereenvoudigen.
 ---
 
 ## Wat is multi-tenancy?
 
-Software multi-tenancy is een [software-architectuur](https://en.wikipedia.org/wiki/Software_architecture) waarbij een enkele [instantie](https://en.wikipedia.org/wiki/Instance_(computer_science)) van [software](https://en.wikipedia.org/wiki/Computer_software) op een server draait en meerdere huurders bedient. Systemen die op deze manier zijn ontworpen, zijn "gedeeld" (in plaats van "toegewijd" of "geïsoleerd").
+Software multi-tenancy is een software waarin een enkele instantie van software op een server draait en meerdere tenants bedient. Systemen die op deze manier zijn ontworpen, zijn "gedeeld" (in plaats van "dedicated" of "geïsoleerd").
+```mermaid
+ graph TB
+  Client1[Klant 1] --> MultiTenantApp[Multi-Tenant Applicatie]
+  Client2[Klant 2] --> MultiTenantApp
+  Client3[Klant 3] --> MultiTenantApp
 
-![multi_tenant_architecture.webp](https://uploads.strapi.logto.io/multi_tenant_architecture_600f47afe8.webp)
+  MultiTenantApp --> Tenant1[Tenant 1]
+  MultiTenantApp --> Tenant2[Tenant 2]
+  MultiTenantApp --> Tenant3[Tenant 3]
+```
 
-Een huurder is een groep gebruikers die gemeenschappelijke toegang delen met specifieke privileges tot de software-instantie.
+Een tenant is een groep gebruikers die gemeenschappelijke toegang delen met specifieke privileges tot de software-instantie.
 
-De multi-tenant architectuur wordt vaak geprefereerd wanneer serviceproviders gestandaardiseerde diensten aanbieden aan meerdere klanten. Deze diensten hebben meestal minimale maatwerkopties en alle klanten delen dezelfde applicatie-instantie. Wanneer de applicatie wordt bijgewerkt, geldt dit voor alle klanten tegelijk.
+Een voorbeeld hiervan is dat CRM (Customer Relationship Management) systemen vaak gebruikmaken van een multi-tenant architectuur om dezelfde service aan alle klanten te bieden.
 
-Een voorbeeld hiervan is een CRM (Customer Relationship Management) systeem dat vaak gebruikmaakt van multi-tenant architectuur om dezelfde dienst aan alle klanten te leveren.
+Een belangrijk principe van multi-tenancy is "delen". Dit betekent niet dat **elke** onderdeel van de oplossing wordt gedeeld; het betekent dat ten minste **enkele** componenten worden hergebruikt over meerdere tenants. Het begrijpen van dit bredere concept kan je helpen beter in te spelen op de behoeften van je klanten.
 
-Een belangrijk principe van multi-tenancy is "delen." Dit betekent niet dat **elk** onderdeel van de oplossing wordt gedeeld; het betekent dat ten minste **sommige** componenten worden hergebruikt voor meerdere huurders. Het begrijpen van dit bredere concept kan je helpen beter in te spelen op de behoeften van je klanten.
+## Wat zijn de use cases voor multi-tenant producten?
 
-## Wat zijn de gebruikssituaties voor multi-tenant producten?
+Multi-tenant apps worden vaak gebruikt in software-as-a-service (SaaS) producten zoals productiviteitstools, samenwerkingssoftware, enzovoort. In deze opzet vertegenwoordigt elke "tenant" meestal een zakelijke klant, met meerdere gebruikers (meestal werknemers). In verschillende producten kan het worden aangeduid als een tenant, werkruimte of project, afhankelijk van de context. Een enkel bedrijf kan ook meerdere tenants hebben om verschillende afdelingen of organisaties te vertegenwoordigen.
 
-Multi-tenant apps worden vaak gebruikt in software-as-a-service (SaaS) producten zoals productiviteitstools, samenwerkingssoftware, enzovoort. In deze opzet vertegenwoordigt elke "huurder" meestal een zakelijke klant, met meerdere gebruikers (typisch werknemers). Afhankelijk van het product kan het worden aangeduid als een huurder, werkruimte of project. Een enkel bedrijf kan ook meerdere huurders hebben die verschillende divisies of organisaties vertegenwoordigen.
+In complexere gevallen, zoals B2B-applicaties buiten SaaS, bieden multi-tenant apps een gedeeld platform voor verschillende teams, zakelijke klanten en partnerbedrijven om toegang te krijgen tot je diensten.
 
-In meer complexe gevallen, zoals B2B-applicaties buiten SaaS, bieden multi-tenant apps een gedeeld platform voor verschillende teams, zakelijke klanten en partnerbedrijven om toegang te krijgen tot je diensten.
-
-## Waarom zou je multi-tenancy in een SaaS-product moeten gebruiken?
+## Waarom zou je multi-tenancy gebruiken in een SaaS-product?
 
 ### Schalen met multi-tenancy
 
-Voor ondernemingen is multi-tenancy de sleutel tot het effectief voldoen aan hun eisen voor beschikbaarheid, middelenbeheer, kostenbeheer en gegevensbeveiliging. Op technisch niveau vereenvoudigt het aannemen van een multi-tenant aanpak je ontwikkelprocessen, minimaliseert het technische uitdagingen en bevordert het naadloze uitbreiding.
+Voor zakelijke ondernemingen is multi-tenancy de sleutel tot het effectief voldoen aan hun eisen voor beschikbaarheid, middelenbeheer, kostenbeheer en gegevensbeveiliging. Op technisch niveau stroomlijnt het aannemen van een multi-tenant benadering je ontwikkelingsprocessen, minimaliseert het technische uitdagingen en bevordert het naadloze uitbreiding.
 
-### Een uniforme ervaring creëren
+### Creëren van een uniforme ervaring
 
-Wanneer we kijken naar de oorsprong van SaaS-producten, is het vergelijkbaar met een gebouw met verschillende appartementen. Alle huurders delen gemeenschappelijke voorzieningen zoals water, elektriciteit en gas, maar ze behouden onafhankelijke controle over het beheer van hun eigen ruimte en middelen. Deze aanpak vereenvoudigt vastgoedbeheer.
+Bij het onderzoeken van de wortels van SaaS-producten is het vergelijkbaar met een gebouw dat verschillende appartementen huisvest. Alle tenants delen gemeenschappelijke voorzieningen zoals water, elektriciteit en gas, maar behouden onafhankelijke controle over het beheer van hun eigen ruimte en middelen. Deze aanpak vereenvoudigt het vastgoedbeheer.
 
-### Zorgen voor beveiliging door huurdersisolatie
+### Beveiliging garanderen door tenant-isolatie
 
-In een multi-tenancy architectuur wordt de term "huurder" geïntroduceerd om grenzen te creëren die de middelen en gegevens van verschillende huurders binnen een gedeelde instantie scheiden en beveiligen. Dit garandeert dat de gegevens en activiteiten van elke huurder apart en veilig blijven, zelfs als ze dezelfde onderliggende middelen gebruiken.
+In een multi-tenancy architectuur wordt de term "tenant" geïntroduceerd om grenzen te creëren die de middelen en gegevens van verschillende tenants binnen een gedeelde instantie scheiden en beveiligen. Dit zorgt ervoor dat de gegevens en operaties van elke tenant afzonderlijk en veilig blijven, zelfs als ze dezelfde onderliggende middelen gebruiken.
 
-## Hoe bereik je huurdersisolatie in multi-tenancy architectuur?
+## Hoe bereik je tenant-isolatie in een multi-tenancy architectuur?
 
-Bij het bespreken van multi-tenant applicaties, is het altijd noodzakelijk om **huurdersisolatie** te bereiken. Dit betekent het gescheiden en veilig houden van de gegevens en middelen van verschillende huurders binnen een gedeeld systeem (bijvoorbeeld een cloudinfrastructuur of een multi-tenant applicatie). Dit voorkomt ongeoorloofde pogingen om toegang te krijgen tot de middelen van een andere huurder.
+Bij het bespreken van multi-tenant applicaties is het altijd noodzakelijk om **tenant-isolatie** te bereiken. Dit betekent het gescheiden en veilig houden van de gegevens en middelen van verschillende tenants binnen een gedeeld systeem (bijvoorbeeld een cloudinfrastructuur of een multi-tenant applicatie). Dit voorkomt ongeoorloofde pogingen om toegang te krijgen tot de middelen van een andere tenant.
 
-Hoewel de uitleg abstract kan lijken, zullen we voorbeelden en belangrijke details gebruiken om de isolatiemindset en de beste praktijk om huurdersisolatie te bereiken verder uit te leggen.
+### Tenant-isolatie sluit aan bij het "gedeelde" concept van multi-tenancy
 
-### Huurdersisolatie gaat niet in tegen het "gedeelde" gedachtegoed van multi-tenancy
+Dat komt omdat tenant-isolatie niet noodzakelijkerwijs een constructie op infrastructuurniveau is. In het domein van multi-tenancy en isolatie zien sommigen isolatie als een strikte scheiding tussen daadwerkelijke infrastructuurmiddelen. Dit leidt meestal tot een model waarin elke tenant aparte databases, computerinstanties, accounts of private clouds heeft. In gedeelde middelen scenario's, zoals multi-tenant apps, kan de manier om isolatie te bereiken een logische constructie zijn.
 
-Dat komt omdat huurdersisolatie niet noodzakelijkerwijs een construct op het niveau van infrastructuurmiddelen is. In de wereld van multi-tenancy en isolatie zien sommigen isolatie als een strikte scheiding tussen echte infrastructuurmiddelen. Dit leidt meestal tot een model waarbij elke huurder afzonderlijke databases, computerinstanties, accounts of privéclouds heeft. In gedeelde middelen scenario's, zoals multi-tenant apps, kan de manier om isolatie te bereiken een logisch construct zijn.
+### Authenticatie en autorisatie zijn niet gelijk aan "isolatie"
 
-In het ontwerp van de architectuur kunnen verschillende graden van middelenisolatie tussen huurders worden bereikt:
+Het gebruik van authenticatie en autorisatie om toegang tot je SaaS-omgeving te controleren is belangrijk, maar het garandeert geen "isolatie". Isolatie betekent het gescheiden houden van verschillende gebruikers of datasets zodat de gegevens of acties van de ene gebruiker niet kunnen interfereren met of toegankelijk zijn voor een andere.
 
-Over het algemeen geldt: hoe meer middelen gedeeld worden tussen huurders, des te lager de kosten van systeemiteratie en -onderhoud. Omgekeerd, hoe minder gedeelde middelen, hoe hoger de kosten.
+Bijvoorbeeld, zelfs als je authenticatie en autorisatie hebt ingesteld, waarbij gebruikers inloggen en een token ontvangen dat hun permissies definieert, verbetert dit de beveiliging maar zorgt het er niet voor dat gebruikers volledig van elkaar geïsoleerd zijn. Een andere context moet worden geïntroduceerd om "isolatie" te bereiken.
 
-Huurdersisolatie richt zich uitsluitend op het gebruik van de “huurder” context om toegang tot middelen te beperken. Het evalueert de context van de huidige huurder en gebruikt die context om te bepalen welke middelen toegankelijk zijn voor die huurder.
+### Gebruik "organisatie" als een context om de SaaS-producttenant te vertegenwoordigen, voor het bereiken van tenant-isolatie
 
-### Authenticatie en autorisatie zijn niet gelijk aan “isolatie”
+Authenticatie en autorisatie alleen zullen niet voorkomen dat een gebruiker met de juiste rol toegang krijgt tot de middelen van een andere tenant. Om toegang te beperken, moeten we een "tenant" context toevoegen, zoals een tenant-ID, organisatie-ID of werkruimte-ID. Deze identificatoren fungeren als muren, deuren en sloten, die tenants gescheiden houden.
 
-Het gebruik van authenticatie en autorisatie om toegang tot je SaaS-omgevingen te controleren is belangrijk, maar het is niet voldoende voor volledige isolatie. Deze mechanismen zijn slechts een deel van de beveiligingspuzzel.
+De term "organisatie" wordt vaak gebruikt voor tenant-isolatie. Veel <Ref slug="identity-provider" /> bevatten een "organisatie" functie om tenants te isoleren terwijl ze een verenigd identiteitssysteem behouden. De gebruiker binnen de organisatie wordt "lid" genoemd.
 
-Mensen stellen vaak de vraag, kan ik algemene autorisatieoplossingen en op rollen gebaseerde toegang beheren gebruiken om huurdersisolatie te bereiken?
+```mermaid
+graph TB
+  IdentityPool[Enkel Identiteitssysteem] --> Org1[Organisatie 1]
+  IdentityPool --> Org2[Organisatie 2]
+  IdentityPool --> Org3[Organisatie 3]
 
-Je kunt een multi-tenant app bouwen, maar je kunt niet zeggen dat je huurdersisolatie strategieën hebt bereikt en toegepast als beste praktijk. We raden het over het algemeen niet aan, omdat huurdersisolatie gescheiden is van authenticatie en autorisatie.
+  Org1 --> Member1_1[Lid]
+  Org1 --> Member1_2[Lid]
 
-Ter illustratie: overweeg een situatie waarin je authenticatie en autorisatie voor je SaaS-systeem hebt ingesteld. Wanneer gebruikers inloggen, ontvangen ze een token met informatie over hun rol, die bepaalt wat ze in de applicatie kunnen doen. Deze aanpak verhoogt de beveiliging, maar garandeert geen isolatie.
+  Org2 --> Member2_1[Lid]
+  Org2 --> Member2_2[Lid]
 
-### Gebruik “organisatie” als context om de SaaS-producthuurder te vertegenwoordigen, voor het bereiken van huurdersisolatie
-
-Door uitsluitend te vertrouwen op authenticatie en autorisatie voorkom je niet dat een gebruiker met de juiste rol toegang krijgt tot de middelen van een andere huurder. We moeten daarom een “huurder” context integreren, zoals een huurder-ID, om de toegang tot middelen te beperken.
-
-Dit is waar huurdersisolatie in het spel komt. Het gebruikt huurder-specifieke identificaties om grenzen te creëren, net zoals muren, deuren en sloten, wat zorgt voor een duidelijke scheiding tussen huurders.
+  Org3 --> Member3_1[Lid]
+  Org3 --> Member3_2[Lid]
+```
 
 ## Hoe worden identiteiten beheerd in multi-tenant apps?
 
-We hebben huurdersisolatie besproken, maar hoe zit het met identiteiten? Hoe beslis je of je identiteiten “geïsoleerd” moeten zijn of niet?
+De eerste belangrijke vraag is om na te denken over of delen van je bedrijf of product aparte identiteitssystemen vereisen. Dit zal je systeemontwerp begeleiden. Hier zijn twee voorbeelden:
 
-Er is vaak verwarring rond het concept "Identiteitsisolatie." Het kan verwijzen naar situaties waar één echte gebruiker twee identiteiten heeft in het algemene begrip van mensen.
+1. Eén identiteitssysteem: Een enkele persoon kan twee identiteiten hebben binnen hetzelfde identiteitssysteem. Bijvoorbeeld, Sarah kan een persoonlijk e-mailadres geregistreerd hebben en ook een zakelijk e-mailadres gebruiken dat verbonden is via <Ref slug="enterprise-sso" />.
+2. Meerdere identiteitssystemen: Gebruikers kunnen ook twee verschillende identiteiten hebben in aparte identiteitssystemen voor volledig niet-gerelateerde producten.
 
-1. Beide identiteiten kunnen binnen een enkel identiteitsysteem bestaan. Bijvoorbeeld, Sarah kan een persoonlijk e-mailadres hebben geregistreerd naast een zakelijk e-mailadres dat is verbonden via single sign-on (SSO).
-2. Gebruikers onderhouden twee verschillende identiteiten binnen afzonderlijke identiteitsystemen, wat volledig gescheiden producten vertegenwoordigt. Deze producten zijn volledig los van elkaar.
+In de meeste multi-tenant apps worden identiteiten meestal beheerd in een enkele pool, terwijl de middelen van elke tenant gescheiden worden gehouden.
 
-Soms worden deze scenario's "identiteitsisolatie" genoemd, maar die term helpt misschien niet bij het nemen van beslissingen.
+## Overwegingen voor het plannen en bouwen van multi-tenant apps
 
-In plaats van te vragen of je "identiteitsisolatie" nodig hebt, denk na over of delen van je bedrijf of product aparte identiteitsystemen vereisen. Dit zal je systeemontwerp begeleiden. Voor multi-tenant apps zijn identiteiten in de meeste gevallen gedeeld, terwijl de middelen van elke huurder gescheiden worden gehouden.
-
-In multi-tenant apps worden identiteiten gedeeld over huurders, in tegenstelling tot huurder-specifieke middelen en gegevens. Het is als een gebouwbeheerder zijn — je zou niet twee afzonderlijke lijsten van namen van huurders willen onderhouden.
-
-Bij het nastreven van huurdersisolatie komt de term "organisatie" vaak naar voren, aangezien het een beste praktijk is voor het bouwen van multi-tenant apps.
-
-Door "organisatie" te gebruiken in veel CIAM (Customer Identity Management) of Auth-diensten, kun je huurdersisolatie bereiken in je multi-tenant app terwijl je toch een verenigd identiteitsysteem behoudt.
-
-## Hoe kies je de juiste autorisatiemodellen voor betere toegang beheersing?
-
-Bij het kiezen van het juiste autorisatiemodel, overweeg deze vragen:
-
-1. Ontwikkel je een B2C, B2B, of een combinatie van beide soorten producten?
-2. Heeft je app een multi-tenant architectuur?
-3. Is er behoefte aan een bepaald isolatieniveau in je app, zoals bepaald door de bedrijfseenheid?
-4. Welke permissies en rollen moeten worden gedefinieerd binnen de context van de organisatie, en welke niet?
+1. Focus op je model: B2B of B2C.
+2. Wie zal de identiteitstaken beheren: ontwikkelaars, de beheerder van je klant, of eindgebruikers?
+3. Voor B2B, moeten je klanten de identiteiten van hun organisatie beheren?
+4. Identificeer welke permissies (<Ref slug="scope" />) en <Ref slug="role" /> moeten worden gedefinieerd voor de organisatie en welke niet.
+5. Vereist je klant <Ref slug="enterprise-sso" />?
+6. Overweeg het toevoegen van samenwerkingsfuncties, zoals uitnodigingen.
 
 <Resources
   urls={[

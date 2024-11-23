@@ -1,75 +1,77 @@
 ---
 title: 设备流 (Device flow)
 tags: [oauth 2.0, oidc]
-description: OAuth 2.0 设备授权流程是一种用户友好的登录方法，适用于输入受限设备或无界面应用。通过验证唯一的设备代码，使用户能够通过全界面的辅助设备授权设备。
+description: OAuth 2.0 设备授权流是一种用户友好的登录方法，适用于输入受限的设备或无头应用程序。通过验证唯一的设备代码，使用户可以通过具有完整用户界面的辅助设备授权设备。
 ---
 
 ## 什么是设备流 (Device flow)？
 
-[OAuth 设备授权流程](https://www.rfc-editor.org/rfc/rfc8628)，也称为设备流 (Device flow)，是一种[OAuth 2.0](https://oauth.net/2/) 实现，专为输入能力有限的设备（例如，智能电视、物联网设备、游戏机）或无界面应用（例如，CLI 工具）设计。它允许用户在这些设备上发起授权请求，然后使用输入能力较强的设备如智能手机或笔记本电脑完成该流程。
+[OAuth 设备授权流](https://www.rfc-editor.org/rfc/rfc8628)，也称为设备流 (Device flow)，是一种<Ref slug="oauth-2.0-grant" />，专为输入能力有限的设备（例如智能电视、物联网设备、游戏机）或无头应用程序（例如 CLI 工具）设计。它允许用户在这些设备上发起<Ref slug="authorization-request">授权请求</Ref>，然后使用输入能力更强的设备（如智能手机或笔记本电脑）完成流程。
 
 ## 何时使用设备流 (Device flow)？
 
-1. **输入受限设备**
-    - 在智能电视上登录（例如，媒体应用）
-    - 在游戏机上登录（例如，游戏系统或媒体应用）
-    - 在会议设备上登录（例如，官方应用或视频会议应用）
+1. **输入受限的设备**
+    - 在智能电视上登录（例如，媒体应用程序）
+    - 在游戏机上登录（例如，游戏系统或媒体应用程序）
+    - 在会议设备上登录（例如，官方应用程序或视频会议应用程序）
     - 在可穿戴设备上登录（例如，输入受限的智能手表）
     - 访问物联网设备（例如，打印机、视频编码器或扬声器）
-2. **无界面应用**
+2. **无头应用程序**
     - 命令行界面登录（例如，GitHub CLI 或 Stripe CLI）
-3. **桌面应用的二维码登录**
-    - 通过用智能手机扫描二维码快速、安全地登录到桌面应用（例如，Telegram，Steam 在桌面上的登录）。这种二维码登录流程可视为传统 OAuth 2.0 设备流的一种变体。
+3. **桌面应用程序的二维码登录**
+    - 通过使用智能手机扫描二维码快速安全地登录桌面应用程序（例如，Telegram、Steam 在桌面上的登录）。这种二维码登录流程可以视为传统 OAuth 2.0 设备流的一种变体。
 
 ## 设备流 (Device flow) 的终端用户流程是什么样的？
 
-忽略二维码登录变体，让我们关注标准的 OAuth 2.0 设备流。涉及两种设备：
+忽略二维码登录变体，让我们专注于标准的 OAuth 2.0 设备流。涉及两种类型的设备：
 
-### 设备代码展示设备
+### 设备代码显示设备
 
-这是需要用户授权访问的输入受限设备或无界面应用。它显示[设备代码和验证 URI](#what-does-device-flow-workflow-look-like)，指导用户如何进行操作。
+这是用户需要授权访问的输入受限设备或无头应用程序。它显示[设备代码和验证 URI](#what-does-device-flow-workflow-look-like)，指导用户如何继续。
 
-基本界面是：
+基本的用户界面是：
 
-![Device code display device UI.png](https://uploads.strapi.logto.io/Device_code_display_device_UI_759058ede9.png)
+![Device code display device UI.png](https://uploads.strapi.logto.io/Device_code_display_device_default_cda216b1a3.png)
 
-为了提升用户体验，服务通常会为验证 URL 生成二维码：
+为了增强用户体验，服务通常会为验证 URL 生成二维码：
 
-![Device code display device UI with QR code.png](https://uploads.strapi.logto.io/device_code_display_device_UI_with_verification_url_438c3b31b9.png)
+![Device code display device UI with QR code.png](https://uploads.strapi.logto.io/Device_code_display_device_QR_code_3c9219e24c.png)
 
-为了提高效率，可以将 `verification_uri` 中的二维码资源（例如，`https://example.com/device`）替换为 `verification_uri_complete`（例如，`https://example.com/device?user_code=WDJB-MJHT`），其中包含 URL 中的设备代码，帮助用户预填写设备代码到字段中。
+为了提高效率，将 `verification_uri` 中的二维码资源（例如，`https://example.com/device`）替换为 `verification_uri_complete`（例如，`https://example.com/device?user_code=DSHP-SNCT`），其中包含 URL 中的设备代码，帮助用户预填设备代码到字段中。
 
 ### 授权设备
 
-按照登录目标设备上的说明，用户将：
+根据登录目标设备上的说明，用户将：
 
-1. 使用另一台具有浏览器访问和输入功能的设备打开验证 URL。
-2. 输入显示的设备代码（可能已预填），然后继续。
-3. 如果浏览器上没有现有会话，用户将首先登录到服务。
+1. 使用具有浏览器访问和输入能力的另一台设备打开验证 URL。
+2. 输入显示的设备代码（可能已预填）并继续。
+3. 如果浏览器上没有现有会话，用户将首先登录服务。
 4. 同意页面将提示用户授权设备登录。
-5. 授权后将显示一个成功页面。
+5. 最后，在授权后将显示成功页面。
 
-以下是一些成熟产品的设备流验证 URL，供你测试：
+![Authorization device for OAuth device flows.png](https://uploads.strapi.logto.io/Authorization_device_for_O_Auth_device_flows_f1e7a42fc7.png)
 
-- 登录到 [YouTube 在智能电视](https://www.youtube.com/watch?v=yTcuazSy5Cs) 上：[youtube.com/activate](https://youtube.com/activate)
-- 登录到 Disney+ 在智能电视上：[disneyplus.com/begin](https://disneyplus.com/begin)
-- 登录到 [Shopify 在三星 Galaxy 手表](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html) 上：[spotify.com/pair](https://spotify.com/pair)
-- 登录到 [Zoom 在会议设备](https://developers.zoom.us/blog/device-authorization/) 上：[zoom.us/oauth_device](https://zoom.us/oauth_device)
-- 登录到 [GitHub CLI](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow)：[github.com/login/device](https://github.com/login/device)
-- 利用 [Google 设备流](https://www.oauth.com/oauth2-servers/device-flow/user-flow/)：https://www.google.com/device
+以下是一些已建立产品的设备流验证 URL 供你测试：
+
+- 登录 [Youtube 在智能电视上](https://www.youtube.com/watch?v=yTcuazSy5Cs)：[youtube.com/activate](https://youtube.com/activate)
+- 登录 Disney+ 在智能电视上：[disneyplus.com/begin](https://disneyplus.com/begin)
+- 登录 [Shopify 在三星 Galaxy Watch 上](https://www.drmare.com/spotify-music/spotify-on-galaxy-watch.html)：[spotify.com/pair](https://spotify.com/pair)
+- 登录 [Zoom 在会议设备上](https://developers.zoom.us/blog/device-authorization/)：[zoom.us/oauth_device](https://zoom.us/oauth_device)
+- 登录 [GitHub CLI](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow)：[github.com/login/device](https://github.com/login/device)
+- 使用 [Google 设备流](https://www.oauth.com/oauth2-servers/device-flow/user-flow/)：https://www.google.com/device
 
 ## 设备流 (Device flow) 的工作流程是什么样的？
 
-首先，你应该理解设备授权响应的参数，它用于处理在设备代码展示设备上显示的信息：
+首先，你应该了解设备授权响应的参数，用于处理设备代码显示设备上显示的信息：
 
-| 参数                                     | 描述                                                        |
-| -------------------------------------- | ---------------------------------------------------------- |
-| `device_code`                          | 设备验证代码。                                               |
-| `user_code`                            | 终端用户验证代码。                                           |
-| `verification_uri`                     | 在授权服务器上的终端用户验证 URI。URI 应该简单易记，因为终端用户将被要求手动输入到他们的用户代理中。 |
-| `verification_uri_complete` (optional) | 包含 "user_code"（或其他具备 "user_code" 同样功能的信息）的验证 URI，设计用于非文本传输。 |
-| `expires_in`                           | "device_code" 和 "user_code" 的有效期（以秒为单位）。        |
-| `interval`                             | 客户端在轮询请求令牌端点之间等待的最短时间（以秒为单位）。如果没有提供值，客户端必须使用 5 作为默认值。 |
+| 参数                                   | 描述                                                                                                                                                                    |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `device_code`                          | 设备验证代码。                                                                                                                                                           |
+| `user_code`                            | 终端用户验证代码。                                                                                                                                                       |
+| `verification_uri`                     | 授权服务器上的终端用户验证 URI。URI 应该简短且易于记忆，因为终端用户将被要求手动将其输入到用户代理中。                                                                   |
+| `verification_uri_complete` (可选)     | 包含 "user_code"（或具有与 "user_code" 相同功能的其他信息）的验证 URI，设计用于非文本传输。                                                                              |
+| `expires_in`                           | "device_code" 和 "user_code" 的有效期（以秒为单位）。                                                                                                                    |
+| `interval`                             | 客户端在轮询 token 端点之间应等待的最小时间（以秒为单位）。如果未提供值，客户端必须使用 5 作为默认值。                                                                  |
 
 ```json
 {
@@ -87,35 +89,55 @@ description: OAuth 2.0 设备授权流程是一种用户友好的登录方法，
 
 ```mermaid
 sequenceDiagram
+	autonumber
 	participant User at browser
 	participant Device Client
 	participant Auth Server
 
-	Device Client ->> Auth Server: (1) 以客户端标识符请求授权
-	Auth Server -->> Device Client: (2) 设备代码、用户代码、验证 URI
-	Device Client ->> User at browser: (3) 指导终端用户打开验证 URI 并输入用户代码
-	Device Client ->> Auth Server: (4) 使用设备代码和客户端标识符开始向令牌端点轮询以获取访问令牌
-	User at browser ->> Auth Server: (5) 访问验证 URI 并输入设备代码
-	Auth Server -->> User at browser: (6) 将用户重定向到登录页面
-	User at browser ->> Auth Server: (7) 完成登录流程并登录成功
-	Auth Server -->> User at browser: (8) 将用户重定向到登录成功页面并指导用户关闭浏览器
-	Auth Server ->> Device Client: (9) 返回访问令牌给客户端 (因为设备在步骤 4 中开始轮询)
+	Device Client ->> Auth Server: 使用客户端标识符请求授权
+	Auth Server -->> Device Client: 设备代码、用户代码、验证 URI
+	Device Client ->> User at browser: 指导终端用户打开验证 URI 并输入用户代码
+	Device Client ->> Auth Server: 使用设备代码和客户端标识符开始轮询访问令牌
+	User at browser ->> Auth Server: 访问验证 URI 并输入设备代码
+	Auth Server -->> User at browser: 将用户重定向到登录页面
+	User at browser ->> Auth Server: 完成登录流程并登录
+	Auth Server -->> User at browser: 将用户重定向到登录成功页面并指导用户关闭浏览器
+	Auth Server ->> Device Client: 返回访问令牌给客户端（因为设备在步骤 4 中轮询）
 ```
 
-1. 设备客户端使用客户端标识符（通常为授权服务器平台上的客户端 ID）向授权服务器请求授权。
-2. 授权服务器将设备代码、用户代码和验证 URI 返回给设备客户端。
-3. 设备客户端以文本（或二维码等）形式向用户展示验证 URI 和用户代码，指导用户访问 URI 并输入代码。
-4. 与步骤 3 同时，设备客户端开始向授权服务器中的令牌端点使用设备代码和客户端标识符轮询访问令牌，并等待用户审核授权请求并完成用户授权。
-5. 用户通过另一设备的浏览器访问由授权服务器托管的验证 URI，并输入用户代码。
+1. 设备客户端使用客户端标识符（通常是授权服务器平台上的客户端 ID）向授权服务器请求授权。
+2. 授权服务器向设备客户端响应设备代码、用户代码和验证 URI。
+3. 设备客户端以文本（或二维码等）形式向用户显示验证 URI 和用户代码，指导用户访问 URI 并输入代码。
+4. 与步骤 3 同时，设备客户端开始使用设备代码和客户端标识符从授权服务器轮询访问令牌，并开始等待用户查看<Ref slug="authorization-request" />并完成用户授权。
+5. 用户通过另一台设备上的浏览器访问由授权服务器托管的验证 URI，并输入用户代码。
 6. 授权服务器将用户重定向到登录页面，并指导用户完成登录。
 7. 用户完成登录流程并成功登录。
 8. 授权服务器将用户重定向到登录成功页面，并指导用户关闭浏览器。
-9. 与步骤 8 同时，授权服务器将访问令牌返回给设备客户端，因为客户端自步骤 4 以来一直在轮询。
+9. 与步骤 8 同时，授权服务器返回访问令牌给设备客户端，因为客户端自步骤 4 起一直在轮询。
 
-经过这些流程后，设备客户端将能够获得访问令牌以用于后续服务！
+经过这些流程，设备客户端将能够获取<Ref slug="access-token" />以进行后续服务。
 
-欲了解更多详细信息，请阅读 [RFC 8628 OAuth 2.0 设备授权许可 (Device Authorization Grant)](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3)。
+有关更多详细信息，请阅读 [RFC 8628 OAuth 2.0 设备授权许可](https://datatracker.ietf.org/doc/html/rfc8628#autoid-3)。
 
-<SeeAlso slugs={['authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
+## 设备流 (Device flow) 的安全注意事项是什么？
+
+设备流涉及跨两个设备的交互，使其面临潜在的安全风险，如设备代码暴露、暴力攻击或中间人 (MitM) 攻击。
+
+虽然仅获取设备代码并不会立即授予授权（因为用户仍然必须进行身份验证和授权），但攻击者可能会在设备代码的有效期内尝试重放设备代码请求。这可能导致未经授权的重复访问。为了增强安全性，请考虑以下预防措施：
+
+- **缩短 `expires_in` 持续时间：** 通过缩短设备代码的有效期来减少攻击的机会窗口。
+- **限制失败尝试次数：** 限制错误代码输入的次数，以防止暴力攻击。
+- **强制使用 HTTPS：** 确保设备与授权服务器之间的所有通信都使用 HTTPS 加密，以防止中间人攻击。
+- **限制单次使用设备代码：** 限制每个设备代码仅用于**单个会话**，以防止其被未经授权的方重复使用。
+
+请注意，单次使用设备代码并不是 OAuth 2.0 设备流的内置要求。这是一种可选的最佳实践。一些开发人员可能有意设计用于使用相同代码进行并发设备授权（例如，在数百个设备上），但这种方法增加了安全风险，应谨慎评估。
+
+## OIDC 提供商是否支持设备流 (Device flow)？
+
+虽然设备流传统上与 OAuth 相关联，但<Ref slug="openid-connect" />提供商也可以支持它。OIDC 提供了超越 OAuth 主要关注授权的额外优势。它扩展到认证 (Authentication)，允许应用程序在单个流程中获取<Ref slug="access-token" />和<Ref slug="id-token" />。
+
+OIDC 的强大统一身份管理，包括令牌验证和<Ref slug="refresh-token">刷新</Ref>，使其非常适合在设备和应用程序之间进行安全、可靠的<Ref slug="authentication" />和<Ref slug="authorization" />，特别是那些输入能力有限的设备。
+
+<SeeAlso slugs={['oauth-2.0-grant', 'authorization-code-flow', 'implicit-flow', 'client-credentials-flow']} />
 
 <Resources urls={['https://blog.logto.io/a-brief-introduction-to-oauth2-device-flow', 'https://datatracker.ietf.org/doc/html/rfc8628']} />

@@ -1,165 +1,175 @@
 ---
 title: WebAuthn
 tags: [authentication, authorization]
-description: WebAuthn is een API voor toegang tot publieke sleutelreferenties die de implementatie van wachtwoordkluizen (passkeys) vergemakkelijkt.
+description: WebAuthn is een API voor toegang tot publieke sleutelinformatie, die de implementatie van passkeys vergemakkelijkt.
 ---
 
 ## Wat is WebAuthn?
 
-WebAuthn (Web Authentication (Authenticatie) API), ontwikkeld door het [W3C](https://www.w3.org/) en [FIDO Alliance](https://fidoalliance.org/), is een specificatie voor veilige webauthenticatie met behulp van FIDO2-standaarden. WebAuthn biedt een API waarmee websites <Ref slug="passkey" /> kunnen implementeren, die phishingbestendige inloggegevens zijn beveiligd door openbare cryptografie van de openbare sleutel. Wachtwoordkluizen (Passkeys) kunnen wachtwoorden vervangen voor zowel wachtwoordloze inlogmethoden als multi-factor authenticatie (MFA).
+WebAuthn (Web Authentication API), ontwikkeld door de [W3C](https://www.w3.org/) en de [FIDO Alliance](https://fidoalliance.org/), is een specificatie voor veilige webauthenticatie met behulp van FIDO2-standaarden. WebAuthn biedt een API waarmee websites <Ref slug="passkey" /> kunnen implementeren, die phishing-bestendige inloggegevens zijn beveiligd door publieke sleutelcryptografie. Passkeys kunnen wachtwoorden vervangen voor zowel wachtwoordloze logins als <Ref slug="mfa" />.
 
-## Hoe ziet de WebAuthn-werkstroom eruit?
+## Hoe ziet de WebAuthn workflow eruit?
 
-Om een meer gedetailleerde uitleg te geven, kunnen we het proces verdelen in twee fasen: registratie en authenticatie. Ten eerste is het essentieel om de vier belangrijkste entiteiten die betrokken zijn bij de WebAuthn-flow te begrijpen.
+Hier is een voorbeeld uit de praktijk om het beter te begrijpen. Je hebt een webapplicatie MyApp die de WebAuthn API wil integreren om Passkey te implementeren voor multi-factor authenticatie.
 
-### 4 belangrijkste entiteiten
+**Registratiefase:** Na het aanmelden met een e-mailverificatie en het instellen van een nieuw wachtwoord, wordt deze gebruiker gevraagd om een Passkey aan te maken. Ze kiezen ervoor om hun apparaat te koppelen met een vingerafdruk. Dit stelt de Passkey veilig in op hun apparaat.
+
+**Authenticatiefase:** Bij de volgende aanmelding wordt de gebruiker gevraagd om hun Passkey te verifiëren na het invoeren van hun wachtwoord. Met slechts een snelle vingerafdrukscan kunnen ze eenvoudig het authenticatieproces voltooien.
+
+![WebAuthn use case.png](https://uploads.strapi.logto.io/Web_Authn_use_case_657eb22cef.png)
+
+Om een meer gedetailleerde uitleg te geven, kunnen we het proces verdelen in twee fasen: registratie en authenticatie. Eerst is het essentieel om de vier belangrijke entiteiten te begrijpen die betrokken zijn bij de WebAuthn flow.
+
+### 4 belangrijke entiteiten
 
 1. **Gebruiker:** De persoon die probeert toegang te krijgen tot een webapplicatie.
 2. **User agent:** De webbrowser die de WebAuthn API-aanroepen afhandelt en het authenticatieproces beheert tussen de gebruiker, relying party en authenticator.
-3. **Relying party:** De service, applicatie of API-server waartoe de gebruiker toegang zoekt.
-4. **Authenticator:** De hardware- of softwarecomponent die wordt gebruikt om de identiteit van de gebruiker te verifiëren. Dit kan verschillende vormen aannemen, afhankelijk van het platform of de mogelijkheden van de browser, zoals beveiligingssleutels (zoals Yubikeys), telefoons of tablets (verbonden via Bluetooth, NFC of USB), apparaatgebaseerde biometrie of PIN-codes, etc.
+3. **Relying party:** De dienst, applicatie of API-server waartoe de gebruiker toegang zoekt.
+4. **Authenticator:** De hardware- of softwarecomponent die wordt gebruikt om de identiteit van de gebruiker te verifiëren. Het kan verschillende vormen aannemen, afhankelijk van het platform of de browsermogelijkheden, zoals beveiligingssleutels (zoals Yubikeys), telefoons of tablets (verbonden via Bluetooth, NFC of USB), apparaat-gebaseerde biometrie of pincodes, enz.
 
-### WebAuthn-registratie
+### WebAuthn registratie
 
-Asymmetrische cryptografie op basis van openbare sleutels is het kernproces.
+Asymmetrische publieke-sleutelcryptografie is het kernproces.
 
-1. **Sleutelpaar genereren:** 
-De user agent genereert een publieke en private sleutel.
-    - **Publieke sleutel:** Wordt gedeeld met de relying party.
-    - **Private sleutel:** Blijft veilig opgeslagen in de authenticator van de gebruiker.
-2. **Registratie-uitdaging:** 
-Wanneer de gebruiker probeert een wachtwoordkluis te registreren, stuurt de relying party een registratie-uitdaging naar de user agent.
-3. **Gebruikersverificatie:** 
-De user agent stuurt de uitdaging naar de authenticator, die de gebruiker vraagt om verificatie (bijv. biometrische authenticatie of een hardwarebeveiligingssleutel).
+1. **Sleutelpaar generatie**: 
+De user agent genereert een publiek-privaat sleutelpaar.
+    - **Publieke sleutel**: Gedeeld met de relying party.
+    - **Privésleutel**: Blijft veilig opgeslagen in de authenticator van de gebruiker.
+2. **Registratie-uitdaging**: 
+Wanneer de gebruiker probeert een passkey te registreren, stuurt de relying party een registratie-uitdaging naar de user agent.
+3. **Gebruikersverificatie**: 
+De user agent stuurt de uitdaging door naar de authenticator, die de gebruiker om verificatie vraagt (bijv. biometrische authenticatie of een hardwarebeveiligingssleutel).
 4. **Cryptografische handtekening:** 
-De authenticator gebruikt zijn private sleutel om de uitdaging te ondertekenen en creëert een cryptografische handtekening.
+De authenticator gebruikt zijn privésleutel om de uitdaging te ondertekenen, waardoor een cryptografische handtekening ontstaat.
 5. **Verificatie en toegang:** 
-De user agent stuurt de ondertekende uitdaging terug naar de relying party, die de handtekening verifieert met de publieke sleutel en het registratieproces voltooit.
+De user agent stuurt de ondertekende uitdaging terug naar de relying party, die de handtekening verifieert met behulp van de publieke sleutel en het registratieproces voltooit.
 
 ```mermaid
 sequenceDiagram
-	participant User
+	participant Gebruiker
 	participant User Agent (Client)
 	participant Relying Party (API server) 
 	participant Authenticator
 
-	User ->> User Agent (Client): Vraag om een nieuwe wachtwoordkluis te registreren
-	User Agent (Client) ->> Relying Party (API server): Vraag om registratie
+	Gebruiker ->> User Agent (Client): Verzoek om een nieuwe passkey te registreren
+	User Agent (Client) ->> Relying Party (API server): Verzoek registratie
 	Relying Party (API server) -->> User Agent (Client): Stuur uitdaging en registratie-opties
-	User Agent (Client) ->> Authenticator: Vraag om gebruikersinteractie
-	Authenticator -->> User Agent (Client): Onderteken uitdaging en creëer referentie
-	User Agent (Client) ->> Relying Party (API server): Stuur ondertekende uitdaging en referentie
-	Relying Party (API server) -->> User Agent (Client): Verifieer en sla referentie op
-	User Agent (Client) ->> User: Registratie succesvol
+	User Agent (Client) ->> Authenticator: Vraag gebruikersinteractie
+	Authenticator -->> User Agent (Client): Onderteken uitdaging en creëer inloggegevens
+	User Agent (Client) ->> Relying Party (API server): Stuur ondertekende uitdaging en inloggegevens
+	Relying Party (API server) -->> User Agent (Client): Verifieer en sla inloggegevens op
+	User Agent (Client) ->> Gebruiker: Registratie succesvol
 ```
 
-### WebAuthn-authenticatie
+### WebAuthn authenticatie
 
 1. **Authenticatie-uitdaging:**
 Wanneer de gebruiker probeert in te loggen, stuurt de relying party een authenticatie-uitdaging naar de user agent.
 2. **Gebruikersverificatie:**
-De user agent stuurt de uitdaging naar de authenticator, die de gebruiker vraagt om verificatie (bijv. biometrische authenticatie of een hardwarebeveiligingssleutel).
+De user agent stuurt de uitdaging naar de authenticator, die de gebruiker om verificatie vraagt (bijv. biometrische authenticatie of een hardwarebeveiligingssleutel).
 3. **Cryptografische handtekening:**
-De authenticator gebruikt zijn private sleutel om de uitdaging te ondertekenen en creëert een cryptografische handtekening.
+De authenticator gebruikt zijn privésleutel om de uitdaging te ondertekenen, waardoor een cryptografische handtekening ontstaat.
 4. **Verificatie en toegang:**
-De user agent verifieert de handtekening met de publieke sleutel en informeert de relying party over een succesvolle authenticatie. Toegang wordt verleend als de verificatie succesvol is.
+De user agent verifieert de handtekening met behulp van de publieke sleutel en informeert de relying party over een succesvolle authenticatie. Toegang wordt verleend als de verificatie succesvol is.
 
 ```mermaid
 sequenceDiagram
-	participant User
+	participant Gebruiker
 	participant User Agent (Client)
 	participant Relying Party (API server)
 	participant Authenticator
 
-	User ->> User Agent (Client): Start login
-	User Agent (Client) ->> Relying Party (API server): Vraag om authenticatie
+	Gebruiker ->> User Agent (Client): Start login
+	User Agent (Client) ->> Relying Party (API server): Verzoek authenticatie
 	Relying Party (API server) -->> User Agent (Client): Stuur uitdaging
-	User Agent (Client) ->> Authenticator: Vraag om gebruikersinteractie
+	User Agent (Client) ->> Authenticator: Vraag gebruikersinteractie
 	Authenticator -->> User Agent (Client): Onderteken uitdaging
 	User Agent (Client) ->> Relying Party (API server): Stuur ondertekende uitdaging
 	Relying Party (API server) -->> User Agent (Client): Verifieer handtekening en authenticeer gebruiker
-	User Agent (Client) ->> User: Authenticatie succesvol
+	User Agent (Client) ->> Gebruiker: Authenticatie succesvol
 ```
 
 ## Hoe gebruik je WebAuthn?
 
-WebAuthn API kan worden gebruikt om inloggen met wachtwoordkluizen of de tweestapsverificatie te implementeren. Raadpleeg Passkey experience voor meer details.
+De WebAuthn API kan worden gebruikt om passkey inloggen of 2-staps verificatie te implementeren. Raadpleeg Passkey ervaring voor meer details.
 
-Om de Web Authentication (Authenticatie) API (WebAuthn) te gebruiken voor veilige authenticatie, moet je twee hoofdprocessen afhandelen: registratie en authenticatie. Hier zijn eenvoudige codevoorbeelden van hoe je deze processen zou kunnen implementeren met JavaScript.
+Om de Web Authentication API (WebAuthn) te gebruiken voor veilige authenticatie, moet je twee hoofdprocessen afhandelen: registratie en authenticatie. Hier zijn eenvoudige codevoorbeelden van hoe je deze processen kunt implementeren met JavaScript.
 
 **Registratie**
 
-De relying party (jouw webapplicatie) start het registratieproces door de methode `navigator.credentials.create()` aan te roepen.
+De relying party (jouw webapplicatie) start het registratieproces door de `navigator.credentials.create()` methode aan te roepen.
 
 ```jsx
 // Registratie
 navigator.credentials.create({
   publicKey: {
     rp: {
-      name: "Je Relying Party Naam",
-      id: "je-relying-party-id"
+      name: "Your Relying Party Name",
+      id: "your-relying-party-id"
     },
     user: {
-      id: "gebruiker-id",
-      displayName: "Gebruiker Naam",
-      name: "Gebruiker Naam"
+      id: "user-id",
+      displayName: "User Name",
+      name: "User Name"
     },
-    challenge: "je-uitdaging-waarde",
+    challenge: "your-challenge-value",
     timeout: 60000 // 60 seconden
   }
 }).then(credential => {
-  // Sla de id van de referentie op voor toekomstige authenticatie
+  // Sla het id van de inloggegevens op voor toekomstige authenticatie
   localStorage.setItem("credentialId", credential.id);
 }).catch(error => {
   console.error("Registratiefout:", error);
 });
 ```
 
-De relying party start het authenticatieproces door de methode `navigator.credentials.get()` aan te roepen.
+De relying party start het authenticatieproces door de `navigator.credentials.get()` methode aan te roepen.
 
 ```jsx
 // Authenticatie
 navigator.credentials.get({
   publicKey: {
     rp: {
-      name: "Je Relying Party Naam",
-      id: "je-relying-party-id"
+      name: "Your Relying Party Name",
+      id: "your-relying-party-id"
     },
-    challenge: "je-uitdaging-waarde",
+    challenge: "your-challenge-value",
     timeout: 60000 // 60 seconden
   }
 }).then(credential => {
-  // Verifieer de id van de referentie en andere eigenschappen
+  // Verifieer het id van de inloggegevens en andere eigenschappen
   if (credential.id === localStorage.getItem("credentialId")) {
-    // Authenticatie geslaagd
+    // Authenticatie succesvol
     console.log("Gebruiker succesvol geauthenticeerd");
   } else {
-    console.error("Ongeldige referentie");
+    console.error("Ongeldige inloggegevens");
   }
 }).catch(error => {
   console.error("Authenticatiefout:", error);
 });
 ```
 
-Lees de specificaties voor meer details: https://fidoalliance.org/specifications/download/.
+Om de details te leren, lees de specificaties: https://fidoalliance.org/specifications/download/.
 
-Opmerking: in WebAuthn-acties, of het nu voor registratie of authenticatie is, is het "rp ID" (relying party ID) een verplicht veld. Het vertegenwoordigt de domeinnaam van de huidige webpagina. Als het niet overeenkomt met het huidige domein, zal de browser het verzoek afwijzen. Dit betekent dat wachtwoordkluizen aan een specifiek domein zijn gebonden en dat er momenteel geen manier is om bestaande wachtwoordkluizen naar een ander domein te migreren. Bovendien kunnen wachtwoordkluizen niet worden gebruikt over verschillende domeinen.
+Opmerking: In WebAuthn-acties, of het nu gaat om registratie of authenticatie, is de "rp ID" (relying party ID) een verplicht veld. Het vertegenwoordigt de domeinnaam van de huidige webpagina. Als het niet overeenkomt met het huidige domein, zal de browser het verzoek afwijzen. Dit betekent dat passkeys gebonden zijn aan een specifiek domein en dat er momenteel geen manier is om bestaande passkeys naar een ander domein te migreren. Bovendien kunnen passkeys niet worden gebruikt over verschillende domeinen.
+
+## WebAuthn en OpenID Connect (OIDC)
+
+Door de sterke beveiliging van WebAuthn te combineren met het gestandaardiseerde identiteitsprotocol van OIDC, kunnen we een veiligere en gebruiksvriendelijkere authenticatie-ervaring creëren.
+
+Leer hoe het werkt:
+
+- **Registratiefase**: Gebruikers voltooien een standaard <Ref slug="openid-connect" /> registratieproces (bijv. e-mailverificatie en wachtwoordcreatie). WebAuthn genereert een publiek-privaat sleutelpaar, waarbij de publieke sleutel wordt opgeslagen bij de OIDC <Ref slug="identity-provider" /> en de privésleutel op het apparaat van de gebruiker blijft.
+- **Authenticatiefase**: Gebruikers hebben toegang tot een OIDC-beschermde bron en worden doorgestuurd naar de inlogpagina. Na het verstrekken van basisgegevens (bijv. e-mail en wachtwoord), roept het systeem WebAuthn aan voor passkey authenticatie. Zodra de Passkey is geverifieerd, geeft OIDC een Access Token of ID Token uit voor gebruikers toegang.
 
 ## Wat is het verschil tussen WebAuthn en CTAP2?
 
 **WebAuthn** en **CTAP2** zijn beide essentiële componenten van de FIDO2-standaard, maar ze dienen verschillende doeleinden:
 
-- **CTAP2 (Client to Authenticator Protocol 2):** Dit protocol definieert hoe een apparaat, zoals een beveiligingssleutel of smartphone, communiceert met een webapplicatie. Het stelt een beveiligd kanaal in tussen de **authenticator** en het **apparaat van de gebruiker**, waarbij ervoor wordt gezorgd dat gevoelige authenticatiegegevens worden beschermd.
-- **WebAuthn (Web Authentication (Authenticatie) API):** Deze API biedt een gestandaardiseerde manier voor webapplicaties om te communiceren met CTAP2-conforme authenticators. Het handelt het authenticatieproces af, inclusief de uitwisseling van authenticatiegegevens tussen het **apparaat van de gebruiker** en de **relying party**.
+- **CTAP2 (Client to Authenticator Protocol 2):** Dit protocol definieert hoe een apparaat, zoals een beveiligingssleutel of smartphone, communiceert met een webapplicatie. Het stelt een beveiligd kanaal in tussen de **authenticator** en het **apparaat van de gebruiker**, waardoor gevoelige authenticatiegegevens worden beschermd.
+- **WebAuthn (Web Authentication API):** Deze API biedt een gestandaardiseerde manier voor webapplicaties om te communiceren met CTAP2-compatibele authenticators. Het handelt het authenticatieproces af, inclusief de uitwisseling van authenticatiegegevens tussen het **apparaat van de gebruiker** en de **relying party**.
 
-## Termen om te kennen
-
-- <Ref slug="passkey" />
-- FIDO
-- FIDO2
-- CTAP2
-- MFA
-- Authenticator
+<SeeAlso slugs={["passkey", "mfa", "openid-connect"]} />
 
 <Resources
   urls={[
