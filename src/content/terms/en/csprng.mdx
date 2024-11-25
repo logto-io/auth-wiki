@@ -1,0 +1,102 @@
+---
+title: Cryptographically secure pseudorandom number generator
+tags: [security]
+description: A cryptographically secure pseudorandom number generator (CSPRNG) is a pseudorandom number generator that generates random numbers that are suitable for use in cryptographic applications where the security of the data is important.
+---
+
+In modern computing systems, random numbers are ubiquitous, from generating passwords to playing simple lottery games. However, in the field of cryptography, the security of random numbers is not just a matter of "winning the lottery" with low probability, but a critical factor in determining whether a system can withstand attacks.
+
+If a random number generator is not secure, it may lead to:
+
+- Prediction of encryption keys, making system communications easily broken;
+- Forgery of session tokens, leading to illegal takeover of user accounts;
+- Failure of signature algorithms, making digital signatures lose their legality.
+
+Therefore, in cryptographic applications, we need not only a "seemingly random" sequence of numbers, but also unpredictable and secure random numbers. This is where the **Cryptographically Secure Pseudorandom Number Generator (CSPRNG)** comes into play.
+
+## What is CSPRNG?
+
+CSPRNG is a special form of Pseudorandom Number Generator (PRNG) designed for cryptographic applications, with higher security standards.
+
+The core characteristics of CSPRNG include:
+
+1. **Predictive Resistance**: Attackers cannot predict other parts of the random sequence based on known parts.
+2. **Backward Untraceability**: Even if the internal state is stolen by attackers, the previously generated random number sequence cannot be restored.
+
+To understand the importance of CSPRNG, let's compare it with other random number generation methods.
+
+## Comparison of random number generators
+
+1. **True Random Number Generator (TRNG)**
+    
+    TRNG generates completely random values based on physical phenomena (e.g., hardware noise, electromagnetic interference), but it is slow and strongly dependent on hardware.
+    
+2. **Pseudorandom Number Generator (PRNG)**
+    
+    PRNG generates random numbers based on algorithms and seeds, which are efficient but predictable and unsuitable for cryptographic scenarios.
+    
+3. **CSPRNG**
+    
+    CSPRNG is designed based on cryptographic principles, addressing the security vulnerabilities of PRNG, ensuring that the generated random number sequence is unpredictable.
+    
+
+For example, PRNG is like a program that automatically generates poems; as long as the starting sentence (seed) is known, attackers can predict subsequent sentences. In contrast, CSPRNG is like a program that locks the source code of the poem, making it almost impossible for the outside world to predict the next sentence.
+
+## Principles and algorithms of CSPRNG
+
+### Common CSPRNG algorithms
+
+- **HMAC deterministic random bit generator (HMAC-DRBG)**
+    
+    A CSPRNG based on the HMAC (Hash-based Message Authentication Code) algorithm, which uses keys and pseudorandom values to update the internal state. HMAC-DRBG improves unpredictability and backward untraceability through dual-state management (key `K` and pseudorandom value `V`).
+    
+- **SHA-256-based PRNG**
+    
+    A random number generator based on the SHA-256 hash algorithm, which does not require additional keys and relies only on the state value. Its update mechanism is simple, but its resistance to attacks is not as good as HMAC-DRBG.
+    
+- **Counter mode deterministic random bit generator (CTR-DRBG)**
+    
+    A random number generator based on block cipher modes (such as AES), using counter (CTR) mode to generate random numbers. It is suitable for high-performance and high-security demand scenarios, relying on the security of block cipher algorithms and suitable for hardware implementation.
+    
+
+### Random seed generation
+
+- Obtain high-entropy seeds by calling the operating system's true random number generator (TRNG).
+- Use hardware security modules (HSM) or system entropy sources (such as `/dev/urandom`) to generate seeds to ensure the randomness of the initial state of CSPRNG.
+
+## How to use CSPRNG?
+
+From the previous principles, we know that to ensure the effectiveness of CSPRNG, we should start with a true random seed. If the initial seed cannot guarantee true randomness, then in theory, relying only on the CSPRNG algorithm is difficult to ensure the true cryptographic security of the random number.
+
+In fact, modern operating systems have already considered this issue and provide system-level true random number interfaces, which mostly generate high-quality random numbers based on underlying entropy sources (such as hardware noise, keyboard and mouse events).
+
+For example, the `/dev/random` and `/dev/urandom` interfaces in Linux and macOS, and the `CryptGenRandom` or `BCryptGenRandom` interfaces in Windows.
+
+Common programming languages also provide encapsulations of system-level true random number interfaces:
+
+- Node.js's `crypto.randomBytes()` method;
+- Java's `SecureRandom` class;
+- Python's `os.urandom()` interface and `secrets` module, etc.
+
+You may wonder, since system-level true random numbers can be generated, why do we still need CSPRNG algorithms?
+
+As mentioned earlier, the entropy pool capacity of the operating system is limited, which means that the rate at which it generates true random numbers is limited. In scenarios where a large number of random numbers are required in a short time, system-level random numbers cannot meet the requirements. CSPRNG is an enhancement of system-level true random numbers, providing faster generation of cryptographically secure random numbers, as well as higher customization and more random bits, etc.
+
+When using CSPRNG, the following points should be noted:
+
+- If a common pseudorandom number seed is used, it may lead to attackers predicting the random sequence, resulting in insecure CSPRNG output. We can use the system-level interface mentioned earlier to generate true random numbers as seeds.
+- If the internal state of CSPRNG is leaked, it may also lead to the prediction of generated random numbers. To avoid such situations, we can periodically update the state or seed of CSPRNG.
+
+## Application Examples
+
+### Key Generation
+
+In encrypted communication, the security of the key directly determines the security of the system. If the key is predictable, attackers can obtain the key through brute force cracking or analysis of the key generation pattern, thereby decrypting the communication content. Therefore, key generation requires random numbers with extremely high unpredictability, and the characteristics of CSPRNG (predictive resistance and backward untraceability) ensure that the generated keys are difficult to predict.
+
+### Session Tokens
+
+In web applications, session tokens are used to identify user sessions (such as login status). If the token is guessed or forged by attackers, it may lead to session hijacking (Session Hijacking), thereby impersonating users to perform operations.
+
+For example, in CSRF and PKCE, random `state` or `code` are used to prevent session or process attacks.
+
+There are also other scenarios, such as when using hash algorithms to process passwords to be written into the DB, if only simple hash algorithms are used, it is difficult to resist rainbow table attacks. In such cases, when using hash algorithms, Salt, which is a random variable, is added to make the same password generate different hash values.
