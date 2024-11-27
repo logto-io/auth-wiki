@@ -13,10 +13,15 @@ const alternateLinks = Object.fromEntries(
     getLocaleUrl(Astro.url.pathname, locale),
   ]),
 );
+const selectedWidthCalcId =
+  "selected-width-calc-" + Math.random().toString(36).substring(7);
 const { class: className, ...rest } = Astro.props;
 ---
 
-<astro-language-selector data-links={JSON.stringify(alternateLinks)}>
+<astro-language-selector
+  data-links={JSON.stringify(alternateLinks)}
+  data-width-calc-id={selectedWidthCalcId}
+>
   <select class={className} {...rest}>
     {
       Object.entries(localeDisplay).map(([value, display]) => (
@@ -27,6 +32,14 @@ const { class: className, ...rest } = Astro.props;
     }
   </select>
 </astro-language-selector>
+<select
+  id={selectedWidthCalcId}
+  class={className}
+  {...rest}
+  style="visibility: hidden; position: absolute; top: -9999px; pointer-events: none; user-select: none;"
+>
+  <option></option>
+</select>
 
 <style>
   .option {
@@ -43,12 +56,28 @@ const { class: className, ...rest } = Astro.props;
     connectedCallback() {
       const select = this.querySelector("select");
       const links = JSON.parse(this.dataset.links ?? "{}");
+      const selectedWidthCalcId = this.dataset.widthCalcId;
+
+      // Select tag cannot have dynamic width that fits its content without JavaScript.
+      const calcWidth = () => {
+        if (!select || !selectedWidthCalcId) return;
+        const selected = select.querySelector("option:checked");
+        const calc = document.getElementById(selectedWidthCalcId);
+        const calcOption = calc?.querySelector("option");
+        if (selected && calc && calcOption) {
+          calcOption.textContent = selected.textContent;
+          select.style.width = `${calc.offsetWidth}px`;
+        }
+      };
+
+      calcWidth();
 
       if (select) {
         select.addEventListener("change", () => {
           const locale = select.value;
           const url = links[locale];
           window.location.href = url;
+          calcWidth();
         });
       }
     }
