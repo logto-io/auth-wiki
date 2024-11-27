@@ -1,7 +1,7 @@
 ---
 title: Single sign-on (SSO)
 tags: [authentication]
-description: Single sign-on (SSO) is an authentication method that allows users to access multiple systems with a single set of credentials. As a key component of identity and access management (IAM) systems, SSO is widely used in modern cloud-based applications and services, simplifying user access and enhancing security.
+description: Single sign-on (SSO) is an authentication method that allows users to access multiple systems with a single set of credentials.
 ---
 
 ## What is single sign-on (SSO)?
@@ -14,13 +14,15 @@ A well-known example of SSO is Google’s suite of services, such as Gmail, Goog
 
 ## How does single sign-on work?
 
-SSO operates on a trust relationship between an application or service, known as the <Ref slug="service-provider" /> and an <Ref slug="identity-provider" />. The IdP handles user authentication and securely shares the necessary information with the SP to grant access. This trust is established through a process called federation, where both the SP and IdP agree on specific standards and protocols to securely exchange authentication data.
+SSO relies on a trust relationship between an application or service, known as the <Ref slug="service-provider" />, and an <Ref slug="identity-provider" />. The IdP handles user authentication and securely shares the necessary information with the SP to grant access. This trust is established through a process called federation, where the SP and IdP agree on specific standards and protocols for securely exchanging authentication data.
 
-When a user tries to access an SSO-enabled application, the SP redirects them to the IdP for authentication. The IdP prompts the user for their credentials, verifies their identity, and generates a security token or assertion containing the user's information. This token is sent back to the SP, which then uses it to grant access.
+When a user attempts to access an SSO-enabled application, the SP redirects them to the IdP for authentication. The IdP prompts the user to provide credentials, verifies their identity, and establishes an authenticated session in its system. This session is typically maintained using a session cookie securely stored under the IdP's domain.
 
-If the user attempts to access another SSO-enabled application, the process is repeated automatically without requiring them to log in again. The IdP sends the required authentication data directly to the SP, allowing the user to seamlessly access the new application.
+Once the user is authenticated, the IdP generates a security token or assertion containing the user information that has been consented to be shared with the SP. This token or assertion is securely transmitted back to the SP, which validates it and grants the user access.
 
-<Ref slug="saml" /> and <Ref slug="openid-connect" /> are two widely used protocols for implementing SSO. These standards define how authentication data is exchanged between the IsP and the SP, ensuring secure and reliable communication.
+If the user accesses another SSO-enabled application, the process occurs smoothly without requiring additional logins. This convenience is made possible by the user authentication session maintained by the IdP, allowing the IdP to automatically verify the user’s identity and issue a new security token without prompting for credentials again.
+
+Protocols like <Ref slug="saml" /> and <Ref slug="openid-connect" /> are widely used to implement SSO. These standards define how authentication data is securely exchanged between the IdP and SP, ensuring reliable and secure communication while maintaining the user's seamless experience across applications.
 
 ### SAML-based SSO
 
