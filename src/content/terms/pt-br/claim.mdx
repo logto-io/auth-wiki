@@ -1,0 +1,72 @@
+---
+title: Declaração (Claim)
+tags: [oauth 2.0, oidc]
+description: Uma declaração (claim) em JSON Web Token (JWT) é um par nome-valor que transmite informações específicas. Em um contexto mais amplo, uma declaração pode ser qualquer par nome-valor que representa informações.
+---
+
+## O que é uma declaração (claim)?
+
+Uma declaração (claim) é um par nome-valor que transmite informações específicas. Por exemplo, em um objeto JSON:
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+Neste exemplo, `sub` é uma declaração que representa o identificador do sujeito com o valor `foo`, e `email` é uma declaração que representa o endereço de e-mail com o valor `foo@bar.com`.
+
+> Usamos *sujeito* em vez de *usuário* porque, sem uma definição clara, o sujeito (`sub`) pode representar um usuário, dispositivo ou qualquer entidade.
+
+### Usos das declarações (claims)
+
+Declarações (claims) são amplamente utilizadas em vários contextos, como:
+
+- <Ref slug="jwt" />: Em um JWT, declarações são usadas para representar informações sobre o token, como o emissor (`iss`), sujeito (`sub`) e tempo de expiração (`exp`).
+- <Ref slug="openid-connect" />: No OIDC, declarações são usadas para representar informações do usuário no <Ref slug="id-token" /> e <Ref slug="userinfo-endpoint" />, como o endereço de e-mail do usuário (`email`), nome (`name`) e foto de perfil (`picture`).
+
+### Declarações padrão
+
+No JWT e OIDC, existem declarações padrão definidas pelas especificações. Algumas declarações padrão comuns incluem:
+
+- **`iss`**: O emissor do token. Por exemplo, se o <Ref slug="authorization-server" /> que emitiu o token é `https://example.com`, na maioria dos casos a declaração `iss` será a mesma (`https://example.com`).
+- **`sub`**: O sujeito do token. Representa a entidade sobre a qual o token trata. Por exemplo, em um ID token, a declaração `sub` geralmente representa o identificador do usuário.
+- **`aud`**: A audiência do token. Indica os destinatários para os quais o token é destinado. Por exemplo, se o token é destinado ao acesso a uma API em `https://api.example.com`, a declaração `aud` será a mesma (`https://api.example.com`).
+- **`exp`**: O tempo de expiração do token. Indica quando o token não deve mais ser aceito para processamento.
+- **`nbf`**: O tempo "não antes" do token. Indica quando o token deve começar a ser aceito para processamento.
+- **`iat`**: O tempo de emissão do token. Indica quando o token foi emitido.
+- **`jti`**: O ID do JWT do token. Fornece um identificador único para o token.
+
+OIDC também define declarações padrão adicionais para informações do usuário. Veja [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims) na especificação OIDC para mais detalhes.
+
+### Declarações personalizadas
+
+Além das declarações padrão, você pode definir declarações personalizadas para representar informações específicas da aplicação. Por exemplo, você pode incluir uma declaração `role` para representar o papel do usuário na aplicação.
+
+Declarações personalizadas podem ser nomeadas com [Identificadores de Recursos Uniformes (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) para evitar conflitos com outras declarações. Por exemplo:
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+Neste exemplo, a declaração `role` é nomeada com `https://example.com/claims/` para garantir a exclusividade. Alternativamente, você pode definir seu próprio [Nome de Recurso Uniforme (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) para declarações personalizadas:
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+Neste exemplo, a declaração `role` é nomeada com `urn:example:claims:`.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

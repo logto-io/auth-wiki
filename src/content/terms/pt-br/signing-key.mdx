@@ -1,0 +1,149 @@
+---
+title: Chave de assinatura
+tags: [oidc]
+description: Uma chave de assinatura é uma chave criptográfica usada para assinar e verificar JSON Web Tokens no OpenID Connect (OIDC). Ela é usada para garantir a integridade e autenticidade dos tokens emitidos pelo provedor OpenID.
+---
+
+## O que é uma chave de assinatura?
+
+No contexto do <Ref slug="openid-connect" />, uma **chave de assinatura**, geralmente um par de chaves assimétricas, é usada para assinar e verificar <Ref slug="jwt">JSON Web Tokens (JWTs)</Ref>. Provedores OpenID usam chaves de assinatura para assinar tokens como <Ref slug="id-token">ID tokens</Ref> e <Ref slug="access-token">access tokens</Ref> para garantir sua integridade e autenticidade.
+
+Embora o conceito de chaves de assinatura possa ser mais amplo, vamos nos concentrar em como elas são usadas no OIDC para proteger tokens. Outros casos de uso incluem assinatura de e-mails, documentos e pacotes de software, que podem derivar dos mesmos princípios.
+
+## Exemplo: Assinatura de ID token
+
+Quando um usuário se autentica com um provedor OpenID, o provedor emite um ID token que contém informações do usuário (<Ref slug="claim">claims</Ref>) e é assinado pela chave de assinatura do provedor. Como o ID token é um JWT, ele consiste em três partes: cabeçalho, payload e assinatura.
+
+### 1. Cabeçalho
+
+Vamos supor que o cabeçalho seja:
+
+```json
+{
+  "alg": "ES384",
+  "typ": "JWT"
+}
+```
+
+O JSON indica que o ID token é assinado usando o algoritmo [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) com a curva P-384. O campo `typ` especifica que o tipo de token é JWT.
+
+### 2. Payload
+
+O payload contém informações básicas do usuário:
+
+```json
+{
+  "sub": "1234567890",
+  "name": "Alice"
+}
+```
+
+O `sub` claim é o identificador único do usuário, e `name` é o nome de exibição dele.
+
+### 3. Assinar o token
+
+De acordo com o formato JWT, o cabeçalho e o payload devem ser codificados em Base64URL e concatenados com um `.` para assinatura:
+
+```
+{{header}}.{{payload}}
+```
+
+Neste caso, o valor seria:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0
+```
+
+Vamos supor que o provedor OpenID use a seguinte chave privada para assinar o token:
+
+```
+-----BEGIN PRIVATE KEY-----
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDBW9PDXInlNT2hjOtQr
+g4pkVkyJsKia33dHrsbOG4Z77pfYN7SYZCHh9YdLXTTKinehZANiAAQX/FB1s6Gj
+YnDSGCY08PRUAQ8CCRCt8Ph/VDHfLj1xSbrjp8wFf0NjH7jcfNebpV1fvu4XKbP3
+Ro7h0G6elN1TMsVECJPv4ieDNkYOsgT4UboJypC5E/rmvrlJTMM6Y/k=
+-----END PRIVATE KEY-----
+```
+
+Para assinar o token, o provedor OpenID precisa usar a chave privada para gerar uma assinatura por:
+
+```
+signature = sign(header + '.' + payload, private_key)
+```
+
+Então, a assinatura codificada em Base64URL é:
+
+```
+Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+### 4. Montar o JWT
+
+Finalmente, o provedor OpenID monta o JWT concatenando o cabeçalho, payload e assinatura com `.`:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+Neste caso, o ID token seria:
+
+```
+eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Cjy6A_FHnwQBP0hRawoGTkRy8m8o0Ncc1q4BeyxYr0fxhKYmJJinIWZPXJdaAXRO9wOFuH2-UML2yWHjot_LnCPO6362asMvgNkEJMZ6UtqyOPlsCOJ7voTPOCT6sYu2
+```
+
+O ID token agora está pronto para ser enviado ao <Ref slug="client" /> para processamento posterior.
+
+### 5. Verificar o token
+
+Quando o cliente recebe o ID token, ele pode verificar a assinatura usando a chave pública do provedor OpenID. Normalmente, a chave pública é disponibilizada através do endpoint <Ref slug="openid-connect-discovery" /> (`jwks_uri`) no formato de um <Ref slug="jwk" headingId="json-web-key-set-jwks" />.
+
+Para este exemplo, a chave pública é:
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx-43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+E o valor correspondente do JWK é:
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+Agora, o cliente pode verificar a assinatura usando a chave pública.
+
+## Escolha o algoritmo certo
+
+Existem vários algoritmos disponíveis para assinar JWTs:
+
+- **Algoritmos simétricos**: HMAC com a família SHA (por exemplo, HS256, HS384, HS512) é um algoritmo simétrico que usa a mesma chave para assinar e verificar. Não é recomendado para a maioria dos casos, pois a chave secreta precisa ser compartilhada entre as partes.
+- **Algoritmos assimétricos**: RSA (por exemplo, RS256, RS384, RS512) e ECDSA (por exemplo, ES256, ES384, ES512) são algoritmos assimétricos que usam um par de chaves: uma chave privada para assinar e uma chave pública para verificar.
+  - RSA é amplamente utilizado e suportado por muitas bibliotecas e plataformas. No entanto, tem um tamanho de chave e assinatura muito maior em comparação com o ECDSA.
+  - ECDSA é mais performático e gera assinaturas menores, tornando-o uma escolha melhor para ambientes restritos. Como é menos comum, certifique-se de que sua plataforma o suporte.
+
+> ECDSA deve ser a escolha preferida para novas aplicações devido aos seus benefícios de desempenho e segurança.
+
+## Outros cenários de chave de assinatura
+
+Embora o exemplo acima se concentre em ID tokens no OIDC, o conceito de chave de assinatura é amplamente usado em vários cenários, como assinatura de e-mails, documentos e pacotes de software. Os princípios-chave permanecem os mesmos:
+
+- Para chaves simétricas, a mesma chave é usada para assinar e verificar. Isso é adequado para cenários onde as partes podem compartilhar a chave com segurança, ou há uma única entidade responsável por assinar e verificar.
+- Para chaves assimétricas, uma chave privada é usada para assinar, e uma chave pública correspondente é usada para verificar. Isso é adequado para a maioria dos cenários onde as partes de assinatura e verificação são entidades diferentes.
+
+<SeeAlso slugs={["jwt", "jws", "jwk", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/introduction-to-ec-and-rsa-signing-algorithms-in-jwt",
+    "https://tools.ietf.org/html/rfc7515",
+    "https://tools.ietf.org/html/rfc7517",
+  ]}
+/>

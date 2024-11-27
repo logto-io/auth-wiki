@@ -1,0 +1,65 @@
+---
+title: Management API
+tags: [api, integration]
+description: L'API di gestione (Management API) nel contesto della gestione delle identità e degli accessi (IAM) consente la gestione programmatica delle risorse come utenti, applicazioni, ruoli e permessi. Tipicamente RESTful, fornisce un livello di astrazione tra il sistema IAM e l'interfaccia utente, abilitando automazione, integrazione e sviluppo di funzionalità personalizzate.
+---
+
+## Che cos'è l'API di gestione (Management API)?
+
+La definizione di Management API può variare a seconda del software o del servizio che stai utilizzando. Nel contesto della gestione delle identità e degli accessi (IAM), Management API di solito si riferisce a un insieme di API che ti permettono di gestire programmaticamente le risorse correlate all'IAM. Ad esempio, utenti, applicazioni, ruoli, permessi, organizzazioni, ecc.
+
+Sebbene il nome non specifichi l'implementazione esatta, Management API è solitamente RESTful, data la sua natura di definire precisamente le risorse e le operazioni che possono essere eseguite su di esse. Detto ciò, quando vedi `POST /users`, puoi aspettarti che questa chiamata API creerà un nuovo utente.
+
+## Perché l'API di gestione (Management API) è importante?
+
+Management API crea un livello separato di astrazione sopra il sistema IAM, ma sotto l'interfaccia utente. Questo permette agli sviluppatori di automatizzare la gestione delle risorse IAM, il che può essere particolarmente utile in diversi scenari:
+
+### 1. Automazione
+
+Come suggerisce il nome, Management API ti permette di usare il codice per gestire le risorse, invece di cliccare manualmente attraverso l'interfaccia utente. Questo è particolarmente utile quando hai un gran numero di utenti, applicazioni o ruoli da gestire. Ad esempio, puoi scrivere uno script per importare utenti da un file CSV e assegnarli ai ruoli e permessi corretti.
+
+### 2. Integrazione
+
+Management API crea un modo standard per la comunicazione da servizio a servizio (o machine-to-machine). Quando hai più servizi che devono comunicare con il sistema IAM, invece di implementare integrazioni personalizzate per ciascun servizio, una Management API ben progettata può essere utilizzata per tutti i servizi combinando le chiamate API. Ad esempio, un servizio che ha bisogno di elencare tutti gli utenti sotto un ruolo specifico può farlo chiamando `GET /roles/{role_id}/users`.
+
+### 3. Composizione ed estensione delle funzionalità
+
+A causa della varietà di requisiti aziendali, un sistema IAM potrebbe non essere in grado di fornire tutte le funzionalità esatte di cui hai bisogno, specialmente quando si tratta di requisiti complessi di access control (access control). Management API ti permette di costruire funzionalità personalizzate sopra il sistema IAM esistente senza modificare la piattaforma o l'architettura sottostante.
+
+Vediamo un esempio quotidiano: gli utenti finali devono cambiare il loro indirizzo email. Diverse app possono avere requisiti diversi:
+
+1. L'app A richiede all'utente di verificare sia il vecchio che il nuovo indirizzo email.
+2. L'app B richiede all'utente di verificare la password esistente prima di cambiare l'indirizzo email.
+3. L'app C richiede all'utente di verificare la password esistente e a un amministratore di approvare il cambio di email.
+
+Con Management API, puoi costruire un servizio personalizzato che orchestra questi requisiti chiamando le API necessarie nell'ordine corretto. Puoi persino combinare Management API con l'API del tuo servizio per ottenere un flusso di lavoro complesso. Prendiamo l'app C come esempio:
+
+1. L'utente clicca su "Cambia Email" nell'app C, che invia una richiesta `POST /email-change-requests` al tuo servizio. Crea una nuova richiesta di cambio email e restituisce l'identificatore `foo`.
+2. L'app C mostra un dialogo all'utente, chiedendogli di inserire la password esistente.
+3. L'utente inserisce la password e l'app C invia una richiesta `PATCH /email-change-requests/foo` al tuo servizio con la password. In background, il tuo servizio verifica la password chiamando Management API `POST /users/{user_id}/verify-password`.
+4. Se la password è corretta, il tuo servizio crea un record di verifica del successo nella richiesta di cambio email `foo`.
+5. Nel pannello di amministrazione, un amministratore può vedere le richieste di cambio email in sospeso con `GET /email-change-requests?status=pending`.
+6. Se l'amministratore approva la richiesta, il pannello di amministrazione invia una richiesta `PATCH /email-change-requests/foo` al tuo servizio con l'approvazione dell'amministratore.
+7. Il tuo servizio chiamerà quindi Management API `PATCH /users/{user_id}` per aggiornare l'indirizzo email dell'utente. Se l'indirizzo email non può essere aggiornato, Management API restituirà un errore e il tuo servizio può gestirlo di conseguenza.
+
+Nota che nell'esempio sopra, i nostri utenti finali non interagiscono mai direttamente con Management API. Invece, interagiscono con l'app C, che orchestra le chiamate Management API in background per ottenere il flusso di lavoro desiderato.
+
+## Come dovrebbe essere una buona Management API?
+
+- **RESTful**: Segui i principi RESTful per rendere l'API prevedibile e facile da usare.
+- **Orientata alle risorse**: Rappresenta le risorse come sostantivi e usa i metodi HTTP per eseguire azioni su di esse.
+- **Coerente**: Usa convenzioni di denominazione, gestione degli errori e formati di risposta coerenti.
+- **Sicura**: Implementa meccanismi di autenticazione e autorizzazione adeguati per proteggere l'API.
+- **Documentata**: Fornisci documentazione chiara e concisa su come usare l'API, inclusi esempi e casi d'uso.
+- **Compatibile**: Assicura la compatibilità all'indietro quando introduci nuove versioni dell'API.
+- **Completa**: Copri tutte le operazioni necessarie per gestire efficacemente le risorse IAM.
+
+Ci sono altri aspetti come le prestazioni e la scalabilità, che sono più legati all'infrastruttura piuttosto che al design dell'API stesso. Tuttavia, in pratica, una buona Management API dovrebbe considerare anche questi aspetti.
+
+<Resources
+  urls={[
+    "https://blog.logto.io/graphql-and-rest-api",
+    "https://blog.logto.io/post-only-debate",
+    "https://swagger.io/specification/",
+  ]}
+/>

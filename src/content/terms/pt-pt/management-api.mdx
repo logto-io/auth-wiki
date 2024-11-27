@@ -1,0 +1,65 @@
+---
+title: API de Gestão (Management API)
+tags: [api, integration]
+description: A API de Gestão (Management API) no contexto de gestão de identidade e acesso (IAM) permite a gestão programática de recursos como utilizadores, aplicações, funções e permissões. Tipicamente RESTful, fornece uma camada de abstração entre o sistema IAM e a interface do utilizador, permitindo automação, integração e desenvolvimento de funcionalidades personalizadas.
+---
+
+## O que é a API de Gestão (Management API)?
+
+A definição de API de Gestão (Management API) pode variar dependendo do software ou serviço que estás a usar. No contexto de gestão de identidade e acesso (IAM), a API de Gestão (Management API) geralmente refere-se a um conjunto de APIs que te permitem gerir recursos relacionados com IAM de forma programática. Por exemplo, utilizadores, aplicações, funções, permissões, organizações, etc.
+
+Embora o nome não especifique a implementação exata, a API de Gestão (Management API) é geralmente RESTful, dada a sua natureza de definir precisamente os recursos e operações que podem ser realizadas sobre eles. Dito isto, quando vês `POST /users`, podes esperar que esta chamada de API criará um novo utilizador.
+
+## Por que a API de Gestão (Management API) é importante?
+
+A API de Gestão (Management API) cria uma camada separada de abstração sobre o sistema IAM, mas abaixo da interface do utilizador. Isto permite que os desenvolvedores automatizem a gestão de recursos IAM, o que pode ser especialmente útil em vários cenários:
+
+### 1. Automação
+
+Como o nome sugere, a API de Gestão (Management API) permite que uses código para gerir recursos, em vez de clicares manualmente através da interface do utilizador. Isto é particularmente útil quando tens um grande número de utilizadores, aplicações ou funções para gerir. Por exemplo, podes escrever um script para importar utilizadores de um ficheiro CSV e atribuí-los às funções e permissões corretas.
+
+### 2. Integração
+
+A API de Gestão (Management API) cria uma forma padrão para comunicação de serviço para serviço (ou máquina para máquina). Quando tens múltiplos serviços que precisam de comunicar com o sistema IAM, em vez de implementares integrações personalizadas para cada serviço, uma API de Gestão (Management API) bem desenhada pode ser usada para todos os serviços combinando as chamadas de API. Por exemplo, um serviço que precisa listar todos os utilizadores sob uma função específica pode fazê-lo chamando `GET /roles/{role_id}/users`.
+
+### 3. Composição e extensão de funcionalidades
+
+Devido à variedade de requisitos de negócios, um sistema IAM pode não conseguir fornecer todas as funcionalidades exatas que precisas, especialmente quando se trata de requisitos complexos de controlo de acesso. A API de Gestão (Management API) permite que construas funcionalidades personalizadas sobre o sistema IAM existente sem modificar a plataforma ou arquitetura subjacente.
+
+Vamos ver um exemplo do dia a dia: os utilizadores finais precisam mudar o seu endereço de email. Diferentes apps podem ter diferentes requisitos:
+
+1. A App A requer que o utilizador verifique ambos os endereços de email, o antigo e o novo.
+2. A App B requer que o utilizador verifique a senha existente antes de mudar o endereço de email.
+3. A App C requer que o utilizador verifique a senha existente e que um administrador aprove a mudança de email.
+
+Com a API de Gestão (Management API), podes construir um serviço personalizado que orquestra estes requisitos chamando as APIs necessárias na ordem correta. Podes até combinar a API de Gestão (Management API) com a API do teu serviço para alcançar um fluxo de trabalho complexo. Vamos tomar a App C como exemplo:
+
+1. O utilizador clica em "Mudar Email" na App C, que envia um pedido `POST /email-change-requests` para o teu serviço. Ele cria um novo pedido de mudança de email e retorna o identificador `foo`.
+2. A App C mostra um diálogo ao utilizador, pedindo-lhe para inserir a senha existente.
+3. O utilizador insere a senha, e a App C envia um pedido `PATCH /email-change-requests/foo` para o teu serviço com a senha. Em segundo plano, o teu serviço verifica a senha chamando a API de Gestão (Management API) `POST /users/{user_id}/verify-password`.
+4. Se a senha estiver correta, o teu serviço cria um registo de verificação de sucesso no pedido de mudança de email `foo`.
+5. No painel de administração, um administrador pode ver os pedidos de mudança de email pendentes com `GET /email-change-requests?status=pending`.
+6. Se o administrador aprovar o pedido, o painel de administração envia um pedido `PATCH /email-change-requests/foo` para o teu serviço com a aprovação do administrador.
+7. O teu serviço então chamará a API de Gestão (Management API) `PATCH /users/{user_id}` para atualizar o endereço de email do utilizador. Se o endereço de email não puder ser atualizado, a API de Gestão (Management API) retornará um erro, e o teu serviço pode tratá-lo adequadamente.
+
+Nota que no exemplo acima, os nossos utilizadores finais nunca interagem diretamente com a API de Gestão (Management API). Em vez disso, eles interagem com a App C, que orquestra as chamadas da API de Gestão (Management API) em segundo plano para alcançar o fluxo de trabalho desejado.
+
+## Como deve ser uma boa API de Gestão (Management API)?
+
+- **RESTful**: Seguir os princípios RESTful para tornar a API previsível e fácil de usar.
+- **Orientada a recursos**: Representar recursos como substantivos e usar métodos HTTP para realizar ações sobre eles.
+- **Consistente**: Usar convenções de nomenclatura, tratamento de erros e formatos de resposta consistentes.
+- **Segura**: Implementar mecanismos adequados de autenticação e autorização para proteger a API.
+- **Documentada**: Fornecer documentação clara e concisa sobre como usar a API, incluindo exemplos e casos de uso.
+- **Compatível**: Garantir compatibilidade retroativa ao introduzir novas versões da API.
+- **Abrangente**: Cobrir todas as operações necessárias para gerir recursos IAM de forma eficaz.
+
+Existem outros aspetos como desempenho e escalabilidade, que estão mais relacionados com a infraestrutura do que com o design da API em si. No entanto, na prática, uma boa API de Gestão (Management API) deve considerar estes aspetos também.
+
+<Resources
+  urls={[
+    "https://blog.logto.io/graphql-and-rest-api",
+    "https://blog.logto.io/post-only-debate",
+    "https://swagger.io/specification/",
+  ]}
+/>

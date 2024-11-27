@@ -1,0 +1,81 @@
+---
+title: URI de Redirecionamento (Redirect URI)
+tags: [oauth 2.0, oidc]
+description: URI de redirecionamento (Redirect URI) é um URI onde o authorization server redireciona o user-agent após um authorization request. É um parâmetro essencial nos oauth 2.0 grant e OpenID Connect (OIDC) que envolvem interação do usuário.
+---
+
+## O que é um URI de redirecionamento?
+
+Um URI de redirecionamento, também conhecido como URL de callback ou URL de redirecionamento, é um URI para indicar onde o <Ref slug="authorization-server" /> deve redirecionar o user-agent após a conclusão do <Ref slug="authorization-request" />.
+
+> Universal Resource Identifier (URI) são frequentemente confundidos com URL (Uniform Resource Locator). Para mais informações, confira [Desvendando URI, URL e URN](https://blog.logto.io/unveiling-uri-url-and-urn).
+
+Vamos dar uma olhada em um exemplo de um authorization request que inclui um URI de redirecionamento:
+
+```http
+GET /authorize?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email
+  &state=abc123
+  &nonce=123456 HTTP/1.1
+```
+
+Neste exemplo, o valor bruto do parâmetro `redirect_uri` é `https%3A%2F%2Fclient.example.com%2Fcallback`, que está codificado em URL. O valor real é `https://client.example.com/callback`.
+
+## Como funciona um URI de redirecionamento?
+
+> No contexto do <Ref slug="openid-connect" />, o fluxo de trabalho para o OAuth 2.0's <Ref slug="authorization-request" /> e <Ref slug="authorization-server" /> aplica-se de forma semelhante. O URI de redirecionamento funciona da mesma maneira que no OAuth 2.0, tanto para <Ref slug="authentication-request" /> quanto para <Ref slug="openid-connect" headingId="openid-provider-op" />.
+
+Vamos supor que o <Ref slug="client" /> inicie o authorization request a partir do URL `https://client.example.com`. Após o usuário completar o processo de autorização, o authorization server redirecionará o user-agent (navegador) de volta para `https://client.example.com/callback`.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Client
+    participant Authorization Server
+
+    User->>Client: Clica no botão "Autorizar"
+    Client->>Authorization Server: Redireciona com authorization request
+    Authorization Server->>User: Prompt de autorização
+    User->>Authorization Server: Autoriza acesso
+    Authorization Server->>Client: Redireciona para o URI de redirecionamento do cliente<br/>`https://client.example.com/callback`
+```
+
+É claro que o URI de redirecionamento é essencial para o authorization server redirecionar o user-agent de volta quando o processo de autorização estiver completo. Além disso, o URI de redirecionamento também é usado para receber o authorization code ou tokens, dependendo do fluxo.
+
+Aqui está um exemplo não normativo de como o redirecionamento real em um <Ref slug="authorization-code-flow" /> pode parecer:
+
+```http
+HTTP/1.1 302 Found
+Location: https://client.example.com/callback?code=AUTHORIZATION_CODE&state=abc123
+```
+
+Note que os parâmetros de URL `code` e `state` que são anexados pelo authorization server estão incluídos no URI de redirecionamento. O client precisa extrair os parâmetros `code` e `state` da URL para continuar o processo de autorização.
+
+## Por que precisamos de um URI de redirecionamento?
+
+Como podemos ver no exemplo acima, o authorization server precisa saber para onde redirecionar após um authorization request bem-sucedido. É especialmente útil quando há múltiplos clients (ou seja, <Ref slug="single-sign-on" />), e cada client tem um URI de redirecionamento diferente.
+
+Com o <Ref slug="authorization-code-flow" />, o URI de redirecionamento também é usado para passar o authorization code de volta para o client, em vez de usar o front-channel (navegador) para evitar expor os tokens a possíveis ataques.
+
+Era possível usar o [Resource Owner Password Credentials (ROPC) grant](https://datatracker.ietf.org/doc/html/rfc6749#section-4.3) para obter tokens para o usuário sem um URI de redirecionamento. No entanto, ele está obsoleto no <Ref slug="oauth-2.1" /> devido a preocupações de segurança.
+
+## Considerações de segurança
+
+O URI de redirecionamento é um parâmetro crítico e é um alvo comum para atacantes. Aqui estão algumas considerações de segurança a serem mantidas em mente:
+
+- **Lista branca de URIs de redirecionamento**: O client deve aceitar apenas URIs de redirecionamento que estão registrados com o authorization server. Isso impede que atacantes redirecionem usuários para sites maliciosos.
+- **Use HTTPS**: Sempre use HTTPS para o URI de redirecionamento para proteger a comunicação entre o client e o authorization server.
+- **Correspondência exata**: O URI de redirecionamento deve corresponder exatamente ao URI registrado. Os authorization servers podem impor regras de correspondência estritas que desautorizam padrões de correspondência amplos.
+- **Parâmetro de estado**: Use o parâmetro `state` para prevenir ataques de <Ref slug="csrf" />. O client deve validar o parâmetro `state` para garantir que ele corresponda ao valor enviado no authorization request.
+
+<SeeAlso slugs={["csrf", "oauth-2.1", "authorization-code-flow"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/oauth-2-1",
+    "https://blog.logto.io/csrf",
+    "https://blog.logto.io/redirect-uri-in-authorization-code-flow",
+  ]}
+/>

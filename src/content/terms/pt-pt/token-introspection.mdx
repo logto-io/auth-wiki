@@ -1,0 +1,60 @@
+---
+title: Introspecção de token (Token introspection)
+tags: [oauth 2.0, oidc]
+description: A introspecção de token (token introspection) é uma extensão do OAuth 2.0 que permite que os clientes consultem o servidor de autorização (authorization server) para validar tokens de acesso (access tokens) e recuperar metadados sobre eles.
+---
+
+## O que é a introspecção de token (token introspection)?
+
+A introspecção de token (token introspection) é uma extensão do OAuth 2.0 definida no [RFC 7662](https://datatracker.ietf.org/doc/html/rfc7662) que permite que <Ref slug="client">clientes</Ref> consultem o <Ref slug="authorization-server" /> para validar tokens de acesso (access tokens) e recuperar metadados sobre eles. Esta extensão é útil quando:
+
+- O cliente deseja verificar a validade de um token de acesso (access token) em tempo real.
+- O token de acesso (access token) é <Ref slug="opaque-token">opaco</Ref> (não auto-contido) e requer que o servidor de autorização (authorization server) o valide.
+
+## Como funciona a introspecção de token (token introspection)?
+
+Aqui está um exemplo não normativo de uma solicitação de introspecção de token:
+
+```http
+POST /introspect HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+token=random-token-value
+  &token_type_hint=access_token
+```
+
+O parâmetro `token_type_hint` é opcional e deve ser definido para o tipo de token que está sendo introspectado. Se o token de acesso (access token) for válido, o servidor de autorização (authorization server) responde com os metadados do token:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "active": true,
+  "scope": "read write",
+  "client_id": "client-id",
+  "username": "johndoe",
+  "token_type": "Bearer",
+  "exp": 1634020800,
+  "iat": 1634017200
+}
+```
+
+Vale a pena notar que nem todos os servidores de autorização (authorization servers) suportam a introspecção de token (token introspection) e nem todos os tokens são introspectáveis. O <Ref slug="authorization-server" /> pode limitar o uso da introspecção de token (token introspection) com base em vários fatores, por exemplo, alguns servidores de autorização (authorization servers) podem não suportar introspecção para <Ref slug="jwt">JWTs</Ref>.
+
+### Parâmetros chave em uma solicitação de introspecção de token
+
+Aqui estão dois parâmetros chave em uma solicitação de introspecção de token:
+
+- **`token`**: O token a ser introspectado.
+- **`token_type_hint`**: O tipo de token que está sendo introspectado. Pode ser `access_token` ou `refresh_token`.
+
+<SeeAlso slugs={["oauth-2.0", "opaque-token", "jwt"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/oauth2-token-introspection',
+    'https://datatracker.ietf.org/doc/html/rfc7662',
+  ]}
+/>

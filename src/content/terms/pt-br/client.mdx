@@ -1,0 +1,99 @@
+---
+title: Cliente
+tags: [oauth 2.0, oidc]
+description: No OAuth 2.0 e OpenID Connect (OIDC), um cliente é uma aplicação que solicita autenticação (authentication) ou autorização (authorization) em nome de um usuário ou de si mesmo. Clientes podem ser públicos ou confidenciais (privados), e eles usam diferentes tipos de concessão para obter tokens.
+---
+
+## O que é um cliente?
+
+Um cliente, no contexto de <Ref slug="oauth-2.0" /> e <Ref slug="openid-connect" />, é uma aplicação que solicita autenticação (authentication) ou autorização (authorization). Por exemplo, quando um usuário clica em "Entrar com Google" em uma aplicação, a aplicação está agindo como um **cliente** que solicita autorização ao Google.
+
+> "Cliente" e "aplicação" são frequentemente usados de forma intercambiável no contexto de <Ref slug="iam" />.
+
+Existem múltiplas categorizações de clientes com base em suas capacidades e níveis de confiança, mas para os frameworks, uma distinção significativa é entre clientes públicos e confidenciais. Isso afeta como o cliente pode obter tokens e os tipos de concessão que pode usar.
+
+### Clientes públicos
+
+Clientes públicos são aplicações que não podem manter suas credenciais confidenciais, o que significa que o proprietário do recurso (usuário) pode acessá-las. Exemplos de clientes públicos incluem:
+
+- Aplicações de página única (SPAs)
+- Aplicativos móveis
+- Aplicativos de desktop
+
+Você pode argumentar que aplicativos móveis e de desktop têm capacidades de armazenamento seguro, mas a maioria dos frameworks os considera clientes públicos porque são distribuídos para usuários finais e presume-se que os usuários finais possam acessar as credenciais.
+
+### Clientes confidenciais
+
+Clientes confidenciais (privados) são aplicações que podem armazenar informações sensíveis de forma confidencial sem expô-las aos proprietários dos recursos (usuários finais). Exemplos de clientes confidenciais incluem:
+
+- Servidores web
+- Serviços de backend
+
+## Como um cliente funciona?
+
+### Autenticação (authentication) e autorização (authorization) do usuário
+
+Quando um cliente deseja autenticar um usuário, ele inicia uma <Ref slug="authorization-request" /> para o <Ref slug="authorization-server" /> para obter um <Ref slug="access-token" />. O cliente deve incluir parâmetros necessários na solicitação, como o ID do cliente, URI de redirecionamento e escopos. Aqui está um diagrama de sequência simplificado do fluxo de código de autorização (authorization code flow):
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MyApp as MyApp<br/>(Cliente)
+    participant Google as Google<br/>(Authorization Server)
+
+    User->>MyApp: Clicar em "Entrar com Google"
+    MyApp->>Google: Redirecionar para a página de login do Google
+    Google->>MyApp: Redirecionar de volta com o código de autorização
+    MyApp->>Google: Trocar código de autorização por access token
+    Google->>MyApp: Emitir e responder com access token
+```
+
+Neste exemplo, o Google atua como o **authorization server** que emite um access token para o **cliente** (MyApp) após o usuário fazer login com sucesso. O cliente pode então usar o **access token** para buscar o perfil do usuário (recurso protegido) no Google.
+
+Para clientes OpenID Connect (OIDC), o cliente precisa iniciar uma <Ref slug="authentication-request" /> para autenticar o usuário. Ele usa o mesmo endpoint da solicitação de autorização, mas os parâmetros e a resposta são diferentes.
+
+### Comunicação máquina a máquina
+
+Para comunicação <Ref slug="machine-to-machine" />, o cliente pode usar o <Ref slug="client-credentials-flow" /> para enviar diretamente uma <Ref slug="token-request" /> para o authorization server. O cliente deve incluir o ID do cliente, segredo do cliente e escopos na solicitação. Aqui está um diagrama de sequência simplificado do fluxo de credenciais do cliente (client credentials flow):
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Authorization Server
+
+    Client->>Authorization Server: Solicitar access token
+    Authorization Server->>Client: Responder com access token
+```
+
+O authorization server validará as credenciais do cliente e emitirá um access token se o cliente estiver autorizado. Como o cliente precisa enviar o segredo do cliente, é importante usar o fluxo de credenciais do cliente apenas para clientes confidenciais.
+
+## Considerações de segurança
+
+### Tipos de cliente
+
+O tipo de cliente (público ou privado) afeta as considerações de segurança para o cliente.
+
+- Clientes públicos não devem usar o fluxo de credenciais do cliente porque não podem armazenar o segredo do cliente de forma segura. Em vez disso, o <Ref slug="authorization-code-flow" /> com <Ref slug="pkce" /> é recomendado para clientes públicos para autenticar usuários.
+- Clientes confidenciais podem usar o fluxo de credenciais do cliente para comunicação máquina a máquina. Eles devem armazenar o segredo do cliente de forma segura e usá-lo apenas em ambientes seguros.
+
+### Armazenamento de tokens
+
+Clientes devem usar o mais alto nível de segurança possível para armazenar tokens. Por exemplo, em aplicações web, cookies HTTP-only são recomendados para armazenar access tokens para prevenir ataques XSS.
+
+### Expiração de tokens
+
+Access tokens têm um tempo de vida limitado para reduzir o risco de acesso não autorizado. Clientes devem lidar com a expiração de tokens de forma adequada usando <Ref slug="refresh-token">refresh tokens</Ref> para obter novos access tokens.
+
+### Revogação de tokens
+
+Clientes devem estar preparados para lidar com a revogação de tokens. Se o usuário sair ou o authorization server revogar o token, o cliente deve limpar o token do armazenamento do lado do cliente.
+
+<SeeAlso slugs={["oauth-2.0", "oauth-2.0-grant", "openid-connect", "authorization-request", "authentication-request"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/secure-cloud-apps-with-oauth-and-openid-connect",
+    "https://datatracker.ietf.org/doc/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html"
+  ]}
+/>

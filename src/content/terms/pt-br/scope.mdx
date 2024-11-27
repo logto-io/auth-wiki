@@ -1,0 +1,56 @@
+---
+title: Escopo (Scope)
+tags: [authorization]
+description: O escopo (scope) define as permissões que uma aplicação solicita de um usuário para acessar seus recursos protegidos. É um conceito fundamental no OAuth 2.0 e OIDC que controla o nível de acesso que uma aplicação pode ter aos dados de um usuário.
+---
+
+## O que é um escopo (scope)?
+
+Nos protocolos <Ref slug="oauth-2.0" /> e <Ref slug="openid-connect" />, um **escopo (scope)** é um mecanismo para limitar o acesso que uma aplicação tem aos recursos de um usuário. Ele define as permissões que a aplicação está solicitando do usuário.
+
+Os escopos (scopes) são representados como strings definidas pelo servidor de autorização. Quando uma aplicação solicita acesso aos recursos de um usuário, ela especifica os escopos (scopes) necessários na solicitação de autorização. O usuário é então solicitado a conceder ou negar essas permissões durante o processo de autorização.
+
+### Por que usar escopos (scopes)?
+
+- **Controle de acesso granular**: Os escopos (scopes) permitem que as aplicações solicitem apenas as permissões necessárias para realizar ações específicas, reduzindo o risco de acesso não autorizado.
+- **Consentimento do usuário**: Os escopos (scopes) ajudam os usuários a entender quais dados a aplicação acessará e por quê.
+- **Segurança**: Os escopos (scopes) ajudam a evitar que as aplicações excedam suas permissões de acesso, aumentando a segurança dos dados do usuário.
+
+## Como o escopo (scope) funciona?
+
+Quando uma aplicação inicia o processo de autorização OAuth 2.0 / OIDC, ela inclui uma lista de escopos (scopes) na solicitação de autorização. O servidor de autorização então apresenta ao usuário uma tela de consentimento que lista os escopos (scopes) solicitados. O usuário pode escolher conceder ou negar acesso a cada escopo (scope). Este processo é tipicamente usado quando a aplicação é uma aplicação de terceiros que requer acesso aos recursos do usuário.
+
+Alternativamente, se a aplicação for confiável pelo servidor de autorização, o usuário pode não ser solicitado a dar consentimento, em vez disso, ocorre um consentimento automático e todos os escopos (scopes) solicitados são concedidos.
+
+## Definindo escopos (scopes)
+
+Os escopos (scopes) são tipicamente definidos pelo provedor de API. Eles podem ser:
+- **Escopos padrão**: Escopos (scopes) comumente usados definidos pela especificação OAuth 2.0, compartilhados por diferentes aplicações e serviços. Ex.: `openid`, `profile`, `email`.
+- **Escopos personalizados**: Específicos para uma aplicação ou serviço, adaptados aos seus requisitos únicos. Ex.: `read:orders`, `write:comments`.
+
+## Onde os escopos (scopes) podem ser usados no OIDC e na gestão de identidade?
+
+Os escopos (scopes) podem ser usados em vários aspectos do OIDC, incluindo, mas não se limitando a:
+
+- **Autenticação**: Os escopos (scopes) podem ser usados para solicitar informações específicas do usuário durante o processo de autenticação. Ex.: `profile`, `email`.
+- **Autorização**: Os escopos (scopes) podem ser usados para solicitar acesso a recursos específicos ou realizar ações específicas. Ex.: `read:orders`, `write:comments`.
+- **Consentimento**: Os escopos (scopes) são apresentados ao usuário durante a tela de consentimento para informá-lo das permissões solicitadas pela aplicação.
+- **Emissão de token**: Os escopos (scopes) são incluídos na resposta do token para indicar as permissões concedidas à aplicação.
+- **Validação de token**: Os escopos (scopes) podem ser usados para validar os direitos de acesso da aplicação quando ela apresenta o token para acessar recursos protegidos.
+- **Servidor de recursos**: Os escopos (scopes) podem ser usados pelo servidor de recursos para aplicar políticas de controle de acesso com base nas permissões concedidas à aplicação.
+- **Perfil do usuário**: Os escopos (scopes) podem ser usados para solicitar informações adicionais do perfil do usuário além das declarações básicas.
+
+## Melhores práticas
+
+- **Solicitar escopos mínimos**: Sempre solicite o conjunto mínimo de escopos (scopes) necessário para o funcionamento da sua aplicação. Isso minimiza o risco de permissões excessivas e aumenta a confiança do usuário.
+- **Explicar o uso dos escopos**: Explique claramente aos usuários por que cada escopo (scope) é necessário. A transparência ajuda a obter o consentimento do usuário.
+- **Usar escopos padrão quando possível**: Aproveite os escopos (scopes) padrão para garantir compatibilidade e reduzir a complexidade.
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims",
+  ]}
+/>

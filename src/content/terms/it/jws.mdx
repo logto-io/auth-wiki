@@ -1,0 +1,136 @@
+---
+title: Firma Web JSON (JWS)
+tags: [oidc, jose]
+description: La Firma Web JSON (JWS) è un modo standard per firmare e verificare i dati in formato JSON. È spesso utilizzata per garantire l'integrità e l'autenticità dei JSON Web Token (JWT) in OpenID Connect (OIDC).
+---
+
+## Che cos'è la Firma Web JSON (JWS)?
+
+La Firma Web JSON (JWS) definisce un metodo standard per firmare e verificare i dati in formato JSON. È ampiamente utilizzata nelle applicazioni moderne e negli standard aperti come <Ref slug="openid-connect" /> per garantire l'integrità e l'autenticità dei dati trasmessi.
+
+JWS è particolarmente utile quando si lavora con <Ref slug="jwt">JSON Web Token (JWT)</Ref>. Ad esempio, un <Ref slug="id-token" /> o un <Ref slug="access-token" /> può essere firmato utilizzando JWS e verificato dal destinatario senza effettuare un'altra richiesta di rete.
+
+## Come funziona JWS?
+
+JWS utilizza algoritmi crittografici per firmare i dati e produrre una firma. Ci sono due concetti principali in JWS: l'intestazione JWS e la serializzazione JWS.
+
+### Intestazione JWS
+
+JWS ha un'intestazione che contiene metadati importanti sull'algoritmo di firma e la gestione delle chiavi. Alcuni attributi comuni in un'intestazione JWS includono:
+
+- `alg` (Algorithm): L'algoritmo crittografico utilizzato per firmare i dati.
+- `typ` (Type): Il tipo di token, come JWT.
+- `kid` (Key ID): Un identificatore univoco per la chiave utilizzata per firmare i dati.
+- `jku` (JWK Set URL): L'URL dove si trova il <Ref slug="jwk" headingId="json-web-key-set-jwks" />.
+
+Per un elenco dettagliato degli attributi dell'intestazione JWS, fare riferimento a [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4).
+
+### Serializzazione JWS
+
+JWS ha due formati di serializzazione: compatto e JSON. Ogni formato ha il proprio modo di rappresentare i dati firmati.
+
+#### Serializzazione compatta
+
+Nella serializzazione compatta, il JWS è rappresentato come una stringa con tre parti codificate in Base64URL separate da punti (`.`). Le tre parti sono:
+
+```
+{{header}}.{{payload}}.{{signature}}
+```
+
+Ogni parte ha uno scopo specifico:
+
+- `header`: Metadati sull'algoritmo di firma e la gestione delle chiavi in formato codificato Base64URL.
+- `payload`: I dati firmati in formato codificato Base64URL.
+- `signature`: La firma crittografica dell'intestazione e del payload.
+
+> [!Nota]
+> Nessuna intestazione non protetta è inclusa nella serializzazione compatta.
+
+Ad esempio, un JWS può apparire così:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0.Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE
+```
+
+Dopo aver decodificato le parti codificate in Base64URL, il JWS consiste nei seguenti elementi:
+
+- Intestazione: `{"alg":"HS256","typ":"JWT"}`
+- Payload: `{"sub":"1234567890","name":"Alice"}`
+- Firma: `Xv9da66g3y4nxs_0hlR9CBkOG9GkxfPmq1_7u4tNeXE`
+
+L'intestazione specifica che il JWS è firmato utilizzando l'algoritmo HMAC-SHA256 (`HS256`) e il tipo di token è JWT (`typ: "JWT"`) in formato JSON. Il payload contiene informazioni di base sull'utente, come il soggetto (`sub`) e il nome (`name`).
+
+La firma è calcolata da:
+
+```
+Hash(
+  Base64URLEncode(header) || '.' || Base64URLEncode(payload),
+  secret
+)
+```
+
+Secondo l'intestazione JWS, l'algoritmo HMAC-SHA256 è utilizzato nella funzione `Hash`, dove il `secret` è una chiave segreta condivisa `top-secret` in questo caso.
+
+Per un esempio dettagliato di come JWS funziona con JWT, fare riferimento all'articolo <Ref slug="signing-key" />.
+
+#### Serializzazione JSON
+
+La serializzazione JSON fornisce un modo più strutturato per rappresentare il JWS. Il JWS è rappresentato come un oggetto JSON con le seguenti proprietà:
+
+```json
+{
+  "payload": "{{payload}}",
+  "signatures": [
+    {
+      "protected": "{{protected-header}}",
+      "header": "{{header}}",
+      "signature": "{{signature}}"
+    }
+  ]
+}
+```
+
+- `payload`: Il payload codificato in Base64URL. Questi sono i dati firmati.
+- `signatures`: Un array di oggetti firma, ciascuno contenente l'intestazione protetta, l'intestazione e la firma.
+
+  Ogni oggetto firma può includere:
+
+  - `protected`: L'intestazione protetta codificata in Base64URL (`header` nella serializzazione compatta).
+  - `header`: L'intestazione non protetta in formato JSON. L'intestazione non è inclusa nella firma.
+  - `signature`: La firma crittografica dell'intestazione e del payload (`signature` nella serializzazione compatta).
+
+Ad esempio, un JWS in serializzazione JSON può apparire così:
+
+```json
+{
+  "payload": "eyJzdWIiOiIx...bGciOiJIUzI1NiJ9",
+  "signatures": [
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-29"
+      },
+      "signature": "Xv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    },
+    {
+      "protected": "eyJhbGci...InR5cCI6IkpXVCJ9",
+      "header": {
+        "kid": "2010-12-30"
+      },
+      "signature": "Yv9da66g3y4nxs...R9CBkOG9GkxfPmq1_7u4tNeXE"
+    }
+  ]
+}
+```
+
+Nell'esempio sopra, ci sono due firme (array `signatures`) per lo stesso payload. Ogni oggetto firma contiene l'intestazione protetta, l'intestazione e la firma.
+
+<SeeAlso slugs={["jwt", "jwk", "jwe"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7515",
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+  ]}
+/>

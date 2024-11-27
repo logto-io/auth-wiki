@@ -1,0 +1,88 @@
+---
+title: Fluxo híbrido (Hybrid flow)
+tags: [oauth 2.0, oidc]
+description: O fluxo híbrido (hybrid flow) é um fluxo do OpenID Connect (OIDC) que combina o fluxo de autorização (authorization code flow) e o fluxo implícito (implicit flow). É projetado para fornecer um equilíbrio entre segurança e usabilidade para autenticação (authentication).
+---
+
+## O que é o fluxo híbrido (hybrid flow)?
+
+O fluxo híbrido (hybrid flow) é um processo de autenticação (authentication) que combina as características do <Ref slug="authorization-code-flow" /> e do <Ref slug="implicit-flow" />. Vale a pena notar que o fluxo híbrido (hybrid flow) não faz parte da especificação do <Ref slug="oauth-2.0" />, mas é uma extensão fornecida pelo <Ref slug="openid-connect" />.
+
+Este fluxo é projetado para fornecer um equilíbrio entre segurança e usabilidade para a autenticação (authentication) do utilizador. No entanto, o fluxo híbrido (hybrid flow) não é recomendado para novas aplicações devido às [considerações de segurança](#security-considerations) associadas ao fluxo implícito (implicit flow). Uma alternativa popular ao fluxo híbrido (hybrid flow) é usar o fluxo de autorização (authorization code flow) com <Ref slug="pkce" /> para melhor segurança.
+
+## Como funciona o fluxo híbrido (hybrid flow)?
+
+Aqui estão os principais passos do fluxo híbrido (hybrid flow):
+
+1. Semelhante a outros fluxos OIDC, o fluxo híbrido (hybrid flow) começa com o <Ref slug="client" /> iniciando um <Ref slug="authentication-request" /> para o <Ref slug="openid-connect" headingId="openid-provider-op" />.
+
+    Nota: O cliente deve incluir o parâmetro `response_type` com a combinação de `code` e pelo menos um de `id_token` ou `token`, o que significa que há três combinações possíveis:
+
+      - `code id_token`: O cliente espera um código de autorização (authorization code) e um ID token.
+      - `code token`: O cliente espera um código de autorização (authorization code) e um access token.
+      - `code id_token token`: O cliente espera um código de autorização (authorization code), um ID token e um access token.
+
+    O requisito é autoexplicativo: o cliente espera tanto um código de autorização (authorization code) quanto um ou mais tokens, que correspondem ao fluxo de autorização (authorization code flow) e ao fluxo implícito (implicit flow), respectivamente.
+2. O utilizador autentica-se no <Ref slug="openid-connect" headingId="openid-provider-op" />.
+3. O <Ref slug="openid-connect" headingId="openid-provider-op" /> redireciona o utilizador de volta para a aplicação cliente com o código de autorização (authorization code) e os tokens solicitados.
+4. A aplicação cliente processa os tokens e pode usá-los para aceder a recursos protegidos em nome do utilizador; também pode usar o código de autorização (authorization code) para obter tokens adicionais através do <Ref slug="token-request" />.
+
+Aqui está um diagrama de sequência simplificado do fluxo híbrido (hybrid flow):
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Client
+    participant OpenID Provider
+
+    User->>Client: Acessar página de "Iniciar sessão"
+    Client->>OpenID Provider: Redirecionar com pedido de autenticação
+    OpenID Provider->>User: Solicitação de autenticação
+    User->>OpenID Provider: Inserir credenciais e autenticar
+    OpenID Provider->>Client: Conceder código de autorização e tokens
+    par
+      Client->>Client: Processar tokens
+    and
+      Client->>OpenID Provider: Trocar código de autorização por tokens
+    end
+```
+
+Aqui está um exemplo não normativo de um pedido de autenticação do fluxo híbrido (hybrid flow):
+
+```http
+GET /authorize?response_type=code%20id_token
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=https%3A%2F%2Fclient.example.com%2Fcallback
+  &scope=openid%20profile%20email
+  &nonce=123456
+  &state=abc123 HTTP/1.1
+Host: your-openid-provider.com
+```
+
+### Parâmetros chave em um pedido de autenticação do fluxo híbrido (hybrid flow)
+
+O pedido de autenticação do fluxo híbrido (hybrid flow) inclui os seguintes parâmetros chave:
+
+- **`response_type`**: O valor deve ser uma combinação de `code` e pelo menos um de `id_token` ou `token`. Por exemplo, `code id_token` ou `code token`.
+- **`client_id`**: O identificador do cliente emitido pelo <Ref slug="openid-connect" headingId="openid-provider-op" /> (authorization server).
+- **`redirect_uri`**: O URI onde o authorization server envia o utilizador após o processo de autenticação (authentication).
+- **`scope`**: Os <Ref slug="scope">scopes</Ref> (permissões) solicitados para os tokens.
+- **`resource`**: O parâmetro opcional que especifica o <Ref slug="resource-indicator" /> para os recursos solicitados. O authorization server precisa suportar [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707) para usar este parâmetro.
+
+Para a lista completa de parâmetros e suas descrições, veja [Autenticação usando o Fluxo Híbrido](https://openid.net/specs/openid-connect-core-1_0.html#HybridFlowAuth).
+
+## Considerações de segurança
+
+O fluxo híbrido (hybrid flow) inclui o fluxo implícito (implicit flow), que é conhecido por suas limitações de segurança. Os tokens ainda são transmitidos através do canal frontal (navegador), o que pode expô-los a potenciais ataques. O fluxo implícito (implicit flow) será descontinuado no <Ref slug="oauth-2.1" /> devido a essas preocupações.
+
+<Ref slug="authorization-code-flow" /> com <Ref slug="pkce" /> é a alternativa recomendada ao fluxo híbrido (hybrid flow). Ele fornece uma maneira mais segura de autenticar utilizadores sem expor tokens no canal frontal.
+
+<SeeAlso slugs={["openid-connect", "oauth-2.1", "authorization-code-flow", "pkce", "implicit-flow"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/implicit-flow-is-dead",
+    "https://blog.logto.io/oauth-2-1",
+    "https://openid.net/specs/openid-connect-core-1_0.html#HybridFlowAuth",
+  ]}
+/>

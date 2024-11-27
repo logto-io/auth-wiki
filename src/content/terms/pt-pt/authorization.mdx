@@ -1,0 +1,50 @@
+---
+title: Autorização (Authorization)
+tags: [authorization]
+description: A autorização (Authorization) é o processo de determinar quais ações uma identidade pode realizar em um recurso. É um mecanismo de segurança fundamental para definir e aplicar políticas de acesso.
+---
+
+## O que é autorização (Authorization)?
+
+> **Resumindo**: A autorização (Authorization) responde à pergunta "O que você pode fazer?"
+
+A autorização (Authorization) é um processo de tomada de decisão que determina se uma identidade (usuário, serviço ou dispositivo) tem as permissões necessárias para realizar uma ação específica em um recurso. Vamos dar uma olhada em alguns exemplos:
+
+- Em um editor de documentos online, um usuário pode compartilhar um documento com outras pessoas.
+- Em um serviço de armazenamento em nuvem, um serviço pode ler e escrever arquivos em uma pasta específica.
+- Em um sistema de casa inteligente, um dispositivo pode acender as luzes na sala de estar.
+
+Todos esses exemplos envolvem uma identidade (sujeito) realizando uma ação em um recurso. Claro, a autorização (Authorization) também pode falhar, como quando um usuário tenta excluir um arquivo que não tem permissão para acessar.
+
+O modelo básico para autorização (Authorization) é simples: Se **identidade** realiza **ação** em **recurso**, então **aceitar** ou **negar**.
+
+### Diferença entre autenticação (Authentication) e autorização (Authorization)
+
+Autenticação (Authentication) e autorização (Authorization) são frequentemente confundidas, mas são fundamentalmente diferentes: <Ref slug="authentication" /> responde à pergunta "Qual identidade você possui?". Além disso, na maioria dos casos, a autorização (Authorization) ocorre após a autenticação (Authentication) porque o sistema precisa conhecer a identidade antes de tomar decisões de acesso.
+
+### Diferença entre autorização (Authorization) e controlo de acesso (Access Control)
+
+A autorização (Authorization) é um subconjunto do controlo de acesso (Access Control). O controlo de acesso (Access Control) é o conceito mais amplo que inclui autorização (Authorization) e outras restrições na gestão de acesso. Em outras palavras, o controlo de acesso (Access Control) é um termo geral que descreve a restrição seletiva de acesso a recursos, enquanto a autorização (Authorization) é especificamente sobre o processo de tomada de decisão.
+
+## Como funciona a autorização (Authorization)?
+
+A autorização (Authorization) é tipicamente implementada usando <Ref slug="access-control" headingId="access-control-models" />. Eles definem como as permissões são atribuídas e aplicadas em um sistema.
+
+## Estruturas (protocolos) de autorização (Authorization)
+
+Embora <Ref slug="oauth-2.0" /> seja uma estrutura muito popular para autorização (Authorization), vale a pena notar que OAuth 2.0 não define qual modelo de controlo de acesso (Access Control) usar. Em vez disso, foca-se na delegação de autorização (Authorization) e na emissão de access tokens.
+
+Dito isso, OAuth 2.0 é adequado para cenários de autorização (Authorization) de terceiros, onde um usuário concede permissão a um cliente para acessar seus recursos. Por exemplo, quando você faz login em um site usando sua conta do Google, está autorizando o site a acessar seu perfil do Google.
+
+Se você está lidando com autorização (Authorization) de primeira parte (por exemplo, dentro de sua aplicação ou organização), pode precisar implementar um modelo de controlo de acesso (Access Control) como <Ref slug="rbac" /> ou <Ref slug="abac" />. A combinação de <Ref slug="openid-connect" /> e modelos de controlo de acesso (Access Control) pode fornecer uma base sólida tanto para autenticação (Authentication) quanto para autorização (Authorization).
+
+Em vez de construir um sistema de autorização (Authorization) próprio, é recomendado usar um <Ref slug="identity-provider" /> que ofereça capacidades de autenticação (Authentication) e autorização (Authorization). Um bom identity provider lidará com a complexidade do controlo de acesso (Access Control) e fornecerá uma solução segura e escalável para suas aplicações.
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

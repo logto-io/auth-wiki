@@ -1,0 +1,73 @@
+---
+title: Descoberta do OpenID Connect (OIDC)
+tags: [oidc]
+description: A Descoberta do OpenID Connect (OIDC) é um mecanismo que permite aos clientes descobrir automaticamente os endpoints e a configuração do Provedor OpenID.
+---
+
+## O que é a Descoberta do OpenID Connect (OIDC)?
+
+A Descoberta do OpenID Connect (OIDC), definida em [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html), é um mecanismo que permite aos <Ref slug="client">clientes</Ref> descobrir automaticamente os endpoints e a configuração do Provedor OpenID. É uma abordagem moderna para simplificar a comunicação entre clientes e <Ref slug="openid-connect" headingId="openid-provider-op">Provedores OpenID</Ref>.
+
+A Descoberta OIDC tem dois componentes principais:
+
+- Descoberta do issuer (emissor) do Provedor OpenID: O cliente pode descobrir a localização (URL) do issuer via [WebFinger](https://tools.ietf.org/html/rfc7033) ou um documento fora de banda.
+- Metadados do Provedor OpenID: O cliente pode recuperar e processar o documento de metadados para conhecer as capacidades e endpoints do Provedor OpenID.
+
+## Como funciona a Descoberta OIDC?
+
+### Descoberta do issuer (emissor) do Provedor OpenID
+
+O issuer do Provedor OpenID é um identificador único (geralmente o mesmo que a sua URL) que os clientes podem usar para descobrir a configuração do Provedor OpenID. No entanto, os clientes precisam saber a localização do issuer antes de poderem recuperar o documento de metadados.
+
+Se a localização do issuer já for conhecida, o cliente pode pular para o próximo passo. Caso contrário, o cliente pode usar o WebFinger para descobrir a localização do issuer. As informações necessárias para a descoberta do issuer OIDC são:
+
+- `host`: Onde o serviço WebFinger está hospedado.
+- `resource`: O endereço de e-mail ou URL do Provedor OpenID.
+- `rel`: O tipo de relação, que deve ser definido como `http://openid.net/specs/connect/1.0/issuer`.
+
+Por exemplo, um utilizador com o endereço de e-mail `foo@bar.com` está tentando descobrir a localização do issuer em `example.com`. A solicitação WebFinger seria assim:
+
+```http
+GET /.well-known/webfinger?resource=acct%3Afoo%40bar.com&
+  rel=http%3A%2F%2Fopenid.net%2Fspecs%2Fconnect%2F1.0%2Fissuer HTTP/1.1
+Host: example.com
+```
+
+O parâmetro `resource` decodificado é `acct:foo@bar.com`, e o parâmetro `rel` é `http://openid.net/specs/connect/1.0/issuer`.
+
+### Metadados do Provedor OpenID
+
+Uma vez que o cliente conhece a localização do issuer, ele pode recuperar o documento de metadados do endpoint bem conhecido. O caminho para o documento de metadados é `/.well-known/openid-configuration` relativo à URL do issuer.
+
+Por exemplo, se a URL do issuer for `https://oidc.example.com`, o cliente pode recuperar o documento de metadados de `https://oidc.example.com/.well-known/openid-configuration`. Aqui está um exemplo não normativo da resposta de metadados:
+
+```json
+{
+  "issuer": "https://oidc.example.com",
+  "authorization_endpoint": "https://oidc.example.com/authorize",
+  "token_endpoint": "https://oidc.example.com/token",
+  //...
+}
+```
+
+O documento de metadados contém muitas informações úteis sobre o Provedor OpenID. Vamos destacar alguns campos chave:
+
+- `issuer`: O identificador único do Provedor OpenID. Deve ser usado para validar os tokens.
+- `authorization_endpoint`: A URL para iniciar o <Ref slug="authentication-request" />.
+- `token_endpoint`: A URL para enviar o <Ref slug="token-request" />.
+- `jwks_uri`: A URL para recuperar o <Ref slug="jwk" headingId="json-web-key-set-jwks" /> para validação da <Ref slug="signing-key" />.
+- `response_types_supported`: Os tipos de resposta suportados para o <Ref slug="authentication-request" />.
+- `scopes_supported`: Os <Ref slug="scope">scopes</Ref> suportados para o <Ref slug="authentication-request" />.
+- `claims_supported`: Os <Ref slug="claim">claims</Ref> suportados para o <Ref slug="id-token" />.
+- `token_endpoint_auth_methods_supported`: Os métodos de autenticação do cliente suportados para o <Ref slug="token-request" />.
+
+Para uma lista exaustiva de campos de metadados, consulte a especificação [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata).
+
+<SeeAlso slugs={["openid-connect", "authentication-request", "jwt", "token-request"]} />
+
+<Resources
+  urls={[
+    'https://blog.logto.io/exploring-oidc-configuration',
+    'https://openid.net/specs/openid-connect-discovery-1_0.html',
+  ]}
+/>

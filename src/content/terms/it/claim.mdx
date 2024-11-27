@@ -1,0 +1,72 @@
+---
+title: Claim
+tags: [oauth 2.0, oidc]
+description: Un claim in JSON Web Token (JWT) è una coppia nome-valore che trasmette informazioni specifiche. In un contesto più ampio, un claim può essere qualsiasi coppia nome-valore che rappresenta informazioni.
+---
+
+## Cos'è un claim?
+
+Un claim è una coppia nome-valore che trasmette informazioni specifiche. Ad esempio, in un oggetto JSON:
+
+```json
+{
+  "sub": "foo",
+  "email": "foo@bar.com"
+}
+```
+
+In questo esempio, `sub` è un claim che rappresenta l'identificatore del soggetto con il valore `foo`, e `email` è un claim che rappresenta l'indirizzo email con il valore `foo@bar.com`.
+
+> Usiamo *soggetto* invece di *utente* perché senza una definizione chiara, il soggetto (`sub`) può rappresentare un utente, un dispositivo o qualsiasi entità.
+
+### Usi dei claim
+
+I claim sono ampiamente utilizzati in vari contesti, come:
+
+- <Ref slug="jwt" />: In un JWT, i claim sono usati per rappresentare informazioni sul token, come l'issuer (`iss`), il soggetto (`sub`) e il tempo di scadenza (`exp`).
+- <Ref slug="openid-connect" />: In OIDC, i claim sono usati per rappresentare informazioni sull'utente nel <Ref slug="id-token" /> e nel <Ref slug="userinfo-endpoint" />, come l'indirizzo email dell'utente (`email`), il nome (`name`) e l'immagine del profilo (`picture`).
+
+### Claim standard
+
+In JWT e OIDC, ci sono claim standard definiti dalle specifiche. Alcuni claim standard comuni includono:
+
+- **`iss`**: L'issuer del token. Ad esempio, se il <Ref slug="authorization-server" /> che ha emesso il token è `https://example.com`, nella maggior parte dei casi il claim `iss` sarà lo stesso (`https://example.com`).
+- **`sub`**: Il soggetto del token. Rappresenta l'entità di cui il token tratta. Ad esempio, in un ID token, il claim `sub` di solito rappresenta l'identificatore dell'utente.
+- **`aud`**: L'audience del token. Indica i destinatari per cui il token è destinato. Ad esempio, se il token è destinato all'accesso a un'API su `https://api.example.com`, il claim `aud` sarà lo stesso (`https://api.example.com`).
+- **`exp`**: Il tempo di scadenza del token. Indica quando il token non dovrebbe più essere accettato per l'elaborazione.
+- **`nbf`**: Il tempo "not before" del token. Indica quando il token dovrebbe iniziare ad essere accettato per l'elaborazione.
+- **`iat`**: Il tempo di emissione del token. Indica quando il token è stato emesso.
+- **`jti`**: L'ID del JWT del token. Fornisce un identificatore univoco per il token.
+
+OIDC definisce anche claim standard aggiuntivi per le informazioni sull'utente. Vedi [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims) nella specifica OIDC per maggiori dettagli.
+
+### Claim personalizzati
+
+Oltre ai claim standard, puoi definire claim personalizzati per rappresentare informazioni specifiche dell'applicazione. Ad esempio, puoi includere un claim `role` per rappresentare il ruolo dell'utente nell'applicazione.
+
+I claim personalizzati possono essere spaziati con [Uniform Resource Identifiers (URIs)](https://blog.logto.io/unveiling-uri-url-and-urn) per evitare conflitti con altri claim. Ad esempio:
+
+```json
+{
+  "https://example.com/claims/role": "admin"
+}
+```
+
+In questo esempio, il claim `role` è spaziato con `https://example.com/claims/` per garantire l'unicità. In alternativa, puoi definire il tuo [Uniform Resource Name (URN)](https://blog.logto.io/unveiling-uri-url-and-urn) per i claim personalizzati:
+
+```json
+{
+  "urn:example:claims:role": "admin"
+}
+```
+
+In questo esempio, il claim `role` è spaziato con `urn:example:claims:`.
+
+<SeeAlso slugs={["jwt", "openid-connect", "id-token", "userinfo-endpoint"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7519#section-4",
+    "https://openid.net/specs/openid-connect-core-1_0.html#Claims",
+  ]}
+/>

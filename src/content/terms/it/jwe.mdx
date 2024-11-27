@@ -1,0 +1,73 @@
+---
+title: Crittografia Web JSON (JSON Web Encryption, JWE)
+tags: [oidc, jose]
+description: La Crittografia Web JSON (JSON Web Encryption, JWE) è un modo standard per crittografare e decrittografare i dati in formato JSON. È spesso utilizzata per proteggere informazioni sensibili nei JSON Web Token (JWT) in transito.
+---
+
+## Cos'è la Crittografia Web JSON (JSON Web Encryption, JWE)?
+
+Come definito nell'RFC 7516, la Crittografia Web JSON (JSON Web Encryption, JWE) è un meccanismo per crittografare e decrittografare dati in formato JSON. Aggiunge un livello di riservatezza ai dati ed è particolarmente utile quando si trasmettono informazioni sensibili su una rete non affidabile.
+
+JWE è spesso utilizzato in combinazione con i <Ref slug="jwt">JSON Web Token (JWT)</Ref> per proteggere i dati del payload. Ad esempio, un <Ref slug="id-token" /> o un <Ref slug="access-token" /> può essere crittografato utilizzando JWE per garantire che i dati siano sicuri durante la trasmissione.
+
+## Come funziona JWE?
+
+JWE ha due formati di serializzazione: compatto e JSON. Ogni formato ha il proprio modo di rappresentare i dati crittografati.
+
+### Serializzazione compatta
+
+Nella serializzazione compatta, il JWE è rappresentato come una stringa con cinque parti codificate in Base64URL separate da punti (`.`). Le cinque parti sono:
+
+```
+{{header}}.{{encrypted-key}}.{{iv}}.{{ciphertext}}.{{tag}}
+```
+
+Ogni parte ha uno scopo specifico:
+
+- `header`: Contiene i metadati sull'algoritmo di crittografia e la gestione delle chiavi.
+- `encrypted-key`: La chiave di crittografia del contenuto crittografata (CEK) utilizzata per crittografare il payload.
+- `iv`: Il vettore di inizializzazione utilizzato nel processo di crittografia.
+- `ciphertext`: I dati del payload crittografati.
+- `tag`: Il tag di autenticazione utilizzato per verificare l'integrità dei dati crittografati.
+
+### Serializzazione JSON
+
+La serializzazione JSON è più verbosa e fornisce un modo strutturato per rappresentare il JWE. Il JWE è rappresentato come un oggetto JSON con le seguenti proprietà:
+
+```json
+{
+  "protected": "{{protected-header}}",
+  "unprotected": "{{unprotected-header}}",
+  "header": "{{header}}",
+  "encrypted_key": "{{encrypted-key}}",
+  "iv": "{{iv}}",
+  "ciphertext": "{{ciphertext}}",
+  "tag": "{{tag}}",
+  "aad": "{{additional-authenticated-data}}"
+}
+```
+
+- `protected`: Contiene l'header protetto codificato in Base64URL.
+- `unprotected`: Contiene l'header non protetto condiviso del JWE.
+- `header`: Contiene l'header non protetto per destinatario del JWE.
+- `encrypted_key`: Contiene la chiave di crittografia del contenuto crittografata (CEK) codificata in Base64URL.
+- `iv`: Contiene il vettore di inizializzazione codificato in Base64URL.
+- `ciphertext`: Contiene il testo cifrato codificato in Base64URL (payload crittografato).
+- `tag`: Contiene il tag di autenticazione codificato in Base64URL.
+- `aad`: Contiene i dati autenticati aggiuntivi codificati in Base64URL.
+
+---
+
+Il client dovrebbe essere in grado di decrittografare il JWE utilizzando la chiave e l'algoritmo appropriati. Una chiave pre-comunicata o una chiave derivata da un protocollo di accordo chiave può essere utilizzata per decrittografare il JWE.
+
+Ad esempio, un <Ref slug="id-token" /> può essere crittografato utilizzando JWE, e il client può decrittografarlo utilizzando la chiave appropriata ottenuta dall'endpoint `jwks_uri` del provider OpenID.
+
+<SeeAlso slugs={["jwt", "jwk", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://datatracker.ietf.org/doc/html/rfc7516",
+    "https://datatracker.ietf.org/doc/html/rfc7517",
+    "https://datatracker.ietf.org/doc/html/rfc7518",
+  ]}
+/>

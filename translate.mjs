@@ -98,6 +98,8 @@ for (const missingEntry of missingEntries) {
       await fs.writeFile(path.join(contentDir, locale, entry), translated, 'utf-8');
       task.title = `Translated ${missingEntry}.`;
     },
+    retry: 1,
+    exitOnError: false,
   });
 }
 

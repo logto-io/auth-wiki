@@ -1,0 +1,56 @@
+---
+title: Autenticazione (Authentication)
+tags: [authentication]
+description: L'autenticazione (Authentication) è il processo di verifica della proprietà dell'identità (ad esempio, utente o servizio). È la base dei sistemi di gestione delle identità e degli accessi (IAM) ed è essenziale per proteggere applicazioni e servizi.
+---
+
+## Che cos'è l'autenticazione (Authentication)?
+
+> **In breve**: L'autenticazione (Authentication) risponde alla domanda "Quale identità possiedi?"
+
+Ecco alcuni esempi tipici di autenticazione (Authentication):
+
+- Accesso con nome utente e password
+- Accesso sociale (ad esempio, Accedi con Google)
+- Autenticazione (Authentication) <Ref slug="machine-to-machine" /> (ad esempio, API keys)
+
+Non abbiamo usato la frase "Chi sei?" perché:
+
+- Nel regno dell'<Ref slug="iam" />, l'autenticazione (Authentication) riguarda la verifica della proprietà di un'identità, non l'identificazione della persona o entità. Ad esempio, quando uno dei tuoi familiari utilizza le tue credenziali per accedere al tuo account, non sono te, ma l'identità per il sistema è la stessa.
+- L'identità può essere un utente, un servizio o un dispositivo. Ad esempio, un servizio può autenticarsi a un altro servizio utilizzando API keys.
+
+### Differenza tra autenticazione (Authentication) e autorizzazione (Authorization)
+
+Questi due termini sono spesso confusi, ma sono fondamentalmente diversi: <Ref slug="authorization" /> risponde alla domanda "Cosa puoi fare?". Inoltre, l'autenticazione (Authentication) è un prerequisito per l'autorizzazione (Authorization) perché il sistema deve conoscere l'identità prima di decidere quali azioni può eseguire.
+
+## Fattori di autenticazione (Authentication)
+
+L'autenticazione (Authentication) può essere eseguita utilizzando uno o più fattori. Ecco alcuni fattori comuni:
+
+- **Fattore di conoscenza**: Qualcosa che sai (ad esempio, password, PIN)
+- **Fattore di possesso**: Qualcosa che hai (ad esempio, smartphone, token di sicurezza)
+- **Fattore di inerzia**: Qualcosa che sei (ad esempio, impronta digitale, riconoscimento facciale)
+
+<Ref slug="mfa" /> è una pratica comune che combina più fattori per aumentare la sicurezza. Ad esempio, quando accedi al tuo conto bancario, potresti dover fornire una password (fattore di conoscenza) e un codice monouso da un'app di autenticazione (fattore di possesso).
+
+<Ref slug="passkey" /> è un moderno fattore di autenticazione (Authentication) che può combinare più fattori ed è resistente agli attacchi di phishing.
+
+## Framework (protocolli) di autenticazione (Authentication)
+
+Invece di costruire un sistema di autenticazione (Authentication) fatto in casa, è consigliabile utilizzare framework e protocolli consolidati poiché sono stati testati e revisionati da esperti di sicurezza. Esistono vari framework e protocolli di autenticazione (Authentication) che definiscono come dovrebbe essere eseguita l'autenticazione (Authentication). Due comuni sono:
+
+- <Ref slug="openid-connect" />: Un livello di identità costruito sopra <Ref slug="oauth-2.0" /> che aggiunge capacità di autenticazione (Authentication). È relativamente moderno e ampiamente utilizzato per nuove applicazioni.
+- <Ref slug="saml" />: Un protocollo per lo scambio di dati di autenticazione (Authentication) e autorizzazione (Authorization) tra le parti. È comunemente usato in ambienti aziendali.
+
+La scelta del framework dipende dal tuo caso d'uso e dai requisiti. Per le nuove applicazioni, OIDC è raccomandato per il suo design moderno e il supporto per <Ref slug="jwt" />.
+
+Tuttavia, lavorare direttamente con questi protocolli può ancora essere complesso e richiedere tempo. Entrambi i protocolli hanno curve di apprendimento ripide e richiedono un'implementazione attenta per garantire la sicurezza. Invece, utilizzare un <Ref slug="identity-provider" /> che supporta o è costruito su questi protocolli può semplificare notevolmente il processo di autenticazione (Authentication). Un buon identity provider offrirà anche funzionalità aggiuntive come <Ref slug="mfa" /> e <Ref slug="single-sign-on" /> per le tue esigenze future.
+
+<SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

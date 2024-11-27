@@ -1,0 +1,56 @@
+---
+title: Scope
+tags: [authorization]
+description: Lo scope definisce le autorizzazioni che un'applicazione richiede a un utente per accedere alle sue risorse protette. È un concetto fondamentale in OAuth 2.0 e OIDC che controlla il livello di accesso che un'applicazione può avere ai dati di un utente.
+---
+
+## Che cos'è uno scope?
+
+Nei protocolli <Ref slug="oauth-2.0" /> e <Ref slug="openid-connect" />, uno **scope** è un meccanismo per limitare l'accesso che un'applicazione ha alle risorse di un utente. Definisce le autorizzazioni che l'applicazione sta richiedendo all'utente.
+
+Gli scope sono rappresentati come stringhe definite dal authorization server (server di autorizzazione). Quando un'applicazione richiede l'accesso alle risorse di un utente, specifica gli scope di cui ha bisogno nella authorization request (richiesta di autorizzazione). All'utente viene quindi chiesto di concedere o negare queste autorizzazioni durante il processo di autorizzazione.
+
+### Perché usare gli scope?
+
+- **Controllo degli accessi granulare**: Gli scope consentono alle applicazioni di richiedere solo le autorizzazioni necessarie per eseguire azioni specifiche, riducendo il rischio di accessi non autorizzati.
+- **Consenso dell'utente**: Gli scope aiutano gli utenti a comprendere quali dati l'applicazione accederà e perché.
+- **Sicurezza**: Gli scope aiutano a prevenire che le applicazioni superino le loro autorizzazioni di accesso, migliorando la sicurezza dei dati dell'utente.
+
+## Come funziona lo scope?
+
+Quando un'applicazione avvia il processo di autorizzazione OAuth 2.0 / OIDC, include un elenco di scope nella authorization request (richiesta di autorizzazione). Il authorization server (server di autorizzazione) presenta quindi all'utente una schermata di consenso che elenca gli scope richiesti. L'utente può scegliere di concedere o negare l'accesso a ciascuno scope. Questo processo è tipicamente utilizzato quando l'applicazione è un'applicazione di terze parti che richiede l'accesso alle risorse dell'utente.
+
+In alternativa, se l'applicazione è considerata affidabile dal authorization server (server di autorizzazione), l'utente potrebbe non essere invitato a fornire il consenso; invece, avviene un consenso automatico e tutti gli scope richiesti vengono concessi.
+
+## Definizione degli scope
+
+Gli scope sono tipicamente definiti dal provider dell'API. Possono essere:
+- **Scope standard**: Scope comunemente usati definiti dalla specifica OAuth 2.0, condivisi da diverse applicazioni e servizi. Ad esempio `openid`, `profile`, `email`.
+- **Scope personalizzati**: Specifici per un'applicazione o servizio, adattati ai suoi requisiti unici. Ad esempio `read:orders`, `write:comments`.
+
+## Dove possono essere utilizzati gli scope in OIDC e nella gestione delle identità?
+
+Gli scope possono essere utilizzati in vari aspetti di OIDC, inclusi ma non limitati a:
+
+- **Autenticazione**: Gli scope possono essere utilizzati per richiedere informazioni specifiche sull'utente durante il processo di autenticazione. Ad esempio `profile`, `email`.
+- **Autorizzazione**: Gli scope possono essere utilizzati per richiedere l'accesso a risorse specifiche o eseguire azioni specifiche. Ad esempio `read:orders`, `write:comments`.
+- **Consenso**: Gli scope vengono presentati all'utente durante la schermata di consenso per informarlo delle autorizzazioni richieste dall'applicazione.
+- **Emissione del token**: Gli scope sono inclusi nella risposta del token per indicare le autorizzazioni concesse all'applicazione.
+- **Validazione del token**: Gli scope possono essere utilizzati per convalidare i diritti di accesso dell'applicazione quando presenta il token per accedere alle risorse protette.
+- **Resource server**: Gli scope possono essere utilizzati dal resource server per applicare politiche di controllo degli accessi basate sulle autorizzazioni concesse all'applicazione.
+- **Profilo utente**: Gli scope possono essere utilizzati per richiedere ulteriori informazioni sul profilo utente oltre ai claim di base.
+
+## Migliori pratiche
+
+- **Richiedi scope minimi**: Richiedi sempre il set minimo di scope necessario per il funzionamento della tua applicazione. Questo minimizza il rischio di autorizzazioni eccessive e aumenta la fiducia dell'utente.
+- **Spiega l'uso degli scope**: Spiega chiaramente agli utenti perché ciascuno scope è necessario. La trasparenza aiuta a ottenere il consenso dell'utente.
+- **Usa scope standard quando possibile**: Sfrutta gli scope standard per garantire la compatibilità e ridurre la complessità.
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims",
+  ]}
+/>

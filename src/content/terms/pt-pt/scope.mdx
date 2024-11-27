@@ -1,0 +1,56 @@
+---
+title: Scope (Scope)
+tags: [authorization]
+description: Scope (Scope) define as permissões que uma aplicação solicita a um utilizador para aceder aos seus recursos protegidos. É um conceito fundamental no OAuth 2.0 e OIDC (OpenID Connect) que controla o nível de acesso que uma aplicação pode ter aos dados de um utilizador.
+---
+
+## O que é um scope (scope)?
+
+Nos protocolos <Ref slug="oauth-2.0" /> e <Ref slug="openid-connect" />, um **scope (scope)** é um mecanismo para limitar o acesso que uma aplicação tem aos recursos de um utilizador. Define as permissões que a aplicação está a solicitar ao utilizador.
+
+Os scopes (scopes) são representados como strings definidas pelo authorization server (servidor de autorização). Quando uma aplicação solicita acesso aos recursos de um utilizador, especifica os scopes (scopes) de que necessita no authorization request (pedido de autorização). O utilizador é então solicitado a conceder ou negar estas permissões durante o processo de autorização.
+
+### Por que usar scopes (scopes)?
+
+- **Controlo de acesso granular**: Os scopes (scopes) permitem que as aplicações solicitem apenas as permissões de que necessitam para realizar ações específicas, reduzindo o risco de acesso não autorizado.
+- **Consentimento do utilizador**: Os scopes (scopes) ajudam os utilizadores a entender que dados a aplicação irá aceder e porquê.
+- **Segurança**: Os scopes (scopes) ajudam a evitar que as aplicações excedam as suas permissões de acesso, melhorando a segurança dos dados do utilizador.
+
+## Como funciona o scope (scope)?
+
+Quando uma aplicação inicia o processo de autorização OAuth 2.0 / OIDC, inclui uma lista de scopes (scopes) no authorization request (pedido de autorização). O authorization server (servidor de autorização) então apresenta ao utilizador um ecrã de consentimento que lista os scopes (scopes) solicitados. O utilizador pode escolher conceder ou negar o acesso a cada scope (scope). Este processo é tipicamente usado quando a aplicação é uma aplicação de terceiros que requer acesso aos recursos do utilizador.
+
+Alternativamente, se a aplicação for confiável pelo authorization server (servidor de autorização), o utilizador pode não ser solicitado a dar consentimento, em vez disso, ocorre um consentimento automático e todos os scopes (scopes) solicitados são concedidos.
+
+## Definindo scopes (scopes)
+
+Os scopes (scopes) são tipicamente definidos pelo API provider (fornecedor de API). Podem ser:
+- **Scopes (scopes) padrão**: Scopes (scopes) comumente usados definidos pela especificação OAuth 2.0, compartilhados por diferentes aplicações e serviços. Ex. `openid`, `profile`, `email`.
+- **Scopes (scopes) personalizados**: Específicos para uma aplicação ou serviço, adaptados aos seus requisitos únicos. Ex. `read:orders`, `write:comments`.
+
+## Onde os scopes (scopes) podem ser usados no OIDC (OpenID Connect) e na gestão de identidade?
+
+Os scopes (scopes) podem ser usados em vários aspetos do OIDC (OpenID Connect), incluindo mas não se limitando a:
+
+- **Autenticação**: Os scopes (scopes) podem ser usados para solicitar informações específicas do utilizador durante o processo de autenticação. Ex. `profile`, `email`.
+- **Autorização**: Os scopes (scopes) podem ser usados para solicitar acesso a recursos específicos ou realizar ações específicas. Ex. `read:orders`, `write:comments`.
+- **Consentimento**: Os scopes (scopes) são apresentados ao utilizador durante o ecrã de consentimento para informá-lo das permissões solicitadas pela aplicação.
+- **Emissão de token**: Os scopes (scopes) são incluídos na resposta do token para indicar as permissões concedidas à aplicação.
+- **Validação de token**: Os scopes (scopes) podem ser usados para validar os direitos de acesso da aplicação quando esta apresenta o token para aceder a recursos protegidos.
+- **Resource server (servidor de recursos)**: Os scopes (scopes) podem ser usados pelo resource server (servidor de recursos) para aplicar políticas de controlo de acesso com base nas permissões concedidas à aplicação.
+- **Perfil do utilizador**: Os scopes (scopes) podem ser usados para solicitar informações adicionais do perfil do utilizador além dos claims (claims) básicos.
+
+## Melhores práticas
+
+- **Solicitar scopes (scopes) mínimos**: Solicitar sempre o conjunto mínimo de scopes (scopes) necessário para a sua aplicação funcionar. Isto minimiza o risco de sobre-permissão e aumenta a confiança do utilizador.
+- **Explicar o uso dos scopes (scopes)**: Explicar claramente aos utilizadores por que cada scope (scope) é necessário. A transparência ajuda a obter o consentimento do utilizador.
+- **Usar scopes (scopes) padrão quando possível**: Aproveitar os scopes (scopes) padrão para garantir compatibilidade e reduzir a complexidade.
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc6749",
+    "https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims",
+  ]}
+/>

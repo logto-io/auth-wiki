@@ -14,9 +14,12 @@ export const locales = Object.freeze({
   en: 'en',
   es: 'es',
   fr: 'fr',
+  it: 'it',
   ko: 'ko',
   ja: 'ja',
   nl: 'nl',
+  'pt-br': 'pt-BR',
+  'pt-pt': 'pt-PT',
   zh: 'zh-Hans',
   // Astro doesn't maintain the case when generating file-based slugs, so we need to use the
   // lowercase version of the locale code as the key.

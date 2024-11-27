@@ -1,0 +1,64 @@
+---
+title: Chiave API
+tags: [authentication, api]
+description: Una chiave API è un identificatore unico utilizzato per autenticare e autorizzare un client quando accede a un'API. Serve come un token segreto incluso nelle richieste API per verificare l'identità del client e consentire l'accesso a risorse o servizi specifici. Le chiavi API sono tipicamente utilizzate nelle comunicazioni server-to-server o quando si accede a dati pubblici.
+---
+
+## Che cos'è una chiave API?
+
+Le chiavi API sono utilizzate per identificare e autorizzare l'applicazione o il servizio chiamante. Sono tipicamente di lunga durata e statiche fino a quando non vengono ruotate e spesso hanno un set fisso di permessi. Sono principalmente utilizzate per comunicazioni server-to-server o per accedere a dati pubblici, questi token generalmente non rappresentano un utente specifico.
+
+## Come funziona una chiave API?
+
+Una chiave API è una lunga stringa di caratteri generata dal fornitore dell'API e condivisa con gli utenti autorizzati. Questa chiave deve essere inclusa nell'intestazione della richiesta quando si accede all'API. Le chiavi API sono semplici ed efficaci per esigenze di sicurezza di base. Ad esempio, servizi popolari come Google Maps API e AWS forniscono chiavi API per controllare l'accesso e monitorare l'utilizzo.
+
+```java
+curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
+```
+
+Le chiavi API non sono efficaci come altre forme di autenticazione API, come <Ref slug="oauth-2.0" /> e <Ref slug="jwt" />, ma svolgono comunque un ruolo importante nell'aiutare i produttori di API a monitorare l'utilizzo poiché è il metodo più semplice e ampiamente utilizzato per proteggere le API.
+
+## Quali sono i suoi pro e contro?
+
+### Pro
+
+- Semplice da implementare: le chiavi API sono facili da implementare e utilizzare. Comportano l'aggiunta di una chiave all'intestazione della richiesta, rendendolo un metodo semplice per sviluppatori e clienti da comprendere e impiegare.
+- Facile da monitorare: le chiavi API sono facili da monitorare. Puoi tracciare l'utilizzo di ciascuna chiave e revocarle se necessario.
+- Limitazione del tasso efficace: le chiavi API sono efficaci per la limitazione del tasso. Puoi impostare un limite sul numero di richieste per chiave per prevenire abusi.
+- Adatto per dati non sensibili: le chiavi API sono adatte per dati non sensibili o API pubblicamente disponibili, dove i requisiti di sicurezza sono inferiori.
+
+### Contro
+
+- Sicurezza limitata: le chiavi API non sono abbastanza sicure per dati sensibili, specialmente per applicazioni lato client. Sono spesso utilizzate nelle comunicazioni machine-to-machine.
+- Non adatto per l'autenticazione dell'utente: le chiavi API sono legate ad applicazioni o sistemi, non a utenti individuali, rendendo difficile identificare utenti specifici o tracciare le loro azioni.
+- Nessuna scadenza del token: le chiavi API sono tipicamente statiche e non scadono. Se una chiave viene compromessa, potrebbe essere utilizzata in modo improprio indefinitamente a meno che non venga rigenerata manualmente.
+
+## Quali sono i casi d'uso per le chiavi API?
+
+- Comunicazione service-to-service: le chiavi API sono adatte per scenari in cui le applicazioni devono comunicare con le API direttamente tramite CLI. Ad esempio, chiamare le API di OpenAI.
+- API pubbliche: quando si espongono API al pubblico, le chiavi API forniscono un metodo semplice di controllo dell'accesso.
+- Configurazione semplificata: per esigenze di autenticazione rapide e semplici, specialmente nella fase di sviluppo. A differenza dell'autenticazione machine-to-machine, le chiavi API non richiedono la registrazione del client in anticipo e non necessitano di essere scambiate per un access token. Basta passare la tua chiave API come parametro nella tua richiesta e funziona semplicemente.
+
+Nella pratica reale, lo scopo più comune quando si costruiscono prodotti è l'integrazione del prodotto. Ecco un caso d'uso tipico:
+
+### Esempio: Integrazione con Stripe
+
+Stripe utilizza le chiavi API per un'integrazione sicura con diverse piattaforme e applicazioni. Puoi creare, visualizzare, eliminare e gestire queste chiavi tramite il Developers Dashboard. Utilizzando le chiavi API, puoi integrare le funzionalità di checkout e fatturazione di Stripe nel tuo prodotto.
+
+![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
+
+## Qual è la differenza tra Personal Access Tokens (PAT) e Machine-to-Machine (M2M)?
+
+Quando si parla di chiavi API, i personal access tokens e <Ref slug="machine-to-machine" /> possono essere menzionati insieme poiché tutti possono accedere programmaticamente alle risorse API tramite comandi CLI o stabilire comunicazioni tra servizi backend.
+
+### Personal Access Tokens (PATs)
+
+Un personal access token è anche una stringa ma rappresenta l'identità e i permessi ***di un utente specifico***, è generato dinamicamente al momento dell'autenticazione o del login riuscito e tipicamente ha una durata limitata ma può essere rinnovato. Fornisce un controllo di accesso dettagliato ai dati e alle capacità specifiche dell'utente ed è comunemente utilizzato per strumenti CLI, script o accesso personale alle API. La principale differenza è che è più specifico e utilizzato per azioni specifiche dell'utente.
+
+### Machine-to-Machine (M2M)
+
+La comunicazione M2M avviene quando i dispositivi scambiano automaticamente dati senza coinvolgimento umano in un senso più ampio.
+
+Nel contesto di <Ref slug="openid-connect" /> (o <Ref slug="oauth-2.0" />), le applicazioni M2M utilizzano il <Ref slug="client-credentials-flow" />, come definito nel [protocollo OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749), che supporta protocolli standard simili. Di solito comporta un'applicazione client (una macchina o un servizio) che accede alle risorse sia per conto proprio che per conto di un utente. È ideale per situazioni in cui solo i client fidati possono accedere ai servizi backend.
+
+<SeeAlso slugs={["machine-to-machine"]} />

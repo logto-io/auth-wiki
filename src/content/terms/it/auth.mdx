@@ -1,0 +1,44 @@
+---
+title: Auth (disambiguazione)
+tags: [authentication, authorization]
+description: Il termine "auth" è spesso usato come abbreviazione per authentication (autenticazione) o authorization (autorizzazione). Questi concetti sono correlati ma fondamentalmente diversi.
+---
+
+## Auth
+
+Questa pagina è una disambiguazione per il termine "auth". È spesso usato come abbreviazione per:
+
+- <Ref slug="authentication" />: Il processo di verifica della proprietà dell'identità (ad esempio, utente o servizio). Risponde alla domanda "Quale identità possiedi?"
+- <Ref slug="authorization" />: Il processo di determinazione delle azioni che un'identità può eseguire su una risorsa. Risponde alla domanda "Cosa puoi fare?"
+
+> [!Note]
+> A volte, authentication (autenticazione) e authorization (autorizzazione) sono indicate rispettivamente come "AuthN" e "AuthZ".
+
+Questi due concetti sono entrambi essenziali nel regno di <Ref slug="iam" />, ma sono fondamentalmente diversi. Vediamo un esempio: un'applicazione web MyStorage ha la capacità di caricare file e connettersi a Google Drive. Un tipico flusso utente sarebbe:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MyStorage
+    participant Google
+    autonumber
+
+    User->>MyStorage: Accedi a MyStorage
+    MyStorage->>User: Benvenuto, Utente!
+    User->>MyStorage: Clicca "Connetti Google Drive"
+    MyStorage->>Google: Reindirizza a Google<br />con authorization request
+    Google->>User: Chiedi all'utente di accedere
+    User->>Google: Accedi a Google
+    Google->>User: Chiedi il permesso di accedere a Google Drive
+    User->>Google: Concedi l'accesso a MyStorage
+    Google->>MyStorage: Reindirizza a MyStorage<br />con dati di autorizzazione (ad esempio, access token)
+    MyStorage->>Google: Accedi a Google Drive dell'utente utilizzando l'access token
+```
+
+In questo flusso, l'utente esegue due passaggi di authentication (autenticazione): uno con MyStorage (passaggio 1) e un altro con Google (passaggio 6); e un passaggio di authorization (autorizzazione): concedere l'accesso a Google Drive (passaggio 8).
+
+## A quale ti riferisci?
+
+Quando vedi il termine "auth", è importante chiarire se si riferisce a authentication (autenticazione) o authorization (autorizzazione); altrimenti, potresti aspettarti che entrambi i processi siano coperti (proprio come fa questo sito web).
+
+<SeeAlso slugs={["authentication", "authorization", "iam", "oauth-2.0", "openid-connect"]} />

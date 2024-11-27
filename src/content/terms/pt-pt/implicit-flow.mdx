@@ -1,0 +1,83 @@
+---
+title: Fluxo implícito (Implicit flow)
+tags: [oauth 2.0, oidc]
+description: O fluxo implícito (implicit flow) do OIDC é um método de autenticação para SPAs, permitindo que recebam rapidamente tokens diretamente do servidor de autorização. Embora simplifique o processo ao eliminar a necessidade de um servidor backend, vem com menor segurança devido à exposição do token na URL.
+---
+
+## O que é o fluxo implícito (implicit flow)
+
+O fluxo implícito (implicit flow) do OIDC (OpenID Connect) é um processo de autenticação usado principalmente por aplicações cliente implementadas em um navegador usando uma linguagem de script, por exemplo, aplicações de página única (SPAs). Ele permite que aplicações cliente obtenham diretamente tokens de ID e tokens de acesso (access tokens) do servidor de autorização sem realizar a autenticação do cliente.
+
+## Como funciona o fluxo implícito (implicit flow)?
+
+Os principais passos do fluxo implícito (implicit flow) são os seguintes:
+
+1. **Envio do pedido de autenticação (authentication request)**: O utilizador inicia o fluxo normalmente clicando num link ou botão na aplicação para iniciar sessão. A aplicação envia um pedido de autenticação (authentication request) para o endpoint de autorização do servidor de autorização. O servidor de autorização valida os parâmetros e redireciona o utilizador para autenticar-se na página de início de sessão do servidor de autorização.
+2. **Autenticação do utilizador**: O utilizador autentica-se no servidor de autorização (por exemplo, inserindo nome de utilizador e senha).
+3. **Resposta do servidor de autorização**: O servidor de autorização retorna um token de ID e, se solicitado, um token de acesso (access token) para a aplicação cliente como fragmento de URL.
+4. **Processamento dos tokens pelo cliente**: A aplicação cliente extrai os tokens do fragmento de URL.
+
+```mermaid
+sequenceDiagram
+participant User
+participant Application
+participant Authorization Server
+User->>Application: Iniciar fluxo de início de sessão
+Application->>Authorization Server: Solicitar servidor de autorização com ID do cliente, scope, redirect URI e estado
+Authorization Server->>User: Redirecionar utilizador para a página de início de sessão e solicitar autenticação
+User->>Authorization Server: Autenticar (por exemplo, inserir nome de utilizador e senha)
+Authorization Server -->>Application: Retornar token de ID e token de acesso no fragmento de URL
+Application->>Application: Extrair tokens do fragmento de URL
+```
+
+### Pedido de autenticação (Authentication request)
+
+Os parâmetros do pedido são os seguintes:
+- **client_id**: OBRIGATÓRIO. Identificador de cliente OAuth 2.0 válido, que está disponível no Logto como o ID da aplicação (ou ID do app).
+- **scope**: OBRIGATÓRIO. Este valor especifica um conjunto de recursos que o utilizador está solicitando do servidor de autorização. Por exemplo, `openid profile email`
+- **response_type**: OBRIGATÓRIO. O valor é `id_token` ou `id_token token`. Nenhum token de acesso (access token) é retornado quando o valor é `id_token`.
+- **redirect_uri**: OBRIGATÓRIO. O URI para o qual a resposta de autenticação será enviada e deve corresponder exatamente ao redirect URI que o cliente pré-registrou no <Ref slug="openid-connect" headingId="openid-provider-op" />. Por exemplo, `Sign-in redirect URI` no Logto Admin Console.
+- **nonce**: OBRIGATÓRIO. Uma string aleatória usada para mitigar ataques de repetição, que é passada sem modificações do pedido de autenticação para o claim do token de ID.
+
+### Exemplo de um pedido de autenticação
+
+```bash
+curl -X GET "https://authorization-server.com/auth" \
+  -d "response_type=id_token token" \
+  -d "client_id=YOUR_APPLICATION_ID" \
+  -d "redirect_uri=https://yourapp.com/callback" \
+  -d "scope=openid profile email" \
+  -d "nonce=RANDOM_STRING"
+```
+
+## Limitações
+
+O fluxo implícito (implicit flow) foi desenvolvido numa época em que os navegadores não adotavam amplamente o Cross-Origin Resource Sharing (CORS). Portanto, o envio de pedidos POST para o servidor de autorização hospedado em um domínio diferente é proibido.
+
+Devido a esta limitação, o servidor de autorização retorna diretamente os tokens no fragmento de URL, o que pode expô-los ao utilizador final e a aplicações que têm acesso ao User Agent do utilizador final.
+
+Além disso, a autenticação do cliente não é realizada no fluxo implícito (implicit flow), o que significa que qualquer aplicação pode fingir ser o cliente que solicita a autenticação, já que o ID do cliente está sempre exposto em aplicações baseadas em navegador.
+
+Devido às limitações acima, o fluxo implícito (implicit flow) é geralmente considerado menos seguro do que o Fluxo de Código de Autorização (Authorization Code Flow).
+
+## Alternativas ao fluxo implícito (implicit flow)
+
+Dadas as limitações de segurança do fluxo implícito (implicit flow), outros fluxos são frequentemente recomendados:
+- **Fluxo de Código de Autorização (Authorization Code Flow)**: Este fluxo envolve um passo adicional onde o cliente troca um código de autorização por tokens, proporcionando uma camada extra de segurança.
+- **PKCE (Proof Key for Code Exchange)**: Uma extensão do Fluxo de Código de Autorização (Authorization Code Flow) que adiciona uma camada adicional de segurança usando um verificador de código e um desafio de código.
+
+<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/implicit-flow-is-dead",
+    {
+      url: "https://tools.ietf.org/html/rfc6749#section-4.2",
+      result: {
+        ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
+        ogDescription: "O tipo de concessão implícita é usado para obter tokens de acesso (não suporta a emissão de tokens de atualização) e é otimizado para clientes públicos conhecidos por operar um URI de redirecionamento específico. Esses clientes são tipicamente implementados em um navegador usando uma linguagem de script como JavaScript."
+      }
+    },
+    "https://openid.net/specs/openid-connect-core-1_0.html",
+  ]}
+/>

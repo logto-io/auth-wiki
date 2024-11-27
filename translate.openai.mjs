@@ -68,7 +68,7 @@ export class OpenAiTranslate {
           content: content,
         },
       ],
-      temperature: 0.2,
+      temperature: 0.1,
       stream: true,
     });
 

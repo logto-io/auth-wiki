@@ -1,0 +1,50 @@
+---
+title: Autorizzazione
+tags: [authorization]
+description: L'autorizzazione è il processo di determinare quali azioni un'identità può eseguire su una risorsa. È un meccanismo di sicurezza fondamentale per definire e applicare le politiche di accesso.
+---
+
+## Cos'è l'autorizzazione (authorization)?
+
+> **In breve**: L'autorizzazione risponde alla domanda "Cosa puoi fare?"
+
+L'autorizzazione è un processo decisionale che determina se un'identità (utente, servizio o dispositivo) ha le autorizzazioni necessarie per eseguire un'azione specifica su una risorsa. Diamo un'occhiata ad alcuni esempi:
+
+- In un editor di documenti online, un utente può condividere un documento con altri.
+- In un servizio di archiviazione cloud, un servizio può leggere e scrivere file in una cartella specifica.
+- In un sistema di casa intelligente, un dispositivo può accendere le luci nel soggiorno.
+
+Tutti questi esempi coinvolgono un'identità (soggetto) che esegue un'azione su una risorsa. Naturalmente, l'autorizzazione può anche fallire, come quando un utente tenta di eliminare un file a cui non ha il permesso di accedere.
+
+Il modello di base per l'autorizzazione è semplice: Se **identità** esegue **azione** su **risorsa**, allora **accetta** o **nega**.
+
+### Differenza tra autenticazione e autorizzazione
+
+L'autenticazione e l'autorizzazione sono spesso confuse, ma sono fondamentalmente diverse: <Ref slug="authentication" /> risponde alla domanda "Quale identità possiedi?". Inoltre, nella maggior parte dei casi, l'autorizzazione avviene dopo l'autenticazione perché il sistema deve conoscere l'identità prima di prendere decisioni di accesso.
+
+### Differenza tra autorizzazione e controllo degli accessi
+
+L'autorizzazione è un sottoinsieme del controllo degli accessi. Il controllo degli accessi è il concetto più ampio che include l'autorizzazione e altre restrizioni sulla gestione degli accessi. In altre parole, il controllo degli accessi è un termine generale che descrive la restrizione selettiva dell'accesso alle risorse, mentre l'autorizzazione riguarda specificamente il processo decisionale.
+
+## Come funziona l'autorizzazione (authorization)?
+
+L'autorizzazione è tipicamente implementata utilizzando <Ref slug="access-control" headingId="access-control-models" />. Definiscono come le autorizzazioni sono assegnate e applicate in un sistema.
+
+## Framework (protocolli) di autorizzazione
+
+Sebbene <Ref slug="oauth-2.0" /> sia un framework molto popolare per l'autorizzazione, è importante notare che OAuth 2.0 non definisce quale modello di controllo degli accessi utilizzare. Invece, si concentra sulla delega dell'autorizzazione e sull'emissione di access token.
+
+Detto ciò, OAuth 2.0 è adatto per scenari di autorizzazione di terze parti in cui un utente concede il permesso a un client di accedere alle proprie risorse. Ad esempio, quando accedi a un sito web utilizzando il tuo account Google, stai autorizzando il sito web ad accedere al tuo profilo Google.
+
+Se stai gestendo l'autorizzazione di prima parte (ad esempio, all'interno della tua applicazione o organizzazione), potresti dover implementare un modello di controllo degli accessi come <Ref slug="rbac" /> o <Ref slug="abac" />. La combinazione di <Ref slug="openid-connect" /> e modelli di controllo degli accessi può fornire una solida base sia per l'autenticazione che per l'autorizzazione.
+
+Invece di costruire un sistema di autorizzazione fatto in casa, è consigliabile utilizzare un <Ref slug="identity-provider" /> che offra funzionalità di autenticazione e autorizzazione. Un buon identity provider gestirà la complessità del controllo degli accessi e fornirà una soluzione sicura e scalabile per le tue applicazioni.
+
+<SeeAlso slugs={["authentication", "access-control", "oauth-2.0", "rbac", "abac"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/ciam-101-intro-authn-sso",
+    "https://blog.logto.io/ciam-102-authz-and-rbac",
+  ]}
+/>

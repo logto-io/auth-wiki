@@ -1,0 +1,161 @@
+---
+title: Controle de acesso baseado em atributos (ABAC)
+tags: [authorization]
+description: O controle de acesso baseado em atributos (ABAC) é um modelo de controle de acesso que utiliza atributos (como funções de usuário, propriedades de recursos e condições ambientais) para tomar decisões de controle de acesso. É uma maneira flexível e dinâmica de gerenciar o acesso a recursos protegidos.
+---
+
+## O que é controle de acesso baseado em atributos (ABAC)?
+
+ABAC é um modelo de <Ref slug="access-control" /> que utiliza atributos para tomar decisões de controle de acesso. Esses atributos podem incluir vários fatores, como:
+
+- Atributos do usuário: por exemplo, funções, departamento, localização, etc.
+- Atributos do recurso: por exemplo, nível de sensibilidade, proprietário, tipo, etc.
+- Atributos ambientais: por exemplo, horário de acesso, localização, dispositivo, etc.
+
+Ao avaliar esses atributos e executá-los por meio de um conjunto de regras, o ABAC pode determinar se um sujeito (por exemplo, usuário, serviço) deve ter acesso a um recurso. Essa abordagem permite um controle de acesso detalhado e uma aplicação de políticas dinâmica com base no contexto.
+
+## Como o ABAC funciona?
+
+O ABAC utiliza uma abordagem baseada em políticas para controle de acesso. Uma política típica de ABAC consiste em:
+
+- **Sujeito**: A entidade que solicita acesso (por exemplo, usuário, serviço, dispositivo).
+- **Ação**: A operação sendo realizada no recurso (por exemplo, ler, escrever, excluir).
+- **Recurso**: A entidade sendo acessada (por exemplo, arquivo, banco de dados, API).
+- **Ambiente**: O contexto no qual o acesso é solicitado (por exemplo, horário, localização, dispositivo).
+- **Atributos**: As propriedades do sujeito, recurso e ambiente que são avaliadas para tomar decisões de acesso.
+- **Políticas**: Um conjunto de regras que definem as condições sob as quais o acesso é concedido ou negado.
+
+As políticas de ABAC são mais complexas do que modelos tradicionais de controle de acesso, como <Ref slug="rbac" />. Por outro lado, o ABAC oferece mais flexibilidade e granularidade nas decisões de controle de acesso.
+
+### Exemplo de políticas de ABAC
+
+Por exemplo, um sistema possui várias políticas de ABAC:
+
+1. **Política 1**: Permitir acesso se:
+
+    - (Sujeito) Função do sujeito é `gerente`.
+    - (Atributo) Nível de sensibilidade do recurso é `alto`.
+    - (Ambiente) Localização é `interna`.
+    - (Ação) Qualquer ação.
+    - (Ambiente) Horário é entre 9h e 17h (horário de expediente).
+
+2. **Política 2**: Negar acesso se:
+
+    - (Sujeito) Função do sujeito não é `gerente`.
+    - (Atributo) Nível de sensibilidade do recurso é `alto`.
+    - (Ambiente) Qualquer localização.
+    - (Ação) Qualquer ação.
+    - (Ambiente) Qualquer horário.
+
+3. **Política 3**: Permitir acesso se:
+
+    - (Sujeito) Função do sujeito é `funcionário` ou `gerente`.
+    - (Atributo) Nível de sensibilidade do recurso é `baixo`.
+    - (Ambiente) Qualquer localização.
+    - (Ação) Ação de `leitura`.
+    - (Ambiente) Qualquer horário.
+
+O mecanismo de avaliação de políticas verificará essas políticas em ordem, e a primeira política que corresponder às condições determinará a decisão de acesso. Enquanto isso, uma política padrão de negação é aplicada se nenhuma outra política corresponder.
+
+Vamos passar por alguns cenários para entender como o ABAC funciona:
+
+> **Cenário 1**. Um usuário deseja acessar (realizar ação de `leitura`) um documento de alto nível de sensibilidade (recurso) fora do escritório (ambiente). O usuário tem a função de `gerente` armazenada no sistema.
+  
+**Decisão**: O acesso é negado porque o usuário está fora do escritório (a localização não é `interna`).
+
+> **Cenário 2**. Um usuário deseja acessar (realizar ação de `leitura`) um documento de alto nível de sensibilidade (recurso) durante o horário de expediente (ambiente) na rede do escritório (localização=`interna`). O usuário tem a função de `gerente`.
+
+**Decisão**: O acesso é concedido porque todas as condições na Política 1 são atendidas.
+
+> **Cenário 3**. Todas as condições no cenário 2 são as mesmas, mas o usuário tem a função de `funcionário` em vez de `gerente`.
+
+**Decisão**: O acesso é negado porque a função do usuário não corresponde às condições na Política 1.
+
+> **Cenário 4**. Um usuário deseja acessar (realizar ação de `leitura`) um documento de baixo nível de sensibilidade (recurso). O usuário tem a função de `funcionário`.
+
+**Decisão**: O acesso é concedido porque todas as condições na Política 3 são atendidas.
+
+> **Cenário 5**. Um usuário deseja excluir (realizar ação de `exclusão`) um documento de baixo nível de sensibilidade (recurso). O usuário tem a função de `funcionário`.
+
+**Decisão**: O acesso é negado porque não há política que permita a ação de `exclusão` em documentos de baixo nível de sensibilidade.
+
+Você pode notar que nem todos os atributos são necessários em cada política. Essa flexibilidade permite um mecanismo de controle de acesso mais dinâmico e ciente do contexto.
+
+## eXtensible Access Control Markup Language (XACML)
+
+XACML é um padrão baseado em XML para expressar políticas de controle de acesso. Embora não defina um modelo específico de controle de acesso, o XACML é frequentemente usado para implementar políticas de ABAC. Vamos ver um exemplo não normativo de como o XACML pode ser usado para representar as políticas de ABAC do exemplo anterior:
+
+```xml
+<PolicySet PolicySetId="ABAC_Policies" PolicyCombiningAlgId="urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-overrides">
+  <Policy PolicyId="Policy1" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides">
+    <Target>
+      <Subjects>
+        <Subject>
+          <SubjectMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">manager</AttributeValue>
+            <SubjectAttributeDesignator AttributeId="role" DataType="http://www.w3.org/2001/XMLSchema#string"/>
+          </SubjectMatch>
+        </Subject>
+      </Subjects>
+      <Resources>
+        <Resource>
+          <ResourceMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">high</AttributeValue>
+            <ResourceAttributeDesignator AttributeId="sensitivity-level" DataType="http://www.w3.org/2001/XMLSchema#string"/>
+          </ResourceMatch>
+        </Resource>
+      </Resources>
+      <Environments>
+        <Environment>
+          <EnvironmentMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">internal</AttributeValue>
+            <EnvironmentAttributeDesignator AttributeId="location" DataType="http://www.w3.org/2001/XMLSchema#string"/>
+          </EnvironmentMatch>
+        </Environment>
+        <Environment>
+          <EnvironmentMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:time-in-range">
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#time">09:00:00</AttributeValue>
+            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#time">17:00:00</AttributeValue>
+            <EnvironmentAttributeDesignator AttributeId="time" DataType="http://www.w3.org/2001/XMLSchema#time"/>
+          </EnvironmentMatch>
+        </Environment>
+      </Environments>
+    </Target>
+    <Rule RuleId="Rule1" Effect="Permit"/>
+  </Policy>
+  <!-- Outras políticas (Política 2, Política 3) -->
+</PolicySet>
+```
+
+Para mais informações sobre XACML, veja <Ref slug="xacml" />.
+
+## Considerações de implementação
+
+Embora o ABAC forneça uma maneira poderosa de gerenciar o controle de acesso, ele também apresenta algumas considerações de implementação:
+
+- Complexidade do sistema: As políticas de ABAC podem se tornar complexas à medida que o número de atributos e regras aumenta. O gerenciamento e teste adequados de políticas são mais demorados do que modelos de controle de acesso mais simples.
+- Desempenho: Avaliar políticas complexas de ABAC pode impactar o desempenho do sistema. Técnicas de cache e otimização podem ajudar a mitigar esse problema.
+- Conflitos de políticas: Políticas conflitantes podem levar a decisões de acesso imprevisíveis. A revisão regular de políticas e a resolução de conflitos devem fazer parte do processo de gerenciamento de políticas.
+
+## ABAC vs. RBAC
+
+Comparar ABAC com <Ref slug="rbac" /> pode ajudar a entender as diferenças entre os dois modelos:
+
+|                       | RBAC                               | ABAC                                     |
+|-----------------------|------------------------------------|------------------------------------------|
+| Política de controle de acesso | Baseada em funções                     | Baseada em atributos                      |
+| Granularidade           | Grossa                            | Fina                                     |
+| Flexibilidade           | Limitada                          | Altamente flexível                        |
+| Complexidade            | Mais simples                      | Mais complexa                            |
+| Impacto no desempenho    | Mínimo                            | Pode ser significativo                   |
+| Gerenciamento de acesso     | Gerenciamento de funções            | Gerenciamento de políticas               |
+| Melhor para              | Estruturas de permissão bem definidas | Controle de acesso dinâmico e ciente do contexto |
+
+<SeeAlso slugs={["access-control", "rbac", "authorization"]} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/rbac-and-abac",
+    "https://csrc.nist.gov/publications/detail/sp/800-162/final",
+  ]}
+/>

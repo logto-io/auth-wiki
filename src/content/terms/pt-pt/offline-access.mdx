@@ -1,0 +1,51 @@
+---
+title: Acesso offline (Offline access)
+tags: [oauth 2.0, oidc]
+description: O acesso offline (Offline access) permite que os clientes obtenham novos access tokens sem exigir que o utilizador se re-autentique. É útil para sessões de longa duração e uma melhor experiência do utilizador.
+---
+
+## O que é o acesso offline (offline access)?
+
+O conceito de acesso offline (offline access) pode variar dependendo do contexto, vamos focar nas especificações do OAuth 2.0 e OpenID Connect (OIDC). Neste contexto, o acesso offline permite que os clientes obtenham novos <Ref slug="access-token">access tokens</Ref> usando um <Ref slug="refresh-token">refresh token</Ref> sem exigir que o utilizador se re-autentique. Esta funcionalidade é particularmente útil para sessões de longa duração e uma melhor experiência do utilizador.
+
+Vale a pena notar que o OAuth 2.0 não define o termo "acesso offline" explicitamente; apenas especifica o uso de refresh tokens para obter novos access tokens. No entanto, o termo "acesso offline" (juntamente com o scope `offline_access`) foi amplamente adotado na indústria para se referir a esta capacidade, e é oficialmente definido na especificação <Ref slug="openid-connect" />.
+
+## Como funciona o acesso offline (offline access)?
+
+Para simplificar, usaremos os termos do OAuth 2.0 <Ref slug="authorization-request" /> e <Ref slug="authorization-server" /> para ilustrar como o acesso offline funciona. Seus termos alternativos no OIDC são <Ref slug="authentication-request" /> e <Ref slug="openid-connect" headingId="openid-provider-op" />, respectivamente.
+
+Existem dois passos principais envolvidos no aproveitamento do acesso offline:
+
+1. **Solicitar acesso offline**: Quando o <Ref slug="client" /> inicia um authorization request para o authorization server, inclui o scope `offline_access` para solicitar acesso offline. Este scope indica que o cliente deseja obter um refresh token juntamente com o access token.
+
+   O suporte para acesso offline pode variar entre os authorization servers, e o authorization server pode ignorar o scope `offline_access` se não o suportar. Por favor, consulte a documentação do authorization server para garantir a compatibilidade antes de usar este scope.
+
+2. **Usar o refresh token**: Uma vez que o <Ref slug="oauth-2.0-grant" /> esteja completo, o cliente deve receber um <Ref slug="refresh-token" /> juntamente com o <Ref slug="access-token" />. O cliente pode armazenar o refresh token de forma segura e usá-lo para enviar um <Ref slug="token-request" /> ao authorization server para obter um novo access token quando o access token atual expirar.
+
+Para exemplos detalhados de acesso offline em ação, por favor, consulte o artigo <Ref slug="refresh-token" />.
+
+## Considerações de segurança
+
+As implicações de segurança do acesso offline são semelhantes às dos refresh tokens. Por favor, consulte a seção de <Ref slug="refresh-token" headingId="security-considerations" /> para detalhes.
+
+<SeeAlso slugs={['refresh-token', 'oauth-2.0', 'openid-connect']} />
+
+<Resources
+  urls={[
+    "https://blog.logto.io/understanding-refresh-token-rotation",
+    "https://blog.logto.io/understanding-tokens-in-oidc",
+    {
+      url: "https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess",
+      result: {
+        ogTitle: "Offline Access in OpenID Connect Core 1.0",
+      }
+    },
+    {
+      url: "https://datatracker.ietf.org/doc/html/rfc6749#section-1.5",
+      result: {
+        ogTitle: "Refresh Token in OAuth 2.0",
+        ogDescription: "Refresh tokens are credentials used to obtain access tokens."
+      },
+    },
+  ]}
+/>

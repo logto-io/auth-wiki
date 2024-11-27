@@ -1,0 +1,65 @@
+---
+title: API de Gerenciamento (Management API)
+tags: [api, integração]
+description: A API de Gerenciamento (Management API) no contexto de gerenciamento de identidade e acesso (IAM) permite o gerenciamento programático de recursos como usuários, aplicações, funções e permissões. Tipicamente RESTful, ela fornece uma camada de abstração entre o sistema IAM e a interface do usuário, possibilitando automação, integração e desenvolvimento de funcionalidades personalizadas.
+---
+
+## O que é a API de Gerenciamento (Management API)?
+
+A definição de API de Gerenciamento (Management API) pode variar dependendo do software ou serviço que você está usando. No contexto de gerenciamento de identidade e acesso (IAM), a API de Gerenciamento geralmente se refere a um conjunto de APIs que permitem gerenciar recursos relacionados ao IAM de forma programática. Por exemplo, usuários, aplicações, funções, permissões, organizações, etc.
+
+Embora o nome não especifique a implementação exata, a API de Gerenciamento é geralmente RESTful, dada sua natureza de definir precisamente os recursos e operações que podem ser realizadas sobre eles. Dito isso, quando você vê `POST /users`, pode esperar que essa chamada de API criará um novo usuário.
+
+## Por que a API de Gerenciamento (Management API) é importante?
+
+A API de Gerenciamento cria uma camada separada de abstração sobre o sistema IAM, mas abaixo da interface do usuário. Isso permite que os desenvolvedores automatizem o gerenciamento de recursos IAM, o que pode ser especialmente útil em vários cenários:
+
+### 1. Automação
+
+Como o nome sugere, a API de Gerenciamento permite que você use código para gerenciar recursos, em vez de clicar manualmente através da interface do usuário. Isso é particularmente útil quando você tem um grande número de usuários, aplicações ou funções para gerenciar. Por exemplo, você pode escrever um script para importar usuários de um arquivo CSV e atribuí-los às funções e permissões corretas.
+
+### 2. Integração
+
+A API de Gerenciamento cria uma maneira padrão para comunicação de serviço para serviço (ou máquina para máquina). Quando você tem vários serviços que precisam se comunicar com o sistema IAM, em vez de implementar integrações personalizadas para cada serviço, uma API de Gerenciamento bem projetada pode ser usada para todos os serviços combinando as chamadas de API. Por exemplo, um serviço que precisa listar todos os usuários sob uma função específica pode fazê-lo chamando `GET /roles/{role_id}/users`.
+
+### 3. Composição e extensão de funcionalidades
+
+Devido à variedade de requisitos de negócios, um sistema IAM pode não ser capaz de fornecer todas as funcionalidades exatas que você precisa, especialmente quando se trata de requisitos complexos de controle de acesso. A API de Gerenciamento permite que você construa funcionalidades personalizadas sobre o sistema IAM existente sem modificar a plataforma ou arquitetura subjacente.
+
+Vamos ver um exemplo cotidiano: usuários finais precisam mudar seu endereço de e-mail. Diferentes aplicativos podem ter diferentes requisitos:
+
+1. O App A requer que o usuário verifique ambos os endereços de e-mail, antigo e novo.
+2. O App B requer que o usuário verifique a senha existente antes de mudar o endereço de e-mail.
+3. O App C requer que o usuário verifique a senha existente e que um administrador aprove a mudança de e-mail.
+
+Com a API de Gerenciamento, você pode construir um serviço personalizado que orquestra esses requisitos chamando as APIs necessárias na ordem correta. Você pode até combinar a API de Gerenciamento com a API do seu serviço para alcançar um fluxo de trabalho complexo. Vamos pegar o App C como exemplo:
+
+1. O usuário clica em "Mudar E-mail" no App C, que envia uma solicitação `POST /email-change-requests` para o seu serviço. Ele cria uma nova solicitação de mudança de e-mail e retorna o identificador `foo`.
+2. O App C mostra um diálogo para o usuário, pedindo que ele insira a senha existente.
+3. O usuário insere a senha, e o App C envia uma solicitação `PATCH /email-change-requests/foo` para o seu serviço com a senha. Em segundo plano, seu serviço verifica a senha chamando a API de Gerenciamento `POST /users/{user_id}/verify-password`.
+4. Se a senha estiver correta, seu serviço cria um registro de verificação de sucesso na solicitação de mudança de e-mail `foo`.
+5. No painel de administração, um administrador pode ver as solicitações de mudança de e-mail pendentes com `GET /email-change-requests?status=pending`.
+6. Se o administrador aprovar a solicitação, o painel de administração envia uma solicitação `PATCH /email-change-requests/foo` para o seu serviço com a aprovação do administrador.
+7. Seu serviço então chamará a API de Gerenciamento `PATCH /users/{user_id}` para atualizar o endereço de e-mail do usuário. Se o endereço de e-mail não puder ser atualizado, a API de Gerenciamento retornará um erro, e seu serviço poderá lidar com isso adequadamente.
+
+Note que no exemplo acima, nossos usuários finais nunca interagem diretamente com a API de Gerenciamento. Em vez disso, eles interagem com o App C, que orquestra as chamadas da API de Gerenciamento em segundo plano para alcançar o fluxo de trabalho desejado.
+
+## Como deve ser uma boa API de Gerenciamento (Management API)?
+
+- **RESTful**: Siga os princípios RESTful para tornar a API previsível e fácil de usar.
+- **Orientada a recursos**: Represente recursos como substantivos e use métodos HTTP para realizar ações sobre eles.
+- **Consistente**: Use convenções de nomenclatura, tratamento de erros e formatos de resposta consistentes.
+- **Segura**: Implemente mecanismos adequados de autenticação e autorização para proteger a API.
+- **Documentada**: Forneça documentação clara e concisa sobre como usar a API, incluindo exemplos e casos de uso.
+- **Compatível**: Garanta compatibilidade retroativa ao introduzir novas versões da API.
+- **Abrangente**: Cubra todas as operações necessárias para gerenciar recursos IAM de forma eficaz.
+
+Existem outros aspectos, como desempenho e escalabilidade, que estão mais relacionados à infraestrutura do que ao design da API em si. No entanto, na prática, uma boa API de Gerenciamento deve considerar esses aspectos também.
+
+<Resources
+  urls={[
+    "https://blog.logto.io/graphql-and-rest-api",
+    "https://blog.logto.io/post-only-debate",
+    "https://swagger.io/specification/",
+  ]}
+/>

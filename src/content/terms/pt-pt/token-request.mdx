@@ -1,0 +1,122 @@
+---
+title: Pedido de token (Token request)
+tags: [oauth 2.0, oidc]
+description: "Pedido de token (Token request) refere-se ao pedido OAuth 2.0 para troca de credenciais (por exemplo, código de autorização, refresh token) por um conjunto de tokens, que normalmente inclui um ou mais dos seguintes: access token, ID token ou refresh token."
+---
+
+## O que é um pedido de token (token request)?
+
+No <Ref slug="oauth-2.0" /> e <Ref slug="openid-connect" />, um pedido de token (token request) é um pedido ao <Ref slug="authorization-server" /> (ou <Ref slug="openid-connect" headingId="openid-provider-op" /> em OIDC) para troca de credenciais (por exemplo, código de autorização, refresh token) por um conjunto de tokens. O conjunto de tokens normalmente inclui um ou mais dos seguintes:
+
+- <Ref slug="access-token" />: Um token que concede acesso a recursos protegidos.
+- <Ref slug="id-token" />: Um token que contém informações do usuário (específico do OIDC).
+- <Ref slug="refresh-token" />: Um token que pode ser usado para obter um novo access token sem interação do usuário.
+
+Dependendo do <Ref slug="oauth-2.0-grant">tipo de concessão (grant type)</Ref> usado, o pedido pode incluir diferentes parâmetros e retornar diferentes tokens.
+
+Por exemplo, no <Ref slug="client-credentials-flow" />, o <Ref slug="client" /> solicita diretamente um <Ref slug="access-token" /> com credenciais do cliente. Aqui está um exemplo não normativo do pedido de token:
+
+```http
+POST /token HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+  &client_id=client-id
+  &client_secret=client-secret
+  &scope=read
+```
+
+Se o pedido for bem-sucedido, o authorization server responde com um access token:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "access_token": "eyJhbGci...zHg",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scope": "read"
+}
+```
+
+## Como funciona um pedido de token (token request)?
+
+Como mostra o exemplo acima, o pedido de token em si é direto. O cliente envia um pedido HTTP ao endpoint de token do authorization server com os parâmetros necessários. O authorization server valida o pedido, processa-o e retorna os tokens na resposta.
+
+No entanto, de acordo com o tipo de concessão (fluxo) específico usado, o pedido de token pode precisar de mais preparação.
+
+### Fluxo de código de autorização (Authorization code flow)
+
+No <Ref slug="authorization-code-flow" />, o cliente primeiro obtém um código de autorização iniciando um <Ref slug="authorization-request" /> (ou <Ref slug="authentication-request" /> em OIDC) com o authorization server. Uma vez que o usuário concede permissão, o cliente troca o código de autorização por um access token e, opcionalmente, um refresh token através do pedido de token.
+
+Aqui está um diagrama de sequência simplificado do fluxo de código de autorização:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Client
+    participant AS as Authorization Server
+
+    User->>Client: Clicar no botão "Autorizar"
+    Client->>AS: Redirecionar com pedido de autorização
+    AS->>User: Solicitação de autorização
+    User->>AS: Aprovar acesso
+    AS->>Client: Redirecionar com código de autorização
+    Client->>AS: Pedido de token com código de autorização
+    AS->>Client: Responder com access token e refresh token
+```
+
+### Fluxo de credenciais do cliente (Client credentials flow)
+
+Como o exemplo na primeira seção mostra, o <Ref slug="client-credentials-flow" /> é muito mais simples. O cliente solicita diretamente um access token com suas credenciais de cliente. O authorization server valida as credenciais do cliente e emite um access token se for bem-sucedido.
+
+Aqui está um diagrama de sequência não normativo do fluxo de credenciais do cliente:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AS as Authorization Server
+
+    Client->>AS: Pedido de token com credenciais do cliente
+    AS->>Client: Responder com access token
+```
+
+### Refresh token
+
+Em alguns tipos de concessão, o cliente também pode solicitar <Ref slug="offline-access" /> incluindo o `offline_access` scope no pedido de autorização. Se concedido, o authorization server emite um refresh token juntamente com o access token. O cliente pode usar o refresh token para obter um novo access token através do pedido de token sem interação do usuário.
+
+Aqui está um exemplo não normativo de uso de um refresh token para obter um novo access token:
+
+```http
+POST /token HTTP/1.1
+Host: authorization-server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token
+  &refresh_token=refresh-token
+  &client_id=client-id
+  &client_secret=client-secret
+```
+
+---
+
+Outros <Ref slug="oauth-2.0-grant">tipos de concessão (grant types)</Ref> também podem envolver pedidos de token, mas a ideia básica permanece a mesma.
+
+## Parâmetros chave em um pedido de token
+
+Aqui estão alguns parâmetros chave que são comumente usados em um pedido de token:
+
+- **`grant_type`**: O tipo de concessão sendo solicitado. Valores comuns incluem `authorization_code`, `client_credentials`, `refresh_token`, etc.
+- **`client_id`**: O identificador do cliente emitido pelo authorization server.
+- **`client_secret`**: O segredo do cliente emitido pelo authorization server (para clientes confidenciais).
+- **`code`**: O código de autorização obtido do authorization server (para o fluxo de código de autorização).
+- **`refresh_token`**: O refresh token obtido do authorization server (para atualizar access tokens).
+- **`scope`**: Os <Ref slug="scope">scopes</Ref> (permissões) solicitados para o access token.
+- **`redirect_uri`**: O URI onde o authorization server envia a resposta (para o fluxo de código de autorização).
+- **`code_verifier`**: O verificador de código usado na extensão <Ref slug="pkce" /> (para o fluxo de código de autorização).
+
+Os parâmetros reais e seus valores dependem do tipo de concessão e dos requisitos específicos da aplicação. Antes de fazer um pedido de token, você deve consultar a lista completa de parâmetros para o tipo de concessão específico que está usando.
+
+<SeeAlso slugs={["oauth-2.0", "openid-connect", "authorization-request", "authentication-request"]} />

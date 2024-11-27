@@ -1,0 +1,34 @@
+---
+title: Papel (Role)
+tags: [authorization]
+description: Um papel (role) é um conceito central em sistemas de controle de acesso baseado em papéis (RBAC), representando uma coleção de permissões que define quais ações os usuários podem realizar, proporcionando uma maneira eficiente de gerenciar e atribuir direitos de acesso aos usuários.
+---
+
+## Papel (Role)
+
+Um papel (role) é um dos componentes centrais em <Ref slug="rbac" />. Ele serve como um contêiner para permissões que podem ser atribuídas a usuários, atuando como um intermediário entre os usuários e seus direitos de acesso.
+
+```mermaid
+  graph LR
+    Usuários
+    -->|atribuído a| Papéis
+    -->|incluindo| Permissões
+```
+
+Uma estrutura típica de papel (role) contém um nome e um conjunto de permissões:
+
+```typescript
+const role = {
+  name: 'order_admin',
+  permissions: [
+    'read:orders',   // Ver detalhes do pedido
+    'write:orders',  // Editar pedidos
+    'read:products'  // Ver produtos
+  ]
+}
+```
+
+> [!Note]
+> Papéis (roles) são usados principalmente para gerenciamento de permissões. Para implementação de controle de acesso, é recomendado verificar permissões diretamente em vez de papéis. Veja <Ref slug="rbac" /> para mais informações.
+
+<SeeAlso slugs={["rbac", "authorization", "access-control"]} />

@@ -1,0 +1,96 @@
+---
+title: JSON Web Key (JWK)
+tags: [oidc, jose]
+description: Um JSON Web Key (JWK) é um formato baseado em JSON usado para representar chaves criptográficas. Quando múltiplos JWKs precisam ser agrupados, eles são organizados em um JSON Web Key Set (JWKS).
+---
+
+## O que é um JSON Web Key (JWK)?
+
+Um JSON Web Key (JWK) é um formato baseado em JSON usado para representar chaves criptográficas. É amplamente utilizado no contexto de <Ref slug="jws" /> e <Ref slug="jwe" /> para validar a integridade e confidencialidade de <Ref slug="jwt">JSON Web Tokens</Ref>. Também é usado em <Ref slug="openid-connect" /> para gerenciamento de identidade e acesso.
+
+Por exemplo, uma chave pública ECDSA codificada em PEM:
+
+```
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEF/xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4
+f1Qx3y49cUm646fMBX9DYx+43HzXm6VdX77uFymz90aO4dBunpTdUzLFRAiT7+In
+gzZGDrIE+FG6CcqQuRP65r65SUzDOmP5
+-----END PUBLIC KEY-----
+```
+
+...pode ser representada como um JWK:
+
+```json
+{
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+  "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+}
+```
+
+## Como funciona um JWK?
+
+Como o JWK é um formato baseado em JSON, ele pode transportar metadados ricos sobre a chave em comparação com formatos tradicionais como PEM. Aqui estão alguns atributos comuns em um JWK:
+
+- `kty` (Key Type): A família de algoritmos criptográficos usada com a chave. Valores comuns incluem `RSA`, `EC` e `oct`. `EC` foi marcado como "Recomendado+" no [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
+- `use` (Public Key Use): O uso pretendido da chave pública. Valores comuns incluem `sig` (assinatura) e `enc` (criptografia).
+- `key_ops` (Key Operations): As operações de chave suportadas pela chave. Valores comuns incluem `sign`, `verify`, `encrypt` e `decrypt`.
+- `alg` (Algorithm): O algoritmo pretendido para uso com a chave. Dependendo do tipo de chave, o algoritmo pode variar. Por exemplo, `RS256` pode ser usado com uma chave RSA, enquanto `ES256` pode ser usado com uma chave EC.
+- `kid` (Key ID): Um identificador único para a chave. Pode ser usado para corresponder a uma chave específica em um conjunto de chaves.
+
+Exceto `kty`, todos os outros atributos são opcionais e podem ser usados para fornecer contexto adicional sobre a chave. De acordo com o valor de `kty`, outros atributos podem ser obrigatórios ou opcionais. No exemplo acima, o JWK representa uma chave ECDSA (`kty: "EC"`) com uma curva de P-384 (`crv: "P-384"`). Os atributos `x` e `y` contêm as coordenadas da chave pública.
+
+Aqui está outro exemplo não normativo de um JWK de chave pública RSA:
+
+```json
+{
+  "kty": "RSA",
+  "use": "sig",
+  "alg": "RS256",
+  "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+  "e": "AQAB",
+  "kid": "2011-04-29-1234"
+}
+```
+
+Para informações detalhadas sobre os atributos do JWK e seus significados, consulte o [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
+
+## JSON Web Key Set (JWKS)
+
+Quando múltiplos JWKs precisam ser agrupados, eles são organizados em um JSON Web Key Set (JWKS). Um JWKS é um objeto JSON que contém um array de JWKs. É comumente usado na resposta do endpoint `jwks_uri` em <Ref slug="openid-connect-discovery" /> para fornecer as chaves públicas para validação de <Ref slug="signing-key" /> de JWT.
+
+Aqui está um exemplo não normativo de um JWKS contendo dois JWKs:
+
+```json
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "n": "0vx7agoebGcQSuuPiLJXZpt...-TmV4HCA1T8jXg3fE2VbA",
+      "e": "AQAB",
+      "kid": "2011-04-29-1234"
+    },
+    {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "F_xQdbOho2Jw0hgmNPD0VAEPAgkQrfD4f1Qx3y49cUm646fMBX9DYx-43HzXm6Vd",
+      "y": "X77uFymz90aO4dBunpTdUzLFRAiT7-IngzZGDrIE-FG6CcqQuRP65r65SUzDOmP5"
+    }
+  ]
+}
+```
+
+Neste exemplo, o JWKS contém dois JWKs: uma chave RSA e uma chave EC. O atributo `keys` é um array de JWKs, cada um representando uma chave diferente.
+
+<SeeAlso slugs={["jwt", "jws", "signing-key", "openid-connect-discovery"]} />
+
+<Resources
+  urls={[
+    "https://tools.ietf.org/html/rfc7517",
+    "https://tools.ietf.org/html/rfc7518",
+    "https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata",
+  ]}
+/>

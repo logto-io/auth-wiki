@@ -1,0 +1,156 @@
+---
+title: Token opaco
+tags: [oauth 2.0, oidc]
+description: Un token opaco è un tipo di token il cui formato è determinato dall'issuer (emittente), tipicamente appare come una stringa di caratteri o numeri e richiede la validazione da parte dell'issuer piuttosto che contenere tutte le informazioni necessarie per la validazione diretta.
+---
+
+## Che cos'è un token?
+
+Prima di introdurre i token opachi, è importante capire cosa sia un token:
+
+I token sono utilizzati per rappresentare e trasmettere informazioni sicure tra le parti e supportano la stragrande maggioranza dei processi di <Ref slug="authentication" /> e <Ref slug="authorization" /> che avvengono su internet dietro le quinte. I due tipi di token più popolari nei servizi web sono <Ref slug="jwt" /> e i token opachi.
+
+## Che cos'è un token opaco?
+
+I token opachi sono token in un formato proprietario a cui non puoi accedere e contengono tipicamente un identificatore per informazioni nella memoria persistente di un server.
+
+Un token opaco è una delle forme che un token può assumere, e i <Ref slug="access-token">access token</Ref> e i <Ref slug="refresh-token">refresh token</Ref> possono esistere come token opachi. Il formato di un token opaco è determinato dal suo issuer (emittente) ed è tipicamente una stringa di numeri e/o caratteri utilizzata per aiutare l'issuer a recuperare e identificare determinate informazioni in un database. Ecco un esempio di un token opaco:
+
+```
+M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
+```
+
+D'altra parte, JWT è un altro formato comune di token. È una stringa JSON che contiene tutti i claim e le informazioni, insieme a una firma dell'issuer. Per impostazione predefinita, non è criptato, anche se può essere criptato utilizzando lo standard <Ref slug="jwe" />. Anche se JWT è tipicamente non criptato, non compromette la sua sicurezza — la presenza della firma assicura l'integrità del contenuto del token, permettendo piena fiducia nei dati all'interno del JWT.
+
+A differenza del JWT, che contiene tutte le informazioni necessarie per essere validato direttamente alla risorsa protetta, i token opachi non possono essere validati direttamente dalla risorsa. Invece, richiedono la validazione da parte dell'issuer del token opaco (di solito il <Ref slug="authorization-server" />). Questo processo di validazione è tipicamente chiamato <Ref slug="token-introspection" />.
+
+## Che cos'è un JWT?
+
+In contrasto con i token opachi, un JWT è un token autonomo e senza stato che trasporta informazioni in un formato strutturato e leggibile.
+
+Un JWT è composto da tre parti: un `header`, un `payload` e una `signature`, ciascuno codificato in Base64URL.
+
+Ecco un esempio di un JWT:
+
+`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+
+- L'`header` contiene informazioni sul tipo di token e l'algoritmo utilizzato per la firma. Ad esempio, `{"alg": "HS256", "typ": "JWT"}`.
+- La sezione `payload` contiene i claim—pezzi di informazioni sull'utente o sull'autorizzazione—come l'ID utente, il tempo di scadenza e gli scope. Poiché questi dati sono codificati ma non criptati, chiunque abbia il token può decodificarlo per vedere i claim, anche se non può modificarlo senza invalidare la firma. In base alla specifica e alla configurazione del server di autorizzazione, vari claim possono essere inclusi nel payload. Questo conferisce al token la sua natura autonoma. Ad esempio, `{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}`.
+- La `signature` è generata combinando l'header, il payload e una chiave segreta utilizzando l'algoritmo specificato. Questa firma è utilizzata per verificare l'integrità del token e assicurarsi che non sia stato manomesso.
+
+I JWT sono comunemente usati perché possono essere verificati localmente dal client o da qualsiasi servizio, senza bisogno di interagire con il server di autorizzazione. Questo rende i JWT particolarmente efficienti per i sistemi distribuiti, dove più servizi potrebbero aver bisogno di verificare l'autenticità del token in modo indipendente.
+
+Tuttavia, questa comodità comporta anche la responsabilità di assicurarsi che i claim del token non siano eccessivamente esposti, poiché sono visibili a chiunque abbia accesso al token. Inoltre, i JWT sono tipicamente di breve durata e il tempo di scadenza è incluso nei claim del token per garantire che il token non sia valido indefinitamente.
+
+## Validazione del token di accesso opaco
+
+Un token di accesso opaco viene validato inviandolo al server di autorizzazione per la verifica. Il server di autorizzazione mantiene lo stato dei token emessi e può determinare la validità del token in base alla sua memoria interna.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant AS as Authorization Server
+    participant RP as Resource Provider
+
+    C ->> AS: 1. post /oidc/token
+    AS ->> C: 2. token opaco
+    C ->> RP: 3. get /api/resource
+    RP ->> AS: 4. post /oidc/introspect
+    AS ->> RP: 5. info token
+
+```
+
+1. Il client richiede un access token al server di autorizzazione.
+2. Il server di autorizzazione emette un token opaco.
+3. Il client invia la richiesta di accesso alla risorsa con il token opaco nell'header.
+4. Il provider di risorse invia una richiesta di introspezione del token al server di autorizzazione per validare il token.
+5. Il server di autorizzazione risponde con le informazioni sul token.
+
+## Validazione del token di accesso JWT (offline)
+
+Un token di accesso JWT può essere validato offline dal client o da qualsiasi servizio che abbia accesso alla chiave pubblica del token.
+
+```mermaid
+
+sequenceDiagram
+    participant C as Client
+    participant AS as Authorization Server
+    participant RP as Resource Provider
+
+    RP ->> AS: 0. get /oidc/.well-known/jwks.json
+
+    C ->> AS: 1. post /oidc/token
+    AS ->> C: 2. token JWT
+    C ->> RP: 3. get /api/resource
+    RP ->> RP: 4. valida token JWT
+    RP ->> C: 5. risposta 200 OK
+
+```
+
+1. Il provider di risorse pre-recupera la chiave pubblica del server di autorizzazione dal <Ref slug="openid-connect-discovery" />. La chiave pubblica è utilizzata per verificare la firma del token e assicurarne l'integrità.
+2. Il client richiede un access token al server di autorizzazione.
+3. Il server di autorizzazione emette un token JWT.
+4. Il client invia la richiesta di accesso alla risorsa con il token JWT nell'header.
+5. Il provider di risorse decodifica e valida il token JWT utilizzando la chiave pubblica ottenuta dal server di autorizzazione.
+6. Il provider di risorse concede l'accesso in base alla validità del token.
+
+## Casi d'uso in OIDC
+
+Nel contesto di OIDC (<Ref slug="openid-connect" />), i token opachi e i JWT servono a scopi diversi e sono utilizzati in scenari distinti.
+
+### Token opachi
+
+1. Recupero del profilo utente:
+
+Per impostazione predefinita, quando un client richiede un access token senza specificare una risorsa e include lo scope `openid`, il server di autorizzazione emette un access token opaco. Questo token è principalmente utilizzato per recuperare informazioni sul profilo utente dall'endpoint OIDC `/oidc/userinfo`. Al ricevere una richiesta con il token opaco, il server di autorizzazione controlla la sua memoria interna per recuperare le informazioni di autorizzazione associate e verifica la validità del token prima di rispondere con i dettagli del profilo utente.
+
+2. Scambio del refresh token:
+
+I refresh token sono progettati per essere scambiati solo tra il client e il server di autorizzazione, senza bisogno di essere condivisi con i provider di risorse. Pertanto, i refresh token sono tipicamente emessi come token opachi. Quando l'attuale access token scade, il client può utilizzare il refresh token opaco per ottenere un nuovo access token, garantendo un accesso continuo senza ri-autenticare l'utente.
+
+### JWT
+
+1. ID token:
+
+In OIDC, l'ID token è un JWT che contiene informazioni sull'utente ed è utilizzato per autenticare l'utente. Tipicamente emesso insieme all'access token, l'ID token permette al client di verificare l'identità dell'utente. Ad esempio:
+
+```json
+// Payload decodificato di un ID token
+{
+  "iss": "<https://auth.wiki>",
+  "sub": "1234567890",
+  "aud": "client_id",
+  "exp": 1630368000,
+  "name": "John Doe",
+  "email": "john.doe@mail.com",
+  "picture": "<https://example.com/johndoe.jpg>"
+}
+
+```
+
+Il client può validare l'ID token per assicurarsi dell'identità dell'utente ed estrarre informazioni sull'utente per scopi di personalizzazione o autorizzazione. L'ID token è per un uso singolo e non dovrebbe essere utilizzato per l'autorizzazione delle risorse API.
+
+2. Accesso alle risorse API (utilizzando l'access token):
+
+Quando un client richiede un access token con un specifico <Ref slug="resource-indicator" />, il server di autorizzazione emette un access token JWT destinato all'accesso a quella risorsa. Il JWT contiene claim che il provider di risorse può utilizzare per autorizzare l'accesso del client. Ad esempio:
+
+```json
+// Payload decodificato di un access token JWT
+{
+  "iss": "<https://auth.wiki>",
+  "sub": "1234567890",
+  "aud": "<https://api.example.com>",
+  "scope": "read write",
+  "exp": 1630368000
+}
+
+```
+
+Il provider di risorse può validare la richiesta controllando i claim:
+
+- `iss`: Conferma che il token è stato emesso da un server di autorizzazione fidato.
+- `sub`: Identifica l'utente associato al token.
+- `aud`: Assicura che il token sia destinato alla risorsa specifica.
+- `scope`: Verifica i permessi concessi all'utente.
+
+<SeeAlso slugs={['jwt']} />
