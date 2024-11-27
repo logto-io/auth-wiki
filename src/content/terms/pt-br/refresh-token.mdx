@@ -60,7 +60,7 @@ grant_type=refresh_token
   &scope=openid%20profile%20email
 ```
 
-## Considerações de segurança
+## Considerações de segurança ||security-considerations||
 
 Como os tokens de atualização são de longa duração (por exemplo, dias, semanas) e podem ser usados para obter novos tokens de acesso sem interação do usuário, eles representam um risco de segurança maior do que tokens de acesso (por exemplo, minutos, horas). O uso de tokens de atualização deve ser cuidadosamente considerado e implementado para mitigar potenciais ameaças de segurança. Aqui estão algumas práticas recomendadas a considerar:
 
@@ -71,7 +71,7 @@ Armazene tokens de atualização de forma segura no lado do cliente para preveni
 - **Cookies HTTP-only**: Armazene tokens em cookies HTTP-only para evitar que o JavaScript do lado do cliente os acesse.
 - **Armazenamento criptografado**: Use armazenamentos seguros como Keychain (iOS) ou KeyStore (Android) em dispositivos móveis, ou bancos de dados criptografados em aplicações web.
 
-### Rotação de token de atualização
+### Rotação de token de atualização ||refresh-token-rotation||
 
 Embora os tokens de atualização possam ser de longa duração, rotacioná-los periodicamente ou com base em certas condições (por exemplo, após uma troca de token bem-sucedida) pode reduzir significativamente o risco de acesso não autorizado. A estratégia exata de rotação pode variar com base nos requisitos de segurança da aplicação e nas capacidades do servidor de autorização.
 
@@ -82,7 +82,7 @@ Aqui estão duas estratégias comuns de rotação de token:
 
 Quando um token de atualização é rotacionado, o token de atualização anterior deve ser invalidado para prevenir seu reuso. Essas estratégias são frequentemente combinadas com o TTL (tempo de vida) da sessão para garantir que, após um certo período de tempo, independentemente da validade do token de atualização, o usuário deve se autenticar novamente.
 
-### Tokens de atualização vinculados ao remetente
+### Tokens de atualização vinculados ao remetente ||sender-constrained-refresh-tokens||
 
 Tokens de atualização vinculados ao remetente são um mecanismo de segurança para vincular o token de atualização ao cliente que o solicitou, caso o cliente não seja um <Ref slug="client" headingId="confidential-clients">cliente confidencial</Ref>. Métodos comuns são [DPoP](https://datatracker.ietf.org/doc/html/rfc9449) e [mTLS](https://datatracker.ietf.org/doc/html/rfc8705).
 

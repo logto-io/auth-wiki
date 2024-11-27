@@ -60,7 +60,7 @@ grant_type=refresh_token
   &scope=openid%20profile%20email
 ```
 
-## Considerazioni sulla sicurezza
+## Considerazioni sulla sicurezza ||security-considerations||
 
 Poiché i refresh token sono a lunga durata (ad esempio, giorni, settimane) e possono essere utilizzati per ottenere nuovi access token senza interazione dell'utente, rappresentano un rischio di sicurezza maggiore rispetto agli access token (ad esempio, minuti, ore). L'uso dei refresh token dovrebbe essere attentamente considerato e implementato per mitigare potenziali minacce alla sicurezza. Ecco alcune best practice da considerare:
 
@@ -71,7 +71,7 @@ Memorizza in modo sicuro i refresh token sul lato client per prevenire accessi n
 - **Cookie HTTP-only**: Memorizza i token in cookie HTTP-only per impedire al JavaScript lato client di accedervi.
 - **Archiviazione crittografata**: Usa archiviazioni sicure come Keychain (iOS) o KeyStore (Android) su dispositivi mobili, o database crittografati su applicazioni web.
 
-### Rotazione del refresh token
+### Rotazione del refresh token ||refresh-token-rotation||
 
 Sebbene i refresh token possano essere a lunga durata, ruotarli periodicamente o in base a determinate condizioni (ad esempio, dopo uno scambio di token riuscito) può ridurre significativamente il rischio di accessi non autorizzati. La strategia di rotazione esatta può variare in base ai requisiti di sicurezza dell'applicazione e alle capacità dell'authorization server.
 
@@ -82,7 +82,7 @@ Ecco due comuni strategie di rotazione dei token:
 
 Quando un refresh token viene ruotato, il precedente refresh token dovrebbe essere invalidato per impedirne il riutilizzo. Queste strategie sono spesso combinate con il TTL (time-to-live) della sessione per garantire che dopo un certo periodo di tempo, indipendentemente dalla validità del refresh token, l'utente debba autenticarsi nuovamente.
 
-### Refresh token vincolati al mittente
+### Refresh token vincolati al mittente ||sender-constrained-refresh-tokens||
 
 I refresh token vincolati al mittente sono un meccanismo di sicurezza per legare il refresh token al client che lo ha richiesto, nel caso in cui il client non sia un <Ref slug="client" headingId="confidential-clients">client confidenziale</Ref>. I metodi comuni sono [DPoP](https://datatracker.ietf.org/doc/html/rfc9449) e [mTLS](https://datatracker.ietf.org/doc/html/rfc8705).
 
