@@ -1,0 +1,102 @@
+---
+title: Generatore di numeri pseudocasuali crittograficamente sicuro
+tags: [security]
+description: Un generatore di numeri pseudocasuali crittograficamente sicuro (CSPRNG) è un generatore di numeri pseudocasuali che genera numeri casuali adatti all'uso in applicazioni crittografiche dove la sicurezza dei dati è importante.
+---
+
+Nei moderni sistemi informatici, i numeri casuali sono onnipresenti, dalla generazione di password al gioco della lotteria. Tuttavia, nel campo della crittografia, la sicurezza dei numeri casuali non è solo una questione di "vincere la lotteria" con bassa probabilità, ma un fattore critico nel determinare se un sistema può resistere agli attacchi.
+
+Se un generatore di numeri casuali non è sicuro, può portare a:
+
+- Predizione delle chiavi di crittografia, rendendo le comunicazioni di sistema facilmente violabili;
+- Falsificazione dei token di sessione, portando alla presa illegale di account utente;
+- Fallimento degli algoritmi di firma, facendo perdere la legalità alle firme digitali.
+
+Pertanto, nelle applicazioni crittografiche, abbiamo bisogno non solo di una sequenza di numeri "apparentemente casuale", ma anche di numeri casuali imprevedibili e sicuri. È qui che entra in gioco il **Generatore di Numeri Pseudocasuali Crittograficamente Sicuro (CSPRNG)**.
+
+## Cos'è il CSPRNG?
+
+Il CSPRNG è una forma speciale di Generatore di Numeri Pseudocasuali (PRNG) progettata per applicazioni crittografiche, con standard di sicurezza più elevati.
+
+Le caratteristiche principali del CSPRNG includono:
+
+1. **Resistenza Predittiva**: Gli attaccanti non possono prevedere altre parti della sequenza casuale basandosi su parti conosciute.
+2. **Irretracciabilità Retrospettiva**: Anche se lo stato interno viene rubato dagli attaccanti, la sequenza di numeri casuali generata in precedenza non può essere ripristinata.
+
+Per comprendere l'importanza del CSPRNG, confrontiamolo con altri metodi di generazione di numeri casuali.
+
+## Confronto tra generatori di numeri casuali
+
+1. **Generatore di Numeri Veramente Casuali (TRNG)**
+    
+    Il TRNG genera valori completamente casuali basati su fenomeni fisici (ad esempio, rumore hardware, interferenze elettromagnetiche), ma è lento e fortemente dipendente dall'hardware.
+    
+2. **Generatore di Numeri Pseudocasuali (PRNG)**
+    
+    Il PRNG genera numeri casuali basati su algoritmi e semi, che sono efficienti ma prevedibili e inadatti a scenari crittografici.
+    
+3. **CSPRNG**
+    
+    Il CSPRNG è progettato basandosi su principi crittografici, affrontando le vulnerabilità di sicurezza del PRNG, garantendo che la sequenza di numeri casuali generata sia imprevedibile.
+    
+
+Ad esempio, il PRNG è come un programma che genera automaticamente poesie; finché la frase iniziale (seme) è conosciuta, gli attaccanti possono prevedere le frasi successive. Al contrario, il CSPRNG è come un programma che blocca il codice sorgente della poesia, rendendo quasi impossibile per il mondo esterno prevedere la frase successiva.
+
+## Principi e algoritmi del CSPRNG
+
+### Algoritmi comuni di CSPRNG
+
+- **Generatore deterministico di bit casuali HMAC (HMAC-DRBG)**
+    
+    Un CSPRNG basato sull'algoritmo HMAC (Hash-based Message Authentication Code), che utilizza chiavi e valori pseudocasuali per aggiornare lo stato interno. HMAC-DRBG migliora l'imprevedibilità e l'irretracciabilità retrospettiva attraverso la gestione a doppio stato (chiave `K` e valore pseudocasuale `V`).
+    
+- **PRNG basato su SHA-256**
+    
+    Un generatore di numeri casuali basato sull'algoritmo hash SHA-256, che non richiede chiavi aggiuntive e si basa solo sul valore di stato. Il suo meccanismo di aggiornamento è semplice, ma la sua resistenza agli attacchi non è buona come quella di HMAC-DRBG.
+    
+- **Generatore deterministico di bit casuali in modalità contatore (CTR-DRBG)**
+    
+    Un generatore di numeri casuali basato su modalità di cifratura a blocchi (come AES), utilizzando la modalità contatore (CTR) per generare numeri casuali. È adatto a scenari di alta prestazione e alta sicurezza, basandosi sulla sicurezza degli algoritmi di cifratura a blocchi e adatto all'implementazione hardware.
+    
+
+### Generazione di semi casuali
+
+- Ottenere semi ad alta entropia chiamando il generatore di numeri veramente casuali (TRNG) del sistema operativo.
+- Utilizzare moduli di sicurezza hardware (HSM) o fonti di entropia del sistema (come `/dev/urandom`) per generare semi per garantire la casualità dello stato iniziale del CSPRNG.
+
+## Come utilizzare il CSPRNG?
+
+Dai principi precedenti, sappiamo che per garantire l'efficacia del CSPRNG, dovremmo iniziare con un seme veramente casuale. Se il seme iniziale non può garantire una vera casualità, allora in teoria, affidarsi solo all'algoritmo CSPRNG è difficile per garantire la vera sicurezza crittografica del numero casuale.
+
+In effetti, i moderni sistemi operativi hanno già considerato questo problema e forniscono interfacce di numeri casuali veramente di sistema, che generano per lo più numeri casuali di alta qualità basati su fonti di entropia sottostanti (come rumore hardware, eventi di tastiera e mouse).
+
+Ad esempio, le interfacce `/dev/random` e `/dev/urandom` in Linux e macOS, e le interfacce `CryptGenRandom` o `BCryptGenRandom` in Windows.
+
+Anche i linguaggi di programmazione comuni forniscono incapsulamenti delle interfacce di numeri casuali veramente di sistema:
+
+- Il metodo `crypto.randomBytes()` di Node.js;
+- La classe `SecureRandom` di Java;
+- L'interfaccia `os.urandom()` e il modulo `secrets` di Python, ecc.
+
+Potresti chiederti, dato che i numeri casuali veramente di sistema possono essere generati, perché abbiamo ancora bisogno degli algoritmi CSPRNG?
+
+Come accennato in precedenza, la capacità del pool di entropia del sistema operativo è limitata, il che significa che la velocità con cui genera numeri casuali veri è limitata. In scenari in cui è richiesto un gran numero di numeri casuali in breve tempo, i numeri casuali a livello di sistema non possono soddisfare i requisiti. Il CSPRNG è un miglioramento dei numeri casuali veramente di sistema, fornendo una generazione più rapida di numeri casuali crittograficamente sicuri, nonché una maggiore personalizzazione e più bit casuali, ecc.
+
+Quando si utilizza il CSPRNG, è necessario prestare attenzione ai seguenti punti:
+
+- Se viene utilizzato un seme di numero pseudocasuale comune, potrebbe portare gli attaccanti a prevedere la sequenza casuale, risultando in un output CSPRNG non sicuro. Possiamo utilizzare l'interfaccia di sistema menzionata in precedenza per generare numeri casuali veri come semi.
+- Se lo stato interno del CSPRNG viene divulgato, potrebbe anche portare alla previsione dei numeri casuali generati. Per evitare tali situazioni, possiamo aggiornare periodicamente lo stato o il seme del CSPRNG.
+
+## Esempi di applicazione
+
+### Generazione di chiavi
+
+Nella comunicazione crittografata, la sicurezza della chiave determina direttamente la sicurezza del sistema. Se la chiave è prevedibile, gli attaccanti possono ottenere la chiave attraverso il cracking a forza bruta o l'analisi del modello di generazione della chiave, decriptando così il contenuto della comunicazione. Pertanto, la generazione di chiavi richiede numeri casuali con un'imprevedibilità estremamente elevata, e le caratteristiche del CSPRNG (resistenza predittiva e irretracciabilità retrospettiva) garantiscono che le chiavi generate siano difficili da prevedere.
+
+### Token di sessione
+
+Nelle applicazioni web, i token di sessione vengono utilizzati per identificare le sessioni utente (come lo stato di accesso). Se il token viene indovinato o falsificato dagli attaccanti, potrebbe portare al dirottamento della sessione (Session Hijacking), impersonando così gli utenti per eseguire operazioni.
+
+Ad esempio, in CSRF e PKCE, vengono utilizzati `state` o `code` casuali per prevenire attacchi di sessione o di processo.
+
+Ci sono anche altri scenari, come quando si utilizzano algoritmi hash per elaborare le password da scrivere nel DB, se vengono utilizzati solo semplici algoritmi hash, è difficile resistere agli attacchi con tabelle arcobaleno. In tali casi, quando si utilizzano algoritmi hash, viene aggiunto il Salt, che è una variabile casuale, per fare in modo che la stessa password generi valori hash diversi.

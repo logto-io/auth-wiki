@@ -1,0 +1,102 @@
+---
+title: Cryptografisch veilige pseudorandom nummergenerator
+tags: [security]
+description: Een cryptografisch veilige pseudorandom nummergenerator (CSPRNG) is een pseudorandom nummergenerator die willekeurige getallen genereert die geschikt zijn voor gebruik in cryptografische toepassingen waar de beveiliging van de gegevens belangrijk is.
+---
+
+In moderne computersystemen zijn willekeurige getallen alomtegenwoordig, van het genereren van wachtwoorden tot het spelen van eenvoudige loterijspellen. In het veld van cryptografie is de beveiliging van willekeurige getallen echter niet alleen een kwestie van "de loterij winnen" met een lage waarschijnlijkheid, maar een cruciale factor bij het bepalen of een systeem aanvallen kan weerstaan.
+
+Als een willekeurige nummergenerator niet veilig is, kan dit leiden tot:
+
+- Voorspelling van encryptiesleutels, waardoor systeemcommunicatie gemakkelijk kan worden gekraakt;
+- Vervalsing van sessietokens, wat leidt tot illegale overname van gebruikersaccounts;
+- Falen van handtekeningalgoritmen, waardoor digitale handtekeningen hun wettigheid verliezen.
+
+Daarom hebben we in cryptografische toepassingen niet alleen een "schijnbaar willekeurige" reeks getallen nodig, maar ook onvoorspelbare en veilige willekeurige getallen. Dit is waar de **Cryptografisch Veilige Pseudorandom Nummergenerator (CSPRNG)** in beeld komt.
+
+## Wat is CSPRNG?
+
+CSPRNG is een speciale vorm van Pseudorandom Nummergenerator (PRNG) ontworpen voor cryptografische toepassingen, met hogere beveiligingsnormen.
+
+De kernkenmerken van CSPRNG zijn onder andere:
+
+1. **Voorspellingsweerstand**: Aanvallers kunnen andere delen van de willekeurige reeks niet voorspellen op basis van bekende delen.
+2. **Achterwaartse ontraceerbaarheid**: Zelfs als de interne staat door aanvallers wordt gestolen, kan de eerder gegenereerde willekeurige nummerreeks niet worden hersteld.
+
+Om het belang van CSPRNG te begrijpen, laten we het vergelijken met andere methoden voor het genereren van willekeurige getallen.
+
+## Vergelijking van willekeurige nummergeneratoren
+
+1. **True Random Number Generator (TRNG)**
+    
+    TRNG genereert volledig willekeurige waarden op basis van fysieke fenomenen (bijv. hardware-ruis, elektromagnetische interferentie), maar het is traag en sterk afhankelijk van hardware.
+    
+2. **Pseudorandom Number Generator (PRNG)**
+    
+    PRNG genereert willekeurige getallen op basis van algoritmen en zaden, die efficiënt maar voorspelbaar zijn en ongeschikt voor cryptografische scenario's.
+    
+3. **CSPRNG**
+    
+    CSPRNG is ontworpen op basis van cryptografische principes, waarbij de beveiligingslekken van PRNG worden aangepakt, zodat de gegenereerde willekeurige nummerreeks onvoorspelbaar is.
+    
+
+Bijvoorbeeld, PRNG is als een programma dat automatisch gedichten genereert; zolang de startzin (zaad) bekend is, kunnen aanvallers de volgende zinnen voorspellen. Daarentegen is CSPRNG als een programma dat de broncode van het gedicht vergrendelt, waardoor het voor de buitenwereld bijna onmogelijk is om de volgende zin te voorspellen.
+
+## Principes en algoritmen van CSPRNG
+
+### Veelvoorkomende CSPRNG-algoritmen
+
+- **HMAC deterministische willekeurige bitgenerator (HMAC-DRBG)**
+    
+    Een CSPRNG gebaseerd op het HMAC (Hash-based Message Authentication Code) algoritme, dat sleutels en pseudorandom waarden gebruikt om de interne staat bij te werken. HMAC-DRBG verbetert onvoorspelbaarheid en achterwaartse ontraceerbaarheid door middel van dual-state management (sleutel `K` en pseudorandom waarde `V`).
+    
+- **SHA-256-gebaseerde PRNG**
+    
+    Een willekeurige nummergenerator gebaseerd op het SHA-256 hash-algoritme, dat geen extra sleutels vereist en alleen afhankelijk is van de staatwaarde. Het update-mechanisme is eenvoudig, maar de weerstand tegen aanvallen is niet zo goed als HMAC-DRBG.
+    
+- **Counter mode deterministische willekeurige bitgenerator (CTR-DRBG)**
+    
+    Een willekeurige nummergenerator gebaseerd op blokcijfermodi (zoals AES), die de counter (CTR) modus gebruikt om willekeurige getallen te genereren. Het is geschikt voor scenario's met hoge prestaties en hoge beveiligingseisen, afhankelijk van de beveiliging van blokcijferalgoritmen en geschikt voor hardware-implementatie.
+    
+
+### Willekeurige zaadgeneratie
+
+- Verkrijg hoog-entropie zaden door de true random number generator (TRNG) van het besturingssysteem aan te roepen.
+- Gebruik hardwarebeveiligingsmodules (HSM) of systeem-entropiebronnen (zoals `/dev/urandom`) om zaden te genereren om de willekeurigheid van de initiële staat van CSPRNG te waarborgen.
+
+## Hoe CSPRNG te gebruiken?
+
+Uit de eerdere principes weten we dat om de effectiviteit van CSPRNG te waarborgen, we moeten beginnen met een true random zaad. Als het initiële zaad geen echte willekeurigheid kan garanderen, is het in theorie moeilijk om alleen op het CSPRNG-algoritme te vertrouwen om de echte cryptografische beveiliging van het willekeurige getal te waarborgen.
+
+In feite hebben moderne besturingssystemen dit probleem al overwogen en bieden ze systeemniveau true random number interfaces, die meestal hoogwaardige willekeurige getallen genereren op basis van onderliggende entropiebronnen (zoals hardware-ruis, toetsenbord- en muisgebeurtenissen).
+
+Bijvoorbeeld, de `/dev/random` en `/dev/urandom` interfaces in Linux en macOS, en de `CryptGenRandom` of `BCryptGenRandom` interfaces in Windows.
+
+Veelgebruikte programmeertalen bieden ook inkapselingen van systeemniveau true random number interfaces:
+
+- De `crypto.randomBytes()` methode van Node.js;
+- De `SecureRandom` klasse van Java;
+- De `os.urandom()` interface en `secrets` module van Python, enzovoort.
+
+Je vraagt je misschien af, aangezien systeemniveau true random numbers kunnen worden gegenereerd, waarom hebben we dan nog CSPRNG-algoritmen nodig?
+
+Zoals eerder vermeld, is de entropiepoolcapaciteit van het besturingssysteem beperkt, wat betekent dat de snelheid waarmee het true random numbers genereert beperkt is. In scenario's waar een groot aantal willekeurige getallen in korte tijd nodig is, kunnen systeemniveau willekeurige getallen niet aan de eisen voldoen. CSPRNG is een verbetering van systeemniveau true random numbers, die snellere generatie van cryptografisch veilige willekeurige getallen biedt, evenals hogere aanpasbaarheid en meer willekeurige bits, enzovoort.
+
+Bij het gebruik van CSPRNG moeten de volgende punten in acht worden genomen:
+
+- Als een gewoon pseudorandom nummerzaad wordt gebruikt, kan dit ertoe leiden dat aanvallers de willekeurige reeks voorspellen, wat resulteert in onveilige CSPRNG-uitvoer. We kunnen de eerder genoemde systeemniveau interface gebruiken om true random numbers als zaden te genereren.
+- Als de interne staat van CSPRNG wordt gelekt, kan dit ook leiden tot de voorspelling van gegenereerde willekeurige getallen. Om dergelijke situaties te vermijden, kunnen we periodiek de staat of het zaad van CSPRNG bijwerken.
+
+## Toepassingsvoorbeelden
+
+### Sleutelgeneratie
+
+In versleutelde communicatie bepaalt de beveiliging van de sleutel direct de beveiliging van het systeem. Als de sleutel voorspelbaar is, kunnen aanvallers de sleutel verkrijgen door brute force kraken of analyse van het sleutelgeneratiepatroon, waardoor ze de communicatie-inhoud kunnen ontsleutelen. Daarom vereist sleutelgeneratie willekeurige getallen met een extreem hoge onvoorspelbaarheid, en de kenmerken van CSPRNG (voorspellingsweerstand en achterwaartse ontraceerbaarheid) zorgen ervoor dat de gegenereerde sleutels moeilijk te voorspellen zijn.
+
+### Sessietokens
+
+In webapplicaties worden sessietokens gebruikt om gebruikerssessies te identificeren (zoals inlogstatus). Als het token wordt geraden of vervalst door aanvallers, kan dit leiden tot sessiekaping (Session Hijacking), waardoor gebruikers worden geïmiteerd om acties uit te voeren.
+
+Bijvoorbeeld, in CSRF en PKCE worden willekeurige `state` of `code` gebruikt om sessie- of procesaanvallen te voorkomen.
+
+Er zijn ook andere scenario's, zoals wanneer hash-algoritmen worden gebruikt om wachtwoorden te verwerken die in de DB moeten worden geschreven. Als alleen eenvoudige hash-algoritmen worden gebruikt, is het moeilijk om regenboogtabelaanvallen te weerstaan. In dergelijke gevallen, wanneer hash-algoritmen worden gebruikt, wordt Salt, een willekeurige variabele, toegevoegd om ervoor te zorgen dat hetzelfde wachtwoord verschillende hash-waarden genereert.

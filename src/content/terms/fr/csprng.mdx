@@ -1,0 +1,102 @@
+---
+title: Générateur de nombres pseudo-aléatoires cryptographiquement sécurisé
+tags: [security]
+description: Un générateur de nombres pseudo-aléatoires cryptographiquement sécurisé (CSPRNG) est un générateur de nombres pseudo-aléatoires qui génère des nombres aléatoires adaptés à une utilisation dans des applications cryptographiques où la sécurité des données est importante.
+---
+
+Dans les systèmes informatiques modernes, les nombres aléatoires sont omniprésents, de la génération de mots de passe aux jeux de loterie simples. Cependant, dans le domaine de la cryptographie, la sécurité des nombres aléatoires n'est pas seulement une question de "gagner à la loterie" avec une faible probabilité, mais un facteur critique pour déterminer si un système peut résister aux attaques.
+
+Si un générateur de nombres aléatoires n'est pas sécurisé, cela peut entraîner :
+
+- La prédiction des clés de chiffrement, rendant les communications du système facilement cassables ;
+- La falsification des jetons de session, conduisant à la prise de contrôle illégale des comptes utilisateurs ;
+- L'échec des algorithmes de signature, rendant les signatures numériques illégales.
+
+Par conséquent, dans les applications cryptographiques, nous avons besoin non seulement d'une séquence de nombres "apparemment aléatoire", mais aussi de nombres aléatoires imprévisibles et sécurisés. C'est là qu'intervient le **Générateur de Nombres Pseudo-Aléatoires Cryptographiquement Sécurisé (CSPRNG)**.
+
+## Qu'est-ce que le CSPRNG ?
+
+Le CSPRNG est une forme spéciale de Générateur de Nombres Pseudo-Aléatoires (PRNG) conçu pour les applications cryptographiques, avec des normes de sécurité plus élevées.
+
+Les caractéristiques principales du CSPRNG incluent :
+
+1. **Résistance Prédictive** : Les attaquants ne peuvent pas prédire d'autres parties de la séquence aléatoire à partir de parties connues.
+2. **Intraçabilité Rétroactive** : Même si l'état interne est volé par des attaquants, la séquence de nombres aléatoires précédemment générée ne peut pas être restaurée.
+
+Pour comprendre l'importance du CSPRNG, comparons-le avec d'autres méthodes de génération de nombres aléatoires.
+
+## Comparaison des générateurs de nombres aléatoires
+
+1. **Générateur de Nombres Aléatoires Véritables (TRNG)**
+    
+    Le TRNG génère des valeurs complètement aléatoires basées sur des phénomènes physiques (par exemple, le bruit matériel, les interférences électromagnétiques), mais il est lent et fortement dépendant du matériel.
+    
+2. **Générateur de Nombres Pseudo-Aléatoires (PRNG)**
+    
+    Le PRNG génère des nombres aléatoires basés sur des algorithmes et des graines, qui sont efficaces mais prévisibles et inadaptés aux scénarios cryptographiques.
+    
+3. **CSPRNG**
+    
+    Le CSPRNG est conçu sur la base de principes cryptographiques, traitant les vulnérabilités de sécurité du PRNG, garantissant que la séquence de nombres aléatoires générée est imprévisible.
+    
+
+Par exemple, le PRNG est comme un programme qui génère automatiquement des poèmes ; tant que la phrase de départ (graine) est connue, les attaquants peuvent prédire les phrases suivantes. En revanche, le CSPRNG est comme un programme qui verrouille le code source du poème, rendant presque impossible pour le monde extérieur de prédire la phrase suivante.
+
+## Principes et algorithmes du CSPRNG
+
+### Algorithmes CSPRNG courants
+
+- **Générateur de bits aléatoires déterministe HMAC (HMAC-DRBG)**
+    
+    Un CSPRNG basé sur l'algorithme HMAC (Hash-based Message Authentication Code), qui utilise des clés et des valeurs pseudo-aléatoires pour mettre à jour l'état interne. HMAC-DRBG améliore l'imprévisibilité et l'intraçabilité rétroactive grâce à une gestion à double état (clé `K` et valeur pseudo-aléatoire `V`).
+    
+- **PRNG basé sur SHA-256**
+    
+    Un générateur de nombres aléatoires basé sur l'algorithme de hachage SHA-256, qui ne nécessite pas de clés supplémentaires et repose uniquement sur la valeur d'état. Son mécanisme de mise à jour est simple, mais sa résistance aux attaques n'est pas aussi bonne que celle de HMAC-DRBG.
+    
+- **Générateur de bits aléatoires déterministe en mode compteur (CTR-DRBG)**
+    
+    Un générateur de nombres aléatoires basé sur des modes de chiffrement par blocs (tels que AES), utilisant le mode compteur (CTR) pour générer des nombres aléatoires. Il est adapté aux scénarios de haute performance et de haute sécurité, reposant sur la sécurité des algorithmes de chiffrement par blocs et adapté à une implémentation matérielle.
+    
+
+### Génération de graines aléatoires
+
+- Obtenez des graines à haute entropie en appelant le générateur de nombres aléatoires véritables (TRNG) du système d'exploitation.
+- Utilisez des modules de sécurité matériels (HSM) ou des sources d'entropie du système (telles que `/dev/urandom`) pour générer des graines afin d'assurer la randomisation de l'état initial du CSPRNG.
+
+## Comment utiliser le CSPRNG ?
+
+D'après les principes précédents, nous savons que pour assurer l'efficacité du CSPRNG, nous devrions commencer par une graine véritablement aléatoire. Si la graine initiale ne peut garantir une véritable randomisation, alors en théorie, se fier uniquement à l'algorithme CSPRNG est difficile pour assurer la véritable sécurité cryptographique du nombre aléatoire.
+
+En fait, les systèmes d'exploitation modernes ont déjà pris en compte ce problème et fournissent des interfaces de nombres aléatoires véritables au niveau du système, qui génèrent principalement des nombres aléatoires de haute qualité basés sur des sources d'entropie sous-jacentes (telles que le bruit matériel, les événements clavier et souris).
+
+Par exemple, les interfaces `/dev/random` et `/dev/urandom` sous Linux et macOS, et les interfaces `CryptGenRandom` ou `BCryptGenRandom` sous Windows.
+
+Les langages de programmation courants fournissent également des encapsulations des interfaces de nombres aléatoires véritables au niveau du système :
+
+- La méthode `crypto.randomBytes()` de Node.js ;
+- La classe `SecureRandom` de Java ;
+- L'interface `os.urandom()` et le module `secrets` de Python, etc.
+
+Vous vous demandez peut-être, puisque des nombres aléatoires véritables au niveau du système peuvent être générés, pourquoi avons-nous encore besoin des algorithmes CSPRNG ?
+
+Comme mentionné précédemment, la capacité du pool d'entropie du système d'exploitation est limitée, ce qui signifie que le taux auquel il génère des nombres aléatoires véritables est limité. Dans les scénarios où un grand nombre de nombres aléatoires sont nécessaires en peu de temps, les nombres aléatoires au niveau du système ne peuvent pas répondre aux exigences. Le CSPRNG est une amélioration des nombres aléatoires véritables au niveau du système, fournissant une génération plus rapide de nombres aléatoires cryptographiquement sécurisés, ainsi qu'une personnalisation plus élevée et plus de bits aléatoires, etc.
+
+Lors de l'utilisation du CSPRNG, les points suivants doivent être notés :
+
+- Si une graine de nombre pseudo-aléatoire courante est utilisée, cela peut amener les attaquants à prédire la séquence aléatoire, entraînant une sortie CSPRNG non sécurisée. Nous pouvons utiliser l'interface au niveau du système mentionnée précédemment pour générer des nombres aléatoires véritables comme graines.
+- Si l'état interne du CSPRNG est divulgué, cela peut également conduire à la prédiction des nombres aléatoires générés. Pour éviter de telles situations, nous pouvons mettre à jour périodiquement l'état ou la graine du CSPRNG.
+
+## Exemples d'application
+
+### Génération de clés
+
+Dans la communication chiffrée, la sécurité de la clé détermine directement la sécurité du système. Si la clé est prévisible, les attaquants peuvent obtenir la clé par force brute ou analyse du modèle de génération de clés, décryptant ainsi le contenu de la communication. Par conséquent, la génération de clés nécessite des nombres aléatoires avec une imprévisibilité extrêmement élevée, et les caractéristiques du CSPRNG (résistance prédictive et intraçabilité rétroactive) garantissent que les clés générées sont difficiles à prédire.
+
+### Jetons de session
+
+Dans les applications web, les jetons de session sont utilisés pour identifier les sessions utilisateur (comme l'état de connexion). Si le jeton est deviné ou falsifié par des attaquants, cela peut conduire à un détournement de session (Session Hijacking), permettant ainsi aux attaquants de se faire passer pour des utilisateurs pour effectuer des opérations.
+
+Par exemple, dans CSRF et PKCE, des `state` ou `code` aléatoires sont utilisés pour prévenir les attaques de session ou de processus.
+
+Il existe également d'autres scénarios, tels que lors de l'utilisation d'algorithmes de hachage pour traiter les mots de passe à écrire dans la base de données, si seuls des algorithmes de hachage simples sont utilisés, il est difficile de résister aux attaques par table arc-en-ciel. Dans de tels cas, lors de l'utilisation d'algorithmes de hachage, un Salt, qui est une variable aléatoire, est ajouté pour faire en sorte que le même mot de passe génère différentes valeurs de hachage.

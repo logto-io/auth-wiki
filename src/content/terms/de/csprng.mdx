@@ -1,0 +1,102 @@
+---
+title: Kryptografisch sicherer Pseudozufallszahlengenerator
+tags: [security]
+description: Ein kryptografisch sicherer Pseudozufallszahlengenerator (CSPRNG) ist ein Pseudozufallszahlengenerator, der Zufallszahlen erzeugt, die für den Einsatz in kryptografischen Anwendungen geeignet sind, bei denen die Sicherheit der Daten wichtig ist.
+---
+
+In modernen Computersystemen sind Zufallszahlen allgegenwärtig, von der Generierung von Passwörtern bis hin zu einfachen Lotteriespielen. Im Bereich der Kryptographie ist die Sicherheit von Zufallszahlen jedoch nicht nur eine Frage des "Gewinnens der Lotterie" mit geringer Wahrscheinlichkeit, sondern ein kritischer Faktor, um zu bestimmen, ob ein System Angriffen standhalten kann.
+
+Wenn ein Zufallszahlengenerator nicht sicher ist, kann dies zu folgenden Problemen führen:
+
+- Vorhersage von Verschlüsselungsschlüsseln, wodurch Systemkommunikationen leicht gebrochen werden können;
+- Fälschung von Sitzungstoken, was zur illegalen Übernahme von Benutzerkonten führen kann;
+- Versagen von Signaturalgorithmen, wodurch digitale Signaturen ihre Rechtsgültigkeit verlieren.
+
+Daher benötigen wir in kryptografischen Anwendungen nicht nur eine "scheinbar zufällige" Zahlenfolge, sondern auch unvorhersehbare und sichere Zufallszahlen. Hier kommt der **kryptografisch sichere Pseudozufallszahlengenerator (CSPRNG)** ins Spiel.
+
+## Was ist CSPRNG?
+
+CSPRNG ist eine spezielle Form des Pseudozufallszahlengenerators (PRNG), der für kryptografische Anwendungen entwickelt wurde und höhere Sicherheitsstandards aufweist.
+
+Die Kernmerkmale von CSPRNG umfassen:
+
+1. **Vorhersagewiderstand**: Angreifer können andere Teile der Zufallsfolge nicht basierend auf bekannten Teilen vorhersagen.
+2. **Rückwärts-Unverfolgbarkeit**: Selbst wenn der interne Zustand von Angreifern gestohlen wird, kann die zuvor generierte Zufallszahlenfolge nicht wiederhergestellt werden.
+
+Um die Bedeutung von CSPRNG zu verstehen, vergleichen wir es mit anderen Methoden der Zufallszahlengenerierung.
+
+## Vergleich von Zufallszahlengeneratoren
+
+1. **Echter Zufallszahlengenerator (TRNG)**
+    
+    TRNG erzeugt vollständig zufällige Werte basierend auf physikalischen Phänomenen (z. B. Hardware-Rauschen, elektromagnetische Störungen), ist jedoch langsam und stark von der Hardware abhängig.
+    
+2. **Pseudozufallszahlengenerator (PRNG)**
+    
+    PRNG erzeugt Zufallszahlen basierend auf Algorithmen und Seeds, die effizient, aber vorhersehbar sind und sich daher nicht für kryptografische Szenarien eignen.
+    
+3. **CSPRNG**
+    
+    CSPRNG ist basierend auf kryptografischen Prinzipien entwickelt, um die Sicherheitslücken von PRNG zu adressieren und sicherzustellen, dass die generierte Zufallszahlenfolge unvorhersehbar ist.
+    
+
+Zum Beispiel ist PRNG wie ein Programm, das automatisch Gedichte generiert; solange der Anfangssatz (Seed) bekannt ist, können Angreifer die nachfolgenden Sätze vorhersagen. Im Gegensatz dazu ist CSPRNG wie ein Programm, das den Quellcode des Gedichts sperrt, sodass es für die Außenwelt nahezu unmöglich ist, den nächsten Satz vorherzusagen.
+
+## Prinzipien und Algorithmen von CSPRNG
+
+### Häufige CSPRNG-Algorithmen
+
+- **HMAC deterministischer Zufallsbitgenerator (HMAC-DRBG)**
+    
+    Ein CSPRNG basierend auf dem HMAC (Hash-based Message Authentication Code) Algorithmus, der Schlüssel und pseudorandomisierte Werte verwendet, um den internen Zustand zu aktualisieren. HMAC-DRBG verbessert die Unvorhersehbarkeit und Rückwärts-Unverfolgbarkeit durch duales Zustandsmanagement (Schlüssel `K` und pseudorandomisierter Wert `V`).
+    
+- **SHA-256-basierter PRNG**
+    
+    Ein Zufallszahlengenerator basierend auf dem SHA-256-Hash-Algorithmus, der keine zusätzlichen Schlüssel benötigt und sich nur auf den Zustandswert stützt. Sein Aktualisierungsmechanismus ist einfach, aber seine Widerstandsfähigkeit gegen Angriffe ist nicht so gut wie die von HMAC-DRBG.
+    
+- **Zählermodus deterministischer Zufallsbitgenerator (CTR-DRBG)**
+    
+    Ein Zufallszahlengenerator basierend auf Blockchiffre-Modi (wie AES), der den Zählermodus (CTR) verwendet, um Zufallszahlen zu generieren. Er eignet sich für Szenarien mit hohen Leistungs- und Sicherheitsanforderungen, da er sich auf die Sicherheit von Blockchiffre-Algorithmen stützt und für Hardwareimplementierungen geeignet ist.
+    
+
+### Zufallssaatgenerierung
+
+- Erhalte hochentropische Seeds, indem du den echten Zufallszahlengenerator (TRNG) des Betriebssystems aufrufst.
+- Verwende Hardware-Sicherheitsmodule (HSM) oder Systementropiequellen (wie `/dev/urandom`), um Seeds zu generieren und die Zufälligkeit des Anfangszustands von CSPRNG sicherzustellen.
+
+## Wie verwendet man CSPRNG?
+
+Aus den vorherigen Prinzipien wissen wir, dass wir zur Sicherstellung der Effektivität von CSPRNG mit einem echten Zufalls-Seed beginnen sollten. Wenn der anfängliche Seed keine echte Zufälligkeit gewährleisten kann, ist es theoretisch schwierig, sich nur auf den CSPRNG-Algorithmus zu verlassen, um die wahre kryptografische Sicherheit der Zufallszahl zu gewährleisten.
+
+Tatsächlich haben moderne Betriebssysteme dieses Problem bereits berücksichtigt und bieten systemweite echte Zufallszahlenschnittstellen, die meist hochwertige Zufallszahlen basierend auf zugrunde liegenden Entropiequellen (wie Hardware-Rauschen, Tastatur- und Mausereignissen) generieren.
+
+Zum Beispiel die Schnittstellen `/dev/random` und `/dev/urandom` in Linux und macOS sowie die Schnittstellen `CryptGenRandom` oder `BCryptGenRandom` in Windows.
+
+Gängige Programmiersprachen bieten auch Kapselungen von systemweiten echten Zufallszahlenschnittstellen:
+
+- Die Methode `crypto.randomBytes()` von Node.js;
+- Die Klasse `SecureRandom` von Java;
+- Das Interface `os.urandom()` und das Modul `secrets` von Python, etc.
+
+Du fragst dich vielleicht, warum wir immer noch CSPRNG-Algorithmen benötigen, wenn systemweite echte Zufallszahlen generiert werden können?
+
+Wie bereits erwähnt, ist die Entropiepool-Kapazität des Betriebssystems begrenzt, was bedeutet, dass die Rate, mit der es echte Zufallszahlen generiert, begrenzt ist. In Szenarien, in denen in kurzer Zeit eine große Anzahl von Zufallszahlen benötigt wird, können systemweite Zufallszahlen die Anforderungen nicht erfüllen. CSPRNG ist eine Erweiterung der systemweiten echten Zufallszahlen und bietet eine schnellere Generierung kryptografisch sicherer Zufallszahlen sowie höhere Anpassungsmöglichkeiten und mehr Zufallsbits, etc.
+
+Beim Einsatz von CSPRNG sollten folgende Punkte beachtet werden:
+
+- Wenn ein allgemeiner Pseudozufallszahlensaat verwendet wird, kann dies dazu führen, dass Angreifer die Zufallsfolge vorhersagen, was zu unsicherem CSPRNG-Ausgang führt. Wir können die zuvor erwähnte systemweite Schnittstelle verwenden, um echte Zufallszahlen als Seeds zu generieren.
+- Wenn der interne Zustand von CSPRNG geleakt wird, kann dies auch zur Vorhersage der generierten Zufallszahlen führen. Um solche Situationen zu vermeiden, können wir den Zustand oder den Seed von CSPRNG regelmäßig aktualisieren.
+
+## Anwendungsbeispiele
+
+### Schlüsselgenerierung
+
+In verschlüsselter Kommunikation bestimmt die Sicherheit des Schlüssels direkt die Sicherheit des Systems. Wenn der Schlüssel vorhersehbar ist, können Angreifer den Schlüssel durch Brute-Force-Angriffe oder Analyse des Schlüsselerzeugungsmusters erhalten und so den Kommunikationsinhalt entschlüsseln. Daher erfordert die Schlüsselerzeugung Zufallszahlen mit extrem hoher Unvorhersehbarkeit, und die Eigenschaften von CSPRNG (Vorhersagewiderstand und Rückwärts-Unverfolgbarkeit) stellen sicher, dass die generierten Schlüssel schwer vorherzusagen sind.
+
+### Sitzungstoken
+
+In Webanwendungen werden Sitzungstoken verwendet, um Benutzersitzungen zu identifizieren (z. B. Anmeldestatus). Wenn das Token von Angreifern erraten oder gefälscht wird, kann dies zu Sitzungsentführung (Session Hijacking) führen, wodurch Benutzeroperationen vorgetäuscht werden können.
+
+Zum Beispiel werden in CSRF und PKCE zufällige `state` oder `code` verwendet, um Sitzungs- oder Prozessangriffe zu verhindern.
+
+Es gibt auch andere Szenarien, wie wenn Hash-Algorithmen verwendet werden, um Passwörter zu verarbeiten, die in die DB geschrieben werden sollen. Wenn nur einfache Hash-Algorithmen verwendet werden, ist es schwierig, Rainbow-Table-Angriffen zu widerstehen. In solchen Fällen wird beim Einsatz von Hash-Algorithmen Salt, eine Zufallsvariable, hinzugefügt, um sicherzustellen, dass dasselbe Passwort unterschiedliche Hash-Werte erzeugt.
