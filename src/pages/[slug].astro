@@ -63,9 +63,10 @@ if (headings.some(({ depth }) => depth === 1)) {
 }
 
 const phrases = getPhrases(locale);
+const seoTitle = phrases.content.what_is.replace("{{title}}", title);
 ---
 
-<Layout title={title} description={description} coverUrl={coverUrl}>
+<Layout title={seoTitle} description={description} coverUrl={coverUrl}>
   <Topbar />
   <FancyHr />
   <main>
@@ -86,7 +87,7 @@ const phrases = getPhrases(locale);
               <span>{phrases.content.edit_on_github}</span>
             </a>
           </div>
-          <h1>{title}</h1>
+          <h1>{seoTitle}</h1>
           <p class="description">
             {description}
           </p>

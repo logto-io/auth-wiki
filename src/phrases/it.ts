@@ -10,6 +10,7 @@ export const it = Object.freeze({
     description: 'Esplora e trova definizioni chiare di glossari chiave relativi all\'autenticazione, all\'autorizzazione e alla gestione delle identità e degli accessi (IAM). Lavora con standard aperti come <a href="/openid-connect">OpenID Connect</a>, <a href="/oauth-2.0">OAuth 2.0</a> e <a href="/saml">SAML</a>.',
   },
   content: {
+    what_is: 'Cos\'è {{title}}?',
     edit_on_github: 'Modifica su GitHub',
     table_of_contents: 'Sommario',
     see_also: 'Vedi anche',

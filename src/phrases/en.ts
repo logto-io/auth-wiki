@@ -10,6 +10,7 @@ export const en = Object.freeze({
     description: 'Explore and find clear definitions of key glossaries related to authentication, authorization, and identity and access management (IAM). Work with open-standards like <a href="/openid-connect">OpenID Connect</a>, <a href="/oauth-2.0">OAuth 2.0</a>, and <a href="/saml">SAML</a>.'
   },
   content: {
+    what_is: 'What is {{title}}?',
     edit_on_github: 'Edit on GitHub',
     table_of_contents: 'Table of Contents',
     see_also: 'See also',

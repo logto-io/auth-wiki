@@ -10,6 +10,7 @@ export const ar = Object.freeze({
     description: 'استكشف واعثر على تعاريف واضحة لمصطلحات رئيسية متعلقة بالمصادقة والتفويض وإدارة الهوية والوصول (IAM). اعمل مع المعايير المفتوحة مثل <a href="/ar/openid-connect">OpenID Connect</a> و <a href="/ar/oauth-2.0">OAuth 2.0</a> و <a href="/ar/saml">SAML</a>.',
   },
   content: {
+    what_is: 'ما هو {{title}}؟',
     edit_on_github: 'تحرير على جيثب',
     table_of_contents: 'جدول المحتويات',
     see_also: 'انظر أيضا',
