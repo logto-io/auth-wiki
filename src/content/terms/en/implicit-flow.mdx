@@ -33,10 +33,10 @@ Application->>Application: Extract tokens from URL fragment
 ### Authentication request
 
 Request parameters are as follows:
-- **client_id**: REQUIRED. Valid OAuth 2.0 client identifier, which is available in Logto as the application ID (or app ID).
+- **client_id**: REQUIRED. Valid OAuth 2.0 client identifier.
 - **scope**: REQUIRED. This value specifies a set of resources the user is requesting from the authorization server. E.g., `openid profile email`
 - **response_type**: REQUIRED. The value is either `id_token` or `id_token token`. No access token is returned when the value is `id_token`.
-- **redirect_uri**: REQUIRED. The URI to which the authentication response will be sent, and should exactly match the redirect URI the client pre-registered at the <Ref slug="openid-connect" headingId="openid-provider-op" />. E.g., `Sign-in redirect URI` in Logto Admin Console.
+- **redirect_uri**: REQUIRED. The URI to which the authentication response will be sent, and should exactly match the redirect URI the client pre-registered at the <Ref slug="openid-connect" headingId="openid-provider-op" />.
 - **nonce**: REQUIRED. A random string used to mitigate replay attacks, which is passed through unmodified from the authentication request to the ID token claim.
 
 ### Example of an authentication request
