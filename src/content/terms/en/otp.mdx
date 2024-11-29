@@ -30,4 +30,113 @@ OTPs are a vital component of Multi-Factor Authentication (MFA), which combines 
 
 For activities that involve sensitive data or significant transactions, such as online banking or making high-value purchases, OTPs serve as a security measure to confirm user consent. Before completing these actions, an OTP is sent to the user's registered contact method, which must be entered to finalize the transaction. This ensures that even if someone gains access to the user’s account, they cannot perform critical actions without the OTP.
 
-<SeeAlso slugs={['totp', 'mfa']} />
+## What are the different types of OTP algorithms?
+
+OTPs can be generated using various algorithms, each with its own advantages and use cases.
+
+### Time-based One-time Password (TOTP)
+
+TOTP is one of the most widely used OTP algorithms. It generates passwords based on the current time and a shared secret key. The generated code typically remains valid for a short period (usually 30 seconds) before a new code is created.
+
+Example TOTP flow:
+
+1. User and server share a secret key (usually presented as a QR code)
+2. Current time is converted to a 30-second interval number
+3. Both parties generate a 6-digit code
+4. Code is valid for the current 30-second window
+
+Popular services using TOTP:
+
+- GitHub's two-factor authentication
+- Google Authenticator
+- Microsoft Authenticator
+- Authy
+
+Learn more about <Ref slug="totp" />.
+
+### HMAC-based One-time Password (HOTP)
+
+HOTP generates passwords based on a counter value and a shared secret key. Unlike TOTP, these passwords don't expire with time but instead become invalid after use. The counter is synchronized between the server and the client, incrementing with each password generation.
+
+Example HOTP flow:
+
+1. Device and server share a secret key
+2. Counter starts at an agreed value
+3. 6-digit code is generated based on key and counter
+4. After successful use, counter increments on both sides
+
+Common uses:
+
+- Hardware security tokens
+- YubiKey's OATH-HOTP functionality
+- Banking security tokens
+
+### SMS OTP
+
+While not technically a distinct algorithm, SMS OTP is a common delivery method where the server generates a random number and sends it via text message. These codes are typically longer-lived than TOTP (usually several minutes) to account for potential delays in SMS delivery.
+
+Example SMS message format:
+"Your verification code is: 847295. Valid for 10 minutes. Don't share this code with anyone."
+
+Implementation considerations:
+
+- Usually 6-8 digits long
+- Validity period: 5-15 minutes
+- Should include rate limiting
+- May require carrier fees
+- Vulnerable to SIM swapping attacks
+
+### Email OTP
+
+Similar to SMS OTP, email-based OTPs involve sending randomly generated codes via email. These are often used for account verification and password reset processes, with slightly longer validity periods to accommodate email delivery times and user interaction.
+
+Best practices for email OTP:
+
+- Include branding and clear instructions
+- Set appropriate expiration times (15-30 minutes)
+- Implement rate limiting
+- Use secure email delivery
+- Include IP address and device information in the email
+
+### Security Considerations
+
+When implementing any OTP system, consider these key factors:
+
+1. **Length and Complexity**
+
+   - TOTP/HOTP: Usually 6-8 digits
+   - SMS/Email: Can be longer, often 6-8 digits
+   - Avoid using letters to prevent confusion
+
+2. **Validity Period**
+
+   - TOTP: 30 seconds
+   - HOTP: Until used
+   - SMS/Email: 5-30 minutes
+
+3. **Rate Limiting**
+
+   - Limit generation attempts
+   - Implement cooldown periods
+   - Block after multiple failed attempts
+
+4. **Secure Storage**
+
+   - Never store OTPs in plain text
+   - Use secure hash comparison
+   - Implement proper cleanup of expired codes
+
+5. **Delivery Security**
+   - TOTP/HOTP: Most secure due to client-side generation
+   - SMS: Vulnerable to interception and SIM swapping
+   - Email: Vulnerable to account compromise
+
+## References
+
+- [RFC 4226: HOTP Algorithm](https://datatracker.ietf.org/doc/html/rfc4226) - IETF specification for HMAC-Based One-Time Password Algorithm
+- [RFC 6238: TOTP Algorithm](https://datatracker.ietf.org/doc/html/rfc6238) - IETF specification for Time-Based One-Time Password Algorithm
+- [NIST Special Publication 800-63B](https://pages.nist.gov/800-63-3/sp800-63b.html) - Digital Identity Guidelines: Authentication and Lifecycle Management
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#one-time-passwords) - Best practices for OTP implementation
+- [Google 2-Step Verification](https://www.google.com/landing/2step/) - Reference implementation of TOTP in production
+
+<SeeAlso slugs={['mfa']} />
