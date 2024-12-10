@@ -1,50 +1,117 @@
 ---
-title: Authenticatie (Authentication)
+title: Authenticatie (AuthN)
 tags: [authentication]
-description: Authenticatie (Authentication) is het proces van het verifiëren van de identiteitseigendom (bijv. gebruiker of service). Het is de basis van identiteit en toegangsbeheer (IAM) systemen en is essentieel voor het beveiligen van applicaties en diensten.
+description: Authenticatie is het proces van het verifiëren van de identiteitseigendom (bijv. gebruiker of dienst). Het is de basis van identity and access management (IAM) systemen en is essentieel voor het beveiligen van applicaties en diensten.
 ---
 
-## Wat is authenticatie (Authentication)?
+## Wat is authenticatie (AuthN)?
 
-> **TL;DR**: Authenticatie (Authentication) beantwoordt de vraag "Welke identiteit bezit je?"
+**Authenticatie (AuthN)** staat voor authenticatie, een mechanisme ingebouwd in software om een gebruiker te identificeren op basis van hun inloggegevens voordat toegang tot bronnen wordt verleend. Bijvoorbeeld, de meest voorkomende inlogmethode omvat een e-mail en wachtwoord. Het systeem gebruikt deze inloggegevens om te verifiëren of de gebruiker de juiste identiteit heeft om toegang te krijgen.
 
-Hier zijn enkele typische voorbeelden van authenticatie (authentication):
+In de context van <Ref slug="iam" />, gaat authenticatie over het verifiëren van het eigendom van een identiteit in plaats van het identificeren van de persoon of entiteit erachter. Bijvoorbeeld, als een familielid jouw inloggegevens gebruikt om in te loggen, zijn zij niet jij, maar het systeem herkent hen als dezelfde identiteit.
 
-- Inloggen met gebruikersnaam en wachtwoord
-- Sociale login (bijv., Inloggen met Google)
-- <Ref slug="machine-to-machine" /> authenticatie (bijv., API-keys)
+Een identiteit kan niet alleen een gebruiker vertegenwoordigen, maar ook een dienst of een apparaat. Bijvoorbeeld, een dienst kan zichzelf authenticeren bij een andere dienst met behulp van een <Ref slug="api-key" />.
 
-We hebben de uitdrukking "Wie ben je?" niet gebruikt omdat:
+Naarmate technologie evolueert, zijn authenticatiemethoden geavanceerder en multidisciplinair geworden. Hoewel de term technisch kan klinken, is het een sleutelbegrip in cybersecurity, aangezien alle applicaties en software vertrouwen op authenticatie om veilige gebruikersinformatie en hun toegang tot een systeem te waarborgen.
 
-- In de wereld van <Ref slug="iam" /> gaat authenticatie (authentication) over het verifiëren van het eigendom van een identiteit, niet over het identificeren van de persoon of entiteit. Bijvoorbeeld, wanneer een van je familieleden je inloggegevens gebruikt om in te loggen op je account, zijn zij niet jij, maar de identiteit voor het systeem is hetzelfde.
-- De identiteit kan een gebruiker, een dienst of een apparaat zijn. Bijvoorbeeld, een dienst kan zichzelf authenticeren naar een andere dienst met behulp van API-keys.
+## Authenticatiefactoren (AuthN)
 
-### Verschil tussen authenticatie en autorisatie
+**AuthN (Authenticatie) factoren** zijn de categorieën van bewijs die worden gebruikt om de identiteit van een gebruiker te verifiëren tijdens het authenticatieproces. Ze helpen ervoor te zorgen dat alleen geautoriseerde gebruikers toegang krijgen tot systemen of bronnen. Deze factoren worden meestal onderverdeeld in drie hoofdtypen, vaak aangeduid als de "drie factoren van authenticatie."
 
-Deze twee termen worden vaak verward, maar ze zijn fundamenteel verschillend: <Ref slug="authorization" /> beantwoordt de vraag "Wat kun je doen?". Bovendien is authenticatie (authentication) een vereiste voor autorisatie omdat het systeem de identiteit moet kennen voordat het kan beslissen welke acties het kan uitvoeren.
+- **Kennisfactor**: Iets dat je weet (bijv. wachtwoord, PIN)
+- **Bezitsfactor**: Iets dat je hebt (bijv. smartphone, beveiligingstoken)
+- **Inherente factor**: Iets dat je bent (bijv. vingerafdruk, gezichtsherkenning)
 
-## Authenticatiefactoren
+Hier zijn twee voorbeelden:
 
-Authenticatie (Authentication) kan worden uitgevoerd met één of meer factoren. Hier zijn enkele veelvoorkomende factoren:
+<Ref slug="mfa" /> is een gangbare praktijk die meerdere factoren combineert om de beveiliging te verhogen. Bijvoorbeeld, wanneer je inlogt op je bankrekening, moet je mogelijk een wachtwoord (kennisfactor) en een eenmalige code van een authenticator-app (bezitsfactor) opgeven.
 
-- **Kennisfactor**: Iets dat je weet (bijv., wachtwoord, PIN)
-- **Bezitsfactor**: Iets dat je hebt (bijv., smartphone, beveiligingstoken)
-- **Eigenschapsfactor**: Iets dat je bent (bijv., vingerafdruk, gezichtsherkenning)
+<Ref slug="passkey" /> is een moderne authenticatiefactor die meerdere factoren kan combineren en bestand is tegen phishing-aanvallen.
 
-<Ref slug="mfa" /> is een veelgebruikte praktijk waarmee meerdere factoren worden gecombineerd om de beveiliging te verhogen. Bijvoorbeeld, wanneer je inlogt op je bankrekening, moet je mogelijk een wachtwoord (kennisfactor) en een eenmalige code van een authenticator-app (bezitsfactor) opgeven.
+## Wat zijn de gebruikelijke soorten authenticatie (AuthN)?
+Na het behandelen van de belangrijkste componenten en authenticatiefactoren, gaan we verder met de soorten authenticatie. Systemen en producten gebruiken verschillende authenticatiemethoden, en deze methoden kunnen overlappen in hun definities en hoe gebruikers ze begrijpen. Bij het selecteren van authenticatiemethoden, focus op de behoeften van je product en streef naar een balans tussen gebruikerservaring en beveiliging.
 
-<Ref slug="passkey" /> is een moderne authenticatiefactor die meerdere factoren kan combineren en resistent is tegen phishing-aanvallen.
+### Wachtwoordauthenticatie
 
-## Authenticatieraamwerken (protocollen)
+**Wachtwoordauthenticatie** is een veelgebruikte methode voor het verifiëren van de identiteit van een gebruiker bij toegang tot een systeem of applicatie. Het vereist dat de gebruiker bijvoorbeeld een e-mailadres of andere vergelijkbare identificatoren zoals gebruikersnaam en telefoonnummer opgeeft, die dienen als een unieke identificator, en een wachtwoord, een geheime reeks die alleen bij de gebruiker bekend is, om hun eigendom van de e-mail te bevestigen.
 
-In plaats van een zelfgemaakt authenticatiesysteem te bouwen, is het aan te raden gevestigde raamwerken en protocollen te gebruiken, omdat ze zijn beproefd en door beveiligingsexperts zijn beoordeeld. Er zijn verschillende authenticatieraamwerken en protocollen die definiëren hoe authenticatie (authentication) moet worden uitgevoerd. Twee veelvoorkomende zijn:
+Het proces begint met de gebruiker die hun e-mail en wachtwoord invoert in een inlogformulier. Het systeem controleert deze inloggegevens vervolgens tegen zijn database van geregistreerde gebruikers. Als de inloggegevens overeenkomen, krijgt de gebruiker toegang; zo niet, dan wordt de toegang geweigerd. Bij succesvolle authenticatie kan het systeem een sessie aanmaken of een token uitgeven om de ingelogde status van de gebruiker te behouden.
 
-- <Ref slug="openid-connect" />: Een identiteitselement gebouwd bovenop <Ref slug="oauth-2.0" /> dat authenticatiemogelijkheden toevoegt. Het is relatief modern en wordt veel gebruikt voor nieuwe applicaties.
+Deze methode is eenvoudig en breed ondersteund, waardoor het gemakkelijk te begrijpen en te gebruiken is voor gebruikers. Het komt echter met uitdagingen. Wachtwoorden kunnen worden gecompromitteerd door phishing, brute-force aanvallen of datalekken. Bovendien kunnen gebruikers het lastig vinden om meerdere wachtwoorden voor verschillende diensten te onthouden. Om deze problemen aan te pakken, wordt e-mail- en wachtwoordauthenticatie vaak verbeterd met beveiligingsmaatregelen zoals tweefactorauthenticatie (2FA), die een extra verificatielaag toevoegt, of door het aanmoedigen van het gebruik van sterke, unieke wachtwoorden die veilig worden beheerd.
+
+Ondanks de uitdagingen blijft e-mail- en wachtwoordauthenticatie een fundamentele methode voor identiteitsverificatie, vaak gecombineerd met aanvullende maatregelen voor verbeterde beveiliging.
+
+### Wachtwoordloze authenticatie
+
+Wachtwoordloze authenticatie kan op verschillende manieren worden begrepen. In brede zin verwijst het naar elke gebruikersauthenticatiemethode die niet afhankelijk is van wachtwoorden. **Wachtwoordloze authenticatie** is een methode om de identiteit van een gebruiker te verifiëren zonder traditionele wachtwoorden te vereisen. In plaats daarvan vertrouwt het op alternatieve technologieën en factoren om gebruikers veilig te authenticeren. Deze methoden omvatten <Ref slug="otp" /> verzonden via e-mail of SMS of authenticator-app, biometrische authenticatie zoals vingerafdrukken of gezichtsherkenning, magic links verzonden naar de e-mail van de gebruiker, passkeys opgeslagen op een apparaat, of sociale logins met behulp van accounts van providers zoals Google of Facebook.
+
+Deze benadering verbetert de beveiliging door risico's die samenhangen met wachtwoorden, zoals phishing, brute-force aanvallen en datalekken, te verminderen. Het verbetert ook de gebruikerservaring door de noodzaak om wachtwoorden te onthouden en te beheren weg te nemen, terwijl de onderhoudskosten worden verlaagd door het verminderen van wachtwoordresetverzoeken.
+
+### Sociale authenticatie
+
+**Sociale authenticatie** is een methode om de identiteit van een gebruiker te verifiëren door hen in staat te stellen in te loggen op een applicatie of website met hun bestaande inloggegevens van een social media- of identity provider-platform, zoals Google, Facebook, Twitter of LinkedIn. In plaats van een nieuwe gebruikersnaam en wachtwoord voor elke applicatie aan te maken, kunnen gebruikers zich authenticeren met een account dat ze al vertrouwen.
+
+Wanneer een gebruiker een sociale inlogoptie selecteert, worden ze doorgestuurd naar het gekozen platform om hun inloggegevens te bevestigen. Eenmaal geauthenticeerd, verstrekt het platform de applicatie een token of gebruikersinformatie, zoals naam, e-mailadres of profielfoto, om hun identiteit te verifiëren. Dit proces is veilig en vereenvoudigt vaak de inlogervaring voor gebruikers.
+
+Sociale authenticatie vermindert wrijving voor gebruikers, verbetert de beveiliging door gebruik te maken van de infrastructuur van de <Ref slug="identity-provider" />, en stelt applicaties in staat om snel geverifieerde gebruikersgegevens te verzamelen. Het is vooral populair in applicaties waar gebruiksgemak en integratie met sociale platforms prioriteiten zijn.
+
+### Multi-factor authenticatie
+
+<Ref slug="mfa" /> is een beveiligingsproces dat vereist dat een gebruiker hun identiteit verifieert met behulp van twee of meer verschillende authenticatiefactoren. Deze factoren vallen meestal in drie categorieën, zoals de authenticatiefactoren die we hierboven hebben genoemd: iets dat je weet, iets dat je hebt, en iets dat je bent.
+
+Door meerdere factoren te combineren, verbetert MFA de beveiliging aanzienlijk. Zelfs als één factor, zoals een wachtwoord, wordt gecompromitteerd, maakt de extra laag (lagen) van verificatie het veel moeilijker voor ongeautoriseerde gebruikers om toegang te krijgen.
+
+MFA wordt veel gebruikt in systemen die hogere niveaus van beveiliging vereisen, zoals online bankieren, bedrijfsnetwerken, financieel gevoelige producten en clouddiensten. In plaats van een methode van authenticatie te zijn, is het nauwkeuriger een beveiligingsmaatregel voor authenticatie.
+
+### **Biometrische** authenticatie
+
+**Biometrische authenticatie** is een beveiligingsproces dat de identiteit van een gebruiker verifieert op basis van **unieke fysieke of gedragskenmerken**. Deze kenmerken, zoals vingerafdrukken, gezichtskenmerken of stempatronen, zijn zeer individueel en moeilijk te repliceren, waardoor deze methode veilig en betrouwbaar is.
+
+Het proces begint met registratie, waarbij de biometrische gegevens van een gebruiker worden vastgelegd en veilig worden opgeslagen als referentie. Tijdens de authenticatie legt het systeem de live biometrische gegevens van de gebruiker vast en vergelijkt deze met de opgeslagen referentie. Als de gegevens overeenkomen, wordt toegang verleend; zo niet, dan wordt toegang geweigerd.
+
+Deze methode is handig omdat gebruikers geen wachtwoorden hoeven te onthouden of fysieke tokens hoeven mee te nemen. Het wordt veel gebruikt in applicaties zoals smartphones, bankapps, beveiligde faciliteiten en zorgsystemen om snelle, betrouwbare en gebruiksvriendelijke toegang te bieden.
+
+### Enterprise single sign-On (SSO) met een identity provider (IdP)
+
+<Ref slug="enterprise-sso" /> met een <Ref slug="identity-provider" /> stelt gebruikers in staat om één keer in te loggen en toegang te krijgen tot meerdere applicaties of diensten zonder opnieuw te hoeven authenticeren. De IdP is een vertrouwde dienst die gebruikersidentiteiten beheert en authenticatie afhandelt.
+
+Zo werkt het:
+1. De gebruiker logt in via de IdP (bijv. Google of Azure AD).
+2. De IdP authenticeert de gebruiker en geeft een token of verklaring af.
+3. Het token wordt gedeeld met andere verbonden apps of diensten om toegang te verlenen zonder extra inlogpogingen.
+
+Deze opzet vereenvoudigt de toegang voor gebruikers terwijl het identiteitsbeheer voor beveiliging centraliseert.
+
+### Machine-to-machine authenticatie
+
+<Ref slug="machine-to-machine" /> authenticatie is een proces dat de identiteit van apparaten, applicaties of diensten verifieert die met elkaar communiceren zonder menselijke tussenkomst. Het zorgt voor veilige interacties tussen machines, vaak in IoT (Internet of Things) omgevingen, APIs of cloudgebaseerde diensten.
+
+In M2M authenticatie, in plaats van gebruikersnamen en wachtwoorden te gebruiken zoals bij traditionele gebruikersauthenticatie, vertrouwen machines op veilige inloggegevens zoals API-sleutels, certificaten of tokens (bijv. <Ref slug="oauth-2.0" />). Deze inloggegevens worden gebruikt om te verifiëren dat een machine of dienst is geautoriseerd om toegang te krijgen tot een andere machine of bron.
+
+Bijvoorbeeld, wanneer een mobiele app communiceert met een cloudserver om gebruikersgegevens op te halen, authenticeert de server de app met een API-sleutel of token om te bevestigen dat het een legitieme client is. Evenzo, in IoT, authenticeren apparaten zoals slimme thermostaten of wearables met hun besturingssystemen of dataservers met behulp van certificaten of veilige tokens.
+
+M2M authenticatie is belangrijk voor het waarborgen van gegevensbeveiliging en vertrouwen in geautomatiseerde systemen, vooral in omgevingen waar gevoelige informatie wordt uitgewisseld.
+
+## Wat zijn de beste praktijken en sleutelprincipes voor het implementeren van authenticatie (AuthN)?
+
+Het implementeren van authenticatiefuncties vereist focus op sleutelprincipes. Het gebruik van vertrouwde protocollen zoals OAuth 2.0 of OpenID Connect en het versleutelen van gevoelige gegevens wordt sterk aanbevolen. Daarnaast helpt het aanbieden van opties zoals sociale logins, wachtwoordloze methoden zoals passkeys, en ondersteuning voor verschillende authenticatiemethoden—zoals gebruikersnaam/wachtwoord, biometrie of SSO—het systeem om aan diverse gebruikersbehoeften te voldoen.
+
+## Authenticatie (AuthN) in OIDC, SAML en OAuth 2.0
+
+In plaats van een zelfgemaakt authenticatiesysteem te bouwen, wordt het aanbevolen om gevestigde frameworks en protocollen te gebruiken, aangezien deze zijn getest en beoordeeld door beveiligingsexperts. Er zijn verschillende authenticatieframeworks en protocollen die definiëren hoe authenticatie moet worden uitgevoerd. Twee veelvoorkomende zijn:
+
+- <Ref slug="openid-connect" />: Een identiteitslaag gebouwd bovenop <Ref slug="oauth-2.0" /> die authenticatiemogelijkheden toevoegt. Het is relatief modern en veel gebruikt voor nieuwe applicaties.
 - <Ref slug="saml" />: Een protocol voor het uitwisselen van authenticatie- en autorisatiegegevens tussen partijen. Het wordt vaak gebruikt in bedrijfsomgevingen.
 
-De keuze van het raamwerk hangt af van je gebruikssituatie en vereisten. Voor nieuwe applicaties wordt OIDC aanbevolen vanwege het moderne ontwerp en de ondersteuning voor <Ref slug="jwt" />.
+De keuze van het framework hangt af van je gebruikssituatie en vereisten. Voor nieuwe applicaties wordt OIDC aanbevolen vanwege het moderne ontwerp en de ondersteuning voor <Ref slug="jwt" />.
 
-Echter, directe omgang met deze protocollen kan nog steeds complex en tijdrovend zijn. Beide protocollen hebben een steile leercurve en vereisen zorgvuldige implementatie om de veiligheid te waarborgen. In plaats daarvan kan het gebruik van een <Ref slug="identity-provider" /> die deze protocollen ondersteunt of erop is gebouwd het authenticatieproces aanzienlijk vereenvoudigen. Een goede identity provider zal ook extra functies bieden zoals <Ref slug="mfa" /> en <Ref slug="single-sign-on" /> voor je toekomstige behoeften.
+Het direct werken met deze protocollen kan echter nog steeds complex en tijdrovend zijn. Beide protocollen hebben steile leercurves en vereisen zorgvuldige implementatie om beveiliging te waarborgen. In plaats daarvan kan het gebruik van een <Ref slug="identity-provider" /> die deze protocollen ondersteunt of erop is gebouwd, het authenticatieproces aanzienlijk vereenvoudigen. Een goede identity provider biedt ook extra functies zoals <Ref slug="mfa" /> en <Ref slug="single-sign-on" /> voor je toekomstige behoeften.
+
+## Wat zijn de verschillen tussen AuthZ en AuthN?
+
+Bij het bespreken van AuthN komt AuthZ natuurlijk ter sprake. Authenticatie (AuthN) bevestigt identiteit, beantwoordt de vraag "Wie ben je?" door middel van inloggegevens zoals wachtwoorden of biometrie. Autorisatie (AuthZ) bepaalt "Wat kun je doen?" door toegang te verlenen of te weigeren op basis van rollen of beleidsregels. AuthN komt eerst om identiteit te verifiëren, gevolgd door AuthZ om permissies te beheren.
+
+Hier is een voorbeeld: wanneer je inlogt op je e-mailaccount met je gebruikersnaam en wachtwoord, is dat **Authenticatie (AuthN)**—bewijzen wie je bent. Eenmaal ingelogd, beslist het systeem of je je e-mails kunt lezen, berichten kunt verzenden of toegang hebt tot beheerdersinstellingen op basis van je rol. Dat is **Autorisatie (AuthZ)**—bepalen wat je mag doen.
 
 <SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
 
