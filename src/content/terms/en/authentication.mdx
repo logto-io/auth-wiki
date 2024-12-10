@@ -1,41 +1,103 @@
 ---
-title: Authentication
+title: What is Authentication (AuthN)?
 tags: [authentication]
 description: Authentication is the process of verifying the identity ownership (e.g. user or service). It is the foundation of identity and access management (IAM) systems and is essential for securing applications and services.
 ---
 
-## What is authentication?
+## What is authentication (AuthN)?
 
-> **TL;DR**: Authentication answers the question "Which identity do you own?"
+**AuthN** stands for authentication, a mechanism built into software to identify a user based on their credentials before granting access to resources. For example, the most common login method involves an email and password. The system uses these credentials to verify whether the user has the correct identity to access it.
 
-Here are some typical examples of authentication:
+In the context of <Ref slug=“iam” />, authentication is about verifying the ownership of an identity rather than identifying the person or entity behind it. For instance, if a family member uses your credentials to log in, they are not you, but the system recognizes them as the same identity.
 
-- Username and password sign-in
-- Social login (e.g., Sign in with Google)
-- <Ref slug="machine-to-machine" /> authentication (e.g., API keys)
+An identity can not only represent a user, but also a service, or a device. For example, one service may authenticate itself to another using <Ref slug=“api-key” />. 
 
-We did not use the phrase "Who are you?" because:
+As technology evolves, authentication methods have become more advanced and multi-disciplinary. While the term might sound technical, tt is a key concept in cybersecurity, as all applications and software rely on authentication to ensure secure user information and their access to a system.
 
-- In the realm of <Ref slug="iam" />, authentication is about verifying the ownership of an identity, not identifying the person or entity. For example, when one of your family members use your credentials to sign in to your account, they are not you, but the identity to the system is the same.
-- The identity can be a user, a service, or a device. For example, a service may authenticate itself to another service using API keys.
+## Authentication (AuthN) factors
 
-### Difference between authentication and authorization
-
-These two terms are often confused, but they are fundamentally different: <Ref slug="authorization" /> answers the question "What can you do?". Additionally, authentication is a prerequisite for authorization because the system needs to know the identity before deciding what actions it can perform.
-
-## Authentication factors
-
-Authentication can be performed using one or more factors. Here are some common factors:
+**AuthN (Authentication) factors** are the categories of evidence used to verify a user’s identity during the authentication process. They help ensure that only authorized users gain access to systems or resources. These factors are typically divided into three main types, often referred to as the “three factors of authentication.”
 
 - **Knowledge factor**: Something you know (e.g., password, PIN)
 - **Possession factor**: Something you have (e.g., smartphone, security token)
 - **Inherence factor**: Something you are (e.g., fingerprint, facial recognition)
 
-<Ref slug="mfa" /> is a common practice that combines multiple factors to increase security. For example, when you sign in to your bank account, you may need to provide a password (knowledge factor) and a one-time code from an authenticator app (possession factor).
+Here are two examples:
 
-<Ref slug="passkey" /> is a modern authentication factor that can combine multiple factors and is resistant to phishing attacks.
+<Ref slug=“mfa” /> is a common practice that combines multiple factors to increase security. For example, when you sign in to your bank account, you may need to provide a password (knowledge factor) and a one-time code from an authenticator app (possession factor).
 
-## Authentication frameworks (protocols)
+<Ref slug=“passkey” /> is a modern authentication factor that can combine multiple factors and is resistant to phishing attacks.
+
+## What are common types of authentication (AuthN)?
+After covering the key components and authentication factors, let’s move on to authentication types. Systems and products use various authentication methods, and these methods may overlap in their definitions and how users understand them. When selecting authentication methods, focus on your product’s needs and aim to balance user experience with security.
+
+### Password authentication
+
+**Password authentication** is a widely used method for verifying a user’s identity when accessing a system or application. It requires the user to provide an email address for example or other similar identifiers like username and phone number, which serves as a unique identifier, and a password, a secret string known only to the user, to confirm their ownership of the email.
+
+The process begins with the user entering their email and password into a login form. The system then checks these credentials against its database of registered users. If the credentials match, the user is granted access; if not, access is denied. Upon successful authentication, the system may create a session or issue a token to maintain the user’s logged-in state.
+
+This method is simple and widely supported, making it easy for users to understand and use. However, it comes with challenges. Passwords can be compromised through phishing, brute-force attacks, or data breaches. Additionally, users may find it inconvenient to remember multiple passwords for different services. To address these issues, email and password authentication is often enhanced with security measures such as two-factor authentication (2FA), which adds an extra layer of verification, or by encouraging the use of strong, unique passwords managed securely.
+
+Despite its challenges, email and password authentication remains a foundational method for identity verification, often combined with additional measures for improved security.
+
+### Passwordless authentication
+
+ v authentication can be understood in different ways. Broadly, it refers to any user authentication method that doesn’t rely on passwords. **Passwordless authentication** is a method of verifying a user’s identity without requiring traditional passwords. Instead, it relies on alternative technologies and factors to authenticate users securely. These methods include <Ref slug=“otp” /> sent via email or SMS or authenticator app, biometric authentication like fingerprints or facial recognition, magic links sent to the user’s email, passkeys stored on a device, or social sign-ins using accounts from providers like Google or Facebook.
+
+This approach improves security by reducing risks associated with passwords, such as phishing, brute-force attacks, and breaches. It also enhances the user experience by getting rid of the need to remember and manage passwords, while lowering maintenance costs by reducing password reset requests. 
+
+### Social authentication
+
+**Social authentication** is a method of verifying a user’s identity by allowing them to log in to an application or website using their existing credentials from a social media or identity provider platform, such as Google, Facebook, Twitter, or LinkedIn. Instead of creating a new username and password for each application, users can authenticate using an account they already trust.
+
+When a user selects a social login option, they are redirected to the chosen platform to confirm their credentials. Once authenticated, the platform provides the application with a token or user information, such as name, email address, or profile picture, to verify their identity. This process is secure and often simplifies the login experience for users.
+
+Social authentication reduces friction for users, improves security by leveraging <Ref slug=“identity-provider” />’s infrastructure, and allows applications to gather verified user data quickly. It is especially popular in applications where ease of access and integration with social platforms are priorities.
+
+### Multi-factor authentication
+
+<Ref slug=“mfa” /> is a security process that requires a user to verify their identity using two or more distinct authentication factors. These factors typically fall into three categories, like the authentication factors we mentioned above:
+something you know, something you have, and something you are.
+
+By combining multiple factors, MFA significantly enhances security. Even if one factor, such as a password, is compromised, the additional layer(s) of verification makes it much harder for unauthorized users to gain access.
+
+MFA is widely used in systems that require higher levels of security, such as online banking, enterprise networks, financially sensitive products, and cloud services. Rather than being a method of authentication, it is more accurately a security measure for authentication.
+
+### **Biometrics** authentication
+
+**Biometric authentication** is a security process that verifies a user’s identity based on **unique physical or behavioral characteristics**. These characteristics, such as fingerprints, facial features, or voice patterns, are highly individual and difficult to replicate, making this method secure and reliable.
+
+The process begins with enrollment, where a user’s biometric data is captured and securely stored as a reference. During authentication, the system captures the user’s live biometric data and compares it to the stored reference. If the data matches, access is granted; otherwise, it is denied.
+
+This method is convenient because users don’t need to remember passwords or carry physical tokens. It is widely used in applications like smartphones, banking apps, secure facilities, and healthcare systems to provide fast, reliable, and user-friendly access.
+
+### Enterprise single sign-On (SSO) with an identity provider (IdP)
+
+<Ref slug=“enterprise-sso” /> with an <Ref slug=“identity-provider” /> allows users to log in once and access multiple applications or services without needing to reauthenticate. The IdP is a trusted service that manages user identities and handles authentication.
+
+Here’s how it works:
+	1.	The user logs in through the IdP (e.g., Google, or Azure AD).
+	2.	The IdP authenticates the user and issues a token or assertion.
+	3.	The token is shared with other connected apps or services to grant access without additional logins.
+
+This setup simplifies user access while centralizing identity management for security.
+
+### Machine-to-machine authentication
+
+<Ref slug=“machine-to-machine” /> authentication is a process that verifies the identity of devices, applications, or services communicating with each other without human involvement. It ensures secure interactions between machines, often in IoT (Internet of Things) environments, APIs, or cloud-based services.
+
+In M2M authentication, instead of using usernames and passwords like traditional user authentication, machines rely on secure credentials such as API keys, certificates, or tokens (e.g.,<Ref slug=“oauth-2.0” /> ). These credentials are used to verify that a machine or service is authorized to access another machine or resource.
+
+For example, when a mobile app communicates with a cloud server to retrieve user data, the server authenticates the app using an API key or token to confirm it is a legitimate client. Similarly, in IoT, devices like smart thermostats or wearables authenticate with their control systems or data servers using certificates or secure tokens.
+
+M2M authentication is important for ensuring data security and trust in automated systems, especially in environments where sensitive information is exchanged.
+
+## What are the best practices and key principles for implementing authentication (AuthN)?
+
+Implementing authentication features requires focusing on key principles. Using trusted protocols like OAuth 2.0 or OpenID Connect and encrypting sensitive data is highly recommended. Additionally, offering options like social logins, passwordless methods such as passkeys, and support for various authentication methods—such as username/password, biometrics, or SSO—helps the system meet diverse user needs.
+
+## Authentication (AuthN) in OIDC, SAML, and OAuth 2.0
 
 Instead of building a homegrown authentication system, it is recommended to use established frameworks and protocols as they have been battle-tested and reviewed by security experts. There are various authentication frameworks and protocols that define how authentication should be performed. Two common ones are:
 
@@ -45,6 +107,13 @@ Instead of building a homegrown authentication system, it is recommended to use 
 The choice of framework depends on your use case and requirements. For new applications, OIDC is recommended due to its modern design and support for <Ref slug="jwt" />.
 
 However, directly working with these protocols can still be complex and time-consuming. Both protocols have steep learning curves and require careful implementation to ensure security. Instead, using an <Ref slug="identity-provider" /> that supports or are built on these protocols can greatly simplify the authentication process. A good identity provider will also provide additional features like <Ref slug="mfa" /> and <Ref slug="single-sign-on" /> for your future needs.
+
+## What are the differences between AuthZ vs AuthN?
+
+When discussing AuthN, AuthZ naturally comes into the conversation. Authentication (AuthN) confirms identity, answering “Who are you?” through credentials like passwords or biometrics. Authorization (AuthZ) determines “What can you do?” by granting or denying access based on roles or policies. AuthN comes first to verify identity, followed by AuthZ to manage permissions.
+
+Here is an example, when you log into your email account with your username and password, that’s **Authentication (AuthN)**—proving who you are. Once logged in, the system decides whether you can read your emails, send messages, or access admin settings based on your role. That’s **Authorization (AuthZ)**—defining what you’re allowed to do.
+
 
 <SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
 
