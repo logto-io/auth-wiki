@@ -1,50 +1,118 @@
 ---
-title: Autenticação (Authentication)
+title: Autenticação (Authentication, AuthN)
 tags: [authentication]
-description: Autenticação (Authentication) é o processo de verificar a propriedade da identidade (por exemplo, usuário ou serviço). É a base dos sistemas de gerenciamento de identidade e acesso (IAM) e é essencial para proteger aplicativos e serviços.
+description: Autenticação é o processo de verificar a propriedade da identidade (por exemplo, usuário ou serviço). É a base dos sistemas de gerenciamento de identidade e acesso (IAM) e é essencial para proteger aplicativos e serviços.
 ---
 
-## O que é autenticação (Authentication)?
+## O que é autenticação (Authentication, AuthN)?
 
-> **Resumindo**: Autenticação (Authentication) responde à pergunta "Qual identidade você possui?"
+**Autenticação (Authentication, AuthN)** refere-se à autenticação, um mecanismo incorporado ao software para identificar um usuário com base em suas credenciais antes de conceder acesso a recursos. Por exemplo, o método de login mais comum envolve um e-mail e senha. O sistema usa essas credenciais para verificar se o usuário possui a identidade correta para acessá-lo.
 
-Aqui estão alguns exemplos típicos de autenticação (Authentication):
+No contexto de <Ref slug="iam" />, a autenticação é sobre verificar a propriedade de uma identidade em vez de identificar a pessoa ou entidade por trás dela. Por exemplo, se um membro da família usa suas credenciais para fazer login, ele não é você, mas o sistema os reconhece como a mesma identidade.
 
-- Login com nome de usuário e senha
-- Login social (por exemplo, Entrar com Google)
-- Autenticação (Authentication) <Ref slug="machine-to-machine" /> (por exemplo, API keys)
+Uma identidade pode representar não apenas um usuário, mas também um serviço ou um dispositivo. Por exemplo, um serviço pode autenticar-se para outro usando uma <Ref slug="api-key" />.
 
-Não usamos a frase "Quem é você?" porque:
+À medida que a tecnologia evolui, os métodos de autenticação tornaram-se mais avançados e multidisciplinares. Embora o termo possa parecer técnico, é um conceito chave em cibersegurança, pois todos os aplicativos e softwares dependem da autenticação para garantir informações seguras do usuário e seu acesso a um sistema.
 
-- No domínio de <Ref slug="iam" />, a autenticação (Authentication) é sobre verificar a propriedade de uma identidade, não identificar a pessoa ou entidade. Por exemplo, quando um dos seus familiares usa suas credenciais para entrar na sua conta, eles não são você, mas a identidade para o sistema é a mesma.
-- A identidade pode ser um usuário, um serviço ou um dispositivo. Por exemplo, um serviço pode autenticar-se para outro serviço usando API keys.
+## Fatores de autenticação (Authentication, AuthN)
 
-### Diferença entre autenticação (Authentication) e autorização (Authorization)
-
-Esses dois termos são frequentemente confundidos, mas são fundamentalmente diferentes: <Ref slug="authorization" /> responde à pergunta "O que você pode fazer?". Além disso, a autenticação (Authentication) é um pré-requisito para a autorização (Authorization) porque o sistema precisa conhecer a identidade antes de decidir quais ações ela pode realizar.
-
-## Fatores de autenticação (Authentication)
-
-A autenticação (Authentication) pode ser realizada usando um ou mais fatores. Aqui estão alguns fatores comuns:
+**Fatores de Autenticação** são as categorias de evidência usadas para verificar a identidade de um usuário durante o processo de autenticação. Eles ajudam a garantir que apenas usuários autorizados obtenham acesso a sistemas ou recursos. Esses fatores são tipicamente divididos em três tipos principais, frequentemente referidos como os "três fatores de autenticação".
 
 - **Fator de conhecimento**: Algo que você sabe (por exemplo, senha, PIN)
 - **Fator de posse**: Algo que você tem (por exemplo, smartphone, token de segurança)
 - **Fator de inerência**: Algo que você é (por exemplo, impressão digital, reconhecimento facial)
 
-<Ref slug="mfa" /> é uma prática comum que combina múltiplos fatores para aumentar a segurança. Por exemplo, quando você entra na sua conta bancária, pode precisar fornecer uma senha (fator de conhecimento) e um código único de um aplicativo autenticador (fator de posse).
+Aqui estão dois exemplos:
 
-<Ref slug="passkey" /> é um fator de autenticação (Authentication) moderno que pode combinar múltiplos fatores e é resistente a ataques de phishing.
+<Ref slug="mfa" /> é uma prática comum que combina múltiplos fatores para aumentar a segurança. Por exemplo, quando você faz login na sua conta bancária, pode ser necessário fornecer uma senha (fator de conhecimento) e um código único de um aplicativo autenticador (fator de posse).
 
-## Estruturas de autenticação (Authentication) (protocolos)
+<Ref slug="passkey" /> é um fator de autenticação moderno que pode combinar múltiplos fatores e é resistente a ataques de phishing.
 
-Em vez de construir um sistema de autenticação (Authentication) próprio, é recomendado usar estruturas e protocolos estabelecidos, pois eles foram testados e revisados por especialistas em segurança. Existem várias estruturas e protocolos de autenticação (Authentication) que definem como a autenticação (Authentication) deve ser realizada. Dois comuns são:
+## Quais são os tipos comuns de autenticação (Authentication, AuthN)?
 
-- <Ref slug="openid-connect" />: Uma camada de identidade construída sobre <Ref slug="oauth-2.0" /> que adiciona capacidades de autenticação (Authentication). É relativamente moderno e amplamente usado para novos aplicativos.
-- <Ref slug="saml" />: Um protocolo para troca de dados de autenticação (Authentication) e autorização (Authorization) entre partes. É comumente usado em ambientes empresariais.
+Depois de cobrir os componentes principais e fatores de autenticação, vamos passar para os tipos de autenticação. Sistemas e produtos usam vários métodos de autenticação, e esses métodos podem se sobrepor em suas definições e como os usuários os entendem. Ao selecionar métodos de autenticação, concentre-se nas necessidades do seu produto e busque equilibrar a experiência do usuário com a segurança.
 
-A escolha da estrutura depende do seu caso de uso e requisitos. Para novos aplicativos, OIDC é recomendado devido ao seu design moderno e suporte para <Ref slug="jwt" />.
+### Autenticação por senha
 
-No entanto, trabalhar diretamente com esses protocolos ainda pode ser complexo e demorado. Ambos os protocolos têm curvas de aprendizado acentuadas e requerem implementação cuidadosa para garantir a segurança. Em vez disso, usar um <Ref slug="identity-provider" /> que suporte ou seja construído sobre esses protocolos pode simplificar muito o processo de autenticação (Authentication). Um bom provedor de identidade também fornecerá recursos adicionais como <Ref slug="mfa" /> e <Ref slug="single-sign-on" /> para suas necessidades futuras.
+**Autenticação por senha** é um método amplamente utilizado para verificar a identidade de um usuário ao acessar um sistema ou aplicativo. Requer que o usuário forneça um endereço de e-mail, por exemplo, ou outros identificadores semelhantes, como nome de usuário e número de telefone, que servem como um identificador único, e uma senha, uma sequência secreta conhecida apenas pelo usuário, para confirmar a propriedade do e-mail.
+
+O processo começa com o usuário inserindo seu e-mail e senha em um formulário de login. O sistema então verifica essas credenciais em seu banco de dados de usuários registrados. Se as credenciais corresponderem, o usuário recebe acesso; caso contrário, o acesso é negado. Após a autenticação bem-sucedida, o sistema pode criar uma sessão ou emitir um token para manter o estado de login do usuário.
+
+Este método é simples e amplamente suportado, tornando-o fácil de entender e usar pelos usuários. No entanto, apresenta desafios. Senhas podem ser comprometidas por meio de phishing, ataques de força bruta ou violações de dados. Além disso, os usuários podem achar inconveniente lembrar várias senhas para diferentes serviços. Para resolver esses problemas, a autenticação por e-mail e senha é frequentemente aprimorada com medidas de segurança, como autenticação de dois fatores (2FA), que adiciona uma camada extra de verificação, ou incentivando o uso de senhas fortes e únicas gerenciadas de forma segura.
+
+Apesar de seus desafios, a autenticação por e-mail e senha continua sendo um método fundamental para verificação de identidade, frequentemente combinado com medidas adicionais para melhorar a segurança.
+
+### Autenticação sem senha
+
+A autenticação sem senha pode ser entendida de diferentes maneiras. De forma ampla, refere-se a qualquer método de autenticação de usuário que não dependa de senhas. **Autenticação sem senha** é um método de verificar a identidade de um usuário sem exigir senhas tradicionais. Em vez disso, ela se baseia em tecnologias e fatores alternativos para autenticar usuários de forma segura. Esses métodos incluem <Ref slug="otp" /> enviados por e-mail ou SMS ou aplicativo autenticador, autenticação biométrica como impressões digitais ou reconhecimento facial, links mágicos enviados para o e-mail do usuário, passkeys armazenadas em um dispositivo ou logins sociais usando contas de provedores como Google ou Facebook.
+
+Essa abordagem melhora a segurança ao reduzir os riscos associados às senhas, como phishing, ataques de força bruta e violações. Também melhora a experiência do usuário ao eliminar a necessidade de lembrar e gerenciar senhas, enquanto reduz os custos de manutenção ao diminuir as solicitações de redefinição de senha.
+
+### Autenticação social
+
+**Autenticação social** é um método de verificar a identidade de um usuário permitindo que ele faça login em um aplicativo ou site usando suas credenciais existentes de uma plataforma de mídia social ou provedor de identidade, como Google, Facebook, Twitter ou LinkedIn. Em vez de criar um novo nome de usuário e senha para cada aplicativo, os usuários podem autenticar-se usando uma conta em que já confiam.
+
+Quando um usuário seleciona uma opção de login social, ele é redirecionado para a plataforma escolhida para confirmar suas credenciais. Uma vez autenticado, a plataforma fornece ao aplicativo um token ou informações do usuário, como nome, endereço de e-mail ou foto de perfil, para verificar sua identidade. Este processo é seguro e muitas vezes simplifica a experiência de login para os usuários.
+
+A autenticação social reduz o atrito para os usuários, melhora a segurança ao aproveitar a infraestrutura do <Ref slug="identity-provider" />, e permite que os aplicativos coletem rapidamente dados de usuários verificados. É especialmente popular em aplicativos onde a facilidade de acesso e integração com plataformas sociais são prioridades.
+
+### Autenticação multifator
+
+<Ref slug="mfa" /> é um processo de segurança que requer que um usuário verifique sua identidade usando dois ou mais fatores de autenticação distintos. Esses fatores geralmente se enquadram em três categorias, como os fatores de autenticação mencionados acima: algo que você sabe, algo que você tem e algo que você é.
+
+Ao combinar múltiplos fatores, a MFA melhora significativamente a segurança. Mesmo que um fator, como uma senha, seja comprometido, a camada adicional de verificação torna muito mais difícil para usuários não autorizados obterem acesso.
+
+A MFA é amplamente utilizada em sistemas que exigem níveis mais altos de segurança, como bancos online, redes empresariais, produtos financeiramente sensíveis e serviços em nuvem. Em vez de ser um método de autenticação, é mais precisamente uma medida de segurança para autenticação.
+
+### Autenticação biométrica
+
+**Autenticação biométrica** é um processo de segurança que verifica a identidade de um usuário com base em **características físicas ou comportamentais únicas**. Essas características, como impressões digitais, características faciais ou padrões de voz, são altamente individuais e difíceis de replicar, tornando este método seguro e confiável.
+
+O processo começa com o registro, onde os dados biométricos de um usuário são capturados e armazenados de forma segura como referência. Durante a autenticação, o sistema captura os dados biométricos ao vivo do usuário e os compara com a referência armazenada. Se os dados corresponderem, o acesso é concedido; caso contrário, é negado.
+
+Este método é conveniente porque os usuários não precisam lembrar senhas ou carregar tokens físicos. É amplamente utilizado em aplicativos como smartphones, aplicativos bancários, instalações seguras e sistemas de saúde para fornecer acesso rápido, confiável e amigável ao usuário.
+
+### Single Sign-On (SSO) empresarial com um provedor de identidade (IdP)
+
+<Ref slug="enterprise-sso" /> com um <Ref slug="identity-provider" /> permite que os usuários façam login uma vez e acessem vários aplicativos ou serviços sem precisar se reautenticar. O IdP é um serviço confiável que gerencia identidades de usuários e lida com a autenticação.
+
+Veja como funciona:
+1. O usuário faz login através do IdP (por exemplo, Google ou Azure AD).
+2. O IdP autentica o usuário e emite um token ou asserção.
+3. O token é compartilhado com outros aplicativos ou serviços conectados para conceder acesso sem logins adicionais.
+
+Essa configuração simplifica o acesso do usuário enquanto centraliza o gerenciamento de identidade para segurança.
+
+### Autenticação máquina a máquina
+
+<Ref slug="machine-to-machine" /> a autenticação é um processo que verifica a identidade de dispositivos, aplicativos ou serviços que se comunicam entre si sem envolvimento humano. Ela garante interações seguras entre máquinas, frequentemente em ambientes de IoT (Internet das Coisas), APIs ou serviços baseados em nuvem.
+
+Na autenticação M2M, em vez de usar nomes de usuário e senhas como na autenticação tradicional de usuários, as máquinas dependem de credenciais seguras, como chaves de API, certificados ou tokens (por exemplo, <Ref slug="oauth-2.0" />). Essas credenciais são usadas para verificar se uma máquina ou serviço está autorizado a acessar outra máquina ou recurso.
+
+Por exemplo, quando um aplicativo móvel se comunica com um servidor em nuvem para recuperar dados do usuário, o servidor autentica o aplicativo usando uma chave de API ou token para confirmar que é um cliente legítimo. Da mesma forma, em IoT, dispositivos como termostatos inteligentes ou wearables se autenticam com seus sistemas de controle ou servidores de dados usando certificados ou tokens seguros.
+
+A autenticação M2M é importante para garantir a segurança dos dados e a confiança em sistemas automatizados, especialmente em ambientes onde informações sensíveis são trocadas.
+
+## Quais são as melhores práticas e princípios chave para implementar autenticação (AuthN)?
+
+Implementar recursos de autenticação requer foco em princípios chave. Usar protocolos confiáveis como OAuth 2.0 ou OpenID Connect e criptografar dados sensíveis é altamente recomendado. Além disso, oferecer opções como logins sociais, métodos sem senha, como passkeys, e suporte para vários métodos de autenticação—como nome de usuário/senha, biometria ou SSO—ajuda o sistema a atender às diversas necessidades dos usuários.
+
+## Autenticação (AuthN) em OIDC, SAML e OAuth 2.0
+
+Em vez de construir um sistema de autenticação próprio, é recomendado usar frameworks e protocolos estabelecidos, pois eles foram testados e revisados por especialistas em segurança. Existem vários frameworks e protocolos de autenticação que definem como a autenticação deve ser realizada. Dois comuns são:
+
+- <Ref slug="openid-connect" />: Uma camada de identidade construída sobre o <Ref slug="oauth-2.0" /> que adiciona capacidades de autenticação. É relativamente moderno e amplamente utilizado para novos aplicativos.
+- <Ref slug="saml" />: Um protocolo para troca de dados de autenticação e autorização entre partes. É comumente usado em ambientes empresariais.
+
+A escolha do framework depende do seu caso de uso e requisitos. Para novos aplicativos, OIDC é recomendado devido ao seu design moderno e suporte para <Ref slug="jwt" />.
+
+No entanto, trabalhar diretamente com esses protocolos ainda pode ser complexo e demorado. Ambos os protocolos têm curvas de aprendizado acentuadas e requerem implementação cuidadosa para garantir a segurança. Em vez disso, usar um <Ref slug="identity-provider" /> que suporte ou seja construído sobre esses protocolos pode simplificar muito o processo de autenticação. Um bom provedor de identidade também fornecerá recursos adicionais como <Ref slug="mfa" /> e <Ref slug="single-sign-on" /> para suas necessidades futuras.
+
+## Quais são as diferenças entre AuthZ e AuthN?
+
+Ao discutir AuthN, AuthZ naturalmente entra na conversa. Autenticação (AuthN) confirma a identidade, respondendo "Quem é você?" através de credenciais como senhas ou biometria. Autorização (AuthZ) determina "O que você pode fazer?" concedendo ou negando acesso com base em papéis ou políticas. AuthN vem primeiro para verificar a identidade, seguido por AuthZ para gerenciar permissões.
+
+Aqui está um exemplo, quando você faz login na sua conta de e-mail com seu nome de usuário e senha, isso é **Autenticação (AuthN)**—provando quem você é. Uma vez logado, o sistema decide se você pode ler seus e-mails, enviar mensagens ou acessar configurações de administrador com base no seu papel. Isso é **Autorização (AuthZ)**—definindo o que você tem permissão para fazer.
 
 <SeeAlso slugs={["authorization", "access-control", "openid-connect"]} />
 
