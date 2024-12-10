@@ -1,16 +1,16 @@
 ---
-title: What is Authentication (AuthN)?
+title: Authentication (AuthN)
 tags: [authentication]
 description: Authentication is the process of verifying the identity ownership (e.g. user or service). It is the foundation of identity and access management (IAM) systems and is essential for securing applications and services.
 ---
 
 ## What is authentication (AuthN)?
 
-**AuthN** stands for authentication, a mechanism built into software to identify a user based on their credentials before granting access to resources. For example, the most common login method involves an email and password. The system uses these credentials to verify whether the user has the correct identity to access it.
+**Authentication (AuthN)** stands for authentication, a mechanism built into software to identify a user based on their credentials before granting access to resources. For example, the most common login method involves an email and password. The system uses these credentials to verify whether the user has the correct identity to access it.
 
-In the context of <Ref slug=“iam” />, authentication is about verifying the ownership of an identity rather than identifying the person or entity behind it. For instance, if a family member uses your credentials to log in, they are not you, but the system recognizes them as the same identity.
+In the context of <Ref slug="iam" />, authentication is about verifying the ownership of an identity rather than identifying the person or entity behind it. For instance, if a family member uses your credentials to log in, they are not you, but the system recognizes them as the same identity.
 
-An identity can not only represent a user, but also a service, or a device. For example, one service may authenticate itself to another using <Ref slug=“api-key” />. 
+An identity can not only represent a user, but also a service, or a device. For example, one service may authenticate itself to another using <Ref slug="api-key" />. 
 
 As technology evolves, authentication methods have become more advanced and multi-disciplinary. While the term might sound technical, tt is a key concept in cybersecurity, as all applications and software rely on authentication to ensure secure user information and their access to a system.
 
@@ -24,9 +24,9 @@ As technology evolves, authentication methods have become more advanced and mult
 
 Here are two examples:
 
-<Ref slug=“mfa” /> is a common practice that combines multiple factors to increase security. For example, when you sign in to your bank account, you may need to provide a password (knowledge factor) and a one-time code from an authenticator app (possession factor).
+<Ref slug="mfa" /> is a common practice that combines multiple factors to increase security. For example, when you sign in to your bank account, you may need to provide a password (knowledge factor) and a one-time code from an authenticator app (possession factor).
 
-<Ref slug=“passkey” /> is a modern authentication factor that can combine multiple factors and is resistant to phishing attacks.
+<Ref slug="passkey" /> is a modern authentication factor that can combine multiple factors and is resistant to phishing attacks.
 
 ## What are common types of authentication (AuthN)?
 After covering the key components and authentication factors, let’s move on to authentication types. Systems and products use various authentication methods, and these methods may overlap in their definitions and how users understand them. When selecting authentication methods, focus on your product’s needs and aim to balance user experience with security.
@@ -43,7 +43,7 @@ Despite its challenges, email and password authentication remains a foundational
 
 ### Passwordless authentication
 
- v authentication can be understood in different ways. Broadly, it refers to any user authentication method that doesn’t rely on passwords. **Passwordless authentication** is a method of verifying a user’s identity without requiring traditional passwords. Instead, it relies on alternative technologies and factors to authenticate users securely. These methods include <Ref slug=“otp” /> sent via email or SMS or authenticator app, biometric authentication like fingerprints or facial recognition, magic links sent to the user’s email, passkeys stored on a device, or social sign-ins using accounts from providers like Google or Facebook.
+ v authentication can be understood in different ways. Broadly, it refers to any user authentication method that doesn’t rely on passwords. **Passwordless authentication** is a method of verifying a user’s identity without requiring traditional passwords. Instead, it relies on alternative technologies and factors to authenticate users securely. These methods include <Ref slug="otp" /> sent via email or SMS or authenticator app, biometric authentication like fingerprints or facial recognition, magic links sent to the user’s email, passkeys stored on a device, or social sign-ins using accounts from providers like Google or Facebook.
 
 This approach improves security by reducing risks associated with passwords, such as phishing, brute-force attacks, and breaches. It also enhances the user experience by getting rid of the need to remember and manage passwords, while lowering maintenance costs by reducing password reset requests. 
 
@@ -53,11 +53,11 @@ This approach improves security by reducing risks associated with passwords, suc
 
 When a user selects a social login option, they are redirected to the chosen platform to confirm their credentials. Once authenticated, the platform provides the application with a token or user information, such as name, email address, or profile picture, to verify their identity. This process is secure and often simplifies the login experience for users.
 
-Social authentication reduces friction for users, improves security by leveraging <Ref slug=“identity-provider” />’s infrastructure, and allows applications to gather verified user data quickly. It is especially popular in applications where ease of access and integration with social platforms are priorities.
+Social authentication reduces friction for users, improves security by leveraging <Ref slug="identity-provider" />’s infrastructure, and allows applications to gather verified user data quickly. It is especially popular in applications where ease of access and integration with social platforms are priorities.
 
 ### Multi-factor authentication
 
-<Ref slug=“mfa” /> is a security process that requires a user to verify their identity using two or more distinct authentication factors. These factors typically fall into three categories, like the authentication factors we mentioned above:
+<Ref slug="mfa" /> is a security process that requires a user to verify their identity using two or more distinct authentication factors. These factors typically fall into three categories, like the authentication factors we mentioned above:
 something you know, something you have, and something you are.
 
 By combining multiple factors, MFA significantly enhances security. Even if one factor, such as a password, is compromised, the additional layer(s) of verification makes it much harder for unauthorized users to gain access.
@@ -74,7 +74,7 @@ This method is convenient because users don’t need to remember passwords or ca
 
 ### Enterprise single sign-On (SSO) with an identity provider (IdP)
 
-<Ref slug=“enterprise-sso” /> with an <Ref slug=“identity-provider” /> allows users to log in once and access multiple applications or services without needing to reauthenticate. The IdP is a trusted service that manages user identities and handles authentication.
+<Ref slug="enterprise-sso" /> with an <Ref slug="identity-provider" /> allows users to log in once and access multiple applications or services without needing to reauthenticate. The IdP is a trusted service that manages user identities and handles authentication.
 
 Here’s how it works:
 	1.	The user logs in through the IdP (e.g., Google, or Azure AD).
@@ -85,9 +85,9 @@ This setup simplifies user access while centralizing identity management for sec
 
 ### Machine-to-machine authentication
 
-<Ref slug=“machine-to-machine” /> authentication is a process that verifies the identity of devices, applications, or services communicating with each other without human involvement. It ensures secure interactions between machines, often in IoT (Internet of Things) environments, APIs, or cloud-based services.
+<Ref slug="machine-to-machine" /> authentication is a process that verifies the identity of devices, applications, or services communicating with each other without human involvement. It ensures secure interactions between machines, often in IoT (Internet of Things) environments, APIs, or cloud-based services.
 
-In M2M authentication, instead of using usernames and passwords like traditional user authentication, machines rely on secure credentials such as API keys, certificates, or tokens (e.g.,<Ref slug=“oauth-2.0” /> ). These credentials are used to verify that a machine or service is authorized to access another machine or resource.
+In M2M authentication, instead of using usernames and passwords like traditional user authentication, machines rely on secure credentials such as API keys, certificates, or tokens (e.g.,<Ref slug="oauth-2.0" /> ). These credentials are used to verify that a machine or service is authorized to access another machine or resource.
 
 For example, when a mobile app communicates with a cloud server to retrieve user data, the server authenticates the app using an API key or token to confirm it is a legitimate client. Similarly, in IoT, devices like smart thermostats or wearables authenticate with their control systems or data servers using certificates or secure tokens.
 
