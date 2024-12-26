@@ -1,8 +1,6 @@
 ---
 import { defaultLocale } from "astro-i18n-aut";
 import type { CollectionEntry } from "astro:content";
-import { getPhrases } from "../phrases";
-import { getLocaleFromUrl } from "../utils/locale";
 
 type Props = {
   entry: CollectionEntry<"terms">;
@@ -15,19 +13,15 @@ const {
 const slug = rawSlug.startsWith(`${defaultLocale}/`)
   ? rawSlug.slice(defaultLocale.length + 1)
   : rawSlug;
-const locale = getLocaleFromUrl(Astro.url);
-const phrases = getPhrases(locale);
 ---
 
 <section>
   <h3>
-    {title}
+    <a href={`/${slug}`}> {title}</a>
   </h3>
   <p>
     {description}
   </p>
-  <hr />
-  <a href={`/${slug}`}>{phrases.general.learn_more}</a>
 </section>
 
 <style>
@@ -67,20 +61,12 @@ const phrases = getPhrases(locale);
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  hr {
-    margin-block: 4px;
-    border: none;
-    height: 1px;
-    width: 100%;
-    background-color: #e5e1ec;
-  }
   a {
-    color: #ad4ffc;
-    font-size: 16px;
-    font-weight: 500;
+    color: var(--color-text);
     text-decoration: none;
   }
   a:hover {
+    color: #ad4ffc;
     text-decoration: underline;
   }
   @media (max-width: 810px) {
@@ -105,7 +91,7 @@ const phrases = getPhrases(locale);
     hr {
       background-color: rgba(255, 255, 255, 0.08);
     }
-    a {
+    a:hover {
       color: var(--color-link);
     }
   }
