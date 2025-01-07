@@ -1,72 +1,82 @@
 ---
 title: Implicit flow
 tags: [oauth 2.0, oidc]
-description: The OIDC implicit flow is a authentication method for SPAs, enabling them to quickly receive tokens directly from the authorization server. While it simplifies the process by eliminating the need for a backend server, it comes with lower security due to token exposure in the URL.
+description: Implicit flow is an authentication method that allows client-only applications (like SPAs and native apps) to receive tokens directly through URL fragments from the authorization server without providing a client secret.
 ---
 
-## What is implicit flow
+## What is implicit flow?
 
-The OIDC (OpenID Connect) implicit flow is an authentication process mainly used by client applications implemented in a browser using a scripting language, e.g., single-page applications (SPAs). It allows client applications to directly obtain ID tokens and access tokens from the authorization server without performing the client authentication.
+The OAuth 2.0 implicit flow is an authentication method that allows client-only applications (like SPAs and native apps) to receive tokens directly through URL fragments from the authorization server without providing a client secret.
+
+Implicit flow is designed for client-only applications, because they run completely in the browser or on the user's device and cannot safely store client secrets.
+
+Implicit flow has been officially deprecated in <Ref slug="oauth-2.1" /> for the security reasons (will be mentioned below). Client-only applications should now use the <Ref slug="authorization-code-flow" /> with the <Ref slug="pkce" /> extension instead.
 
 ## How does implicit flow work?
 
 The main steps of the implicit flow are as follows:
 
-1. **Sending authentication request**: The user initiates the flow by typically clicking a link or button in the application to sign in. The application sends an authentication request to authorization server's authorization endpoint. Authorization server validates the parameters and redirects the user to authenticate on the authorization server's sign-in page.
-2. **User authentication**: The user authenticates on the authorization server (e.g., by entering username and password).
-3. **Authorization server responds**: The authorization server returns an ID token and, if requested, an access token to the client application as URL fragment.
-4. **Client processes tokens**: The client application extracts the tokens from the URL fragment.
-
 ```mermaid
 sequenceDiagram
-participant User
-participant Application
-participant Authorization Server
-User->>Application: Initiate sign-in flow
-Application->>Authorization Server: Request authorization server with client ID, scope, redirect URI, and state
-Authorization Server->>User: Redirect user to sign-in page and prompt for authentication
-User->>Authorization Server: Authenticate (e.g., enter username and password)
-Authorization Server -->>Application: Return ID token and access token in URL fragment
-Application->>Application: Extract tokens from URL fragment
+  participant U as User
+  participant C as Client
+  participant AS as Authorization Server
+  participant RS as Resource Server
+
+  U->>C: Click sign in
+  C->>AS: Authorization Request<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: Show login page
+  U->>AS: Enter credentials
+  AS-->>C: Return token in URL fragment
+  C->>C: Extract token from fragment
+  C->>RS: API request with token
+  RS-->>C: Protected resource response
 ```
 
-### Authentication request
+Notice:
 
-Request parameters are as follows:
-- **client_id**: REQUIRED. Valid OAuth 2.0 client identifier, which is available in Logto as the application ID (or app ID).
-- **scope**: REQUIRED. This value specifies a set of resources the user is requesting from the authorization server. E.g., `openid profile email`
-- **response_type**: REQUIRED. The value is either `id_token` or `id_token token`. No access token is returned when the value is `id_token`.
-- **redirect_uri**: REQUIRED. The URI to which the authentication response will be sent, and should exactly match the redirect URI the client pre-registered at the <Ref slug="openid-connect" headingId="openid-provider-op" />. E.g., `Sign-in redirect URI` in Logto Admin Console.
-- **nonce**: REQUIRED. A random string used to mitigate replay attacks, which is passed through unmodified from the authentication request to the ID token claim.
+- The client only needs to provide a `client_id` in the authorization request, without requiring a `client_secret`.  
+  This is because these clients cannot securely store secrets, so this flow does not require a client secret.
 
-### Example of an authentication request
+- The `response_type` parameter is set to `token`, instructing the authorization server to return the access token directly instead of an authorization code.  
+  In OIDC (<Ref slug="openid-connect" />), the `response_type` is either `id_token` or `id_token token`, and the auth service will return the corresponding tokens based on different response types.
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- The token is returned directly in the URL fragment. This means the token is exposed in the URL and can be easily accessed by other applications or scripts.
 
-## Limitations
+## Is implicit flow secure?
 
-The implicit flow was developed in a time when browsers did not widespreadly adopt Cross-Origin Resource Sharing (CORS). Therefore, sending POST requests to authorization server hosted on a different domain is prohibited.
+No, the implicit flow in OAuth 2.0 is generally considered less secure than other flows like the authorization code flow.
 
-Due to this limitation, authorization server directly returns the tokens in the URL fragment, which may expose them to the end-user and applications that have access to the end-user's User Agent.
+It's not recommended for most use cases due to several vulnerabilities:
 
-Moreover, the client authentication is not performed in implicit flow, meaning that any application can pretend to be the that client requesting for authentication, as client ID is always exposed in browser based applications.
+- **Token exposure in URL**
+   - Access tokens appear directly in the browser's URL (after the # symbol)
+   - These tokens can be:
+     - Saved in browser history
+     - Leaked through referrer headers
+     - Captured by malicious JavaScript code on the same page
 
-Due to the limitations above, implicit flow is usually considered less secure than Authorization Code Flow.
+- **No client authentication**
+   - The client application doesn't need to prove its identity
+   - This means anyone who knows the `client_id` can pretend to be a legitimate client
 
-## Alternatives to implicit flow
+- **No refresh tokens**
+   - This flow doesn't support refresh tokens
+   - Users must log in again when access tokens expire
+   - To avoid frequent logins, users might store tokens in unsafe ways
 
-Given the security limitations of the implicit flow, other flows are often recommended:
-- **Authorization Code Flow**: This flow involves an additional step where the client exchanges an authorization code for tokens, providing an extra layer of security.
-- **PKCE (Proof Key for Code Exchange)**: An extension to the Authorization Code Flow that adds an additional layer of security by using a code verifier and code challenge.
+- **Vulnerable to XSS attacks**
+   - All tokens are handled in the browser
+   - If the website suffers from an XSS attack (Cross-Site Scripting)
+   - Attackers' JavaScript code can easily steal these tokens
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+Due to these security concerns, implicit flow has been deprecated in <Ref slug="oauth-2.1" />. Client-only applications should now use the <Ref slug="authorization-code-flow" /> with the <Ref slug="pkce" /> extension instead.
+
+You can check out [What is PKCE: from basic concepts to deep understanding](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) to learn how PKCE protects the authorization code flow for client-only applications.
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ Given the security limitations of the implicit flow, other flows are often recom
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript."
-      }
+        ogDescription:
+          "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript.",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />
