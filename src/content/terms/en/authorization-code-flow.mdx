@@ -6,9 +6,11 @@ description: The authorization code flow is a secure OAuth 2.0 mechanism that en
 
 ## What is authorization code flow?
 
-The authorization code flow (a.k.a authorization code grant), defined in [OAuth 2.0 RFC 6749, section 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), is a widely used OAuth 2.0 authorization mechanism that allows applications to obtain an access token on behalf of a user. This flow is particularly suitable for confidential applications (e.g. Traditional server-side running web applications) where the client secret can be securely stored. 
+The authorization code flow (a.k.a authorization code grant), defined in [OAuth 2.0 RFC 6749, section 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), is a widely used OAuth 2.0 authorization mechanism that allows applications to obtain an access token on behalf of a user.
 
-Authorization code flow is a robust and secure method for obtaining access tokens in OAuth 2.0, making it a preferred choice for many web applications. Understanding this flow is essential for developers working with OAuth 2.0 and API integrations.
+This flow is ideal for confidential applications like traditional server-side web apps that can safely store client secrets.
+
+It can also be used securely for native apps and Single Page Applications (SPAs) that cannot securely store client secrets when combined with PKCE (<Ref slug="pkce" />) extension.
 
 ## How does authorization code flow work?
 
@@ -37,74 +39,138 @@ sequenceDiagram
     Authorization Server->>Application: Issue access token (and optionally refresh token)
 ```
 
-## Authentication request
+## How to implement authorization code flow?
 
-Request parameters are as follows:
+Here's a simple example of implementing the authorization code flow, following the guidelines outlined in [OAuth 2.0 RFC 6749, section 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1):
 
-- **client_id**: REQUIRED. Valid OAuth 2.0 client identifier.
-- **scope**: REQUIRED. This value specifies a set of resources the user is requesting from the authorization server. E.g., `openid profile email`.
-- **response_type**: REQUIRED. The value must be `code` to indicate that the application expects an authorization code.
-- **redirect_uri**: REQUIRED. The URI to which the authentication response will be sent, and should exactly match the redirect URI the client pre-registered at the authorization server.
-- **state**: RECOMMENDED. An opaque value used to maintain state between the request and callback. It is also used to prevent <Ref slug="csrf" /> attacks.
-- **nonce**: OPTIONAL. A random string used to associate a client session with an ID token and to mitigate replay attacks.
-- **prompt**: OPTIONAL. Space-delimited, case-sensitive list of string values that specifies whether the authorization server prompts the end-user for re-authentication and consent. The defined values are:
-  - **none**: The authorization server MUST NOT display any authentication or consent user interface pages. An error is returned if an end-user is not already authenticated or the client does not have pre-configured consent for the requested Claims or does not fulfill other conditions for processing the request. The error code will typically be `login_required`, `interaction_required`. This can be used as a method to check for existing authentication and/or consent.
-  - **login**: The authorization server SHOULD prompt the end-user for reauthentication. If it cannot reauthenticate the end-user, it MUST return an error, typically `login_required`.
-  - **consent**: The authorization server SHOULD prompt the end-user for consent before returning information to the client. If it cannot obtain consent, it MUST return an error, typically `consent_required`.
-  - **select_account**: The authorization server SHOULD prompt the end-user to select a user account. This enables an end-user who has multiple accounts at the authorization server to select amongst the multiple accounts that they might have current sessions for. If it cannot obtain an account selection choice made by the end-user, it MUST return an error, typically `account_selection_required`.
+### 1. Initial setup
 
-[Full request parameter definition](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)
+Ensure you have the following information from your auth service before you start:
 
-### Authentication request example
-
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=code" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "state=RANDOM_STRING_FOR_STATE"
+```javascript
+const config = {
+  clientId: "YOUR_CLIENT_ID",
+  clientSecret: "YOUR_CLIENT_SECRET",
+  authorizationEndpoint: "https://authorization-server.com/auth",
+  tokenEndpoint: "https://authorization-server.com/token",
+  redirectUri: "http://localhost:3000/callback",
+};
 ```
 
-A typical successful response:
+Client ID, client secret, and redirect URI are your application's configuration in the auth service.
 
-```http
-HTTP/1.1 302 Found
-Location: https://yourapp.com/callback?
-  code=YOUR_AUTHORIZATION_CODE
-  &state=RANDOM_STRING_FOR_STATE
+The `authorizationEndpoint` and `tokenEndpoint` are provided by your auth service.
+
+If your auth server implements OIDC (<Ref slug="openid-connect" />), you can get this information through <Ref slug="openid-connect-discovery" />.
+
+### 2. Initiate authorization request
+
+The flow starts when a user wants to log in (for example, by clicking a login button). The application will make a login request.
+
+This request includes parameters like `client ID`, `redirect URI`, and `scope`. Then it redirects the user to the auth service's authorization endpoint (the auth service's login page).
+
+The user will authenticate and authorize on this login page.
+
+```javascript
+app.get("/login", (req, res) => {
+  const authUrl = new URL(config.authorizationEndpoint);
+  authUrl.searchParams.append("response_type", "code");
+  authUrl.searchParams.append("client_id", config.clientId);
+  authUrl.searchParams.append("redirect_uri", config.redirectUri);
+  authUrl.searchParams.append("scope", "openid profile email");
+  authUrl.searchParams.append("state", "random_state_string");
+
+  res.redirect(authUrl.toString());
+});
 ```
 
-## Token exchange request
+Note: You can add more parameters beyond those shown in the example code. See [Full authentication request parameter definition](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
 
-Once the above authentication request is successfully responded, the client will be automatically redirected to the callback URI `https://yourapp.com/callback`, with the code as a URI parameter.
+### 3. Handle redirect URI callback and token exchange
 
-The client is expected to obtain and process the `code` with a subsequent token exchange request, in order to exchange for the access tooken.
+After the user completes authentication and authorization on the auth service's login page, the auth service redirects the user back to the application's redirect URI. This redirect URI includes the authorization code and state parameters.
 
-### Token exchange request example
+The application extracts the authorization code and state parameters from the redirect URI and exchanges them for access and refresh tokens (if any) at the auth service's token endpoint.
 
-```bash
-curl -X POST "https://authorization-server.com/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "code=YOUR_AUTHORIZATION_CODE" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "grant_type=authorization_code" \
+```javascript
+app.get("/callback", async (req, res) => {
+  const { code, state } = req.query;
+
+  try {
+    // Exchange the authorization code for an access token and refresh token
+    const tokenResponse = await axios.post(config.tokenEndpoint, {
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: config.redirectUri,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+    });
+
+    const { access_token, refresh_token } = tokenResponse.data;
+    // Store tokens for subsequent requests
+    req.session.accessToken = access_token;
+
+    res.send("Authentication successful!");
+  } catch (error) {
+    res.status(500).send("Token exchange failed");
+  }
+});
 ```
 
-## Benefits
+### 4. Use access token
 
-- **Enhanced security**: The client secret is never exposed to the user's browser, reducing the risk of client impersonation.
-- **One-time authorization code**: The authorization code has a short lifespan and can only be used once, reducing the risk of interception and replay attacks.
-- **Short-lived tokens**: Access tokens issued in this flow are short-lived (typically 1 hour), reducing the risk of unauthorized access if the token is compromised.
-- **Refresh token**: The authorization server can optionally issue a refresh token, allowing the application to obtain a new access token without requiring user interaction.
+Once you have the token, use it to access protected resources:
+
+```javascript
+async function fetchUserProfile(accessToken) {
+  const response = await axios.get("https://api.example.com/userinfo", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+```
+
+## How to use authorization code flow for public clients (native apps and SPAs)?
+
+Public clients (like native apps and SPAs) face unique security challenges when using the authorization code flow. These applications cannot securely store client secrets. The client secret would be exposed in JavaScript code or within the device's storage. This makes it easy for attackers to extract and misuse the secret.
+
+Therefore, the key challenge is how to use the authorization code flow securely without a client secret. The OAuth 2.0 specification introduced PKCE (<Ref slug="pkce" />) extension to solve this problem.
+
+PKCE adds additional security measures to protect the authorization code flow for public clients. It prevents authorization code interception attacks even without using a client secret. Check out this blog to learn more about [How PKCE secures OAuth 2.0 authorization code flow](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps).
+
+## How to use authorization code flow securely?
+
+### **Using "state" to Prevent CSRF Attacks**
+
+CSRF (<Ref slug="csrf" />) attacks trick users into performing unwanted actions in an authenticated web application. The state parameter helps prevent this.
+
+- Generate a unique, random value. Store this value server-side.
+- Include the state parameter. Append it to the authorization request URL.
+- Verify the state upon return. When the authorization server redirects back to your app, compare the returned state with the stored value. If they don't match, reject the request. This confirms the request originated from your application.
+
+### **Configuring secure redirect URIs**
+
+The redirect URI is where the authorization server sends the authorization code after user authentication. Secure configuration is crucial.
+
+- Register valid redirect URIs. During app registration with the authorization server, specify the allowed redirect URIs.
+- Exact matching. The redirect URI in the authorization request must exactly match a registered URI. Even a slight difference can create a vulnerability.
+- Avoid wildcard URIs. If possible, avoid using wildcard URIs in production. They broaden the attack surface.
+- HTTPS for production. Always use HTTPS for redirect URIs in production environments.
+
+### **Using PKCE for all clients**
+
+While PKCE was originally designed for public clients, <Ref slug="oauth-2.1" /> specification requires PKCE to be enforced for all clients, including confidential clients, to enhance the overall security of the authorization code flow. (See [Enforce PKCE for all clients](https://auth.wiki/oauth-2.1#enforcing-pkce-for-all-clients))
 
 ## What is the difference between authorization code flow and implicit flow?
 
 The main difference between the authorization code flow and the implicit flow is how the access token is obtained:
 
 - **Authorization code flow**: The client application receives an authorization code first from the authorization endpoint, then exchanges it for an access token in a subsequent POST request to the token endpoint.
-- **Implicit flow**: The client application receives the access token directly from the authorization endpoint.
+- **Implicit flow**: The client application receives the access token directly in the URL fragment of the redirect URI after user authorization.
+
+Learn more about <Ref slug="implicit-flow" />.
 
 ## What is the difference between authorization code flow and client credentials flow?
 
@@ -113,11 +179,23 @@ The main difference between the authorization code flow and the client credentia
 - **Authorization code flow**: Used when the client application needs to access resources on behalf of a user. The flow involves user authentication and authorization.
 - **Client credentials flow**: Used when the client application needs to access resources on its own behalf. The flow involves client authentication but not user authentication, best suited for machine-to-machine communication.
 
-## What are the typical use cases for the authorization code flow?
+Learn more about <Ref slug="client-credentials-flow" />.
 
-- Traditional web applications that require user authentication and access to APIs.
-- Applications that need to access user data from third-party services securely.
+<SeeAlso
+  slugs={[
+    "device-flow",
+    "implicit-flow",
+    "client-credentials-flow",
+    "pkce",
+    "openid-connect",
+    "openid-connect-discovery",
+    "csrf",
+    "oauth-2.1",
+  ]}
+/>
 
-<SeeAlso slugs={['device-flow', 'implicit-flow', 'client-credentials-flow']} />
-
-<Resources urls={['https://datatracker.ietf.org/doc/html/rfc6749']} />
+<Resources urls={[
+  "https://datatracker.ietf.org/doc/html/rfc6749",
+  "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
+  "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps"
+]} />
