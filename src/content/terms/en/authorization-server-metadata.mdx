@@ -1,0 +1,96 @@
+---
+title: Authorization Server Metadata
+tags: [oauth 2.0, oidc]
+description: OAuth 2.0 Authorization Server Metadata is a standardized format that enables OAuth 2.0 clients to automatically discover and obtain information needed to interact with OAuth 2.0 authorization servers, including endpoint locations and server capabilities.
+---
+
+## What is OAuth 2.0 Authorization Server Metadata?
+
+OAuth 2.0 Authorization Server Metadata is a standardized format defined in [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) that enables OAuth 2.0 clients to automatically discover and obtain information needed to interact with OAuth 2.0 authorization servers.
+
+This includes essential information such as endpoint locations, supported features, and server capabilities.
+
+The metadata format provides a machine-readable configuration document that helps streamline the integration process between clients and authorization servers, reducing the need for manual configuration.
+
+## How does OAuth 2.0 Authorization Server Metadata work?
+
+In the OAuth 2.0 ecosystem, there are several key roles:
+- <Ref slug="authorization-server"/>: Issues access tokens to clients after successfully authenticating the resource owner
+- <Ref slug="client"/>: Application requesting access to protected resources
+- <Ref slug="resource-owner"/>: Entity capable of granting access to protected resources
+- <Ref slug="resource-server"/>: Server hosting protected resources
+
+The Authorization Server Metadata provides a standardized way for clients to discover and understand how to interact with the authorization server. Here's how it works:
+
+1. The client knows or discovers the authorization server's issuer URL
+2. The client constructs the metadata URL by appending `/.well-known/oauth-authorization-server` to the issuer URL
+3. The client retrieves the metadata document containing server configuration
+4. The client uses the retrieved metadata (endpoints, supported features, etc.) to properly configure itself and interact with the authorization server
+
+For example, if the issuer URL is `https://auth.example.com`, the metadata would be available at:
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+The metadata document includes important information such as:
+- `issuer`: The authorization server's identifier
+- `authorization_endpoint`: The authorization endpoint URL
+- `token_endpoint`: The token endpoint URL
+- `scopes_supported`: Available scopes
+- `response_types_supported`: Supported response types
+- `token_endpoint_auth_methods_supported`: Supported client authentication methods
+
+For a complete list of metadata fields, please refer to [RFC 8414 Section 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2).
+
+With these metadata values, clients can automatically configure and execute the OAuth 2.0 flow:
+
+1. **Initial setup**:
+   - Client validates the `issuer` matches the expected authorization server
+   - Client checks `response_types_supported` to ensure its flow type (e.g., `code`) is supported
+
+2. **Authorization request**:
+   - Client uses `authorization_endpoint` to construct the authorization URL
+   - Client selects appropriate scopes from `scopes_supported` based on its needs
+   - Example: `https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **Token exchange**:
+   - After receiving the authorization code, client uses `token_endpoint` for token exchange
+   - Client checks `token_endpoint_auth_methods_supported` to determine how to authenticate (e.g., `client_secret_basic`)
+   - Example: Send POST request to token endpoint with client credentials and authorization code
+
+This basic flow helps clients automatically configure themselves and interact with the authorization server without manual endpoint configuration or trial-and-error scope selection.
+
+## What is the difference between OAuth 2.0 Authorization Server Metadata and OpenID Connect Discovery?
+
+The main differences are:
+
+1. **Scope and Purpose**:
+   - OAuth 2.0 Authorization Server Metadata focuses specifically on OAuth 2.0 protocol configuration
+   - <Ref slug="openid-connect-discovery"/> includes additional parameters for identity-related features, such as:
+     - `userinfo_endpoint`: Endpoint for retrieving user information
+     - `id_token_signing_alg_values_supported`: Supported signing algorithms for ID Tokens
+     - `claims_supported`: Available user claims that can be returned in ID Token or from UserInfo Endpoint
+     - Supports `openid` scope for authentication
+     - Includes hybrid flow response types (e.g., `code id_token`, `code id_token token`)
+
+
+2. **Metadata Endpoint**:
+   - OAuth 2.0 uses `/.well-known/oauth-authorization-server`
+   - OpenID Connect uses `/.well-known/openid-configuration`
+
+## Does OAuth 2.0 Authorization Server Metadata comply with OpenID Connect Discovery?
+
+Yes, OAuth 2.0 Authorization Server Metadata is compatible with <Ref slug="openid-connect-discovery"/>.
+
+The OAuth 2.0 metadata specification (RFC 8414) was inspired by OpenID Connect Discovery 1.0, which was already widely adopted in practice.
+
+Key points about compliance:
+1. The metadata format follows the same JSON structure
+2. Authorization servers can support both endpoints simultaneously
+3. OpenID Providers typically expose both endpoints for backward compatibility
+4. The OAuth 2.0 metadata can be extended with OpenID Connect-specific fields when needed
+
+This compatibility ensures that authorization servers can serve both pure OAuth 2.0 clients and OpenID Connect relying parties without conflicts.
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>
