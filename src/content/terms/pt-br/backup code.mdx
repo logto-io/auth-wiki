@@ -1,0 +1,119 @@
+---
+title: Código de backup
+tags: [authentication, MFA]
+description: Um código de backup (também chamado de código de recuperação) é um conjunto de códigos gerados aleatoriamente, de uso único, que servem como método de autenticação de fallback quando suas opções principais de MFA — como SMS, aplicativos autenticadores ou passkeys — não estão disponíveis.
+---
+
+## O que é um código de backup?
+
+Um código de backup (também chamado de código de recuperação) é um conjunto de códigos gerados aleatoriamente, de uso único, que servem como método de autenticação de fallback quando suas opções principais de MFA — como SMS, aplicativos autenticadores ou passkeys — não estão disponíveis. Pense neles como chaves de emergência que garantem que você sempre possa acessar sua conta, mesmo se perder seu telefone, enfrentar problemas de rede ou encontrar falhas técnicas.
+
+## Como funciona um código de backup?
+
+Os códigos de backup fornecem uma maneira simples, mas segura, de recuperar o acesso à sua conta quando os métodos padrão de MFA falham. Veja como eles funcionam:
+
+1. **Geração**: O sistema cria um conjunto único de códigos (normalmente de 8 a 12 caracteres cada) durante a configuração do MFA.
+2. **Armazenamento**: Você é solicitado a salvar esses códigos de forma segura — seja offline (por exemplo, impresso em papel) ou em um gerenciador de senhas criptografado.
+3. **Uso**: Se você não puder usar seu método principal de MFA, insira um de seus códigos de backup para autenticar.
+4. **Invalidação**: Cada código é automaticamente desativado após o uso para evitar reutilização.
+
+```mermaid
+sequenceDiagram
+  participant Usuário
+  participant App
+  participant SistemaAuth
+  participant DB
+
+  Usuário->>App: Tenta fazer login
+  App->>SistemaAuth: Solicita autenticação
+  SistemaAuth-->>Usuário: Solicita senha e 2FA (por exemplo, OTP)
+  Usuário->>SistemaAuth: Insere senha, mas não consegue acessar OTP
+  SistemaAuth-->>Usuário: Oferece opção "Usar código de backup"
+  Usuário->>SistemaAuth: Seleciona método de código de backup
+  SistemaAuth-->>Usuário: Solicita inserção do código de backup
+  Usuário->>SistemaAuth: Insere código de backup
+  SistemaAuth->>DB: Verifica código de backup
+  DB-->>SistemaAuth: Código de backup é válido
+  SistemaAuth->>DB: Marca código de backup como usado
+  SistemaAuth-->>Usuário: Concede acesso
+```
+
+## Quando usar um código de backup?
+
+Os códigos de backup se tornarão obsoletos? O MFA ainda deve suportá-los?
+
+Absolutamente. Os códigos de backup continuam sendo uma rede de segurança crítica para o MFA. Enquanto métodos mais novos, como passkeys e FIDO2, estão ganhando força, os códigos de backup oferecem uma opção de recuperação universalmente acessível e independente de dispositivo. Eles são uma salvaguarda de baixo custo e alto valor e devem sempre ser suportados juntamente com métodos modernos de MFA.
+
+Use um código de backup quando:
+
+- Seu dispositivo principal de MFA não estiver disponível (por exemplo, telefone perdido, bateria descarregada).
+- Problemas de rede impedem a entrega de SMS/e-mail.
+- Seu aplicativo autenticador falha em sincronizar.
+- Seu token de hardware apresenta mau funcionamento.
+
+## Como usar um código de backup com segurança?
+
+Para garantir que seus códigos de backup permaneçam seguros:
+
+1. **Armazene-os offline**
+    - Salve-os em uma pasta criptografada no seu dispositivo.
+    - Imprima-os e armazene-os em um local seguro (por exemplo, um cofre com teclado).
+    - Evite armazená-los em formatos digitais não seguros (por exemplo, aplicativos de notas online).
+2. **Use um gerenciador de senhas**
+    - A maioria dos gerenciadores de senhas (por exemplo, 1Password, LastPass) oferece um recurso de notas seguras.
+        - Crie uma nova entrada: "Códigos de Backup – [Nome do Serviço]"
+        - Copie e cole seus códigos de backup e, em seguida, habilite a criptografia.
+    - Se estiver usando o Gerenciador de Senhas do Google, você pode:
+        - Encontrar a entrada do serviço relevante.
+        - Editá-la e adicionar uma nota para seus códigos de backup, e rotular os códigos como "Usados/Não Usados" para acompanhá-los.
+        - Dessa forma, ao preencher senhas automaticamente, você pode acessar rapidamente seus códigos de backup quando necessário.
+3. **Substitua os códigos usados**
+    - Gere novos códigos se você tiver usado a maioria deles ou suspeitar que foram comprometidos.
+
+## Projetando uma experiência de MFA com códigos de backup
+
+Para desenvolvedores que implementam códigos de backup, siga estas melhores práticas:
+
+1. **Não dependa apenas de códigos de backup**
+Eles são um recurso de emergência, não um método principal de MFA. Sempre ofereça TOTP, passkeys ou outras opções robustas.
+2. **Forneça de 8 a 10 códigos por padrão**
+    
+    Isso equilibra usabilidade (suficiente para emergências raras) e segurança (minimiza o risco de roubo em massa).
+    
+3. **Imponha uso único**
+    
+    Invalide automaticamente os códigos após o uso.
+    
+4. **Regeneração automática de códigos quando esgotados**
+    
+    Evite bloqueios emitindo novos códigos assim que um usuário esgotar seu conjunto atual.
+    
+5. **Permita regeneração manual com verificação rigorosa**
+    
+    Permita que os usuários gerem novos códigos se perderem os seus, mas exija reautenticação (por exemplo, confirmação por e-mail/SMS/senha).
+    
+
+## Códigos de backup vs. Senhas: Qual é a diferença?
+
+| Recurso | Códigos de backup | Senhas |
+| --- | --- | --- |
+| **Propósito** | Recurso de fallback único quando o MFA falha | Método principal de autenticação |
+| **Formato** | Gerado pelo sistema, alfanumérico | Escolhido pelo usuário, geralmente mistura de caracteres |
+| **Armazenamento** | Hash (geralmente sem sal, pois são de uso único) | Hash + sal (para prevenir ataques de tabela arco-íris) |
+| **Uso** | Desativado após um uso | Reutilizável até ser alterado |
+| **Regeneração** | Sistema emite novos conjuntos | Usuário redefine manualmente |
+| **Segurança** | Deve ser armazenado com segurança | Vulnerável se fraco ou reutilizado |
+
+**Notas de segurança importantes:**
+
+- Ambos devem ser longos e gerados aleatoriamente para resistir a ataques de força bruta.
+- Senhas requerem salting porque os usuários frequentemente as reutilizam.
+- Códigos de backup geralmente não precisam de salting — são de uso único e gerados aleatoriamente, tornando explorações em larga escala improváveis.
+
+<Resources
+  urls={[
+    "https://docs.logto.io/end-user-flows/mfa",
+    "https://auth-wiki.logto.io/mfa",
+    "https://auth-wiki.logto.io/totp"
+  ]}
+/>

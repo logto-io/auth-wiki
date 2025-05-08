@@ -1,74 +1,173 @@
 ---
 title: Link mágico (Magic link)
 tags: [authentication]
-description: Link mágico (Magic link) é uma URL de uso único que pode ser usada para completar o processo de autenticação.
+description: Link mágico (Magic link) é uma URL única que pode ser usada para completar o processo de autenticação.
 ---
 
 ## O que são links mágicos (magic links)?
 
-Um link mágico (magic link) é um link de uso único enviado ao usuário durante o processo de autenticação.
+Um link mágico (magic link) é uma URL segura e com tempo limitado que permite a autenticação passwordless tanto para processos de registro quanto de login. Em vez de criar e lembrar senhas, os usuários recebem um link especial por e-mail que lhes concede acesso imediato. Pense nisso como uma chave digital que funciona apenas uma vez - quando você clica, está autenticado, e então essa chave se torna inválida.
 
-Ao acessar este link, o usuário completa o fluxo de autorização (authorization flow) necessário para acessar o recurso desejado e recebe o acesso apropriado aos recursos. Depois disso, o link mágico se torna inválido.
+Por exemplo, quando você se inscreve no Medium ou tenta fazer login no Slack, em vez de configurar ou inserir uma senha, essas plataformas enviam um e-mail com um link seguro. Um clique, e você está autenticado. Essa abordagem ganhou popularidade significativa porque combina segurança com simplicidade.
 
-## Qual é a diferença entre link mágico (magic link) e senha de uso único (OTP)?
+## Como funcionam os links mágicos (magic links)?
 
-Vamos supor que o usuário use o email para receber um link mágico (magic link) ou <Ref slug='otp' />.
-
-Em muitos casos, os usuários usam o email para receber um OTP para verificar o login ou como um fator de verificação adicional para <Ref slug='mfa' />. Qual é a diferença entre usar um link mágico (magic link) por email e um OTP por email?
-
-Com o OTP, o usuário precisa verificar seu email, lembrar o OTP e, em seguida, inseri-lo no processo de login/verificação. Isso requer que o usuário alterne manualmente entre diferentes aplicativos ou páginas repetidamente.
-
-Usando um link mágico (magic link) por email, o usuário só precisa abrir o email contendo o link mágico em seu aplicativo de email e clicar no link. Isso proporciona uma experiência de usuário mais simples.
-
-Além disso, usar um link mágico (magic link) permite a inclusão de informações além de um token de uso único no link, como informações relacionadas à sessão para login. Isso pode melhorar tanto a segurança quanto a experiência do usuário.
-
-## Como funciona o link mágico (magic link)?
-
-Neste diagrama de sequência, ilustramos como um usuário faz login e obtém acesso aos recursos apropriados usando um link mágico (magic link).
-
-Neste diagrama de sequência, assumimos que o link mágico (magic link) é enviado por email. No entanto, existem outros métodos possíveis para enviar um link mágico, como enviá-lo por mensagem de texto para um telefone celular. Essas alternativas não serão abordadas aqui, pois os fluxos são quase os mesmos.
+O processo é simples do ponto de vista do usuário, mas envolve mecanismos de segurança sofisticados nos bastidores. Veja o que acontece durante um fluxo típico de autenticação com link mágico (magic link):
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant U as Usuário
     participant B as Navegador/Cliente
     participant S as Servidor
-    B->>U: 1. Exibir formulário de login
-    U->>B: 2. Preencher formulário de login com nome de usuário/email, etc.
-    B->>S: 3. Enviar formulário de login
-    S-->>S: 4. Encontrar usuário e endereço de email do usuário
-    S-->>U: 5. Enviar email com link mágico
-    U->>B: 6. Acessar o link mágico anexado no email
-    B->>S: 7. Enviar solicitação `GET ${magicLink}`
-    S-->>S: 8. Verificar solicitação
-    S-->>B: 9. Gerar e emitir access token
-    B-->>U: 10. Acesso concedido
+    participant D as Banco de Dados
+    B->>U: Mostrar formulário de auth
+    U->>B: Inserir endereço de e-mail
+    B->>S: Enviar solicitação
+    S->>D: Armazenar token pendente
+    S-->>S: Gerar link mágico
+    S-->>U: Enviar e-mail com link
+    U->>B: Clicar no link mágico
+    B->>S: Enviar token
+    S->>D: Verificar e invalidar token
+    S-->>S: Criar sessão de usuário
+    S-->>B: Retornar informações da sessão
+    B-->>U: Conceder acesso
 ```
 
-1. **Exibir formulário de login**
-O navegador/cliente inicia o processo de autenticação (authentication) exibindo ao usuário um formulário de login.
-2. **Usuário preenche o formulário de login**
-O usuário insere seu identificador, como nome de usuário, endereço de email ou número de telefone, no formulário de login.
-As informações fornecidas precisam ser suficientes para ajudar o sistema a identificar um usuário único. Por exemplo, na maioria dos sistemas, os nomes de usuário usados para login são únicos. Em tais sistemas, os usuários só precisam fornecer seu nome de usuário para ajudar o sistema a identificar exclusivamente a conta que desejam acessar.
-3. **Enviar formulário de login**
-O navegador/cliente envia o formulário para o servidor, contendo as informações do usuário descritas no passo 2.
-4. **Encontrar usuário e email**
-O servidor processa a solicitação localizando o usuário único no banco de dados e recuperando o endereço de email associado ao usuário.
-5. **Enviar email com link mágico**
-O servidor envia um email para o endereço de email do usuário. Este email contém um link mágico para autenticação (authentication).
-6. **Usuário acessa o link mágico**
-O usuário recebe o email e clica no link mágico fornecido dentro dele.
-7. **Enviar solicitação GET com link mágico**
-O navegador/cliente envia uma solicitação `GET` para o servidor, usando a URL do link mágico.
-8. **Verificar solicitação**
-O servidor verifica a solicitação para garantir que o link mágico seja válido, não utilizado e não expirado.
-9. **Gerar e emitir access token**
-Uma vez que a solicitação é verificada, o servidor gera um access token e o emite para o navegador/cliente.
-10. **Conceder acesso**
-O navegador/cliente recebe o access token e permite que o usuário acesse o recurso solicitado.
+## Qual é a estrutura de um link mágico (magic link)?
 
-## Qual é o benefício dos links mágicos (magic links)?
+Um link mágico típico consiste em vários componentes:
 
-Os links mágicos (magic links) melhoram a arquitetura de segurança dos sistemas de autenticação (authentication) ao empregar um modelo de interação baseado em token. Cada link é exclusivamente criptografado e geralmente inclui um carimbo de tempo de expiração. Dada sua natureza efêmera, mesmo que um link mágico seja interceptado ou vazado, sua curta janela de validade limita a oportunidade de exploração maliciosa.
+- URL base da aplicação
+- Endpoint de autenticação
+- Parâmetro de token
+- Parâmetros adicionais (opcional)
 
-Além disso, como o uso de links mágicos requer um método de recebimento controlado pelo usuário, como um endereço de email ou número de telefone confiável, ele fornece um método de verificação adicional além do nome de usuário e senha, oferecendo segurança extra à conta. E como os links mágicos eliminam a necessidade de inserir credenciais, a segurança da conta dos usuários é melhor protegida, e o processo é mais conveniente.
+Por exemplo:
+
+```
+https://app.example.com/verify-auth?token=abc123...&redirect=/dashboard
+```
+
+## Como é gerado o token de um link mágico (magic link)?
+
+Quando um usuário solicita um link mágico (magic link) (por exemplo, clicando em "Entrar com E-mail"), precisamos gerar um token seguro e imprevisível. Este token é crucial, pois essencialmente se torna uma senha temporária.
+
+O token deve ser gerado usando um <Ref slug='csprng' />. Um CSPRNG usa entropia do hardware do seu sistema (como tempo de teclado, movimentos do mouse, ruído do ventilador, etc.) para gerar números verdadeiramente aleatórios que são impossíveis de prever, mesmo que um invasor conheça saídas anteriores.
+
+Por exemplo, em Node.js:
+
+```javascript
+import crypto from "node:crypto";
+
+// Gerar um token aleatório seguro
+const token = crypto.randomBytes(32).toString("base64url");
+// Resultado: algo como 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
+
+// Alternativa usando Web Crypto API (disponível em Node.js e navegadores)
+const buffer = crypto.getRandomValues(new Uint8Array(32));
+const token2 = Buffer.from(buffer).toString("base64url");
+```
+
+Requisitos para um token seguro:
+
+- Gerado via CSPRNG para garantir imprevisibilidade
+- Pelo menos 32 bytes de comprimento (256 bits de entropia)
+- Codificado de forma segura para URL (base64url elimina caracteres problemáticos)
+- Com tempo limitado e uso único para prevenir ataques de repetição
+- Armazenado de forma segura com metadados (expiração, informações do usuário)
+
+## Como garantir a segurança da autenticação com link mágico (magic link)
+
+A segurança do link mágico (magic link) requer uma abordagem abrangente em várias camadas. Enquanto a entrega de e-mails e os padrões de acesso são críticos, o manuseio seguro de tokens permanece o alicerce da segurança do sistema.
+
+### Fundamentos de segurança de tokens
+
+A segurança dos links mágicos (magic links) depende fortemente da implementação adequada de tokens (veja o conteúdo acima). Cada token deve ser criptograficamente seguro e devidamente gerenciado ao longo de seu ciclo de vida. O sistema deve impor uma expiração rigorosa de tokens (tipicamente 15-30 minutos) e invalidação imediata após o uso.
+
+Ao armazenar tokens, trate-os com o mesmo nível de segurança que senhas:
+
+- Hash de tokens antes do armazenamento para prevenir exposição
+- Implementar limpeza automática de tokens expirados
+- Manter um registro de auditoria do uso e invalidação de tokens
+- Armazenar metadados associados (tempo de criação, usuário pretendido, informações do dispositivo)
+
+### Segurança na entrega de e-mails
+
+O e-mail serve como o principal canal de entrega para links mágicos (magic links), tornando-o um alvo potencial para ataques. Implementar limitação de taxa é essencial para prevenir tentativas de força bruta e proteger contra ataques de bombardeio de e-mails. Por exemplo, você pode limitar os usuários a 5 solicitações de link mágico por hora a partir do mesmo endereço IP.
+
+Além disso, monitorar padrões de atividade incomuns ajuda a detectar possíveis violações de segurança. Isso inclui:
+
+- Múltiplas solicitações de diferentes IPs para o mesmo e-mail
+- Padrões de acesso geográfico incomuns
+- Solicitações rápidas que indicam ataques automatizados
+
+### Controle de acesso e monitoramento
+
+A impressão digital do dispositivo adiciona uma camada extra de segurança ao rastrear padrões consistentes de comportamento do usuário. Quando uma tentativa de login vem de um novo dispositivo ou local, você pode implementar etapas adicionais de verificação ou alertar o usuário.
+
+Para segurança aprimorada em aplicativos sensíveis:
+
+- Combine links mágicos (magic links) com fatores adicionais de autenticação
+- Implemente monitoramento contínuo de sessão
+- Registre todos os eventos de autenticação para trilhas de auditoria
+- Adicione verificação baseada em dispositivo para novos locais
+
+```mermaid
+graph TD
+    A[Camadas de Segurança] --> B[Segurança de Tokens]
+    A --> C[Proteção de E-mail]
+    A --> D[Controle de Acesso]
+    B --> E[Armazenamento Seguro]
+    B --> F[Gestão do Ciclo de Vida]
+    C --> G[Limitação de Taxa]
+    C --> H[Detecção de Padrões]
+    D --> I[Rastreamento de Dispositivos]
+    D --> J[Monitoramento de Sessão]
+```
+
+## Links mágicos (magic links) vs SMS / Email OTP
+
+Tanto os Links Mágicos (Magic Links) quanto o SMS / Email OTP dependem de canais externos para verificação.
+
+Os Links Mágicos (Magic Links) enviam uma URL única para o e-mail do usuário, enquanto o OTP envia um código de verificação para o telefone ou e-mail.
+
+Os Links Mágicos (Magic Links) oferecem uma experiência superior em desktops, pois os usuários simplesmente clicam no link para completar a verificação, eliminando a necessidade de inserir códigos manualmente. Eles também podem carregar informações de contexto adicionais, permitindo fluxos de autenticação mais sofisticados.
+
+No entanto, em cenários móveis, o SMS OTP pode oferecer melhor usabilidade, pois os usuários podem visualizar rapidamente e inserir códigos de verificação.
+
+## Links mágicos (magic links) vs aplicativos autenticadores
+
+Comparados aos códigos OTP gerados por Aplicativos Autenticadores, os Links Mágicos (Magic Links) não exigem que os usuários instalem aplicativos adicionais e funcionam perfeitamente em todos os dispositivos. Isso reduz o atrito, especialmente para usuários não técnicos. No entanto, Aplicativos Autenticadores geram códigos OTP com melhor confiabilidade em tempo real, independentes das velocidades de entrega e disponibilidade do servidor de e-mail.
+
+Para cenários que exigem autenticação frequente com altos requisitos de segurança, Aplicativos Autenticadores podem ser a escolha preferida.
+
+## Quando usar links mágicos (magic links)
+
+Os links mágicos (magic links) são particularmente eficazes para aplicativos empresariais e de negócios onde os usuários normalmente fazem login com menos frequência, como ferramentas de gerenciamento de projetos ou painéis de relatórios. Nesses cenários, o leve atraso na entrega de e-mails é insignificante em comparação com a conveniência de não gerenciar senhas.
+
+### Cenários ideais
+
+Esses métodos de autenticação brilham em contextos empresariais onde o e-mail já é o principal canal de comunicação. Por exemplo, plataformas de colaboração como Slack ou Notion utilizam links mágicos (magic links) de forma eficaz porque:
+
+- Os usuários já estão monitorando ativamente seus e-mails
+- As sessões de login tendem a ser de longa duração
+- O foco está em reduzir o atrito no processo de autenticação
+
+Os links mágicos (magic links) também são excelentes para fluxos de registro de usuários em produtos SaaS onde a otimização de conversão é crucial. Quando os usuários podem começar a usar seu serviço apenas com um endereço de e-mail, isso reduz significativamente as taxas de desistência durante o processo de integração.
+
+### Quando considerar alternativas
+
+No entanto, os links mágicos (magic links) podem não ser a melhor escolha para aplicativos que exigem autenticação frequente. Aplicativos de banco móvel, por exemplo, precisam de métodos de autenticação rápidos e confiáveis, já que os usuários podem verificar seu saldo várias vezes ao dia. Nesses casos, a autenticação biométrica ou códigos PIN geralmente oferecem uma melhor experiência do usuário.
+
+Considere métodos de autenticação alternativos quando:
+
+- Seu aplicativo é principalmente baseado em dispositivos móveis
+- Os usuários precisam de acesso imediato sem dependência de e-mail
+- O ambiente requer autenticação multifatorial
+- Atrasos na entrega de e-mails podem impactar significativamente a experiência do usuário
+
+A chave é alinhar seu método de autenticação com os padrões de comportamento dos usuários e requisitos de segurança. Embora os links mágicos (magic links) ofereçam excelente segurança com atrito mínimo, eles devem fazer parte de uma estratégia de autenticação mais ampla, em vez de serem a única solução.
+
+<SeeAlso slugs={["csprng", "passwordless", "otp", "totp"]} />

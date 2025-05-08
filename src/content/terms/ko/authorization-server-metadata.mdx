@@ -1,0 +1,95 @@
+---
+title: 권한 부여 서버 메타데이터
+tags: [oauth 2.0, oidc]
+description: OAuth 2.0 권한 부여 서버 메타데이터는 OAuth 2.0 클라이언트가 OAuth 2.0 권한 부여 서버와 상호 작용하는 데 필요한 정보를 자동으로 검색하고 얻을 수 있도록 하는 표준화된 형식입니다. 여기에는 엔드포인트 위치와 서버 기능이 포함됩니다.
+---
+
+## OAuth 2.0 권한 부여 서버 메타데이터란 무엇인가?
+
+OAuth 2.0 권한 부여 서버 메타데이터는 [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414)에서 정의된 표준화된 형식으로, OAuth 2.0 클라이언트가 OAuth 2.0 권한 부여 서버와 상호 작용하는 데 필요한 정보를 자동으로 검색하고 얻을 수 있도록 합니다.
+
+여기에는 엔드포인트 위치, 지원되는 기능 및 서버 기능과 같은 필수 정보가 포함됩니다.
+
+메타데이터 형식은 클라이언트와 권한 부여 서버 간의 통합 프로세스를 간소화하고 수동 구성의 필요성을 줄이는 데 도움이 되는 기계 판독 가능한 구성 문서를 제공합니다.
+
+## OAuth 2.0 권한 부여 서버 메타데이터는 어떻게 작동하나요?
+
+OAuth 2.0 생태계에는 여러 주요 역할이 있습니다:
+- <Ref slug="authorization-server"/>: 리소스 소유자를 성공적으로 인증한 후 클라이언트에게 access token을 발급합니다.
+- <Ref slug="client"/>: 보호된 리소스에 대한 액세스를 요청하는 애플리케이션
+- <Ref slug="resource-owner"/>: 보호된 리소스에 대한 액세스를 부여할 수 있는 엔터티
+- <Ref slug="resource-server"/>: 보호된 리소스를 호스팅하는 서버
+
+권한 부여 서버 메타데이터는 클라이언트가 권한 부여 서버와 상호 작용하는 방법을 발견하고 이해할 수 있는 표준화된 방법을 제공합니다. 작동 방식은 다음과 같습니다:
+
+1. 클라이언트는 권한 부여 서버의 issuer URL을 알고 있거나 발견합니다.
+2. 클라이언트는 issuer URL에 `/.well-known/oauth-authorization-server`를 추가하여 메타데이터 URL을 구성합니다.
+3. 클라이언트는 서버 구성이 포함된 메타데이터 문서를 검색합니다.
+4. 클라이언트는 검색된 메타데이터(엔드포인트, 지원되는 기능 등)를 사용하여 적절히 구성하고 권한 부여 서버와 상호 작용합니다.
+
+예를 들어, issuer URL이 `https://auth.example.com`인 경우 메타데이터는 다음 위치에서 사용할 수 있습니다:
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+메타데이터 문서에는 다음과 같은 중요한 정보가 포함됩니다:
+- `issuer`: 권한 부여 서버의 식별자
+- `authorization_endpoint`: 권한 부여 엔드포인트 URL
+- `token_endpoint`: 토큰 엔드포인트 URL
+- `scopes_supported`: 사용 가능한 scope
+- `response_types_supported`: 지원되는 응답 유형
+- `token_endpoint_auth_methods_supported`: 지원되는 클라이언트 인증 방법
+
+메타데이터 필드의 전체 목록은 [RFC 8414 섹션 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2)를 참조하세요.
+
+이러한 메타데이터 값을 사용하여 클라이언트는 OAuth 2.0 흐름을 자동으로 구성하고 실행할 수 있습니다:
+
+1. **초기 설정**:
+   - 클라이언트는 `issuer`가 예상되는 권한 부여 서버와 일치하는지 확인합니다.
+   - 클라이언트는 `response_types_supported`를 확인하여 자신의 흐름 유형(예: `code`)이 지원되는지 확인합니다.
+
+2. **권한 부여 요청**:
+   - 클라이언트는 `authorization_endpoint`를 사용하여 권한 부여 URL을 구성합니다.
+   - 클라이언트는 자신의 필요에 따라 `scopes_supported`에서 적절한 scope를 선택합니다.
+   - 예: `https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **토큰 교환**:
+   - 권한 부여 코드를 받은 후 클라이언트는 `token_endpoint`를 사용하여 토큰을 교환합니다.
+   - 클라이언트는 `token_endpoint_auth_methods_supported`를 확인하여 인증 방법을 결정합니다(예: `client_secret_basic`).
+   - 예: 클라이언트 자격 증명 및 권한 부여 코드를 사용하여 토큰 엔드포인트에 POST 요청을 보냅니다.
+
+이 기본 흐름은 클라이언트가 수동 엔드포인트 구성이나 시행착오적인 scope 선택 없이 자동으로 자신을 구성하고 권한 부여 서버와 상호 작용할 수 있도록 도와줍니다.
+
+## OAuth 2.0 권한 부여 서버 메타데이터와 OpenID Connect Discovery의 차이점은 무엇인가요?
+
+주요 차이점은 다음과 같습니다:
+
+1. **범위와 목적**:
+   - OAuth 2.0 권한 부여 서버 메타데이터는 OAuth 2.0 프로토콜 구성에 중점을 둡니다.
+   - <Ref slug="openid-connect-discovery"/>는 다음과 같은 ID 관련 기능을 위한 추가 매개변수를 포함합니다:
+     - `userinfo_endpoint`: 사용자 정보를 검색하기 위한 엔드포인트
+     - `id_token_signing_alg_values_supported`: ID 토큰에 대한 지원되는 서명 알고리즘
+     - `claims_supported`: ID 토큰 또는 UserInfo Endpoint에서 반환될 수 있는 사용 가능한 사용자 claim
+     - 인증을 위한 `openid` scope 지원
+     - 하이브리드 흐름 응답 유형 포함 (예: `code id_token`, `code id_token token`)
+
+2. **메타데이터 엔드포인트**:
+   - OAuth 2.0은 `/.well-known/oauth-authorization-server`를 사용합니다.
+   - OpenID Connect는 `/.well-known/openid-configuration`을 사용합니다.
+
+## OAuth 2.0 권한 부여 서버 메타데이터는 OpenID Connect Discovery와 호환되나요?
+
+네, OAuth 2.0 권한 부여 서버 메타데이터는 <Ref slug="openid-connect-discovery"/>와 호환됩니다.
+
+OAuth 2.0 메타데이터 사양(RFC 8414)은 이미 실무에서 널리 채택된 OpenID Connect Discovery 1.0에서 영감을 받았습니다.
+
+호환성에 대한 주요 사항:
+1. 메타데이터 형식은 동일한 JSON 구조를 따릅니다.
+2. 권한 부여 서버는 두 엔드포인트를 동시에 지원할 수 있습니다.
+3. OpenID 공급자는 일반적으로 이전 버전과의 호환성을 위해 두 엔드포인트를 모두 노출합니다.
+4. OAuth 2.0 메타데이터는 필요에 따라 OpenID Connect 전용 필드로 확장될 수 있습니다.
+
+이 호환성은 권한 부여 서버가 순수한 OAuth 2.0 클라이언트와 OpenID Connect 의존 당사자 모두에게 충돌 없이 서비스를 제공할 수 있도록 보장합니다.
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

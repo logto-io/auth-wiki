@@ -1,0 +1,95 @@
+---
+title: 認可サーバーメタデータ (Authorization Server Metadata)
+tags: [oauth 2.0, oidc]
+description: OAuth 2.0 認可サーバーメタデータは、OAuth 2.0 クライアントが OAuth 2.0 認可サーバーとやり取りするために必要な情報を自動的に発見し取得できるようにする標準化された形式であり、エンドポイントの場所やサーバーの機能を含みます。
+---
+
+## OAuth 2.0 認可サーバーメタデータ (Authorization Server Metadata) とは？
+
+OAuth 2.0 認可サーバーメタデータは、[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) で定義された標準化された形式であり、OAuth 2.0 クライアントが OAuth 2.0 認可サーバーとやり取りするために必要な情報を自動的に発見し取得できるようにします。
+
+これには、エンドポイントの場所、サポートされている機能、サーバーの能力などの重要な情報が含まれます。
+
+メタデータ形式は、クライアントと認可サーバー間の統合プロセスを合理化し、手動での設定の必要性を減らすための機械可読の設定ドキュメントを提供します。
+
+## OAuth 2.0 認可サーバーメタデータ (Authorization Server Metadata) はどのように機能するのか？
+
+OAuth 2.0 エコシステムには、いくつかの重要な役割があります：
+- <Ref slug="authorization-server"/>: リソースオーナーを正常に認証した後、クライアントにアクセストークンを発行する
+- <Ref slug="client"/>: 保護されたリソースへのアクセスを要求するアプリケーション
+- <Ref slug="resource-owner"/>: 保護されたリソースへのアクセスを許可できるエンティティ
+- <Ref slug="resource-server"/>: 保護されたリソースをホストするサーバー
+
+認可サーバーメタデータは、クライアントが認可サーバーとどのようにやり取りするかを発見し理解するための標準化された方法を提供します。以下はその仕組みです：
+
+1. クライアントは認可サーバーの issuer URL を知っているか発見する
+2. クライアントは issuer URL に `/.well-known/oauth-authorization-server` を追加してメタデータ URL を構築する
+3. クライアントはサーバー設定を含むメタデータドキュメントを取得する
+4. クライアントは取得したメタデータ（エンドポイント、サポートされている機能など）を使用して適切に自分自身を設定し、認可サーバーとやり取りする
+
+例えば、issuer URL が `https://auth.example.com` の場合、メタデータは以下で利用可能です：
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+メタデータドキュメントには以下のような重要な情報が含まれます：
+- `issuer`: 認可サーバーの識別子
+- `authorization_endpoint`: 認可エンドポイントの URL
+- `token_endpoint`: トークンエンドポイントの URL
+- `scopes_supported`: 利用可能なスコープ
+- `response_types_supported`: サポートされているレスポンスタイプ
+- `token_endpoint_auth_methods_supported`: サポートされているクライアント認証方法
+
+メタデータフィールドの完全なリストについては、[RFC 8414 セクション 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2) を参照してください。
+
+これらのメタデータ値を使用して、クライアントは OAuth 2.0 フローを自動的に設定し実行できます：
+
+1. **初期設定**:
+   - クライアントは `issuer` が期待される認可サーバーと一致することを確認する
+   - クライアントは `response_types_supported` を確認し、自身のフロータイプ（例：`code`）がサポートされていることを確認する
+
+2. **認可リクエスト**:
+   - クライアントは `authorization_endpoint` を使用して認可 URL を構築する
+   - クライアントは自身のニーズに基づいて `scopes_supported` から適切なスコープを選択する
+   - 例：`https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **トークン交換**:
+   - 認可コードを受け取った後、クライアントは `token_endpoint` を使用してトークン交換を行う
+   - クライアントは `token_endpoint_auth_methods_supported` を確認して、どのように認証するかを決定する（例：`client_secret_basic`）
+   - 例：クライアントの資格情報と認可コードを使用してトークンエンドポイントに POST リクエストを送信する
+
+この基本的なフローは、クライアントが自動的に自分自身を設定し、手動でのエンドポイント設定や試行錯誤によるスコープ選択なしに認可サーバーとやり取りするのを助けます。
+
+## OAuth 2.0 認可サーバーメタデータ (Authorization Server Metadata) と OpenID Connect Discovery の違いは何か？
+
+主な違いは次のとおりです：
+
+1. **範囲と目的**:
+   - OAuth 2.0 認可サーバーメタデータは、OAuth 2.0 プロトコルの設定に特化している
+   - <Ref slug="openid-connect-discovery"/> は、次のようなアイデンティティ関連の機能のための追加パラメータを含む：
+     - `userinfo_endpoint`: ユーザー情報を取得するためのエンドポイント
+     - `id_token_signing_alg_values_supported`: ID トークンのためにサポートされている署名アルゴリズム
+     - `claims_supported`: ID トークンまたは UserInfo エンドポイントから返される可能性のある利用可能なユーザークレーム
+     - 認証のための `openid` スコープをサポート
+     - ハイブリッドフローのレスポンスタイプを含む（例：`code id_token`, `code id_token token`）
+
+2. **メタデータエンドポイント**:
+   - OAuth 2.0 は `/.well-known/oauth-authorization-server` を使用
+   - OpenID Connect は `/.well-known/openid-configuration` を使用
+
+## OAuth 2.0 認可サーバーメタデータ (Authorization Server Metadata) は OpenID Connect Discovery に準拠しているか？
+
+はい、OAuth 2.0 認可サーバーメタデータは <Ref slug="openid-connect-discovery"/> と互換性があります。
+
+OAuth 2.0 メタデータ仕様 (RFC 8414) は、すでに広く採用されている OpenID Connect Discovery 1.0 に触発されました。
+
+準拠に関する重要なポイント：
+1. メタデータ形式は同じ JSON 構造に従う
+2. 認可サーバーは両方のエンドポイントを同時にサポートできる
+3. OpenID プロバイダーは通常、後方互換性のために両方のエンドポイントを公開する
+4. OAuth 2.0 メタデータは、必要に応じて OpenID Connect 固有のフィールドで拡張できる
+
+この互換性により、認可サーバーは純粋な OAuth 2.0 クライアントと OpenID Connect リライングパーティの両方に対して競合なくサービスを提供できます。
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

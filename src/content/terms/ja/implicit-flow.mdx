@@ -1,72 +1,82 @@
 ---
 title: インプリシットフロー (Implicit flow)
 tags: [oauth 2.0, oidc]
-description: OIDC のインプリシットフロー (implicit flow) は、SPA のための認証 (authentication) メソッドであり、バックエンドサーバーを介さずに認可サーバー (authorization server) から直接トークンを迅速に受け取ることを可能にします。しかし、トークンを URL に露出させることでセキュリティが低下するというデメリットがあります。
+description: インプリシットフロー (Implicit flow) は、クライアントシークレットを提供せずに、クライアントのみのアプリケーション（SPA やネイティブアプリなど）が認可サーバーから URL フラグメントを通じて直接トークンを受け取ることを可能にする認証方法です。
 ---
 
-## インプリシットフロー (Implicit flow) とは
+## インプリシットフロー (Implicit flow) とは？
 
-OIDC (OpenID Connect) のインプリシットフロー (implicit flow) は、主にブラウザでスクリプト言語を使用して実装されたクライアントアプリケーション、例えばシングルページアプリケーション (SPA) で使用される認証 (authentication) プロセスです。クライアントアプリケーションは、クライアント認証 (authentication) を行わずに認可サーバー (authorization server) から ID トークン (id token) やアクセス トークン (access token) を直接取得できます。
+OAuth 2.0 のインプリシットフロー (Implicit flow) は、クライアントシークレットを提供せずに、クライアントのみのアプリケーション（SPA やネイティブアプリなど）が認可サーバーから URL フラグメントを通じて直接トークンを受け取ることを可能にする認証方法です。
 
-## インプリシットフロー (Implicit flow) はどのように動作するのか？
+インプリシットフロー (Implicit flow) は、クライアントシークレットを安全に保存できないブラウザやユーザーのデバイス上で完全に動作するクライアントのみのアプリケーション向けに設計されています。
 
-インプリシットフロー (implicit flow) の主なステップは以下の通りです：
+インプリシットフロー (Implicit flow) は、セキュリティ上の理由から <Ref slug="oauth-2.1" /> で公式に廃止されました（以下で説明します）。クライアントのみのアプリケーションは、代わりに <Ref slug="pkce" /> 拡張機能を使用した <Ref slug="authorization-code-flow" /> を使用する必要があります。
 
-1. **認証リクエストの送信**: ユーザーは通常、アプリケーション内のリンクやボタンをクリックしてサインインし、フローを開始します。アプリケーションは認可サーバー (authorization server) の認可エンドポイントに認証リクエストを送信します。認可サーバー (authorization server) はパラメーターを検証し、認可サーバーのサインインページでユーザーに認証 (authentication) を促すようリダイレクトします。
-2. **ユーザー認証**: ユーザーは認可サーバー (authorization server) で認証を行います（例：ユーザー名とパスワードを入力）。
-3. **認可サーバーが応答**: 認可サーバー (authorization server) は、クライアントアプリケーションに ID トークン (id token) および、要求された場合には、アクセス トークン (access token) を URL フラグメントとして返します。
-4. **クライアントがトークンを処理**: クライアントアプリケーションは URL フラグメントからトークンを抽出します。
+## インプリシットフロー (Implicit flow) はどのように機能するのか？
+
+インプリシットフロー (Implicit flow) の主なステップは次のとおりです：
 
 ```mermaid
 sequenceDiagram
-participant ユーザー
-participant アプリケーション
-participant 認可サーバー
-ユーザー->>アプリケーション: サインインフローを開始
-アプリケーション->>認可サーバー: クライアント ID、scope、リダイレクト URI と state で認可サーバーにリクエスト
-認可サーバー->>ユーザー: サインインページへリダイレクトし認証を促す
-ユーザー->>認可サーバー: 認証 (例：ユーザー名とパスワードの入力)
-認可サーバー -->>アプリケーション: URL フラグメントで ID トークンとアクセス トークンを返す
-アプリケーション->>アプリケーション: URL フラグメントからトークンを抽出
+  participant U as ユーザー
+  participant C as クライアント
+  participant AS as 認可サーバー
+  participant RS as リソースサーバー
+
+  U->>C: サインインをクリック
+  C->>AS: 認可リクエスト<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: ログインページを表示
+  U->>AS: 資格情報を入力
+  AS-->>C: URL フラグメントでトークンを返す
+  C->>C: フラグメントからトークンを抽出
+  C->>RS: トークンを使用して API リクエスト
+  RS-->>C: 保護されたリソースの応答
 ```
 
-### 認証リクエスト (Authentication request)
+注意：
 
-リクエストパラメーターは以下の通りです：
-- **client_id**: 必須。有効な OAuth 2.0 クライアント識別子であり、Logto ではアプリケーション ID (またはアプリ ID) として利用可能です。
-- **scope**: 必須。ユーザーが認可サーバーから要求するリソースセットを指定する値です。例：`openid profile email`
-- **response_type**: 必須。値は `id_token` または `id_token token` のいずれかです。値が `id_token` の場合、アクセス トークン (access token) は返されません。
-- **redirect_uri**: 必須。認証レスポンスが送信される URI であり、クライアントが <Ref slug="openid-connect" headingId="openid-provider-op" /> に事前登録したリダイレクト URI と完全に一致する必要があります。例：Logto 管理コンソールの `Sign-in redirect URI`。
-- **nonce**: 必須。再生攻撃を軽減するために使用されるランダムな文字列で、認証リクエストから ID トークンのクレームまで改変されずに渡されます。
+- クライアントは認可リクエストで `client_id` を提供するだけでよく、`client_secret` は必要ありません。  
+  これは、これらのクライアントがシークレットを安全に保存できないため、このフローではクライアントシークレットを必要としないからです。
 
-### 認証リクエストの例
+- `response_type` パラメータは `token` に設定されており、認可サーバーに認可コードの代わりに直接アクセストークンを返すよう指示します。  
+  OIDC (<Ref slug="openid-connect" />) では、`response_type` は `id_token` または `id_token token` であり、認証サービスは異なるレスポンスタイプに基づいて対応するトークンを返します。
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- トークンは URL フラグメントで直接返されます。これは、トークンが URL に露出し、他のアプリケーションやスクリプトによって簡単にアクセスできることを意味します。
 
-## 制限事項
+## インプリシットフロー (Implicit flow) は安全か？
 
-インプリシットフロー (implicit flow) は、ブラウザが広く Cross-Origin Resource Sharing (CORS) をサポートしていなかった時代に開発されました。そのため、異なるドメインにホストされた認可サーバー (authorization server) への POST リクエストの送信が禁止されています。
+いいえ、OAuth 2.0 のインプリシットフロー (Implicit flow) は、一般的に認可コードフローのような他のフローよりも安全性が低いと考えられています。
 
-この制限のため、認可サーバー (authorization server) はトークンを URL フラグメントで直接返し、それをエンドユーザーやユーザーエージェントにアクセス可能なアプリケーションに露出させる可能性があります。
+いくつかの脆弱性のため、ほとんどのユースケースには推奨されません：
 
-さらに、インプリシットフロー (implicit flow) ではクライアント認証 (authentication) が行われないため、ブラウザベースのアプリケーションではクライアント ID が常に露出しているため、任意のアプリケーションがそのクライアントになりすまして認証を要求することができます。
+- **URL でのトークンの露出**
+   - アクセストークンはブラウザの URL に直接表示されます（# 記号の後）
+   - これらのトークンは以下のように：
+     - ブラウザ履歴に保存される
+     - リファラーヘッダーを通じて漏洩する
+     - 同じページ上の悪意のある JavaScript コードによって捕捉される
 
-これらの制限により、インプリシットフロー (implicit flow) は通常、認可コードフロー (Authorization Code Flow) よりもセキュリティが低いと見なされます。
+- **クライアント認証なし**
+   - クライアントアプリケーションはそのアイデンティティを証明する必要がない
+   - これは、`client_id` を知っている誰もが正当なクライアントのふりをすることができることを意味します
 
-## インプリシットフロー (Implicit flow) の代替手段
+- **リフレッシュトークンなし**
+   - このフローはリフレッシュトークンをサポートしていない
+   - アクセストークンが期限切れになると、ユーザーは再度ログインする必要がある
+   - 頻繁なログインを避けるために、ユーザーはトークンを安全でない方法で保存するかもしれません
 
-インプリシットフロー (implicit flow) のセキュリティ上の制限を考慮すると、他のフローが推奨されることが多いです：
-- **認可コードフロー (Authorization Code Flow)**: このフローでは、クライアントが認可コードをトークンに交換する追加のステップが含まれており、より高いレベルのセキュリティを提供します。
-- **PKCE (Proof Key for Code Exchange)**: 認可コードフロー (Authorization Code Flow) に追加のセキュリティ層を追加する拡張機能であり、コードベリファイアとコードチャレンジを使用します。
+- **XSS 攻撃に対する脆弱性**
+   - すべてのトークンはブラウザで処理される
+   - ウェブサイトが XSS 攻撃（クロスサイトスクリプティング）を受けた場合
+   - 攻撃者の JavaScript コードがこれらのトークンを簡単に盗むことができる
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+これらのセキュリティ上の懸念から、インプリシットフロー (Implicit flow) は <Ref slug="oauth-2.1" /> で廃止されました。クライアントのみのアプリケーションは、代わりに <Ref slug="pkce" /> 拡張機能を使用した <Ref slug="authorization-code-flow" /> を使用する必要があります。
+
+<Ref slug="pkce" /> がクライアントのみのアプリケーションのために認可コードフローをどのように保護するかを学ぶには、[PKCE の基本概念から深い理解まで](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) をチェックしてください。
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ curl -X GET "https://authorization-server.com/auth" \
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript."
-      }
+        ogDescription:
+          "インプリシットグラントタイプはアクセストークンを取得するために使用され（リフレッシュトークンの発行はサポートされていません）、特定のリダイレクト URI を操作することが知られているパブリッククライアントに最適化されています。これらのクライアントは通常、JavaScript などのスクリプト言語を使用してブラウザで実装されます。",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />

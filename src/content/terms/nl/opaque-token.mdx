@@ -1,156 +1,166 @@
 ---
 title: Opaque token
 tags: [oauth 2.0, oidc]
-description: Een opaque token is een type token waarvan het formaat wordt bepaald door de issuer (uitgever), meestal weergegeven als een reeks tekens of cijfers, en validatie door de issuer vereist in plaats van alle benodigde informatie voor directe validatie te bevatten.
+description: Een opaque token is een willekeurige, unieke string die betekenisloos is voor de client, maar dient als een referentiesleutel om autorisatiegegevens op te zoeken in de database van de server.
 ---
-
-## Wat is een token?
-
-Voordat we opaque tokens introduceren, is het belangrijk om te begrijpen wat een token is:
-
-Tokens worden gebruikt om veilige informatie tussen partijen te vertegenwoordigen en over te dragen, en ze ondersteunen het overgrote deel van de <Ref slug="authentication" /> en <Ref slug="authorization" /> processen die achter de schermen op internet plaatsvinden. De twee meest populaire soorten tokens in webservices zijn <Ref slug="jwt" /> en opaque tokens.
 
 ## Wat is een opaque token?
 
-Opaque tokens zijn tokens in een eigen formaat dat je niet kunt openen en bevatten meestal een identificator naar informatie in de persistente opslag van een server.
+Een opaque token is een willekeurige, unieke string die betekenisloos is voor de client, maar dient als een referentiesleutel om autorisatiegegevens op te zoeken in de database van de server.
 
-Een opaque token is een vorm die een token kan aannemen, en <Ref slug="access-token">access tokens</Ref> en <Ref slug="refresh-token">refresh tokens</Ref> kunnen bestaan als opaque tokens. Het formaat van een opaque token wordt bepaald door de issuer (uitgever), en het is meestal een reeks cijfers en/of tekens die de issuer helpt bepaalde informatie in een database op te halen en te identificeren. Hier is een voorbeeld van een opaque token:
+Opaque tokens worden meestal gegenereerd met behulp van een <Ref slug='csprng' /> om de onvoorspelbaarheid en veiligheid ervan te waarborgen, en het formaat ervan wordt bepaald door de issuer.
+
+Hier is een voorbeeld van een opaque token:
 
 ```
 M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
 ```
 
-Aan de andere kant is JWT een ander veelvoorkomend tokenformaat. Het is een JSON-string die alle claims en informatie bevat, samen met een handtekening van de issuer. Standaard is het niet versleuteld, hoewel het kan worden versleuteld met de <Ref slug="jwe" /> standaard. Hoewel JWT meestal niet versleuteld is, doet dit geen afbreuk aan de beveiliging ervan — de aanwezigheid van de handtekening zorgt voor de integriteit van de inhoud van het token, waardoor er volledig vertrouwen is in de gegevens binnen de JWT.
+## Wat is het verschil tussen JWT (JSON Web Token) en een opaque token?
 
-In tegenstelling tot JWT, dat alle informatie bevat die nodig is om direct te worden gevalideerd bij de beschermde bron, kunnen opaque tokens niet direct door de bron worden gevalideerd. In plaats daarvan vereisen ze validatie door de issuer van het opaque token (meestal de <Ref slug="authorization-server" />). Dit validatieproces wordt meestal <Ref slug="token-introspection" /> genoemd.
+Het belangrijkste verschil ligt in hoe deze tokens omgaan met en valideren van autorisatie-informatie:
 
-## Wat is JWT?
+Een opaque token is een willekeurige string die zelf geen informatie bevat. De server moet zijn backend-database raadplegen om eventuele autorisatiegegevens op te halen die aan dit token zijn gekoppeld. Dit maakt opaque tokens volledig afhankelijk van de authorization server voor validatie en interpretatie.
 
-In tegenstelling tot opaque tokens is een JWT een zelfvoorzienend, stateless token dat informatie draagt in een gestructureerd en leesbaar formaat.
+```mermaid
+sequenceDiagram
+    participant Client as Client
+    participant ResourceServer as Resource Server
+    participant AuthServer as Authorization Server
+    participant Database as Database
+    autonumber
 
-Een JWT bestaat uit drie delen: een `header`, een `payload` en een `signature`, elk gecodeerd in Base64URL.
+    Client->>ResourceServer: Verzoek met opaque token
+    ResourceServer->>AuthServer: Valideer token
+    AuthServer->>Database: Vraag tokengegevens op
+    Database->>AuthServer: Retourneer tokeninformatie
+    AuthServer->>ResourceServer: Token validatieresultaat
+    ResourceServer->>Client: Reactie
+```
 
-Hier is een voorbeeld van een JWT:
+JWT is een zelfvoorzienend token dat alle benodigde informatie binnen zichzelf draagt.
 
-`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+Hier is een voorbeeld van een JWT, het is een base64-gecodeerde string:
 
-- De `header` bevat informatie over het type token en het algoritme dat wordt gebruikt voor ondertekening. Bijvoorbeeld, `{"alg": "HS256", "typ": "JWT"}`.
-- Het `payload` gedeelte bevat claims — stukjes informatie over de gebruiker of de autorisatie — zoals gebruikers-ID, vervaltijd en scopes. Omdat deze gegevens zijn gecodeerd maar niet versleuteld, kan iedereen die het token heeft, het decoderen om de claims te zien, hoewel ze het niet kunnen wijzigen zonder de handtekening ongeldig te maken. Afhankelijk van de specificatie en configuratie van de authorization server kunnen verschillende claims in de payload worden opgenomen. Dit geeft het token zijn zelfvoorzienende aard. Bijvoorbeeld, `{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}`.
-- De `signature` wordt gegenereerd door de header, payload en een geheime sleutel te combineren met behulp van het gespecificeerde algoritme. Deze handtekening wordt gebruikt om de integriteit van het token te verifiëren en ervoor te zorgen dat het niet is gewijzigd.
+```
+eyJhbGciOiJIUzI1NiIs.eyJzdWIiOiIxMjM0NTY3O.SflKxwRJSMeKKF2QT4f
+```
 
-JWT's worden vaak gebruikt omdat ze lokaal kunnen worden geverifieerd door de client of een service, zonder interactie met de authorization server. Dit maakt JWT's bijzonder efficiënt voor gedistribueerde systemen, waar meerdere services mogelijk onafhankelijk de authenticiteit van het token moeten verifiëren.
+En het bevat drie delen gescheiden door punten:
 
-Deze gemak brengt echter ook de verantwoordelijkheid met zich mee om ervoor te zorgen dat de claims van het token niet overmatig worden blootgesteld, omdat ze zichtbaar zijn voor iedereen die toegang heeft tot het token. Bovendien zijn JWT's meestal van korte duur, en de vervaltijd is opgenomen in de claims van het token om ervoor te zorgen dat het token niet onbeperkt geldig is.
+1. **Header** - Bevat informatie over het type token en het algoritme dat wordt gebruikt voor ondertekening. Bijvoorbeeld, `{"alg": "HS256", "typ": "JWT"}`.
+2. **Payload** - Bevat claims—stukjes informatie over de gebruiker of de autorisatie, zoals gebruikers-ID, vervaltijd en scopes. Iedereen kan het decoderen om de claims te zien omdat het gecodeerd maar niet versleuteld is.
+3. **Signature** - gegenereerd door de header, payload en een geheime sleutel te combineren met behulp van het gespecificeerde algoritme. Deze handtekening wordt gebruikt om de integriteit van het token te verifiëren en ervoor te zorgen dat het niet is gewijzigd.
 
-## Validatie van opaque access token
+Deze structuur stelt JWT's in staat om te worden gevalideerd en gebruikt zonder een database te raadplegen.
 
-Een opaque access token wordt gevalideerd door het terug te sturen naar de authorization server voor verificatie. De authorization server onderhoudt de status van uitgegeven tokens en kan de geldigheid van het token bepalen op basis van zijn interne opslag.
+Voor meer gedetailleerde informatie over JWT's, raadpleeg <Ref slug='jwt' />.
+
+En bekijk [Opaque token vs JWT](https://blog.logto.io/opaque-token-vs-jwt) om meer te leren over hun verschillen in meer diepte.
+
+## Hoe valideer je een opaque token
+
+In eenvoudige systemen wordt de validatie van een opaque token meestal direct door de server afgehandeld, die de database raadpleegt met behulp van het opaque token als sleutel om de bijbehorende autorisatie-informatie op te halen.
 
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant AS as Authorization Server
-    participant RP as Resource Provider
+    participant S as Server
+    participant D as Database
+    autonumber
 
-    C ->> AS: 1. post /oidc/token
-    AS ->> C: 2. opaque token
-    C ->> RP: 3. get /api/resource
-    RP ->> AS: 4. post /oidc/introspect
-    AS ->> RP: 5. token info
-
+    C->>S: Verzoek met opaque token
+    S->>D: Vraag tokeninformatie op
+    D->>S: Retourneer tokengegevens
+    S->>C: Reactie
 ```
 
-1. De client vraagt een access token aan bij de authorization server.
-2. De authorization server geeft een opaque token uit.
-3. De client stuurt het resource access verzoek met het opaque token in de header.
-4. De resource provider stuurt een token introspectie verzoek naar de authorization server om het token te valideren.
-5. De authorization server reageert met de tokeninformatie.
-
-## Validatie van JWT access token (offline)
-
-Een JWT access token kan offline worden gevalideerd door de client of een service die toegang heeft tot de publieke sleutel van het token.
+In systemen met meerdere partijen die OAuth 2.0 introduceren, kunnen meerdere resource servers (zie: <Ref slug='resource-server' />) hetzelfde opaque token moeten valideren. OAuth 2.0 biedt een gestandaardiseerd token introspection mechanisme voor deze validatie:
 
 ```mermaid
-
 sequenceDiagram
     participant C as Client
+    participant RS as Resource Server
     participant AS as Authorization Server
-    participant RP as Resource Provider
+    participant D as Database
+    autonumber
 
-    RP ->> AS: 0. get /oidc/.well-known/jwks.json
-
-    C ->> AS: 1. post /oidc/token
-    AS ->> C: 2. JWT token
-    C ->> RP: 3. get /api/resource
-    RP ->> RP: 4. validate JWT token
-    RP ->> C: 5. response 200 OK
-
+    C->>RS: Verzoek met opaque token
+    RS->>AS: POST /oauth/introspect
+    AS->>D: Valideer token
+    D->>AS: Tokeninformatie
+    AS->>RS: Token validatie reactie
+    RS->>C: Reactie
 ```
 
-1. De resource provider haalt vooraf de publieke sleutel van de authorization server op via de <Ref slug="openid-connect-discovery" />. De publieke sleutel wordt gebruikt om de handtekening van het token te verifiëren en de integriteit ervan te waarborgen.
-2. De client vraagt een access token aan bij de authorization server.
-3. De authorization server geeft een JWT token uit.
-4. De client stuurt het resource access verzoek met het JWT token in de header.
-5. De resource provider decodeert en valideert het JWT token met behulp van de publieke sleutel verkregen van de authorization server.
-6. De resource provider verleent toegang op basis van de geldigheid van het token.
+Voor gedetailleerde informatie over token introspection, raadpleeg <Ref slug='token-introspection' />.
 
-## Gebruiksscenario's in OIDC
+## Hoe worden opaque tokens gebruikt in OIDC?
 
-In de context van OIDC (<Ref slug="openid-connect" />) dienen opaque tokens en JWT's verschillende doelen en worden ze in verschillende scenario's gebruikt.
+In de context van OIDC (<Ref slug='openid-connect' />) dienen opaque tokens specifieke doeleinden in verschillende scenario's:
 
-### Opaque tokens
+### Gebruikersprofiel ophalen
 
-1. Gebruikersprofiel ophalen:
+Standaard, wanneer een client een access token aanvraagt zonder een resource te specificeren en de `openid` scope opneemt, geeft de authorization server een opaque access token uit. Dit token wordt voornamelijk gebruikt om gebruikersprofielinformatie op te halen van het OIDC `/oidc/userinfo` endpoint (zie: <Ref slug='userinfo-endpoint' />).
 
-Standaard, wanneer een client een access token aanvraagt zonder een resource te specificeren en de `openid` scope opneemt, geeft de authorization server een opaque access token uit. Dit token wordt voornamelijk gebruikt om gebruikersprofielinformatie op te halen van de OIDC `/oidc/userinfo` endpoint. Bij ontvangst van een verzoek met het opaque access token controleert de authorization server zijn interne opslag om de bijbehorende autorisatie-informatie op te halen en verifieert de geldigheid van het token voordat het reageert met de gebruikersprofielgegevens.
+```mermaid
+sequenceDiagram
+    participant Client as Client
+    participant AuthServer as Authorization Server
+    participant Database as Database
+    autonumber
 
-2. Refresh token uitwisseling:
-
-Refresh tokens zijn ontworpen om alleen tussen de client en de authorization server te worden uitgewisseld, zonder dat ze met resource providers hoeven te worden gedeeld. Daarom worden refresh tokens meestal uitgegeven als opaque tokens. Wanneer het huidige access token verloopt, kan de client het opaque refresh token gebruiken om een nieuw access token te verkrijgen, waardoor continue toegang wordt gegarandeerd zonder de gebruiker opnieuw te authenticeren.
-
-### JWT's
-
-1. ID token:
-
-In OIDC is het ID token een JWT dat gebruikersinformatie bevat en wordt gebruikt om de gebruiker te authenticeren. Meestal uitgegeven naast het access token, stelt het ID token de client in staat om de identiteit van de gebruiker te verifiëren. Bijvoorbeeld:
-
-```json
-// Gedecodeerde payload van een ID token
-{
-  "iss": "<https://auth.wiki>",
-  "sub": "1234567890",
-  "aud": "client_id",
-  "exp": 1630368000,
-  "name": "John Doe",
-  "email": "john.doe@mail.com",
-  "picture": "<https://example.com/johndoe.jpg>"
-}
-
+    Client->>AuthServer: GET /oidc/userinfo met opaque token
+    AuthServer->>Database: Vraag tokengegevens op
+    Database->>AuthServer: Retourneer tokeninformatie
+    AuthServer->>Client: Gebruikersprofielgegevens
 ```
 
-De client kan het ID token valideren om de identiteit van de gebruiker te waarborgen en gebruikersinformatie te extraheren voor personalisatie of autorisatiedoeleinden. Het ID token is alleen voor eenmalig gebruik en mag niet worden gebruikt voor API resource autorisatie.
+### Refresh token uitwisseling
 
-2. API resource toegang (met access token):
+Refresh tokens (zie: <Ref slug='refresh-token' />) worden meestal uitgegeven als opaque tokens omdat ze alleen worden uitgewisseld tussen de client en de authorization server. Wanneer het huidige access token verloopt, kan de client het opaque refresh token gebruiken om een nieuw access token te verkrijgen zonder de gebruiker opnieuw te authenticeren.
 
-Wanneer een client een access token aanvraagt met een specifieke <Ref slug="resource-indicator" />, geeft de authorization server een JWT access token uit dat bedoeld is voor toegang tot die resource. De JWT bevat claims die de resource provider kan gebruiken om de toegang van de client te autoriseren. Bijvoorbeeld:
+```mermaid
+sequenceDiagram
+    participant Client as Client
+    participant RS as Resource Server
+    participant AS as Authorization Server
+    autonumber
 
-```json
-// Gedecodeerde payload van een JWT access token
-{
-  "iss": "<https://auth.wiki>",
-  "sub": "1234567890",
-  "aud": "<https://api.example.com>",
-  "scope": "read write",
-  "exp": 1630368000
-}
-
+    Client->>RS: Verzoek met verlopen access token (JWT)
+    RS->>Client: 401 Token verlopen
+    Client->>AS: POST /oidc/token met refresh token
+    AS->>Client: Nieuw access token
+    Client->>RS: Verzoek met nieuw access token
+    RS->>Client: Succes reactie
 ```
 
-De resource provider kan het verzoek valideren door de claims te controleren:
+## Wat zijn de voor- en nadelen van een opaque token?
 
-- `iss`: Bevestigt dat het token is uitgegeven door een vertrouwde authorization server.
-- `sub`: Identificeert de gebruiker die aan het token is gekoppeld.
-- `aud`: Zorgt ervoor dat het token bedoeld is voor de specifieke resource.
-- `scope`: Verifieert de verleende permissies aan de gebruiker.
+### Voordelen
 
-<SeeAlso slugs={['jwt']} />
+- **Veiligheid**: Opaque tokens zijn perfect voor het omgaan met gevoelige gegevens zoals refresh tokens. Aangezien de inhoud volledig willekeurig en betekenisloos is, kan zelfs als iemand het token onderschept, hij geen bruikbare informatie extraheren. Dit maakt ze bijzonder waardevol in scenario's met hoge beveiliging, zoals banktransacties of het omgaan met gevoelige gebruikersgegevens.
+
+- **Herroepbaarheid**: De server kan op elk moment een opaque token onmiddellijk ongeldig maken. Dit is vooral handig wanneer je snel gebruikers toegang moet verwijderen. In tegenstelling tot JWT's die geldig blijven totdat ze verlopen, kunnen opaque tokens onmiddellijk worden ingetrokken (zie: [Beperkingen van JWT](https://blog.logto.io/why-jwt-in-most-oauth-2-services#hard-to-revoke)).
+
+- **Grootte**: Opaque tokens zijn meestal veel korter dan JWT's. Deze kleinere grootte vermindert het netwerkbandbreedtegebruik en de opslagvereisten. Het voordeel wordt vooral merkbaar in systemen die vaak tokens verzenden, zoals mobiele applicaties of IoT-apparaten.
+
+- **Eenvoud**: De implementatie van opaque tokens is eenvoudig. Je genereert een willekeurige string en slaat deze op met de bijbehorende gegevens. Er is geen noodzaak om complexe versleuteling of handtekeningverificatie af te handelen zoals bij JWT's. Deze eenvoud maakt ze ideaal voor interne systeemauthenticatie.
+
+### Nadelen
+
+- **Stateful**: Elk opaque token vereist opslag aan de serverzijde. Dit creëert extra complexiteit in gedistribueerde systemen omdat tokengegevens moeten worden gesynchroniseerd over meerdere servers. Bijvoorbeeld, als je meerdere authentication servers hebt, moeten ze allemaal toegang hebben tot dezelfde token database of cache systeem om tokens correct te valideren.
+
+- **Prestaties**: Tokenvalidatie vereist altijd een database-opzoeking of API-aanroep. In systemen met veel verkeer kunnen deze extra database-opzoekingen prestatieknelpunten creëren. Bijvoorbeeld, als je systeem duizenden verzoeken per seconde verwerkt, elk met tokenvalidatie, wordt de extra databasebelasting aanzienlijk.
+
+- **Interoperabiliteit**: Verschillende systemen kunnen opaque tokens op verschillende manieren implementeren. Dit kan integratie-uitdagingen veroorzaken bij het werken met externe services of verschillende authorization servers. Hoewel standaarden zoals OAuth 2.0 token introspection helpen, kun je nog steeds compatibiliteitsproblemen tegenkomen wanneer systemen verschillende tokenformaten of validatiemethoden gebruiken.
+
+<SeeAlso slugs={[
+  'csprng',
+  'jwt',
+  'resource-server',
+  'token-introspection',
+  'openid-connect',
+  'refresh-token',
+  'userinfo-endpoint'
+]} />

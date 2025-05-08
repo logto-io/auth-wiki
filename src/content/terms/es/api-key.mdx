@@ -1,64 +1,93 @@
 ---
-title: Clave de API (API key)
+title: Clave API
 tags: [authentication, api]
-description: Una clave de API es un identificador único utilizado para autenticar y autorizar un cliente al acceder a una API. Sirve como un token secreto incluido en las solicitudes de API para verificar la identidad del cliente y permitir el acceso a recursos o servicios específicos. Las claves de API se utilizan típicamente en comunicaciones de servidor a servidor o al acceder a datos públicos.
+description: Una clave API es un token secreto utilizado para autenticar clientes que acceden a una API. Verifica la identidad y controla el acceso a recursos específicos, comúnmente utilizada en comunicaciones de servidor a servidor o acceso a datos públicos.
 ---
 
-## ¿Qué es una clave de API?
+## ¿Qué es una clave API?
 
-Las claves de API se utilizan para identificar y autorizar la aplicación o servicio que realiza la llamada. Generalmente tienen una larga duración y son estáticas hasta que se rotan y a menudo tienen un conjunto fijo de permisos. Se utilizan principalmente para comunicaciones de servidor a servidor o para acceder a datos públicos, estos tokens generalmente no representan a un usuario específico.
+Una clave API es un token secreto utilizado para autenticar clientes que acceden a una API. Es como una contraseña para tu aplicación, permite el acceso a una API específica. Piénsalo como una tarjeta de acceso para entrar a un edificio. La tarjeta de acceso otorga acceso, pero no necesariamente identifica quién eres.
 
-## ¿Cómo funciona una clave de API?
+## ¿Cómo funcionan las claves API?
 
-Una clave de API es una larga cadena de caracteres generada por el proveedor de la API y compartida con usuarios autorizados. Esta clave debe incluirse en el encabezado de la solicitud al acceder a la API. Las claves de API son simples y efectivas para necesidades básicas de seguridad. Por ejemplo, servicios populares como Google Maps API y AWS proporcionan claves de API para controlar el acceso y monitorear el uso.
+Las claves API funcionan a través de un proceso simple de solicitud y respuesta.
 
-```java
-curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
+1. **Solicitud:** Tu aplicación envía una solicitud a la API, incluyendo la clave API. La clave a menudo se envía en el encabezado de la solicitud. Por ejemplo, el encabezado podría verse así: `x-api-key: your_actual_api_key`. No hay un estándar único para los nombres de encabezado o formatos de valor.
+
+2. **Verificación:** El servidor de la API verifica la clave proporcionada contra su base de datos.
+
+3. **Respuesta:** Si la clave es válida, el servidor otorga acceso y envía de vuelta los datos solicitados. Si no, se niega el acceso.
+
+Aquí hay un diagrama de secuencia que ilustra el proceso:
+
+```mermaid
+sequenceDiagram
+    participant A as Cliente
+    participant B as Servidor API
+
+    A->>B: Solicitud con clave API en el encabezado
+    activate B
+    B->>B: Verificar clave API
+    B-->>A: Respuesta (Datos o Error)
+    deactivate B
 ```
 
-Las claves de API no son tan efectivas como otras formas de autenticación de API, como <Ref slug="oauth-2.0" /> y <Ref slug="jwt" />, pero aún juegan un papel importante al ayudar a los productores de API a monitorear el uso, ya que es el método más sencillo y ampliamente utilizado para asegurar las APIs.
+## ¿Cuáles son las ventajas y desventajas de las claves API?
 
-## ¿Cuáles son sus pros y contras?
+Veamos qué hace que las claves API sean útiles y dónde fallan:
 
-### Pros
+### Ventajas
 
-- Simple de implementar: Las claves de API son fáciles de implementar y usar. Implican adjuntar una clave al encabezado de la solicitud, lo que lo convierte en un método sencillo para que los desarrolladores y clientes lo entiendan y utilicen.
-- Fácil de monitorear: Las claves de API son fáciles de monitorear. Puedes rastrear el uso de cada clave y revocarlas si es necesario.
-- Limitación de tasa efectiva: Las claves de API son efectivas para la limitación de tasa. Puedes establecer un límite en el número de solicitudes por clave para prevenir abusos.
-- Adecuado para datos no sensibles: Las claves de API son adecuadas para datos no sensibles o APIs disponibles públicamente, donde los requisitos de seguridad son menores.
+- **Súper simples de usar**: Solo agrega una clave a tu solicitud y listo. Es como usar una llave de casa: no se necesitan pasos complicados.
 
-### Contras
+- **Fáciles de rastrear**: ¿Quieres saber quién está usando tu API? Las claves API lo hacen simple. Puedes ver qué aplicaciones están haciendo llamadas y con qué frecuencia lo hacen.
 
-- Seguridad limitada: Las claves de API no son lo suficientemente seguras para datos sensibles, especialmente para aplicaciones del lado del cliente. A menudo se utilizan en comunicaciones de máquina a máquina.
-- No adecuado para la autenticación de usuarios: Las claves de API están vinculadas a aplicaciones o sistemas, no a usuarios individuales, lo que dificulta identificar usuarios específicos o rastrear sus acciones.
-- Sin expiración de token: Las claves de API son típicamente estáticas y no expiran. Si una clave se compromete, podría ser mal utilizada indefinidamente a menos que se regenere manualmente.
+- **Limitación de tasa rápida**: Evita que las personas abusen de tu API estableciendo límites por clave. Es como tener un portero en un club que cuenta cuántas veces alguien entra y sale.
 
-## ¿Cuáles son los casos de uso para las claves de API?
+- **Perfectas para datos públicos**: Si estás compartiendo información no sensible (como datos meteorológicos o estadísticas públicas), las claves API son perfectas.
 
-- Comunicación de servicio a servicio: Las claves de API son adecuadas para escenarios donde las aplicaciones necesitan comunicarse con APIs directamente a través de CLIs. Por ejemplo, llamar a las APIs de OpenAI.
-- APIs públicas: Al exponer APIs al público, las claves de API proporcionan un método sencillo de control de acceso.
-- Configuración simplificada: Para necesidades de autenticación rápidas y simples, especialmente en la fase de desarrollo. A diferencia de la autenticación de máquina a máquina, las claves de API no requieren registro de cliente previo, y tampoco necesitan intercambiarse por un access token. Simplemente pasas tu clave de API como un parámetro en tu solicitud y simplemente funciona.
+### Desventajas
+
+- **Menos seguras que las alternativas modernas**: Las claves API no son tan efectivas como otras formas de autenticación de API, como <Ref slug="oauth-2.0" /> y <Ref slug="jwt" />. Piénsalas como un candado básico en comparación con un sistema de seguridad moderno. Sin embargo, siguen siendo populares porque son la forma más simple de rastrear el uso de la API y comenzar con la seguridad de la API.
+
+- **Riesgos de seguridad**: Las claves API son como dejar la llave de tu casa debajo del felpudo. Si alguien la encuentra, puede usarla para siempre. Aquí está el porqué:
+  - A menudo son visibles en el código
+  - No expiran automáticamente
+  - Si se filtran (como en repositorios públicos de GitHub), cualquiera puede usarlas
+
+- **No pueden diferenciar usuarios**: Aunque algunas empresas usan "claves API" que pueden identificar usuarios (como Stripe), las claves API tradicionales no pueden decirte quién es quién. Solo te dicen qué aplicación está haciendo la solicitud.
+
+- **Estáticas por naturaleza**: A diferencia de los tokens de auth modernos que expiran, las claves API generalmente permanecen iguales para siempre. Esto significa:
+  - No hay actualizaciones automáticas de seguridad
+  - Se necesita trabajo manual para rotar claves
+  - Mayor riesgo si las claves se exponen
+
+## ¿Cuáles son los casos de uso para las claves API?
+
+- Comunicación de servicio a servicio: Las claves API son adecuadas para escenarios donde las aplicaciones necesitan comunicarse con APIs directamente a través de CLIs. Por ejemplo, llamar a APIs de OpenAI.
+- APIs públicas: Al exponer APIs al público, las claves API proporcionan un método sencillo de control de acceso.
+- Configuración simplificada: Para necesidades de autenticación rápidas y simples, especialmente en la fase de desarrollo. A diferencia de la autenticación Machine-to-machine, las claves API no requieren registro previo del cliente, y tampoco necesitan intercambiarse por un access token. Simplemente pasas tu clave API como un parámetro en tu solicitud y simplemente funciona.
 
 En escenarios del mundo real, el propósito más común al construir productos es la integración de productos. Aquí hay un caso de uso típico:
 
 ### Ejemplo: Integración con Stripe
 
-Stripe utiliza claves de API para una integración segura con diferentes plataformas y aplicaciones. Puedes crear, ver, eliminar y gestionar estas claves a través del Developers Dashboard. Al usar claves de API, puedes integrar las funciones de pago y facturación de Stripe en tu producto.
+Stripe utiliza claves API para una integración segura con diferentes plataformas y aplicaciones. Puedes crear, ver, eliminar y gestionar estas claves a través del Developers Dashboard. Al usar claves API, puedes integrar las funciones de pago y facturación de Stripe en tu producto.
 
 ![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
 
-## ¿Cuál es la diferencia entre los Tokens de Acceso Personal (PAT) y la comunicación de Máquina a Máquina (M2M)?
+## ¿Cuál es la diferencia entre Tokens de Acceso Personal (PAT) y Machine-to-Machine (M2M)?
 
-Al hablar de claves de API, los tokens de acceso personal y <Ref slug="machine-to-machine" /> también pueden mencionarse juntos ya que todos pueden acceder programáticamente a recursos de API a través de comandos CLI, o establecer comunicación entre servicios de backend.
+Al hablar de claves API, los tokens de acceso personal y <Ref slug="machine-to-machine" /> también pueden mencionarse juntos ya que todos pueden acceder programáticamente a recursos de API a través de comandos CLI, o establecer comunicación entre servicios de backend.
 
 ### Tokens de Acceso Personal (PATs)
 
-Un token de acceso personal también es una cadena pero representa ***la identidad y permisos de un usuario específico***, se genera dinámicamente tras una autenticación o inicio de sesión exitoso, y típicamente tiene una duración limitada pero puede ser renovado. Proporciona un control de acceso detallado a datos y capacidades específicas del usuario y se utilizan comúnmente para herramientas CLI, scripts o acceso personal a API. La principal diferencia es que es más específico y se utiliza para acciones específicas del usuario.
+Un token de acceso personal también es una cadena pero representa la identidad y permisos de ***un usuario específico***, se genera dinámicamente tras una autenticación o inicio de sesión exitoso, y típicamente tiene una vida útil limitada pero puede ser renovado. Proporciona control de acceso detallado a datos y capacidades específicas del usuario y se utilizan comúnmente para herramientas CLI, scripts o acceso personal a API. La principal diferencia es que es más específico y se utiliza para acciones específicas del usuario.
 
-### Máquina a Máquina (M2M)
+### Machine-to-Machine (M2M)
 
 La comunicación M2M es cuando los dispositivos intercambian datos automáticamente sin intervención humana en un sentido más amplio.
 
-En el contexto de <Ref slug="openid-connect" /> (o <Ref slug="oauth-2.0" />), las aplicaciones M2M usan el <Ref slug="client-credentials-flow" />, como se define en el [protocolo OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749), que soporta protocolos estándar similares. Generalmente involucra a una aplicación cliente (una máquina o servicio) accediendo a recursos ya sea por sí misma o en nombre de un usuario. Es ideal para situaciones donde solo los clientes de confianza pueden acceder a servicios de backend.
+En el contexto de <Ref slug="openid-connect" /> (o <Ref slug="oauth-2.0" />), las aplicaciones M2M utilizan el <Ref slug="client-credentials-flow" />, como se define en el [protocolo OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749), que admite protocolos estándar similares. Generalmente involucra una aplicación cliente (una máquina o servicio) que accede a recursos ya sea por sí misma o en nombre de un usuario. Es ideal para situaciones donde solo los clientes de confianza pueden acceder a servicios de backend.
 
 <SeeAlso slugs={["machine-to-machine"]} />

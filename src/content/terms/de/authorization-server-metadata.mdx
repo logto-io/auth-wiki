@@ -1,0 +1,95 @@
+---
+title: Autorisierungsserver-Metadaten (Authorization Server Metadata)
+tags: [oauth 2.0, oidc]
+description: OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata) sind ein standardisiertes Format, das es OAuth 2.0-Clients ermöglicht, automatisch die Informationen zu entdecken und zu erhalten, die benötigt werden, um mit OAuth 2.0-Autorisierungsservern zu interagieren, einschließlich Endpunktstandorten und Serverfähigkeiten.
+---
+
+## Was sind OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata)?
+
+OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata) sind ein standardisiertes Format, definiert in [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414), das es OAuth 2.0-Clients ermöglicht, automatisch die Informationen zu entdecken und zu erhalten, die benötigt werden, um mit OAuth 2.0-Autorisierungsservern zu interagieren.
+
+Dies umfasst wesentliche Informationen wie Endpunktstandorte, unterstützte Funktionen und Serverfähigkeiten.
+
+Das Metadatenformat bietet ein maschinenlesbares Konfigurationsdokument, das den Integrationsprozess zwischen Clients und Autorisierungsservern vereinfacht und den Bedarf an manueller Konfiguration reduziert.
+
+## Wie funktionieren OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata)?
+
+Im OAuth 2.0-Ökosystem gibt es mehrere Schlüsselrollen:
+- <Ref slug="authorization-server"/>: Gibt access tokens an Clients aus, nachdem der resource owner erfolgreich authentifiziert wurde
+- <Ref slug="client"/>: Anwendung, die Zugriff auf geschützte Ressourcen anfordert
+- <Ref slug="resource-owner"/>: Entität, die in der Lage ist, Zugriff auf geschützte Ressourcen zu gewähren
+- <Ref slug="resource-server"/>: Server, der geschützte Ressourcen hostet
+
+Die Autorisierungsserver-Metadaten (Authorization Server Metadata) bieten eine standardisierte Möglichkeit für Clients, zu entdecken und zu verstehen, wie sie mit dem Autorisierungsserver interagieren können. So funktioniert es:
+
+1. Der Client kennt oder entdeckt die issuer-URL des Autorisierungsservers
+2. Der Client konstruiert die Metadaten-URL, indem er `/.well-known/oauth-authorization-server` an die issuer-URL anhängt
+3. Der Client ruft das Metadatendokument ab, das die Serverkonfiguration enthält
+4. Der Client verwendet die abgerufenen Metadaten (Endpunkte, unterstützte Funktionen usw.), um sich ordnungsgemäß zu konfigurieren und mit dem Autorisierungsserver zu interagieren
+
+Zum Beispiel, wenn die issuer-URL `https://auth.example.com` ist, wären die Metadaten verfügbar unter:
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+Das Metadatendokument enthält wichtige Informationen wie:
+- `issuer`: Die Kennung des Autorisierungsservers
+- `authorization_endpoint`: Die URL des Autorisierungsendpunkts
+- `token_endpoint`: Die URL des Tokenendpunkts
+- `scopes_supported`: Verfügbare scopes
+- `response_types_supported`: Unterstützte Antworttypen
+- `token_endpoint_auth_methods_supported`: Unterstützte Client-Authentifizierungsmethoden
+
+Für eine vollständige Liste der Metadatenfelder siehe bitte [RFC 8414 Abschnitt 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2).
+
+Mit diesen Metadatenwerten können Clients den OAuth 2.0 flow automatisch konfigurieren und ausführen:
+
+1. **Erste Einrichtung**:
+   - Der Client validiert, dass der `issuer` mit dem erwarteten Autorisierungsserver übereinstimmt
+   - Der Client überprüft `response_types_supported`, um sicherzustellen, dass sein flow-Typ (z.B. `code`) unterstützt wird
+
+2. **Autorisierungsanfrage (Authorization request)**:
+   - Der Client verwendet `authorization_endpoint`, um die Autorisierungs-URL zu konstruieren
+   - Der Client wählt geeignete scopes aus `scopes_supported` basierend auf seinen Bedürfnissen
+   - Beispiel: `https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **Token-Austausch**:
+   - Nach Erhalt des Autorisierungscodes verwendet der Client `token_endpoint` für den Token-Austausch
+   - Der Client überprüft `token_endpoint_auth_methods_supported`, um zu bestimmen, wie er sich authentifizieren soll (z.B. `client_secret_basic`)
+   - Beispiel: Sende POST-Anfrage an den Tokenendpunkt mit Client-Anmeldedaten und Autorisierungscode
+
+Dieser grundlegende flow hilft Clients, sich automatisch zu konfigurieren und mit dem Autorisierungsserver zu interagieren, ohne manuelle Endpunktkonfiguration oder Versuch-und-Irrtum-Auswahl von scopes.
+
+## Was ist der Unterschied zwischen OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata) und OpenID Connect Discovery?
+
+Die Hauptunterschiede sind:
+
+1. **Umfang und Zweck**:
+   - OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata) konzentrieren sich speziell auf die OAuth 2.0-Protokollkonfiguration
+   - <Ref slug="openid-connect-discovery"/> enthält zusätzliche Parameter für identitätsbezogene Funktionen, wie:
+     - `userinfo_endpoint`: Endpunkt zum Abrufen von Benutzerinformationen
+     - `id_token_signing_alg_values_supported`: Unterstützte Signaturalgorithmen für ID Tokens
+     - `claims_supported`: Verfügbare Benutzeransprüche, die im ID Token oder vom UserInfo Endpoint zurückgegeben werden können
+     - Unterstützt `openid` scope für die Authentifizierung
+     - Beinhaltet hybrid flow Antworttypen (z.B. `code id_token`, `code id_token token`)
+
+2. **Metadaten-Endpunkt**:
+   - OAuth 2.0 verwendet `/.well-known/oauth-authorization-server`
+   - OpenID Connect verwendet `/.well-known/openid-configuration`
+
+## Entspricht OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata) der OpenID Connect Discovery?
+
+Ja, OAuth 2.0 Autorisierungsserver-Metadaten (Authorization Server Metadata) sind kompatibel mit <Ref slug="openid-connect-discovery"/>.
+
+Die OAuth 2.0-Metadatenspezifikation (RFC 8414) wurde von OpenID Connect Discovery 1.0 inspiriert, das bereits in der Praxis weit verbreitet war.
+
+Wichtige Punkte zur Konformität:
+1. Das Metadatenformat folgt derselben JSON-Struktur
+2. Autorisierungsserver können beide Endpunkte gleichzeitig unterstützen
+3. OpenID-Anbieter stellen typischerweise beide Endpunkte für die Abwärtskompatibilität bereit
+4. Die OAuth 2.0-Metadaten können bei Bedarf mit OpenID Connect-spezifischen Feldern erweitert werden
+
+Diese Kompatibilität stellt sicher, dass Autorisierungsserver sowohl reine OAuth 2.0-Clients als auch OpenID Connect-Relying-Parties ohne Konflikte bedienen können.
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

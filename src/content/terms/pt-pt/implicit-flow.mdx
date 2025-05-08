@@ -1,72 +1,82 @@
 ---
 title: Fluxo implícito (Implicit flow)
 tags: [oauth 2.0, oidc]
-description: O fluxo implícito (implicit flow) do OIDC é um método de autenticação para SPAs, permitindo que recebam rapidamente tokens diretamente do servidor de autorização. Embora simplifique o processo ao eliminar a necessidade de um servidor backend, vem com menor segurança devido à exposição do token na URL.
+description: O fluxo implícito (Implicit flow) é um método de autenticação que permite que aplicações apenas cliente (como SPAs e apps nativas) recebam tokens diretamente através de fragmentos de URL do servidor de autorização sem fornecer um segredo de cliente.
 ---
 
-## O que é o fluxo implícito (implicit flow)
+## O que é o fluxo implícito (implicit flow)?
 
-O fluxo implícito (implicit flow) do OIDC (OpenID Connect) é um processo de autenticação usado principalmente por aplicações cliente implementadas em um navegador usando uma linguagem de script, por exemplo, aplicações de página única (SPAs). Ele permite que aplicações cliente obtenham diretamente tokens de ID e tokens de acesso (access tokens) do servidor de autorização sem realizar a autenticação do cliente.
+O fluxo implícito (implicit flow) do OAuth 2.0 é um método de autenticação que permite que aplicações apenas cliente (como SPAs e apps nativas) recebam tokens diretamente através de fragmentos de URL do servidor de autorização sem fornecer um segredo de cliente.
+
+O fluxo implícito (implicit flow) é projetado para aplicações apenas cliente, porque elas funcionam completamente no navegador ou no dispositivo do usuário e não podem armazenar segredos de cliente de forma segura.
+
+O fluxo implícito (implicit flow) foi oficialmente descontinuado no <Ref slug="oauth-2.1" /> por razões de segurança (serão mencionadas abaixo). Aplicações apenas cliente devem agora usar o <Ref slug="authorization-code-flow" /> com a extensão <Ref slug="pkce" />.
 
 ## Como funciona o fluxo implícito (implicit flow)?
 
 Os principais passos do fluxo implícito (implicit flow) são os seguintes:
 
-1. **Envio do pedido de autenticação (authentication request)**: O utilizador inicia o fluxo normalmente clicando num link ou botão na aplicação para iniciar sessão. A aplicação envia um pedido de autenticação (authentication request) para o endpoint de autorização do servidor de autorização. O servidor de autorização valida os parâmetros e redireciona o utilizador para autenticar-se na página de início de sessão do servidor de autorização.
-2. **Autenticação do utilizador**: O utilizador autentica-se no servidor de autorização (por exemplo, inserindo nome de utilizador e senha).
-3. **Resposta do servidor de autorização**: O servidor de autorização retorna um token de ID e, se solicitado, um token de acesso (access token) para a aplicação cliente como fragmento de URL.
-4. **Processamento dos tokens pelo cliente**: A aplicação cliente extrai os tokens do fragmento de URL.
-
 ```mermaid
 sequenceDiagram
-participant User
-participant Application
-participant Authorization Server
-User->>Application: Iniciar fluxo de início de sessão
-Application->>Authorization Server: Solicitar servidor de autorização com ID do cliente, scope, redirect URI e estado
-Authorization Server->>User: Redirecionar utilizador para a página de início de sessão e solicitar autenticação
-User->>Authorization Server: Autenticar (por exemplo, inserir nome de utilizador e senha)
-Authorization Server -->>Application: Retornar token de ID e token de acesso no fragmento de URL
-Application->>Application: Extrair tokens do fragmento de URL
+  participant U as Utilizador
+  participant C as Cliente
+  participant AS as Servidor de Autorização
+  participant RS as Servidor de Recursos
+
+  U->>C: Clicar em iniciar sessão
+  C->>AS: Pedido de Autorização<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: Mostrar página de login
+  U->>AS: Inserir credenciais
+  AS-->>C: Retornar token no fragmento de URL
+  C->>C: Extrair token do fragmento
+  C->>RS: Pedido de API com token
+  RS-->>C: Resposta de recurso protegido
 ```
 
-### Pedido de autenticação (Authentication request)
+Aviso:
 
-Os parâmetros do pedido são os seguintes:
-- **client_id**: OBRIGATÓRIO. Identificador de cliente OAuth 2.0 válido, que está disponível no Logto como o ID da aplicação (ou ID do app).
-- **scope**: OBRIGATÓRIO. Este valor especifica um conjunto de recursos que o utilizador está solicitando do servidor de autorização. Por exemplo, `openid profile email`
-- **response_type**: OBRIGATÓRIO. O valor é `id_token` ou `id_token token`. Nenhum token de acesso (access token) é retornado quando o valor é `id_token`.
-- **redirect_uri**: OBRIGATÓRIO. O URI para o qual a resposta de autenticação será enviada e deve corresponder exatamente ao redirect URI que o cliente pré-registrou no <Ref slug="openid-connect" headingId="openid-provider-op" />. Por exemplo, `Sign-in redirect URI` no Logto Admin Console.
-- **nonce**: OBRIGATÓRIO. Uma string aleatória usada para mitigar ataques de repetição, que é passada sem modificações do pedido de autenticação para o claim do token de ID.
+- O cliente só precisa fornecer um `client_id` no pedido de autorização, sem exigir um `client_secret`.  
+  Isto porque esses clientes não podem armazenar segredos de forma segura, então este fluxo não requer um segredo de cliente.
 
-### Exemplo de um pedido de autenticação
+- O parâmetro `response_type` é definido como `token`, instruindo o servidor de autorização a retornar o access token diretamente em vez de um código de autorização.  
+  No OIDC (<Ref slug="openid-connect" />), o `response_type` é `id_token` ou `id_token token`, e o serviço de auth retornará os tokens correspondentes com base nos diferentes tipos de resposta.
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- O token é retornado diretamente no fragmento de URL. Isso significa que o token é exposto na URL e pode ser facilmente acessado por outras aplicações ou scripts.
 
-## Limitações
+## O fluxo implícito (implicit flow) é seguro?
 
-O fluxo implícito (implicit flow) foi desenvolvido numa época em que os navegadores não adotavam amplamente o Cross-Origin Resource Sharing (CORS). Portanto, o envio de pedidos POST para o servidor de autorização hospedado em um domínio diferente é proibido.
+Não, o fluxo implícito (implicit flow) no OAuth 2.0 é geralmente considerado menos seguro do que outros fluxos como o fluxo de código de autorização (authorization code flow).
 
-Devido a esta limitação, o servidor de autorização retorna diretamente os tokens no fragmento de URL, o que pode expô-los ao utilizador final e a aplicações que têm acesso ao User Agent do utilizador final.
+Não é recomendado para a maioria dos casos de uso devido a várias vulnerabilidades:
 
-Além disso, a autenticação do cliente não é realizada no fluxo implícito (implicit flow), o que significa que qualquer aplicação pode fingir ser o cliente que solicita a autenticação, já que o ID do cliente está sempre exposto em aplicações baseadas em navegador.
+- **Exposição de token na URL**
+   - Access tokens aparecem diretamente na URL do navegador (após o símbolo #)
+   - Esses tokens podem ser:
+     - Salvos no histórico do navegador
+     - Vazados através de cabeçalhos de referência
+     - Capturados por código JavaScript malicioso na mesma página
 
-Devido às limitações acima, o fluxo implícito (implicit flow) é geralmente considerado menos seguro do que o Fluxo de Código de Autorização (Authorization Code Flow).
+- **Sem autenticação do cliente**
+   - A aplicação cliente não precisa provar sua identidade
+   - Isso significa que qualquer pessoa que conheça o `client_id` pode se passar por um cliente legítimo
 
-## Alternativas ao fluxo implícito (implicit flow)
+- **Sem tokens de atualização (refresh tokens)**
+   - Este fluxo não suporta tokens de atualização
+   - Os utilizadores devem iniciar sessão novamente quando os access tokens expirarem
+   - Para evitar logins frequentes, os utilizadores podem armazenar tokens de maneiras inseguras
 
-Dadas as limitações de segurança do fluxo implícito (implicit flow), outros fluxos são frequentemente recomendados:
-- **Fluxo de Código de Autorização (Authorization Code Flow)**: Este fluxo envolve um passo adicional onde o cliente troca um código de autorização por tokens, proporcionando uma camada extra de segurança.
-- **PKCE (Proof Key for Code Exchange)**: Uma extensão do Fluxo de Código de Autorização (Authorization Code Flow) que adiciona uma camada adicional de segurança usando um verificador de código e um desafio de código.
+- **Vulnerável a ataques XSS**
+   - Todos os tokens são manipulados no navegador
+   - Se o site sofrer um ataque XSS (Cross-Site Scripting)
+   - O código JavaScript dos atacantes pode facilmente roubar esses tokens
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+Devido a estas preocupações de segurança, o fluxo implícito (implicit flow) foi descontinuado no <Ref slug="oauth-2.1" />. Aplicações apenas cliente devem agora usar o <Ref slug="authorization-code-flow" /> com a extensão <Ref slug="pkce" />.
+
+Podes verificar [O que é PKCE: dos conceitos básicos à compreensão profunda](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) para aprender como o PKCE protege o fluxo de código de autorização (authorization code flow) para aplicações apenas cliente.
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ Dadas as limitações de segurança do fluxo implícito (implicit flow), outros 
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "O tipo de concessão implícita é usado para obter tokens de acesso (não suporta a emissão de tokens de atualização) e é otimizado para clientes públicos conhecidos por operar um URI de redirecionamento específico. Esses clientes são tipicamente implementados em um navegador usando uma linguagem de script como JavaScript."
-      }
+        ogDescription:
+          "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript.",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />

@@ -1,24 +1,26 @@
 ---
 title: 授權碼流程 (Authorization code flow)
 tags: [oauth 2.0, oidc]
-description: 授權碼流程 (Authorization code flow) 是一種安全的 OAuth 2.0 機制，可讓應用程式代表用戶獲取存取權杖 (Access Tokens)。它涉及用戶身份驗證 (Authentication)、授權碼生成和權杖交換。
+description: 授權碼流程 (Authorization code flow) 是一種安全的 OAuth 2.0 機制，使應用程式能夠代表用戶獲取存取權杖 (access tokens)。它涉及用戶認證 (authentication)、授權碼生成和權杖交換。
 ---
 
 ## 什麼是授權碼流程 (Authorization code flow)？
 
-授權碼流程 (Authorization code flow，也稱為授權碼授權 (Authorization Code Grant))，定義於 [OAuth 2.0 RFC 6749，第 4.1 節](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1)，是一種廣泛使用的 OAuth 2.0 授權機制，允許應用程式代表用戶獲取存取權杖 (Access Token)。此流程特別適合於可以安全儲存客戶端秘密的保密應用程式（例如：傳統伺服器端運行的網頁應用程式）。
+授權碼流程 (Authorization code flow)（又稱授權碼授權 (authorization code grant)），定義於 [OAuth 2.0 RFC 6749, section 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1)，是一種廣泛使用的 OAuth 2.0 授權機制，允許應用程式代表用戶獲取存取權杖 (access token)。
 
-授權碼流程 (Authorization code flow) 是獲取 OAuth 2.0 中存取權杖 (Access Tokens) 的一種穩固且安全的方法，因此成為許多網頁應用程式的首選。理解此流程對於使用 OAuth 2.0 和 API 集成的開發人員至關重要。
+此流程非常適合於可以安全存儲客戶端密鑰的機密應用程式，如傳統的伺服器端網頁應用程式。
+
+當與 PKCE (<Ref slug="pkce" />) 擴展結合使用時，它也可以安全地用於無法安全存儲客戶端密鑰的原生應用程式和單頁應用程式 (SPAs)。
 
 ## 授權碼流程 (Authorization code flow) 如何運作？
 
-授權碼流程 (Authorization code flow) 包含以下步驟：
+授權碼流程 (Authorization code flow) 涉及以下步驟：
 
-1. **流程啟動**：用戶通常通過點擊應用程式中的鏈接或按鈕來登錄，啟動流程。該應用程式將用戶重定向到授權伺服器的授權端點，傳遞客戶端 ID、請求的範圍 (scope)、重定向 URI 和狀態參數。授權伺服器驗證參數並提示用戶在授權伺服器的登錄頁面上進行身份驗證。
-2. **用戶身份驗證和授權**：用戶在授權伺服器上進行身份驗證，並授權應用程式訪問請求的資源。
-3. **生成授權碼和重定向**：授權伺服器生成授權碼，並使用早先提供的重定向 URI 將用戶重定向回應用程式。授權碼包含在重定向 URI 的查詢字串中。
-4. **代碼交換**：應用程式從查詢字串中提取授權碼，並向授權伺服器的權杖端點發出 POST 請求，以交換授權碼獲取存取權杖 (Access Token)。應用程式在請求中還必須包括客戶端 ID、客戶端秘密、重定向 URI 和授權碼。
-5. **存取權杖 (Access Token) 獲取**：授權伺服器驗證授權碼，並在驗證成功時向應用程式發放存取權杖 (Access Token)（可選擇性地包括刷新權杖 (Refresh Token)）。應用程式然後可以使用存取權杖 (Access Token) 代表用戶發出授權的 API 請求。
+1. **流程啟動**：用戶通常通過點擊應用程式中的鏈接或按鈕來啟動流程。應用程式將用戶重定向到授權伺服器的授權端點，傳遞客戶端 ID、請求的範圍 (scope)、重定向 URI 和狀態參數。授權伺服器驗證參數並提示用戶在授權伺服器的登錄頁面上進行認證。
+2. **用戶認證和授權**：用戶在授權伺服器上進行認證並授予應用程式訪問請求資源的權限。
+3. **代碼生成和重定向**：授權伺服器生成授權碼並使用先前提供的重定向 URI 將用戶重定向回應用程式。授權碼包含在重定向 URI 的查詢字串中。
+4. **代碼交換**：應用程式從查詢字串中提取授權碼，並向授權伺服器的權杖端點發出 POST 請求，以交換授權碼以獲取存取權杖 (access token)。應用程式還必須在請求中包含客戶端 ID、客戶端密鑰、重定向 URI 和授權碼。
+5. **存取權杖檢索**：授權伺服器驗證授權碼，並在成功驗證後向應用程式發出存取權杖 (access token)（以及可選的刷新權杖 (refresh token)）。然後，應用程式可以使用存取權杖 (access token) 代表用戶發出授權的 API 請求。
 
 以下序列圖可以說明這些步驟：
 
@@ -28,96 +30,172 @@ sequenceDiagram
     participant Application
     participant Authorization Server
 
-    User->>Application: 啟動登錄流程
-    Application->>Authorization Server: 請求授權伺服器，傳遞客戶端 ID、範圍 (Scope)、重定向 URI 和狀態 (State)
-    Authorization Server->>User: 將用戶重定向到登錄頁面，並提示進行身份驗證
-    User->>Authorization Server: 認證並授權應用程式訪問請求的許可
-    Authorization Server->>Application: 將用戶重定向到重定向 URI 並附帶授權碼
-    Application->>Authorization Server: 使用授權碼進行權杖交換
-    Authorization Server->>Application: 發放存取權杖 (Access Token)（可包括刷新權杖 (Refresh Token)）
+    User->>Application: Initiate sign-in flow
+    Application->>Authorization Server: Request authorization server with client ID, scope, redirect URI, and state
+    Authorization Server->>User: Redirect user to sign-in page and prompt for authentication
+    User->>Authorization Server: Authenticate and authorize application with requested permissions
+    Authorization Server->>Application: Redirect user to redirect URI with authorization code
+    Application->>Authorization Server: Exchange code for token
+    Authorization Server->>Application: Issue access token (and optionally refresh token)
 ```
 
-## 認證請求 (Authentication Request)
+## 如何實現授權碼流程 (Authorization code flow)？
 
-請求參數如下：
+以下是一個實現授權碼流程 (Authorization code flow) 的簡單示例，遵循 [OAuth 2.0 RFC 6749, section 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1) 中的指南：
 
-- **client_id**: 必填。有效的 OAuth 2.0 客戶端識別碼。
-- **scope**: 必填。此值指定用戶從授權伺服器請求的一組資源。例如，`openid profile email`。
-- **response_type**: 必填。此值必須是 `code`，表示應用程式預期獲得授權碼。
-- **redirect_uri**: 必填。將發送認證響應的 URI，應與客戶端在授權伺服器上預先註冊的重定向 URI 完全匹配。
-- **state**: 推薦。一個不透明的值，用於在請求和回調之間維持狀態。也用於防止 <Ref slug="csrf" /> 攻擊。
-- **nonce**: 可選。一個隨機字符串，用於將客戶端會話與 ID 權杖 (ID Token) 關聯，並減輕重播攻擊。
-- **prompt**: 可選。由字符串值組成的空格分隔且大小寫敏感的列表，指定授權伺服器是否提示終端用戶重新進行身份驗證和授權。定義的值如下：
-  - **none**: 授權伺服器不顯示任何身份驗證或授權用戶介面頁面。如果終端用戶尚未經過身份驗證，或客戶端沒有對所請求的聲明 (Claims) 的預配置授權，或者不滿足處理請求的其他條件，則返回錯誤。錯誤代碼通常是 `login_required`、`interaction_required`。這可以用作檢查現有身份驗證和/或授權的方法。
-  - **login**: 授權伺服器應提示終端用戶重新進行身份驗證。如果無法重新認證終端用戶，必須返回錯誤，通常是 `login_required`。
-  - **consent**: 授權伺服器應在返回信息給客戶端之前提示終端用戶進行授權。如果無法獲得授權，必須返回錯誤，通常是 `consent_required`。
-  - **select_account**: 授權伺服器應提示終端用戶選擇一個用戶帳戶。這使得擁有多個帳戶的終端用戶可以在授權伺服器上選擇多個帳戶中的一個。如果無法獲得終端用戶做出的賬戶選擇，必須返回錯誤，通常是 `account_selection_required`。
+### 1. 初始設置
 
-[完整請求參數定義](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)
+在開始之前，確保你從你的 auth 服務獲得以下信息：
 
-### 認證請求 (Authentication Request) 範例
-
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=code" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "state=RANDOM_STRING_FOR_STATE"
+```javascript
+const config = {
+  clientId: "YOUR_CLIENT_ID",
+  clientSecret: "YOUR_CLIENT_SECRET",
+  authorizationEndpoint: "https://authorization-server.com/auth",
+  tokenEndpoint: "https://authorization-server.com/token",
+  redirectUri: "http://localhost:3000/callback",
+};
 ```
 
-一個典型的成功響應：
+客戶端 ID、客戶端密鑰和重定向 URI 是你的應用程式在 auth 服務中的配置。
 
-```http
-HTTP/1.1 302 Found
-Location: https://yourapp.com/callback?
-  code=YOUR_AUTHORIZATION_CODE
-  &state=RANDOM_STRING_FOR_STATE
+`authorizationEndpoint` 和 `tokenEndpoint` 是由你的 auth 服務提供的。
+
+如果你的 auth 伺服器實現了 OIDC (<Ref slug="openid-connect" />)，你可以通過 <Ref slug="openid-connect-discovery" /> 獲取此信息。
+
+### 2. 啟動授權請求
+
+當用戶想要登錄時（例如，點擊登錄按鈕），流程開始。應用程式將發出登錄請求。
+
+此請求包括 `client ID`、`redirect URI` 和 `scope` 等參數。然後，它將用戶重定向到 auth 服務的授權端點（auth 服務的登錄頁面）。
+
+用戶將在此登錄頁面上進行認證和授權。
+
+```javascript
+app.get("/login", (req, res) => {
+  const authUrl = new URL(config.authorizationEndpoint);
+  authUrl.searchParams.append("response_type", "code");
+  authUrl.searchParams.append("client_id", config.clientId);
+  authUrl.searchParams.append("redirect_uri", config.redirectUri);
+  authUrl.searchParams.append("scope", "openid profile email");
+  authUrl.searchParams.append("state", "random_state_string");
+
+  res.redirect(authUrl.toString());
+});
 ```
 
-## 權杖交換請求 (Token Exchange Request)
+注意：你可以在示例代碼中顯示的參數之外添加更多參數。請參閱 [完整的認證請求參數定義](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)。
 
-一旦上述認證請求成功響應，客戶端將自動重定向到回調 URI `https://yourapp.com/callback`，並將授權碼作為 URI 參數傳遞。
+### 3. 處理重定向 URI 回調和權杖交換
 
-客戶端應獲取並處理 `code`，以後續的權杖交換請求換取存取權杖 (Access Token)。
+在用戶完成 auth 服務的登錄頁面上的認證和授權後，auth 服務將用戶重定向回應用程式的重定向 URI。此重定向 URI 包含授權碼和狀態參數。
 
-### 權杖交換請求範例
+應用程式從重定向 URI 中提取授權碼和狀態參數，並在 auth 服務的權杖端點交換它們以獲取存取權杖 (access token) 和刷新權杖 (refresh token)（如果有的話）。
 
-```bash
-curl -X POST "https://authorization-server.com/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "code=YOUR_AUTHORIZATION_CODE" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "grant_type=authorization_code" \
+```javascript
+app.get("/callback", async (req, res) => {
+  const { code, state } = req.query;
+
+  try {
+    // Exchange the authorization code for an access token and refresh token
+    const tokenResponse = await axios.post(config.tokenEndpoint, {
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: config.redirectUri,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+    });
+
+    const { access_token, refresh_token } = tokenResponse.data;
+    // Store tokens for subsequent requests
+    req.session.accessToken = access_token;
+
+    res.send("Authentication successful!");
+  } catch (error) {
+    res.status(500).send("Token exchange failed");
+  }
+});
 ```
 
-## 優點
+### 4. 使用存取權杖 (Access token)
 
-- **增強的安全性**：客戶端秘密永遠不會暴露給用戶的瀏覽器，降低了客戶端冒充的風險。
-- **一次性授權碼**：授權碼的壽命很短，而且只能使用一次，降低了攔截和重放攻擊的風險。
-- **短命權杖**：在此流程中發放的存取權杖 (Access Tokens) 是短期的（通常為 1 小時），減少了在權杖被洩露時發生未經授權訪問的風險。
-- **刷新權杖 (Refresh Token)**：授權伺服器可以選擇性地發放刷新權杖 (Refresh Token)，允許應用程式在不需要用戶互動的情況下獲取新的存取權杖 (Access Token)。
+一旦你擁有權杖，使用它來訪問受保護的資源：
 
-## 授權碼流程 (Authorization code flow) 與隱式流程 (Implicit Flow) 的區別是什麼？
+```javascript
+async function fetchUserProfile(accessToken) {
+  const response = await axios.get("https://api.example.com/userinfo", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+```
 
-授權碼流程 (Authorization code flow) 和隱式流程 (Implicit Flow) 之間的主要區別在於存取權杖 (Access Token) 是如何獲取的：
+## 如何為公共客戶端（原生應用程式和 SPAs）使用授權碼流程 (Authorization code flow)？
 
-- **授權碼流程 (Authorization code flow)**：客戶端應用程式首先從授權端點獲得授權碼，然後在後續的 POST 請求中使用該授權碼向權杖端點交換存取權杖 (Access Token)。
-- **隱式流程 (Implicit Flow)**：客戶端應用程式直接從授權端點接收存取權杖 (Access Token)。
+公共客戶端（如原生應用程式和 SPAs）在使用授權碼流程 (Authorization code flow) 時面臨獨特的安全挑戰。這些應用程式無法安全地存儲客戶端密鑰。客戶端密鑰將暴露在 JavaScript 代碼中或設備的存儲中。這使得攻擊者容易提取和濫用密鑰。
 
-## 授權碼流程 (Authorization code flow) 與客戶端憑證流程 (Client Credentials Flow) 的區別是什麼？
+因此，關鍵挑戰是如何在沒有客戶端密鑰的情況下安全地使用授權碼流程 (Authorization code flow)。OAuth 2.0 規範引入了 PKCE (<Ref slug="pkce" />) 擴展來解決這個問題。
 
-授權碼流程 (Authorization code flow) 和客戶端憑證流程 (Client Credentials Flow) 主要的區別在於這些流程所用的上下文：
+PKCE 增加了額外的安全措施來保護公共客戶端的授權碼流程 (Authorization code flow)。即使不使用客戶端密鑰，它也能防止授權碼攔截攻擊。查看這篇博客以了解更多關於 [PKCE 如何保護 OAuth 2.0 授權碼流程 (Authorization code flow)](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) 的信息。
 
-- **授權碼流程 (Authorization code flow)**：當客戶端應用程式需要代表用戶訪問資源時使用。該流程涉及用戶的身份驗證 (Authentication) 和授權 (Authorization)。
-- **客戶端憑證流程 (Client Credentials Flow)**：當客戶端應用程式需要代表自身訪問資源時使用。該流程涉及客戶端的身份驗證 (Authentication)，而不涉及用戶身份驗證 (Authentication)，最適合於機器對機器的通信。
+## 如何安全地使用授權碼流程 (Authorization code flow)？
 
-## 授權碼流程 (Authorization code flow) 的典型用例是什麼？
+### **使用 "state" 防止 CSRF 攻擊**
 
-- 需要用戶身份驗證 (Authentication) 並訪問 API 的傳統網頁應用程式。
-- 需要安全地從第三方服務訪問用戶數據的應用程式。
+CSRF (<Ref slug="csrf" />) 攻擊會誘騙用戶在已認證的網頁應用程式中執行不需要的操作。狀態參數有助於防止這種情況。
 
-<SeeAlso slugs={['device-flow', 'implicit-flow', 'client-credentials-flow']} />
+- 生成一個唯一的隨機值。將此值存儲在伺服器端。
+- 包含狀態參數。將其附加到授權請求 URL。
+- 驗證返回的狀態。當授權伺服器重定向回你的應用程式時，將返回的狀態與存儲的值進行比較。如果它們不匹配，則拒絕請求。這確認了請求來自你的應用程式。
 
-<Resources urls={['https://datatracker.ietf.org/doc/html/rfc6749']} />
+### **配置安全的重定向 URI**
+
+重定向 URI 是授權伺服器在用戶認證後發送授權碼的地方。安全配置至關重要。
+
+- 註冊有效的重定向 URI。在應用程式向授權伺服器註冊時，指定允許的重定向 URI。
+- 精確匹配。授權請求中的重定向 URI 必須與註冊的 URI 完全匹配。即使是微小的差異也可能造成漏洞。
+- 避免使用通配符 URI。如果可能，避免在生產環境中使用通配符 URI。它們會擴大攻擊面。
+- 生產環境使用 HTTPS。在生產環境中，始終使用 HTTPS 作為重定向 URI。
+
+### **為所有客戶端使用 PKCE**
+
+雖然 PKCE 最初是為公共客戶端設計的，但 <Ref slug="oauth-2.1" /> 規範要求對所有客戶端（包括機密客戶端）強制執行 PKCE，以增強授權碼流程 (Authorization code flow) 的整體安全性。（參見 [對所有客戶端強制執行 PKCE](https://auth.wiki/oauth-2.1#enforcing-pkce-for-all-clients)）
+
+## 授權碼流程 (Authorization code flow) 和隱式流程 (Implicit flow) 有什麼區別？
+
+授權碼流程 (Authorization code flow) 和隱式流程 (Implicit flow) 的主要區別在於獲取存取權杖 (access token) 的方式：
+
+- **授權碼流程 (Authorization code flow)**：客戶端應用程式首先從授權端點接收授權碼，然後在隨後的 POST 請求中將其交換為存取權杖 (access token)。
+- **隱式流程 (Implicit flow)**：客戶端應用程式在用戶授權後直接在重定向 URI 的 URL 片段中接收存取權杖 (access token)。
+
+了解更多關於 <Ref slug="implicit-flow" /> 的信息。
+
+## 授權碼流程 (Authorization code flow) 和客戶端憑證流程 (Client credentials flow) 有什麼區別？
+
+授權碼流程 (Authorization code flow) 和客戶端憑證流程 (Client credentials flow) 的主要區別在於使用流程的上下文：
+
+- **授權碼流程 (Authorization code flow)**：當客戶端應用程式需要代表用戶訪問資源時使用。該流程涉及用戶認證和授權。
+- **客戶端憑證流程 (Client credentials flow)**：當客戶端應用程式需要代表自己訪問資源時使用。該流程涉及客戶端認證，但不涉及用戶認證，最適合於機器對機器 (machine-to-machine) 通信。
+
+了解更多關於 <Ref slug="client-credentials-flow" /> 的信息。
+
+<SeeAlso
+  slugs={[
+    "device-flow",
+    "implicit-flow",
+    "client-credentials-flow",
+    "pkce",
+    "openid-connect",
+    "openid-connect-discovery",
+    "csrf",
+    "oauth-2.1",
+  ]}
+/>
+
+<Resources urls={[
+  "https://datatracker.ietf.org/doc/html/rfc6749",
+  "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
+  "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps"
+]} />

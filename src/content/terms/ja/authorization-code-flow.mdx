@@ -1,26 +1,28 @@
 ---
-title: 認可コードフロー (Authorization code flow)
+title: 認可コードフロー (Authorization Code Flow)
 tags: [oauth 2.0, oidc]
-description: 認可コードフロー (Authorization code flow) は、安全な OAuth 2.0 メカニズムであり、アプリケーションがユーザーの代理でアクセストークンを取得できるようにします。これには、ユーザー認証、認可コードの生成、およびトークンの交換が含まれます。
+description: 認可コードフローは、ユーザーの代わりにアプリケーションがアクセストークンを取得できるようにする安全な OAuth 2.0 メカニズムです。ユーザー認証、認可コードの生成、トークン交換が含まれます。
 ---
 
-## 認可コードフロー (Authorization code flow) とは？
+## 認可コードフロー (Authorization Code Flow) とは？
 
-認可コードフロー (Authorization code flow)（別名: 認可コードグラント）は、[OAuth 2.0 RFC 6749, section 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1) で定義されている、広く使用されている OAuth 2.0 認可メカニズムであり、アプリケーションがユーザーの代理でアクセストークンを取得できるようにします。このフローは、クライアントシークレットが安全に格納できる、機密アプリケーション（例: 従来のサーバーサイドで動作する Web アプリケーション）に特に適しています。
+認可コードフロー (別名: 認可コードグラント) は、[OAuth 2.0 RFC 6749, セクション 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1) で定義されている、ユーザーの代わりにアプリケーションがアクセストークンを取得できるようにする、広く使用されている OAuth 2.0 認可メカニズムです。
 
-認可コードフロー (Authorization code flow) は、OAuth 2.0 でアクセストークンを取得するための堅牢で安全な方法であり、多くの Web アプリケーションにとって好まれる選択です。OAuth 2.0 と API 統合に取り組む開発者にとって、このフローを理解することは不可欠です。
+このフローは、クライアントシークレットを安全に保存できる従来のサーバーサイド Web アプリのような機密性の高いアプリケーションに最適です。
 
-## 認可コードフロー (Authorization code flow) はどのように機能しますか？
+また、PKCE (<Ref slug="pkce" />) 拡張と組み合わせることで、クライアントシークレットを安全に保存できないネイティブアプリやシングルページアプリケーション (SPA) に対しても安全に使用できます。
 
-認可コードフロー (Authorization code flow) は次の手順を含みます：
+## 認可コードフロー (Authorization Code Flow) はどのように機能するのか？
 
-1. **フローの開始**: ユーザーは通常、アプリケーション内のリンクまたはボタンをクリックしてサインインすることでフローを開始します。アプリケーションはユーザーを認可サーバーの認可エンドポイントにリダイレクトし、クライアント ID、要求されたスコープ、リダイレクト URI、およびステートパラメータを渡します。認可サーバーはパラメータを検証し、ユーザーに認可サーバーのサインインページでの認証を促します。
-2. **ユーザーの認証と認可**: ユーザーは認可サーバーで認証し、要求されたリソースへのアクセス許可をアプリケーションに与えます。
-3. **コードの生成とリダイレクション**: 認可サーバーは認可コードを生成し、先に提供されたリダイレクト URI を使用してユーザーをアプリケーションに戻します。認可コードはリダイレクト URI のクエリ文字列に含まれています。
-4. **コード交換**: アプリケーションはクエリ文字列から認可コードを抽出し、認可サーバーのトークンエンドポイントに POST リクエストを送信して、認可コードをアクセストークンに交換します。アプリケーションはこのリクエストにクライアント ID、クライアントシークレット、リダイレクト URI、および認可コードも含める必要があります。
-5. **アクセストークンの取得**: 認可サーバーは認可コードを検証し、検証が成功した場合にアプリケーションにアクセストークン（およびオプションでリフレッシュトークン）を発行します。アプリケーションは、その後アクセストークンを使用してユーザーの代理で認可された API リクエストを行うことができます。
+認可コードフローは以下のステップを含みます：
 
-この手順は、次のシーケンス図で示されます：
+1. **フローの開始**: ユーザーは通常、アプリケーション内のリンクやボタンをクリックしてサインインすることでフローを開始します。アプリケーションは、クライアント ID、要求されたスコープ、リダイレクト URI、および state パラメータを渡して、ユーザーを認可サーバーの認可エンドポイントにリダイレクトします。認可サーバーはパラメータを検証し、ユーザーに認可サーバーのサインインページで認証を促します。
+2. **ユーザー認証と認可**: ユーザーは認可サーバーで認証し、要求されたリソースへのアクセスをアプリケーションに許可します。
+3. **コード生成とリダイレクト**: 認可サーバーは認可コードを生成し、ユーザーを以前に提供されたリダイレクト URI を使用してアプリケーションにリダイレクトします。認可コードはリダイレクト URI のクエリ文字列に含まれています。
+4. **コード交換**: アプリケーションはクエリ文字列から認可コードを抽出し、認可サーバーのトークンエンドポイントに POST リクエストを送信して、認可コードをアクセストークンに交換します。リクエストにはクライアント ID、クライアントシークレット、リダイレクト URI、および認可コードも含める必要があります。
+5. **アクセストークンの取得**: 認可サーバーは認可コードを検証し、検証が成功するとアプリケーションにアクセストークン (およびオプションでリフレッシュトークン) を発行します。その後、アプリケーションはアクセストークンを使用して、ユーザーの代わりに認可された API リクエストを行うことができます。
+
+このステップは次のシーケンス図で示されます：
 
 ```mermaid
 sequenceDiagram
@@ -29,95 +31,171 @@ sequenceDiagram
     participant Authorization Server
 
     User->>Application: サインインフローを開始
-    Application->>Authorization Server: クライアント ID、スコープ、リダイレクト URI、ステートを使用して認可サーバーにリクエスト
+    Application->>Authorization Server: クライアント ID、スコープ、リダイレクト URI、state を使用して認可サーバーにリクエスト
     Authorization Server->>User: ユーザーをサインインページにリダイレクトし、認証を促す
-    User->>Authorization Server: 認証し、要求された許可でアプリケーションを認可
-    Authorization Server->>Application: 認可コードでリダイレクト URI にユーザーをリダイレクト
+    User->>Authorization Server: 要求された権限でアプリケーションを認証および認可
+    Authorization Server->>Application: 認可コードを持ってリダイレクト URI にユーザーをリダイレクト
     Application->>Authorization Server: コードをトークンに交換
-    Authorization Server->>Application: アクセストークン（およびオプションでリフレッシュトークン）を発行
+    Authorization Server->>Application: アクセストークン (およびオプションでリフレッシュトークン) を発行
 ```
 
-## 認証リクエスト (Authentication request)
+## 認可コードフロー (Authorization Code Flow) を実装するには？
 
-リクエストパラメータは以下の通りです：
+以下は、[OAuth 2.0 RFC 6749, セクション 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1) に記載されたガイドラインに従って、認可コードフローを実装する簡単な例です：
 
-- **client_id**: 必須。 有効な OAuth 2.0 クライアント識別子。
-- **scope**: 必須。この値は、ユーザーが認可サーバーから要求しているリソースのセットを指定します。 例: `openid profile email`。
-- **response_type**: 必須。アプリケーションが認可コードを期待していることを示すために値は `code` でなければなりません。
-- **redirect_uri**: 必須。 認証応答が送信される URI であり、クライアントが認可サーバーで事前に登録したリダイレクト URI と正確に一致する必要があります。
-- **state**: 推奨。リクエストとコールバック間の状態を維持するために使用される不透明な値です。また、<Ref slug="csrf" /> 攻撃を防ぐために使用されます。
-- **nonce**: オプション。クライアントセッションを ID トークンに関連付けるためのランダム文字列で、リプレイ攻撃を軽減します。
-- **prompt**: オプション。リダイレクトエンドユーザーに再認証および同意を促すかどうかを指定する、大文字と小文字を区別するスペース区切りの文字列値のリスト。定義された値は次のとおりです：
-  - **none**: 認可サーバーは認証または同意のユーザーインターフェイスページを表示してはなりません。エンドユーザーがまだ認証されていない場合、またはクライアントが要求された主張の事前設定された同意を持たない場合、またはリクエスト処理の他の条件を満たさない場合、エラーが返されます。エラーコードは通常、`login_required`、`interaction_required`。これは既存の認証および/または同意を確認する方法として使用できます。
-  - **login**: 認可サーバーはエンドユーザーに再認証を促す必要があります。エンドユーザーを再認証できない場合は、通常 `login_required` のエラーを返さなければなりません。
-  - **consent**: 認可サーバーはクライアントに情報を返す前にエンドユーザーに同意を促す必要があります。同意を得られない場合は、通常 `consent_required` のエラーを返さなければなりません。
-  - **select_account**: 認可サーバーはエンドユーザーにユーザーアカウントの選択を促す必要があります。これにより、認可サーバーに複数のアカウントを持つエンドユーザーが、現在セッションを持つ複数のアカウントから選択できるようになります。エンドユーザーによるアカウント選択を得られない場合は、通常 `account_selection_required` のエラーを返さなければなりません。
+### 1. 初期設定
 
-[完全なリクエストパラメータの定義](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)
+開始する前に、auth サービスから以下の情報を取得してください：
 
-### 認証リクエスト (Authentication request) の例
-
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=code" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "state=RANDOM_STRING_FOR_STATE"
+```javascript
+const config = {
+  clientId: "YOUR_CLIENT_ID",
+  clientSecret: "YOUR_CLIENT_SECRET",
+  authorizationEndpoint: "https://authorization-server.com/auth",
+  tokenEndpoint: "https://authorization-server.com/token",
+  redirectUri: "http://localhost:3000/callback",
+};
 ```
 
-一般的な成功の応答：
+クライアント ID、クライアントシークレット、およびリダイレクト URI は、auth サービス内のアプリケーションの設定です。
 
-```http
-HTTP/1.1 302 Found
-Location: https://yourapp.com/callback?
-  code=YOUR_AUTHORIZATION_CODE
-  &state=RANDOM_STRING_FOR_STATE
+`authorizationEndpoint` と `tokenEndpoint` は、auth サービスによって提供されます。
+
+auth サーバーが OIDC (<Ref slug="openid-connect" />) を実装している場合、<Ref slug="openid-connect-discovery" /> を通じてこの情報を取得できます。
+
+### 2. 認可リクエストの開始
+
+フローは、ユーザーがログインしたいときに開始されます (例えば、ログインボタンをクリックすることで)。アプリケーションはログインリクエストを行います。
+
+このリクエストには、`client ID`、`redirect URI`、および `scope` などのパラメータが含まれます。その後、ユーザーを auth サービスの認可エンドポイント (auth サービスのログインページ) にリダイレクトします。
+
+ユーザーはこのログインページで認証および認可を行います。
+
+```javascript
+app.get("/login", (req, res) => {
+  const authUrl = new URL(config.authorizationEndpoint);
+  authUrl.searchParams.append("response_type", "code");
+  authUrl.searchParams.append("client_id", config.clientId);
+  authUrl.searchParams.append("redirect_uri", config.redirectUri);
+  authUrl.searchParams.append("scope", "openid profile email");
+  authUrl.searchParams.append("state", "random_state_string");
+
+  res.redirect(authUrl.toString());
+});
 ```
 
-## トークン交換リクエスト (Token exchange request)
+注意: この例のコードに示されている以上のパラメータを追加することができます。[完全な認証リクエストパラメータの定義](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest) を参照してください。
 
-上記の認証リクエストに正常に応答すると、クライアントは `https://yourapp.com/callback` のコールバック URI に自動的にリダイレクトされ、コードは URI パラメータとして渡されます。
+### 3. リダイレクト URI コールバックとトークン交換の処理
 
-クライアントは、アクセストークンを取得するために、後続のトークン交換リクエストで `code` を取得および処理することが期待されます。
+ユーザーが auth サービスのログインページで認証および認可を完了した後、auth サービスはユーザーをアプリケーションのリダイレクト URI にリダイレクトします。このリダイレクト URI には、認可コードと state パラメータが含まれています。
 
-### トークン交換リクエスト (Token exchange request) の例
+アプリケーションはリダイレクト URI から認可コードと state パラメータを抽出し、auth サービスのトークンエンドポイントでアクセストークンとリフレッシュトークン (あれば) に交換します。
 
-```bash
-curl -X POST "https://authorization-server.com/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "code=YOUR_AUTHORIZATION_CODE" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "grant_type=authorization_code" \
+```javascript
+app.get("/callback", async (req, res) => {
+  const { code, state } = req.query;
+
+  try {
+    // 認可コードをアクセストークンとリフレッシュトークンに交換
+    const tokenResponse = await axios.post(config.tokenEndpoint, {
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: config.redirectUri,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+    });
+
+    const { access_token, refresh_token } = tokenResponse.data;
+    // 後続のリクエストのためにトークンを保存
+    req.session.accessToken = access_token;
+
+    res.send("認証に成功しました！");
+  } catch (error) {
+    res.status(500).send("トークン交換に失敗しました");
+  }
+});
 ```
 
-## 利点
+### 4. アクセストークンの使用
 
-- **セキュリティの向上**: クライアントシークレットがユーザーのブラウザにさらされることがないため、クライアントのなりすましのリスクが軽減されます。
-- **一回限りの認可コード**: 認可コードは短命であり、一度しか使用できないため、傍受およびリプレイ攻撃のリスクが軽減されます。
-- **短命のトークン**: このフローで発行されるアクセストークンは短命（通常 1 時間）であるため、トークンが危険にさらされた場合の不正アクセスのリスクが軽減されます。
-- **リフレッシュトークン**: 認可サーバーはオプションでリフレッシュトークンを発行でき、アプリケーションはユーザーの操作を必要とせずに新しいアクセストークンを取得できます。
+トークンを取得したら、それを使用して保護されたリソースにアクセスします：
 
-## 認可コードフロー (Authorization code flow) とインプリシットフロー (Implicit flow) の違いは何ですか？
+```javascript
+async function fetchUserProfile(accessToken) {
+  const response = await axios.get("https://api.example.com/userinfo", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+```
 
-認可コードフロー (Authorization code flow) とインプリシットフロー (Implicit flow) の主な違いは、アクセストークンが取得される方法にあります：
+## 公開クライアント (ネイティブアプリや SPA) に対して認可コードフローを使用するには？
 
-- **認可コードフロー (Authorization code flow)**: クライアントアプリケーションは最初に認可エンドポイントから認可コードを受け取り、その後トークンエンドポイントへの後続の POST リクエストでアクセストークンに交換します。
-- **インプリシットフロー (Implicit flow)**: クライアントアプリケーションは認可エンドポイントから直接アクセストークンを受け取ります。
+公開クライアント (ネイティブアプリや SPA) は、認可コードフローを使用する際に特有のセキュリティ上の課題に直面します。これらのアプリケーションはクライアントシークレットを安全に保存できません。クライアントシークレットは JavaScript コードやデバイスのストレージ内で露出されるため、攻撃者がシークレットを抽出して悪用するのが容易になります。
 
-## 認可コードフロー (Authorization code flow) とクライアント資格フロー (Client credentials flow) の違いは何ですか？
+したがって、クライアントシークレットなしで認可コードフローを安全に使用する方法が重要な課題です。OAuth 2.0 仕様は、この問題を解決するために PKCE (<Ref slug="pkce" />) 拡張を導入しました。
 
-認可コードフロー (Authorization code flow) とクライアント資格フロー (Client credentials flow) の主な違いは、フローが使用されるコンテキストにあります：
+PKCE は、公開クライアントのために認可コードフローを保護するための追加のセキュリティ対策を提供します。クライアントシークレットを使用せずに認可コードのインターセプション攻撃を防ぎます。詳細は、[PKCE が OAuth 2.0 認可コードフローをどのように保護するか](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) を参照してください。
 
-- **認可コードフロー (Authorization code flow)**: クライアントアプリケーションがユーザーの代理でリソースにアクセスする必要がある場合に使用されます。このフローにはユーザーの認証および認可が含まれます。
-- **クライアント資格フロー (Client credentials flow)**: クライアントアプリケーションが自身の代理でリソースにアクセスする必要がある場合に使用されます。このフローはクライアントの認証を含むが、ユーザーの認証を含まず、マシン間通信に最適です。
+## 認可コードフロー (Authorization Code Flow) を安全に使用するには？
 
-## 認可コードフロー (Authorization code flow) の典型的なユースケースは何ですか？
+### **"state" を使用して CSRF 攻撃を防ぐ**
 
-- ユーザー認証と API へのアクセスを必要とする従来の Web アプリケーション。
-- サードパーティサービスからユーザーデータに安全にアクセスする必要があるアプリケーション。
+CSRF (<Ref slug="csrf" />) 攻撃は、認証された Web アプリケーションでユーザーに望まないアクションを実行させるものです。state パラメータはこれを防ぐのに役立ちます。
 
-<SeeAlso slugs={['device-flow', 'implicit-flow', 'client-credentials-flow']} />
+- 一意でランダムな値を生成します。この値をサーバー側に保存します。
+- state パラメータを含めます。認可リクエスト URL に追加します。
+- 戻ってきたときに state を検証します。認可サーバーがアプリにリダイレクトしたとき、返された state と保存された値を比較します。一致しない場合はリクエストを拒否します。これにより、リクエストがアプリケーションから発信されたことが確認されます。
 
-<Resources urls={['https://datatracker.ietf.org/doc/html/rfc6749']} />
+### **安全なリダイレクト URI の設定**
+
+リダイレクト URI は、ユーザー認証後に認可サーバーが認可コードを送信する場所です。安全な設定が重要です。
+
+- 有効なリダイレクト URI を登録します。認可サーバーへのアプリ登録時に、許可されたリダイレクト URI を指定します。
+- 正確な一致。認可リクエストのリダイレクト URI は、登録された URI と正確に一致する必要があります。わずかな違いでも脆弱性を生む可能性があります。
+- ワイルドカード URI を避ける。可能であれば、本番環境でワイルドカード URI の使用を避けます。攻撃の対象範囲が広がります。
+- 本番環境では HTTPS を使用。リダイレクト URI には常に本番環境で HTTPS を使用します。
+
+### **すべてのクライアントに PKCE を使用**
+
+PKCE はもともと公開クライアントのために設計されましたが、<Ref slug="oauth-2.1" /> 仕様では、すべてのクライアント (機密クライアントを含む) に対して PKCE を強制することが求められています。これにより、認可コードフローの全体的なセキュリティが向上します。([すべてのクライアントに対する PKCE の強制](https://auth.wiki/oauth-2.1#enforcing-pkce-for-all-clients) を参照)
+
+## 認可コードフロー (Authorization Code Flow) とインプリシットフロー (Implicit Flow) の違いは何ですか？
+
+認可コードフローとインプリシットフローの主な違いは、アクセストークンの取得方法です：
+
+- **認可コードフロー**: クライアントアプリケーションは、最初に認可エンドポイントから認可コードを受け取り、その後、トークンエンドポイントへの POST リクエストでそれをアクセストークンに交換します。
+- **インプリシットフロー**: クライアントアプリケーションは、ユーザー認可後にリダイレクト URI の URL フラグメント内で直接アクセストークンを受け取ります。
+
+<Ref slug="implicit-flow" /> について詳しく学びましょう。
+
+## 認可コードフロー (Authorization Code Flow) とクライアントクレデンシャルフロー (Client Credentials Flow) の違いは何ですか？
+
+認可コードフローとクライアントクレデンシャルフローの主な違いは、フローが使用されるコンテキストです：
+
+- **認可コードフロー**: クライアントアプリケーションがユーザーの代わりにリソースにアクセスする必要がある場合に使用されます。このフローにはユーザー認証と認可が含まれます。
+- **クライアントクレデンシャルフロー**: クライアントアプリケーションが自分自身の代わりにリソースにアクセスする必要がある場合に使用されます。このフローにはクライアント認証が含まれますが、ユーザー認証は含まれません。機械間通信に最適です。
+
+<Ref slug="client-credentials-flow" /> について詳しく学びましょう。
+
+<SeeAlso
+  slugs={[
+    "device-flow",
+    "implicit-flow",
+    "client-credentials-flow",
+    "pkce",
+    "openid-connect",
+    "openid-connect-discovery",
+    "csrf",
+    "oauth-2.1",
+  ]}
+/>
+
+<Resources urls={[
+  "https://datatracker.ietf.org/doc/html/rfc6749",
+  "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
+  "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps"
+]} />

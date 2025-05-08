@@ -1,43 +1,72 @@
 ---
-title: Clé API (API key)
+title: Clé API
 tags: [authentication, api]
-description: Une clé API est un identifiant unique utilisé pour authentifier et autoriser un client lors de l'accès à une API. Elle sert de jeton secret inclus dans les requêtes API pour vérifier l'identité du client et permettre l'accès à des ressources ou services spécifiques. Les clés API sont généralement utilisées dans les communications de serveur à serveur ou lors de l'accès à des données publiques.
+description: Une clé API est un jeton secret utilisé pour authentifier les clients accédant à une API. Elle vérifie l'identité et contrôle l'accès à des ressources spécifiques, couramment utilisée dans les communications de serveur à serveur ou pour l'accès aux données publiques.
 ---
 
 ## Qu'est-ce qu'une clé API ?
 
-Les clés API sont utilisées pour identifier et autoriser l'application ou le service appelant. Elles sont généralement de longue durée et statiques jusqu'à leur rotation et ont souvent un ensemble fixe de permissions. Elles sont principalement utilisées pour les communications de serveur à serveur ou l'accès à des données publiques, ces jetons ne représentent généralement pas un utilisateur spécifique.
+Une clé API est un jeton secret utilisé pour authentifier les clients accédant à une API. C'est comme un mot de passe pour votre application, permettant l'accès à une API spécifique. Pensez-y comme une carte d'accès pour entrer dans un bâtiment. La carte accorde l'accès, mais n'identifie pas nécessairement qui vous êtes.
 
-## Comment fonctionne une clé API ?
+## Comment fonctionnent les clés API ?
 
-Une clé API est une longue chaîne de caractères générée par le fournisseur d'API et partagée avec les utilisateurs autorisés. Cette clé doit être incluse dans l'en-tête de la requête lors de l'accès à l'API. Les clés API sont simples et efficaces pour les besoins de sécurité de base. Par exemple, des services populaires comme Google Maps API et AWS fournissent des clés API pour contrôler l'accès et surveiller l'utilisation.
+Les clés API fonctionnent via un processus simple de requête et de réponse.
 
-```java
-curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
+1. **Requête :** Votre application envoie une requête à l'API, incluant la clé API. La clé est souvent envoyée dans l'en-tête de la requête. Par exemple, l'en-tête pourrait ressembler à ceci : `x-api-key: your_actual_api_key`. Il n'existe pas de norme unique pour les noms d'en-tête ou les formats de valeur.
+
+2. **Vérification :** Le serveur API vérifie la clé fournie par rapport à sa base de données.
+
+3. **Réponse :** Si la clé est valide, le serveur accorde l'accès et renvoie les données demandées. Sinon, l'accès est refusé.
+
+Voici un diagramme de séquence illustrant le processus :
+
+```mermaid
+sequenceDiagram
+    participant A as Client
+    participant B as Serveur API
+
+    A->>B: Requête avec clé API dans l'en-tête
+    activate B
+    B->>B: Vérifier la clé API
+    B-->>A: Réponse (Données ou Erreur)
+    deactivate B
 ```
 
-Les clés API ne sont pas aussi efficaces que d'autres formes d'authentification API, telles que <Ref slug="oauth-2.0" /> et <Ref slug="jwt" />, mais elles jouent toujours un rôle important en aidant les producteurs d'API à surveiller l'utilisation, car c'est la méthode la plus simple et la plus largement utilisée pour sécuriser les APIs.
+## Quels sont les avantages et les inconvénients des clés API ?
 
-## Quels sont ses avantages et inconvénients ?
+Voyons ce qui rend les clés API utiles et où elles sont limitées :
 
 ### Avantages
 
-- Simple à mettre en œuvre : Les clés API sont faciles à mettre en œuvre et à utiliser. Elles impliquent d'attacher une clé à l'en-tête de la requête, ce qui en fait une méthode simple pour les développeurs et les clients à comprendre et à employer.
-- Facile à surveiller : Les clés API sont faciles à surveiller. Vous pouvez suivre l'utilisation de chaque clé et les révoquer si nécessaire.
-- Limitation de débit efficace : Les clés API sont efficaces pour la limitation de débit. Vous pouvez définir une limite sur le nombre de requêtes par clé pour prévenir les abus.
-- Adapté aux données non sensibles : Les clés API conviennent aux données non sensibles ou aux APIs publiquement disponibles, où les exigences de sécurité sont moindres.
+- **Super simple à utiliser** : Il suffit d'ajouter une clé à votre requête et c'est parti ! C'est comme utiliser une clé de maison - pas de démarches compliquées nécessaires.
+
+- **Facile à suivre** : Vous voulez savoir qui utilise votre API ? Les clés API rendent cela simple. Vous pouvez voir quelles applications font des appels et à quelle fréquence.
+
+- **Limitation de taux rapide** : Empêchez les gens de surutiliser votre API en définissant des limites par clé. C'est comme avoir un videur dans un club qui compte combien de fois quelqu'un entre et sort.
+
+- **Parfait pour les données publiques** : Si vous partagez des informations non sensibles (comme des données météorologiques ou des statistiques publiques), les clés API sont idéales.
 
 ### Inconvénients
 
-- Sécurité limitée : Les clés API ne sont pas suffisamment sécurisées pour les données sensibles, surtout pour les applications côté client. Elles sont souvent utilisées dans les communications de machine à machine.
-- Pas adapté à l'authentification des utilisateurs : Les clés API sont liées aux applications ou systèmes, pas aux utilisateurs individuels, ce qui rend difficile l'identification des utilisateurs spécifiques ou le suivi de leurs actions.
-- Pas d'expiration de jeton : Les clés API sont généralement statiques et n'expirent pas. Si une clé est compromise, elle pourrait être utilisée indéfiniment à moins d'être régénérée manuellement.
+- **Moins sécurisées que les alternatives modernes** : Les clés API ne sont pas aussi efficaces que d'autres formes d'authentification API, telles que <Ref slug="oauth-2.0" /> et <Ref slug="jwt" />. Pensez-y comme une serrure basique par rapport à un système de sécurité moderne. Cependant, elles restent populaires car elles sont le moyen le plus simple de suivre l'utilisation de l'API et de commencer avec la sécurité de l'API.
+
+- **Risques de sécurité** : Les clés API sont comme laisser votre clé de maison sous le paillasson. Si quelqu'un la trouve, il peut l'utiliser indéfiniment. Voici pourquoi :
+  - Elles sont souvent visibles dans le code
+  - Elles n'expirent pas automatiquement
+  - Si elles sont divulguées (comme dans des dépôts GitHub publics), n'importe qui peut les utiliser
+
+- **Impossible de distinguer les utilisateurs** : Bien que certaines entreprises utilisent des "clés API" qui peuvent identifier les utilisateurs (comme Stripe), les clés API traditionnelles ne peuvent pas vous dire qui est qui. Elles vous indiquent seulement quelle application fait la requête.
+
+- **Statique par nature** : Contrairement aux jetons d'auth modernes qui expirent, les clés API restent généralement les mêmes pour toujours. Cela signifie :
+  - Pas de rafraîchissement automatique de la sécurité
+  - Travail manuel nécessaire pour faire tourner les clés
+  - Risque accru si les clés sont exposées
 
 ## Quels sont les cas d'utilisation des clés API ?
 
-- Communication de service à service : Les clés API conviennent aux scénarios où les applications doivent communiquer directement avec les APIs via des CLI. Par exemple, appeler les APIs OpenAI.
-- APIs publiques : Lors de l'exposition d'APIs au public, les clés API fournissent une méthode simple de contrôle d'accès.
-- Configuration simplifiée : Pour des besoins d'authentification rapides et simples, surtout en phase de développement. Contrairement à l'authentification de machine à machine, les clés API ne nécessitent pas d'enregistrement préalable du client, et n'ont pas besoin d'être échangées contre un access token. Il suffit de passer votre clé API en tant que paramètre dans votre requête et cela fonctionne simplement.
+- Communication de service à service : Les clés API conviennent aux scénarios où les applications doivent communiquer directement avec les API via des CLI. Par exemple, appeler les API d'OpenAI.
+- API publiques : Lors de l'exposition d'API au public, les clés API fournissent une méthode simple de contrôle d'accès.
+- Configuration simplifiée : Pour des besoins d'authentification rapides et simples, surtout en phase de développement. Contrairement à l'authentification Machine-to-machine, les clés API ne nécessitent pas d'enregistrement préalable du client, et n'ont pas besoin d'être échangées contre un access token. Vous passez simplement votre clé API en tant que paramètre dans votre requête et cela fonctionne simplement.
 
 Dans des scénarios réels, l'objectif le plus courant lors de la création de produits est l'intégration de produits. Voici un cas d'utilisation typique :
 
@@ -47,18 +76,18 @@ Stripe utilise des clés API pour une intégration sécurisée avec différentes
 
 ![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
 
-## Quelle est la différence entre les jetons d'accès personnel (PAT) et la communication de machine à machine (M2M) ?
+## Quelle est la différence entre les jetons d'accès personnel (PAT) et Machine-to-Machine (M2M) ?
 
-Lorsqu'on parle de clés API, les jetons d'accès personnel et <Ref slug="machine-to-machine" /> peuvent également être mentionnés ensemble puisqu'ils peuvent tous accéder aux ressources API de manière programmatique via des commandes CLI, ou établir une communication entre les services backend.
+En parlant de clés API, les jetons d'accès personnel et <Ref slug="machine-to-machine" /> peuvent également être mentionnés ensemble puisqu'ils peuvent tous accéder de manière programmatique aux ressources API via des commandes CLI, ou établir une communication entre les services backend.
 
 ### Jetons d'accès personnel (PAT)
 
-Un jeton d'accès personnel est également une chaîne mais représente ***l'identité et les permissions d'un utilisateur spécifique***, est généré dynamiquement lors d'une authentification ou connexion réussie, et a généralement une durée de vie limitée mais peut être rafraîchi. Il fournit un contrôle d'accès granulaire aux données et capacités spécifiques à l'utilisateur et est couramment utilisé pour les outils CLI, les scripts ou l'accès personnel aux APIs. La principale différence est qu'il est plus spécifique et utilisé pour des actions spécifiques à l'utilisateur.
+Un jeton d'accès personnel est également une chaîne mais représente ***l'identité et les permissions d'un utilisateur spécifique***, est généré dynamiquement après une authentification ou une connexion réussie, et a généralement une durée de vie limitée mais peut être rafraîchi. Il fournit un contrôle d'accès granulaire aux données et capacités spécifiques à l'utilisateur et est couramment utilisé pour les outils CLI, les scripts ou l'accès personnel à l'API. La principale différence est qu'il est plus spécifique et utilisé pour des actions spécifiques à l'utilisateur.
 
 ### Machine-to-Machine (M2M)
 
 La communication M2M est lorsque les appareils échangent automatiquement des données sans intervention humaine dans un sens plus large.
 
-Dans le contexte de <Ref slug="openid-connect" /> (ou <Ref slug="oauth-2.0" />), les applications M2M utilisent le <Ref slug="client-credentials-flow" />, tel que défini dans le [protocole OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749), qui prend en charge des protocoles standard similaires. Cela implique généralement qu'une application cliente (une machine ou un service) accède aux ressources soit par elle-même, soit au nom d'un utilisateur. C'est idéal pour les situations où seuls les clients de confiance peuvent accéder aux services backend.
+Dans le contexte de <Ref slug="openid-connect" /> (ou <Ref slug="oauth-2.0" />), les applications M2M utilisent le <Ref slug="client-credentials-flow" />, tel que défini dans le [protocole OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749), qui prend en charge des protocoles standard similaires. Cela implique généralement qu'une application cliente (une machine ou un service) accède à des ressources soit par elle-même, soit pour le compte d'un utilisateur. C'est idéal pour les situations où seuls les clients de confiance peuvent accéder aux services backend.
 
 <SeeAlso slugs={["machine-to-machine"]} />

@@ -1,0 +1,95 @@
+---
+title: 授權伺服器中繼資料 (Authorization Server Metadata)
+tags: [oauth 2.0, oidc]
+description: OAuth 2.0 授權伺服器中繼資料是一種標準化格式，使 OAuth 2.0 客戶端能夠自動發現並獲取與 OAuth 2.0 授權伺服器互動所需的信息，包括端點位置和伺服器功能。
+---
+
+## 什麼是 OAuth 2.0 授權伺服器中繼資料 (Authorization Server Metadata)？
+
+OAuth 2.0 授權伺服器中繼資料是一種在 [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) 中定義的標準化格式，使 OAuth 2.0 客戶端能夠自動發現並獲取與 OAuth 2.0 授權伺服器互動所需的信息。
+
+這包括基本信息，如端點位置、支持的功能和伺服器能力。
+
+中繼資料格式提供了一個機器可讀的配置文件，幫助簡化客戶端和授權伺服器之間的集成過程，減少手動配置的需求。
+
+## OAuth 2.0 授權伺服器中繼資料 (Authorization Server Metadata) 如何運作？
+
+在 OAuth 2.0 生態系統中，有幾個關鍵角色：
+- <Ref slug="authorization-server"/>：在成功驗證資源擁有者後向客戶端發放存取權杖
+- <Ref slug="client"/>：請求訪問受保護資源的應用程序
+- <Ref slug="resource-owner"/>：能夠授予訪問受保護資源的實體
+- <Ref slug="resource-server"/>：託管受保護資源的伺服器
+
+授權伺服器中繼資料提供了一種標準化方式，讓客戶端發現並了解如何與授權伺服器互動。其運作方式如下：
+
+1. 客戶端知道或發現授權伺服器的 issuer URL
+2. 客戶端通過將 `/.well-known/oauth-authorization-server` 附加到 issuer URL 來構建中繼資料 URL
+3. 客戶端檢索包含伺服器配置的中繼資料文件
+4. 客戶端使用檢索到的中繼資料（端點、支持的功能等）來正確配置自身並與授權伺服器互動
+
+例如，如果 issuer URL 是 `https://auth.example.com`，則中繼資料將可在以下位置獲取：
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+中繼資料文件包括重要信息，如：
+- `issuer`：授權伺服器的標識符
+- `authorization_endpoint`：授權端點 URL
+- `token_endpoint`：權杖端點 URL
+- `scopes_supported`：可用的 scope
+- `response_types_supported`：支持的響應類型
+- `token_endpoint_auth_methods_supported`：支持的客戶端驗證方法
+
+有關中繼資料字段的完整列表，請參閱 [RFC 8414 第 2 節](https://datatracker.ietf.org/doc/html/rfc8414#section-2)。
+
+通過這些中繼資料值，客戶端可以自動配置並執行 OAuth 2.0 流程：
+
+1. **初始設置**：
+   - 客戶端驗證 `issuer` 是否與預期的授權伺服器匹配
+   - 客戶端檢查 `response_types_supported` 以確保其流類型（例如，`code`）受到支持
+
+2. **授權請求 (Authorization Request)**：
+   - 客戶端使用 `authorization_endpoint` 構建授權 URL
+   - 客戶端根據其需求從 `scopes_supported` 中選擇適當的 scope
+   - 例子：`https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **權杖交換**：
+   - 在收到授權碼後，客戶端使用 `token_endpoint` 進行權杖交換
+   - 客戶端檢查 `token_endpoint_auth_methods_supported` 以確定如何進行驗證（例如，`client_secret_basic`）
+   - 例子：向權杖端點發送包含客戶端憑證和授權碼的 POST 請求
+
+這一基本流程幫助客戶端自動配置自身並與授權伺服器互動，而無需手動端點配置或反覆試驗的 scope 選擇。
+
+## OAuth 2.0 授權伺服器中繼資料 (Authorization Server Metadata) 與 OpenID Connect Discovery 有何不同？
+
+主要區別在於：
+
+1. **範圍和目的**：
+   - OAuth 2.0 授權伺服器中繼資料專注於 OAuth 2.0 協議配置
+   - <Ref slug="openid-connect-discovery"/> 包含與身份相關功能的附加參數，例如：
+     - `userinfo_endpoint`：檢索用戶信息的端點
+     - `id_token_signing_alg_values_supported`：ID Token 支持的簽名算法
+     - `claims_supported`：可在 ID Token 或從 UserInfo Endpoint 返回的可用用戶 claim
+     - 支持 `openid` scope 進行身份驗證
+     - 包括混合流響應類型（例如，`code id_token`，`code id_token token`）
+
+2. **中繼資料端點**：
+   - OAuth 2.0 使用 `/.well-known/oauth-authorization-server`
+   - OpenID Connect 使用 `/.well-known/openid-configuration`
+
+## OAuth 2.0 授權伺服器中繼資料 (Authorization Server Metadata) 是否符合 OpenID Connect Discovery？
+
+是的，OAuth 2.0 授權伺服器中繼資料與 <Ref slug="openid-connect-discovery"/> 兼容。
+
+OAuth 2.0 中繼資料規範（RFC 8414）受到 OpenID Connect Discovery 1.0 的啟發，後者已在實踐中廣泛採用。
+
+關於合規性的關鍵點：
+1. 中繼資料格式遵循相同的 JSON 結構
+2. 授權伺服器可以同時支持兩個端點
+3. OpenID 提供者通常會公開兩個端點以保持向後兼容性
+4. 當需要時，OAuth 2.0 中繼資料可以擴展為包含 OpenID Connect 特定字段
+
+這種兼容性確保授權伺服器可以同時為純 OAuth 2.0 客戶端和 OpenID Connect 依賴方提供服務而不發生衝突。
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

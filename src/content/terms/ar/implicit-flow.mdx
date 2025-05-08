@@ -1,72 +1,82 @@
 ---
-title: تدفق ضمني (Implicit flow)
+title: التدفق الضمني (Implicit flow)
 tags: [oauth 2.0, oidc]
-description: يعتبر التدفق الضمني (Implicit flow) في OIDC وسيلة لتحقق الهوية (authentication) لتطبيقات الصفحة الواحدة (SPAs)، مما يمكنها من تلقي الرموز (tokens) مباشرة من خادم التفويض (authorization server) بسرعة. بينما يبسط العملية بإلغاء الحاجة لوجود خادم خلفي، إلا أنه يأتي مع أمان أقل بسبب تعريض الرمز (token) في عنوان URL.
+description: التدفق الضمني (Implicit flow) هو طريقة مصادقة تسمح لتطبيقات العميل فقط (مثل SPAs والتطبيقات الأصلية) باستلام الرموز مباشرة من خلال شظايا URL من خادم التفويض دون تقديم سر العميل.
 ---
 
-## ما هو التدفق الضمني (implicit flow)
+## ما هو التدفق الضمني (implicit flow)؟
 
-التدفق الضمني (Implicit flow) في OIDC (OpenID Connect) هو عملية تحقق من الهوية تُستخدم بشكل أساسي من قبل تطبيقات العملاء المنفذة في المتصفح باستخدام لغة برمجة نصية، مثل تطبيقات الصفحة الواحدة (SPAs). يسمح لتطبيقات العملاء بالحصول مباشرة على رموز الهوية (ID tokens) والرموز الوصول (access tokens) من خادم التفويض (authorization server) دون إجراء تحقق العميل (client authentication).
+التدفق الضمني (Implicit flow) في OAuth 2.0 هو طريقة مصادقة تسمح لتطبيقات العميل فقط (مثل SPAs والتطبيقات الأصلية) باستلام الرموز مباشرة من خلال شظايا URL من خادم التفويض دون تقديم سر العميل.
+
+تم تصميم التدفق الضمني (Implicit flow) لتطبيقات العميل فقط، لأنها تعمل بالكامل في المتصفح أو على جهاز المستخدم ولا يمكنها تخزين أسرار العميل بأمان.
+
+تم إلغاء التدفق الضمني (Implicit flow) رسميًا في <Ref slug="oauth-2.1" /> لأسباب أمنية (سيتم ذكرها أدناه). يجب على تطبيقات العميل فقط الآن استخدام <Ref slug="authorization-code-flow" /> مع امتداد <Ref slug="pkce" /> بدلاً من ذلك.
 
 ## كيف يعمل التدفق الضمني (implicit flow)؟
 
-الخطوات الرئيسية للتدفق الضمني (implicit flow) هي كالآتي:
-
-1. **إرسال طلب تحقق الهوية (authentication request)**: يبدأ المستخدم التدفق عادةً بالنقر على رابط أو زر في التطبيق لتسجيل الدخول. يرسل التطبيق طلب تحقق الهوية إلى نقطة نهاية التفويض لخادم التفويض (authorization server). يقوم خادم التفويض بتحقق من المعلمات ويعيد توجيه المستخدم للتحقق على صفحة تسجيل الدخول الخاصة بخادم التفويض.
-2. **تحقق المستخدم**: يُجري المستخدم التحقق على خادم التفويض (على سبيل المثال، بإدخال اسم المستخدم وكلمة المرور).
-3. **خادم التفويض يستجيب**: يعيد خادم التفويض رمز هوية (ID token) وإذا طُلب، رمز وصول (access token) لتطبيق العميل كجزء من عنوان URL.
-4. **معالجة العميل للرموز (tokens)**: يستخرج تطبيق العميل الرموز من عنوان URL.
+الخطوات الرئيسية للتدفق الضمني (Implicit flow) هي كما يلي:
 
 ```mermaid
 sequenceDiagram
-participant User
-participant Application
-participant Authorization Server
-User->>Application: يبدأ تدفق تسجيل الدخول
-Application->>Authorization Server: يطلب التفويض مع معرف العميل (client ID), النطاق (scope), URI إعادة التوجيه (redirect URI), وحالة (state)
-Authorization Server->>User: يوجه المستخدم إلى صفحة تسجيل الدخول ويطالب بالتحقق
-User->>Authorization Server: التحقق (مثل إدخال اسم المستخدم وكلمة المرور)
-Authorization Server -->>Application: يعيد رمز هوية (ID token) ورمز وصول (access token) في جزء عنوان URL
-Application->>Application: يستخرج الرموز من جزء عنوان URL
+  participant U as المستخدم
+  participant C as العميل
+  participant AS as خادم التفويض
+  participant RS as خادم الموارد
+
+  U->>C: انقر لتسجيل الدخول
+  C->>AS: طلب التفويض<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: عرض صفحة تسجيل الدخول
+  U->>AS: إدخال بيانات الاعتماد
+  AS-->>C: إرجاع الرمز في شظية URL
+  C->>C: استخراج الرمز من الشظية
+  C->>RS: طلب API مع الرمز
+  RS-->>C: استجابة المورد المحمي
 ```
 
-### طلب التحقق من الهوية (Authentication request)
+ملاحظة:
 
-معلمات الطلب كما يلي:
-- **client_id**: مطلوب. معرف عميل OAuth 2.0 صالح، المتاح في Logto كمعرف التطبيق.
-- **scope**: مطلوب. يُحدد هذا القيمة مجموعة من الموارد التي يطلبها المستخدم من خادم التفويض. مثل: `openid profile email`
-- **response_type**: مطلوب. القيمة تكون إما `id_token` أو `id_token token`. لا يتم إعادة رمز وصول عندما تكون القيمة `id_token`.
-- **redirect_uri**: مطلوب. URI الذي سيتم إرسال استجابة التحقق إليه، ويجب أن يتطابق تمامًا مع URI إعادة التوجيه الذي سبق تسجيله بواسطة العميل في <Ref slug="openid-connect" headingId="openid-provider-op" />. مثل: `Sign-in redirect URI` في Logto Admin Console.
-- **nonce**: مطلوب. سلسلة عشوائية تُستخدم للتخفيف من هجمات إعادة التشغيل، تُمرر بدون تعديل من طلب التحقق إلى ادعاء رمز الهوية (ID token claim).
+- يحتاج العميل فقط إلى تقديم `client_id` في طلب التفويض، دون الحاجة إلى `client_secret`.  
+  هذا لأن هذه العملاء لا يمكنها تخزين الأسرار بأمان، لذا لا يتطلب هذا التدفق سر العميل.
 
-### Beispiel auf eine Authentifizierungsanfrage
+- يتم تعيين معامل `response_type` إلى `token`، مما يوجه خادم التفويض لإرجاع رمز الوصول مباشرة بدلاً من رمز التفويض.  
+  في OIDC (<Ref slug="openid-connect" />)، يكون `response_type` إما `id_token` أو `id_token token`، وستقوم خدمة المصادقة بإرجاع الرموز المقابلة بناءً على أنواع الاستجابة المختلفة.
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- يتم إرجاع الرمز مباشرة في شظية URL. هذا يعني أن الرمز مكشوف في URL ويمكن الوصول إليه بسهولة بواسطة تطبيقات أو نصوص أخرى.
 
-## القيود
+## هل التدفق الضمني (implicit flow) آمن؟
 
-تم تطوير التدفق الضمني (implicit flow) في وقت لم تكن فيه مشاركة الموارد عبر الأصل (CORS) معتمدة على نطاق واسع من قبل المتصفحات. لذلك، يتم حظر إرسال طلبات POST إلى خادم التفويض المستضاف على نطاق مختلف.
+لا، يعتبر التدفق الضمني (Implicit flow) في OAuth 2.0 عمومًا أقل أمانًا من التدفقات الأخرى مثل تدفق رمز التفويض (authorization code flow).
 
-بسبب هذا القيد، يعيد خادم التفويض الرموز مباشرة في جزء عنوان URL، مما قد يعرضها للمستخدم النهائي والتطبيقات التي تتمتع بإمكانية الوصول إلى وحدة وكيل المستخدم للمستخدم النهائي.
+لا يُوصى به لمعظم حالات الاستخدام بسبب العديد من الثغرات الأمنية:
 
-علاوة على ذلك، لا يتم إجراء تحقق العميل في التدفق الضمني، مما يعني أن أي تطبيق يمكن أن يتظاهر بأنه ذلك العميل الذي يطلب التحقق، حيث يتم دائمًا كشف معرف العميل في تطبيقات المستعرض.
+- **تعرض الرمز في URL**
+   - تظهر رموز الوصول مباشرة في URL المتصفح (بعد رمز #)
+   - يمكن أن تكون هذه الرموز:
+     - محفوظة في تاريخ المتصفح
+     - مسربة من خلال رؤوس الإحالة
+     - ملتقطة بواسطة كود JavaScript ضار على نفس الصفحة
 
-بسبب القيود المذكورة أعلاه، يُعتبر أن التدفق الضمني (implicit flow) أقل أمانًا من تدفق رمز التفويض (Authorization Code Flow).
+- **عدم وجود مصادقة للعميل**
+   - لا يحتاج تطبيق العميل لإثبات هويته
+   - هذا يعني أن أي شخص يعرف `client_id` يمكنه التظاهر بأنه عميل شرعي
 
-## بدائل التدفق الضمني (implicit flow)
+- **عدم وجود رموز تحديث**
+   - لا يدعم هذا التدفق رموز التحديث
+   - يجب على المستخدمين تسجيل الدخول مرة أخرى عند انتهاء صلاحية رموز الوصول
+   - لتجنب تسجيل الدخول المتكرر، قد يقوم المستخدمون بتخزين الرموز بطرق غير آمنة
 
-نظرًا للقيود الأمنية للتدفق الضمني، يُوصى غالبًا باستخدام تدفقات أخرى:
-- **تدفق رمز التفويض (Authorization Code Flow)**: يتضمن هذا التدفق خطوة إضافية يقوم فيها العميل بتبادل رمز التفويض للحصول على الرموز، مما يوفر طبقة إضافية من الأمان.
-- **PKCE (Proof Key for Code Exchange)**: هو امتداد لتدفق رمز التفويض يضيف طبقة أمان إضافية باستخدام مُتحقق الكود (code verifier) والتحدي الكود (code challenge).
+- **عرضة لهجمات XSS**
+   - تتم معالجة جميع الرموز في المتصفح
+   - إذا تعرض الموقع لهجوم XSS (Cross-Site Scripting)
+   - يمكن لكود JavaScript الخاص بالمهاجمين سرقة هذه الرموز بسهولة
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+بسبب هذه المخاوف الأمنية، تم إلغاء التدفق الضمني (Implicit flow) في <Ref slug="oauth-2.1" />. يجب على تطبيقات العميل فقط الآن استخدام <Ref slug="authorization-code-flow" /> مع امتداد <Ref slug="pkce" /> بدلاً من ذلك.
+
+يمكنك الاطلاع على [ما هو PKCE: من المفاهيم الأساسية إلى الفهم العميق](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) لتتعلم كيف يحمي PKCE تدفق رمز التفويض لتطبيقات العميل فقط.
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ curl -X GET "https://authorization-server.com/auth" \
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "نوع تفويض الضمني يُستخدم للحصول على رموز الوصول (ولا يدعم إصدار رموز التحديث) وهو محسّن للعملاء العامين المعروفين بتشغيل URI لإعادة التوجيه معينة. يتم تنفيذ هذه التطبيقات عادةً في متصفح باستخدام لغة برمجة نصية مثل JavaScript."
-      }
+        ogDescription:
+          "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript.",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />

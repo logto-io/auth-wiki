@@ -1,0 +1,95 @@
+---
+title: 授权服务器元数据 (Authorization Server Metadata)
+tags: [oauth 2.0, oidc]
+description: OAuth 2.0 授权服务器元数据是一种标准化格式，使 OAuth 2.0 客户端能够自动发现和获取与 OAuth 2.0 授权服务器交互所需的信息，包括端点位置和服务器功能。
+---
+
+## 什么是 OAuth 2.0 授权服务器元数据 (Authorization Server Metadata)？
+
+OAuth 2.0 授权服务器元数据是一种在 [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) 中定义的标准化格式，使 OAuth 2.0 客户端能够自动发现和获取与 OAuth 2.0 授权服务器交互所需的信息。
+
+这包括基本信息，如端点位置、支持的功能和服务器能力。
+
+元数据格式提供了一种机器可读的配置文档，有助于简化客户端和授权服务器之间的集成过程，减少手动配置的需要。
+
+## OAuth 2.0 授权服务器元数据 (Authorization Server Metadata) 如何工作？
+
+在 OAuth 2.0 生态系统中，有几个关键角色：
+- <Ref slug="authorization-server"/>：在成功验证资源所有者后向客户端颁发访问令牌
+- <Ref slug="client"/>：请求访问受保护资源的应用程序
+- <Ref slug="resource-owner"/>：能够授予对受保护资源访问权限的实体
+- <Ref slug="resource-server"/>：托管受保护资源的服务器
+
+授权服务器元数据提供了一种标准化方式，使客户端能够发现和理解如何与授权服务器交互。其工作原理如下：
+
+1. 客户端知道或发现授权服务器的 issuer URL
+2. 客户端通过在 issuer URL 后附加 `/.well-known/oauth-authorization-server` 构建元数据 URL
+3. 客户端检索包含服务器配置的元数据文档
+4. 客户端使用检索到的元数据（端点、支持的功能等）来正确配置自身并与授权服务器交互
+
+例如，如果 issuer URL 是 `https://auth.example.com`，则元数据将可在以下位置获取：
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+元数据文档包括重要信息，如：
+- `issuer`：授权服务器的标识符
+- `authorization_endpoint`：授权端点 URL
+- `token_endpoint`：令牌端点 URL
+- `scopes_supported`：可用的 scope
+- `response_types_supported`：支持的响应类型
+- `token_endpoint_auth_methods_supported`：支持的客户端认证方法
+
+有关元数据字段的完整列表，请参阅 [RFC 8414 第 2 节](https://datatracker.ietf.org/doc/html/rfc8414#section-2)。
+
+通过这些元数据值，客户端可以自动配置并执行 OAuth 2.0 流程：
+
+1. **初始设置**：
+   - 客户端验证 `issuer` 是否与预期的授权服务器匹配
+   - 客户端检查 `response_types_supported` 以确保其流类型（例如，`code`）受支持
+
+2. **授权请求 (Authorization Request)**：
+   - 客户端使用 `authorization_endpoint` 构建授权 URL
+   - 客户端根据其需要从 `scopes_supported` 中选择适当的 scope
+   - 示例：`https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **令牌交换**：
+   - 在收到授权码后，客户端使用 `token_endpoint` 进行令牌交换
+   - 客户端检查 `token_endpoint_auth_methods_supported` 以确定如何进行认证（例如，`client_secret_basic`）
+   - 示例：向令牌端点发送包含客户端凭据和授权码的 POST 请求
+
+这个基本流程帮助客户端自动配置自身并与授权服务器交互，而无需手动端点配置或反复试验选择 scope。
+
+## OAuth 2.0 授权服务器元数据 (Authorization Server Metadata) 和 OpenID Connect Discovery 有什么区别？
+
+主要区别在于：
+
+1. **范围和目的**：
+   - OAuth 2.0 授权服务器元数据专注于 OAuth 2.0 协议配置
+   - <Ref slug="openid-connect-discovery"/> 包含与身份相关功能的附加参数，例如：
+     - `userinfo_endpoint`：用于检索用户信息的端点
+     - `id_token_signing_alg_values_supported`：ID Token 支持的签名算法
+     - `claims_supported`：ID Token 或来自 UserInfo Endpoint 可返回的可用用户 claim
+     - 支持 `openid` scope 进行认证
+     - 包括混合流响应类型（例如，`code id_token`，`code id_token token`）
+
+2. **元数据端点**：
+   - OAuth 2.0 使用 `/.well-known/oauth-authorization-server`
+   - OpenID Connect 使用 `/.well-known/openid-configuration`
+
+## OAuth 2.0 授权服务器元数据 (Authorization Server Metadata) 是否符合 OpenID Connect Discovery？
+
+是的，OAuth 2.0 授权服务器元数据与 <Ref slug="openid-connect-discovery"/> 兼容。
+
+OAuth 2.0 元数据规范（RFC 8414）受到 OpenID Connect Discovery 1.0 的启发，后者在实践中已被广泛采用。
+
+关于合规性的关键点：
+1. 元数据格式遵循相同的 JSON 结构
+2. 授权服务器可以同时支持两个端点
+3. OpenID 提供者通常会同时公开两个端点以保持向后兼容
+4. OAuth 2.0 元数据可以在需要时扩展为包含 OpenID Connect 特定字段
+
+这种兼容性确保授权服务器可以同时为纯 OAuth 2.0 客户端和 OpenID Connect 依赖方提供服务而不产生冲突。
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>
