@@ -1,72 +1,82 @@
 ---
 title: Flux implicite (Implicit flow)
 tags: [oauth 2.0, oidc]
-description: Le flux implicite OIDC (OpenID Connect) est une méthode d'authentification pour les SPAs, leur permettant de recevoir rapidement des tokens directement du serveur d'autorisation. Bien qu'il simplifie le processus en éliminant le besoin d'un serveur backend, il est moins sécurisé en raison de l'exposition des tokens dans l'URL.
+description: Le flux implicite (Implicit flow) est une méthode d'authentification qui permet aux applications uniquement clientes (comme les SPAs et les applications natives) de recevoir des jetons directement via des fragments d'URL depuis le serveur d'autorisation sans fournir de secret client.
 ---
 
-## Qu'est-ce que le flux implicite (Implicit flow)
+## Qu'est-ce que le flux implicite (implicit flow) ?
 
-Le flux implicite OIDC (OpenID Connect) est un processus d'authentification principalement utilisé par les applications clientes implémentées dans un navigateur utilisant un langage de script, par exemple, les applications monopage (SPAs). Il permet aux applications clientes d'obtenir directement des jetons d'ID et des jetons d'accès (access tokens) du serveur d'autorisation sans effectuer l'authentification du client (client).
+Le flux implicite (implicit flow) d'OAuth 2.0 est une méthode d'authentification qui permet aux applications uniquement clientes (comme les SPAs et les applications natives) de recevoir des jetons directement via des fragments d'URL depuis le serveur d'autorisation sans fournir de secret client.
 
-## Comment fonctionne le flux implicite (Implicit flow) ?
+Le flux implicite (implicit flow) est conçu pour les applications uniquement clientes, car elles fonctionnent entièrement dans le navigateur ou sur l'appareil de l'utilisateur et ne peuvent pas stocker en toute sécurité les secrets clients.
 
-Les étapes principales du flux implicite sont les suivantes :
+Le flux implicite (implicit flow) a été officiellement déprécié dans <Ref slug="oauth-2.1" /> pour des raisons de sécurité (qui seront mentionnées ci-dessous). Les applications uniquement clientes devraient maintenant utiliser le <Ref slug="authorization-code-flow" /> avec l'extension <Ref slug="pkce" /> à la place.
 
-1. **Envoi de la demande d'authentification (Authentication request)** : L'utilisateur initie le flux en cliquant généralement sur un lien ou un bouton dans l'application pour se connecter. L'application envoie une demande d'authentification au point d'autorisation du serveur d'autorisation. Le serveur d'autorisation valide les paramètres et redirige l'utilisateur pour s'authentifier sur la page de connexion du serveur d'autorisation.
-2. **Authentification de l'utilisateur** : L'utilisateur s'authentifie sur le serveur d'autorisation (par exemple, en entrant un nom d'utilisateur et un mot de passe).
-3. **Réponse du serveur d'autorisation** : Le serveur d'autorisation renvoie un jeton d'ID et, si demandé, un jeton d'accès (access token) à l'application cliente sous forme de fragment d'URL.
-4. **Traitement des tokens par le client** : L'application cliente extrait les tokens du fragment d'URL.
+## Comment fonctionne le flux implicite (implicit flow) ?
+
+Les principales étapes du flux implicite (implicit flow) sont les suivantes :
 
 ```mermaid
 sequenceDiagram
-participant User
-participant Application
-participant Authorization Server
-User->>Application: Initier le flux de connexion
-Application->>Authorization Server: Demande de serveur d'autorisation avec ID client, scope, redirect URI et state
-Authorization Server->>User: Rediriger l'utilisateur vers la page de connexion et demander une authentification
-User->>Authorization Server: S'authentifier (par ex., entrer nom d'utilisateur et mot de passe)
-Authorization Server -->>Application: Retourner jeton d'ID et jeton d'accès dans le fragment d'URL
-Application->>Application: Extraire les tokens du fragment d'URL
+  participant U as Utilisateur
+  participant C as Client
+  participant AS as Serveur d'autorisation
+  participant RS as Serveur de ressources
+
+  U->>C: Cliquer sur se connecter
+  C->>AS: Demande d'autorisation<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: Afficher la page de connexion
+  U->>AS: Entrer les identifiants
+  AS-->>C: Retourner le jeton dans le fragment d'URL
+  C->>C: Extraire le jeton du fragment
+  C->>RS: Requête API avec le jeton
+  RS-->>C: Réponse de la ressource protégée
 ```
 
-### Demande d'authentification (Authentication request)
+Remarques :
 
-Les paramètres de la demande sont les suivants :
-- **client_id** : REQUIS. Identifiant client valide OAuth 2.0, qui est disponible dans Logto en tant qu'ID de l'application (ou app ID).
-- **scope** : REQUIS. Cette valeur spécifie un ensemble de ressources que l'utilisateur demande au serveur d'autorisation. Par exemple, `openid profile email`
-- **response_type** : REQUIS. La valeur est soit `id_token` soit `id_token token`. Aucun jeton d'accès (access token) n'est retourné lorsque la valeur est `id_token`.
-- **redirect_uri** : REQUIS. L'URI vers lequel la réponse d'authentification sera envoyée, et doit correspondre exactement à l'URI de redirection que le client a préenregistré dans le <Ref slug="openid-connect" headingId="openid-provider-op" />. Par exemple, `URI de redirection de connexion` dans Logto Admin Console.
-- **nonce** : REQUIS. Une chaîne aléatoire utilisée pour atténuer les attaques de relecture, qui est transmise inchangée de la demande d'authentification à la déclaration du jeton d'ID (ID token claim).
+- Le client n'a besoin de fournir qu'un `client_id` dans la demande d'autorisation, sans nécessiter de `client_secret`.  
+  Cela est dû au fait que ces clients ne peuvent pas stocker en toute sécurité les secrets, donc ce flux ne nécessite pas de secret client.
 
-### Exemple de demande d'authentification
+- Le paramètre `response_type` est défini sur `token`, indiquant au serveur d'autorisation de retourner directement le jeton d'accès au lieu d'un code d'autorisation.  
+  Dans OIDC (<Ref slug="openid-connect" />), le `response_type` est soit `id_token` soit `id_token token`, et le service d'auth retournera les jetons correspondants en fonction des différents types de réponse.
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- Le jeton est retourné directement dans le fragment d'URL. Cela signifie que le jeton est exposé dans l'URL et peut être facilement accessible par d'autres applications ou scripts.
 
-## Limitations
+## Le flux implicite (implicit flow) est-il sécurisé ?
 
-Le flux implicite a été développé à une époque où les navigateurs n'adoptaient pas encore largement le Cross-Origin Resource Sharing (CORS). Par conséquent, l'envoi de requêtes POST au serveur d'autorisation hébergé sur un domaine différent est interdit.
+Non, le flux implicite (implicit flow) dans OAuth 2.0 est généralement considéré comme moins sécurisé que d'autres flux comme le flux de code d'autorisation.
 
-En raison de cette limitation, le serveur d'autorisation revient directement les tokens dans le fragment d'URL, ce qui peut les exposer à l'utilisateur final et aux applications ayant accès à l'agent utilisateur de l'utilisateur final.
+Il n'est pas recommandé pour la plupart des cas d'utilisation en raison de plusieurs vulnérabilités :
 
-De plus, l'authentification du client (client) n'est pas effectuée dans le flux implicite, ce qui signifie que toute application peut prétendre être ce client demandant l'authentification, car l'ID client est toujours exposé dans les applications basées sur le navigateur.
+- **Exposition du jeton dans l'URL**
+   - Les jetons d'accès apparaissent directement dans l'URL du navigateur (après le symbole #)
+   - Ces jetons peuvent être :
+     - Enregistrés dans l'historique du navigateur
+     - Fuités via les en-têtes de référent
+     - Capturés par du code JavaScript malveillant sur la même page
 
-En raison des limitations ci-dessus, le flux implicite est généralement considéré comme moins sécurisé que le Flux de Code d'Autorisation (Authorization Code Flow).
+- **Pas d'authentification du client**
+   - L'application cliente n'a pas besoin de prouver son identité
+   - Cela signifie que quiconque connaît le `client_id` peut prétendre être un client légitime
 
-## Alternatives au flux implicite (Implicit flow)
+- **Pas de jetons de rafraîchissement**
+   - Ce flux ne prend pas en charge les jetons de rafraîchissement
+   - Les utilisateurs doivent se reconnecter lorsque les jetons d'accès expirent
+   - Pour éviter des connexions fréquentes, les utilisateurs pourraient stocker les jetons de manière non sécurisée
 
-Compte tenu des limitations de sécurité du flux implicite, d'autres flux sont souvent recommandés :
-- **Flux de Code d'Autorisation (Authorization Code Flow)** : Ce flux implique une étape supplémentaire où le client échange un code d'autorisation pour des tokens, fournissant une couche supplémentaire de sécurité.
-- **PKCE (Proof Key for Code Exchange)** : Une extension au flux de Code d'Autorisation qui ajoute une couche supplémentaire de sécurité en utilisant un vérificateur de code et un défi de code.
+- **Vulnérable aux attaques XSS**
+   - Tous les jetons sont gérés dans le navigateur
+   - Si le site web subit une attaque XSS (Cross-Site Scripting)
+   - Le code JavaScript des attaquants peut facilement voler ces jetons
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+En raison de ces préoccupations de sécurité, le flux implicite (implicit flow) a été déprécié dans <Ref slug="oauth-2.1" />. Les applications uniquement clientes devraient maintenant utiliser le <Ref slug="authorization-code-flow" /> avec l'extension <Ref slug="pkce" /> à la place.
+
+Vous pouvez consulter [Qu'est-ce que PKCE : des concepts de base à une compréhension approfondie](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) pour apprendre comment PKCE protège le flux de code d'autorisation pour les applications uniquement clientes.
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ Compte tenu des limitations de sécurité du flux implicite, d'autres flux sont 
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript."
-      }
+        ogDescription:
+          "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript.",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />

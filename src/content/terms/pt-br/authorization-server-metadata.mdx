@@ -1,0 +1,95 @@
+---
+title: Metadados do Servidor de Autorização (Authorization Server Metadata)
+tags: [oauth 2.0, oidc]
+description: Os Metadados do Servidor de Autorização OAuth 2.0 são um formato padronizado que permite que clientes OAuth 2.0 descubram e obtenham automaticamente as informações necessárias para interagir com servidores de autorização OAuth 2.0, incluindo locais de endpoints e capacidades do servidor.
+---
+
+## O que são Metadados do Servidor de Autorização OAuth 2.0?
+
+Os Metadados do Servidor de Autorização OAuth 2.0 são um formato padronizado definido no [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) que permite que clientes OAuth 2.0 descubram e obtenham automaticamente as informações necessárias para interagir com servidores de autorização OAuth 2.0.
+
+Isso inclui informações essenciais, como locais de endpoints, recursos suportados e capacidades do servidor.
+
+O formato de metadados fornece um documento de configuração legível por máquina que ajuda a simplificar o processo de integração entre clientes e servidores de autorização, reduzindo a necessidade de configuração manual.
+
+## Como funcionam os Metadados do Servidor de Autorização OAuth 2.0?
+
+No ecossistema OAuth 2.0, existem vários papéis principais:
+- <Ref slug="authorization-server"/>: Emite access tokens para clientes após autenticar com sucesso o resource owner
+- <Ref slug="client"/>: Aplicação que solicita acesso a recursos protegidos
+- <Ref slug="resource-owner"/>: Entidade capaz de conceder acesso a recursos protegidos
+- <Ref slug="resource-server"/>: Servidor que hospeda recursos protegidos
+
+Os Metadados do Servidor de Autorização fornecem uma maneira padronizada para que os clientes descubram e entendam como interagir com o servidor de autorização. Veja como funciona:
+
+1. O cliente conhece ou descobre a URL do issuer do servidor de autorização
+2. O cliente constrói a URL de metadados anexando `/.well-known/oauth-authorization-server` à URL do issuer
+3. O cliente recupera o documento de metadados contendo a configuração do servidor
+4. O cliente usa os metadados recuperados (endpoints, recursos suportados, etc.) para se configurar adequadamente e interagir com o servidor de autorização
+
+Por exemplo, se a URL do issuer for `https://auth.example.com`, os metadados estariam disponíveis em:
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+O documento de metadados inclui informações importantes, como:
+- `issuer`: O identificador do servidor de autorização
+- `authorization_endpoint`: A URL do endpoint de autorização
+- `token_endpoint`: A URL do endpoint de token
+- `scopes_supported`: Scopes disponíveis
+- `response_types_supported`: Tipos de resposta suportados
+- `token_endpoint_auth_methods_supported`: Métodos de autenticação de cliente suportados
+
+Para uma lista completa de campos de metadados, consulte [RFC 8414 Seção 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2).
+
+Com esses valores de metadados, os clientes podem configurar e executar automaticamente o fluxo OAuth 2.0:
+
+1. **Configuração inicial**:
+   - O cliente valida se o `issuer` corresponde ao servidor de autorização esperado
+   - O cliente verifica `response_types_supported` para garantir que seu tipo de fluxo (por exemplo, `code`) seja suportado
+
+2. **Solicitação de autorização (authorization request)**:
+   - O cliente usa `authorization_endpoint` para construir a URL de autorização
+   - O cliente seleciona scopes apropriados de `scopes_supported` com base em suas necessidades
+   - Exemplo: `https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **Troca de token**:
+   - Após receber o authorization code, o cliente usa `token_endpoint` para a troca de token
+   - O cliente verifica `token_endpoint_auth_methods_supported` para determinar como autenticar (por exemplo, `client_secret_basic`)
+   - Exemplo: Enviar solicitação POST para o endpoint de token com credenciais do cliente e authorization code
+
+Esse fluxo básico ajuda os clientes a se configurarem automaticamente e interagirem com o servidor de autorização sem configuração manual de endpoints ou seleção de scopes por tentativa e erro.
+
+## Qual é a diferença entre Metadados do Servidor de Autorização OAuth 2.0 e OpenID Connect Discovery?
+
+As principais diferenças são:
+
+1. **Escopo e Propósito**:
+   - Os Metadados do Servidor de Autorização OAuth 2.0 focam especificamente na configuração do protocolo OAuth 2.0
+   - <Ref slug="openid-connect-discovery"/> inclui parâmetros adicionais para recursos relacionados à identidade, como:
+     - `userinfo_endpoint`: Endpoint para recuperar informações do usuário
+     - `id_token_signing_alg_values_supported`: Algoritmos de assinatura suportados para ID Tokens
+     - `claims_supported`: Claims de usuário disponíveis que podem ser retornados no ID Token ou do UserInfo Endpoint
+     - Suporta o scope `openid` para autenticação
+     - Inclui tipos de resposta de fluxo híbrido (por exemplo, `code id_token`, `code id_token token`)
+
+2. **Endpoint de Metadados**:
+   - OAuth 2.0 usa `/.well-known/oauth-authorization-server`
+   - OpenID Connect usa `/.well-known/openid-configuration`
+
+## Os Metadados do Servidor de Autorização OAuth 2.0 são compatíveis com OpenID Connect Discovery?
+
+Sim, os Metadados do Servidor de Autorização OAuth 2.0 são compatíveis com <Ref slug="openid-connect-discovery"/>.
+
+A especificação de metadados OAuth 2.0 (RFC 8414) foi inspirada pelo OpenID Connect Discovery 1.0, que já era amplamente adotado na prática.
+
+Pontos-chave sobre a conformidade:
+1. O formato de metadados segue a mesma estrutura JSON
+2. Servidores de autorização podem suportar ambos os endpoints simultaneamente
+3. Provedores de OpenID geralmente expõem ambos os endpoints para compatibilidade retroativa
+4. Os metadados OAuth 2.0 podem ser estendidos com campos específicos do OpenID Connect quando necessário
+
+Essa compatibilidade garante que os servidores de autorização possam atender tanto clientes OAuth 2.0 puros quanto partes confiantes do OpenID Connect sem conflitos.
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

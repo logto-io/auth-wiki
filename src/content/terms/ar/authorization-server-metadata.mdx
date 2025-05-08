@@ -1,0 +1,95 @@
+---
+title: بيانات خادم التفويض (Authorization Server Metadata)
+tags: [oauth 2.0, oidc]
+description: بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata) هي صيغة موحدة تمكن عملاء OAuth 2.0 من اكتشاف والحصول على المعلومات اللازمة للتفاعل مع خوادم تفويض OAuth 2.0، بما في ذلك مواقع النهايات وقدرات الخادم.
+---
+
+## ما هي بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata)؟
+
+بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata) هي صيغة موحدة تم تعريفها في [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) تمكن عملاء OAuth 2.0 من اكتشاف والحصول على المعلومات اللازمة للتفاعل مع خوادم تفويض OAuth 2.0.
+
+يشمل ذلك معلومات أساسية مثل مواقع النهايات، الميزات المدعومة، وقدرات الخادم.
+
+توفر صيغة البيانات وثيقة تكوين قابلة للقراءة آليًا تساعد في تبسيط عملية التكامل بين العملاء وخوادم التفويض، مما يقلل الحاجة إلى التكوين اليدوي.
+
+## كيف تعمل بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata)؟
+
+في نظام OAuth 2.0 البيئي، هناك عدة أدوار رئيسية:
+- <Ref slug="authorization-server"/>: يصدر رموز الوصول (access tokens) للعملاء بعد التحقق بنجاح من مالك المورد
+- <Ref slug="client"/>: تطبيق يطلب الوصول إلى الموارد المحمية
+- <Ref slug="resource-owner"/>: كيان قادر على منح الوصول إلى الموارد المحمية
+- <Ref slug="resource-server"/>: خادم يستضيف الموارد المحمية
+
+توفر بيانات خادم التفويض طريقة موحدة للعملاء لاكتشاف وفهم كيفية التفاعل مع خادم التفويض. إليك كيف تعمل:
+
+1. يعرف العميل أو يكتشف عنوان URL الخاص بـ issuer لخادم التفويض
+2. يقوم العميل بإنشاء عنوان URL للبيانات عن طريق إضافة `/.well-known/oauth-authorization-server` إلى عنوان URL الخاص بـ issuer
+3. يسترجع العميل وثيقة البيانات التي تحتوي على تكوين الخادم
+4. يستخدم العميل البيانات المسترجعة (النهايات، الميزات المدعومة، إلخ) لتكوين نفسه بشكل صحيح والتفاعل مع خادم التفويض
+
+على سبيل المثال، إذا كان عنوان URL الخاص بـ issuer هو `https://auth.example.com`، ستكون البيانات متاحة على:
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+تشمل وثيقة البيانات معلومات هامة مثل:
+- `issuer`: معرف خادم التفويض
+- `authorization_endpoint`: عنوان URL لنقطة التفويض
+- `token_endpoint`: عنوان URL لنقطة الرمز
+- `scopes_supported`: النطاقات المتاحة
+- `response_types_supported`: أنواع الاستجابة المدعومة
+- `token_endpoint_auth_methods_supported`: طرق مصادقة العميل المدعومة
+
+للحصول على قائمة كاملة بحقول البيانات، يرجى الرجوع إلى [RFC 8414 Section 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2).
+
+مع هذه القيم من البيانات، يمكن للعملاء تكوين وتنفيذ تدفق OAuth 2.0 تلقائيًا:
+
+1. **الإعداد الأولي**:
+   - يتحقق العميل من أن `issuer` يطابق خادم التفويض المتوقع
+   - يتحقق العميل من `response_types_supported` للتأكد من أن نوع التدفق الخاص به (مثل `code`) مدعوم
+
+2. **طلب التفويض**:
+   - يستخدم العميل `authorization_endpoint` لإنشاء عنوان URL للتفويض
+   - يختار العميل النطاقات المناسبة من `scopes_supported` بناءً على احتياجاته
+   - مثال: `https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **تبادل الرمز**:
+   - بعد تلقي رمز التفويض، يستخدم العميل `token_endpoint` لتبادل الرمز
+   - يتحقق العميل من `token_endpoint_auth_methods_supported` لتحديد كيفية المصادقة (مثل `client_secret_basic`)
+   - مثال: إرسال طلب POST إلى نقطة الرمز مع بيانات اعتماد العميل ورمز التفويض
+
+يساعد هذا التدفق الأساسي العملاء على تكوين أنفسهم تلقائيًا والتفاعل مع خادم التفويض دون الحاجة إلى تكوين يدوي للنهايات أو اختيار النطاقات عن طريق التجربة والخطأ.
+
+## ما الفرق بين بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata) و OpenID Connect Discovery؟
+
+الاختلافات الرئيسية هي:
+
+1. **النطاق والغرض**:
+   - تركز بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata) بشكل خاص على تكوين بروتوكول OAuth 2.0
+   - <Ref slug="openid-connect-discovery"/> يشمل معلمات إضافية للميزات المتعلقة بالهوية، مثل:
+     - `userinfo_endpoint`: نقطة لاسترجاع معلومات المستخدم
+     - `id_token_signing_alg_values_supported`: خوارزميات التوقيع المدعومة لرموز الهوية (ID Tokens)
+     - `claims_supported`: المطالبات المتاحة للمستخدم التي يمكن إرجاعها في رمز الهوية أو من UserInfo Endpoint
+     - يدعم نطاق `openid` للمصادقة
+     - يشمل أنواع استجابة التدفق الهجين (مثل `code id_token`, `code id_token token`)
+
+2. **نقطة البيانات**:
+   - يستخدم OAuth 2.0 `/.well-known/oauth-authorization-server`
+   - يستخدم OpenID Connect `/.well-known/openid-configuration`
+
+## هل تتوافق بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata) مع OpenID Connect Discovery؟
+
+نعم، بيانات خادم التفويض (OAuth 2.0 Authorization Server Metadata) متوافقة مع <Ref slug="openid-connect-discovery"/>.
+
+تم استلهام مواصفات بيانات OAuth 2.0 (RFC 8414) من OpenID Connect Discovery 1.0، الذي كان قد تم اعتماده على نطاق واسع في الممارسة.
+
+نقاط رئيسية حول الامتثال:
+1. تتبع صيغة البيانات نفس هيكل JSON
+2. يمكن لخوادم التفويض دعم كلا النقطتين في نفس الوقت
+3. عادة ما تعرض موفرو OpenID كلا النقطتين للتوافق مع الإصدارات السابقة
+4. يمكن توسيع بيانات OAuth 2.0 مع حقول محددة لـ OpenID Connect عند الحاجة
+
+يضمن هذا التوافق أن خوادم التفويض يمكنها خدمة كل من عملاء OAuth 2.0 البحتة وأطراف OpenID Connect المعتمدة دون تعارضات.
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

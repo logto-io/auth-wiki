@@ -1,156 +1,166 @@
 ---
 title: Jeton opaque
 tags: [oauth 2.0, oidc]
-description: Un jeton opaque est un type de jeton dont le format est déterminé par l'issuer, apparaissant généralement comme une chaîne de caractères ou de chiffres, et nécessitant une validation par l'issuer plutôt que de contenir toutes les informations nécessaires pour une validation directe.
+description: Un jeton opaque est une chaîne aléatoire et unique qui est dénuée de sens pour le client mais sert de clé de référence pour rechercher des données d'autorisation dans la base de données du serveur.
 ---
-
-## Qu'est-ce qu'un jeton ?
-
-Avant d'introduire les jetons opaques, il est important de comprendre ce qu'est un jeton :
-
-Les jetons sont utilisés pour représenter et transmettre des informations sécurisées entre les parties, et ils soutiennent la grande majorité des processus d'<Ref slug="authentication" /> et d'<Ref slug="authorization" /> qui se produisent sur Internet en coulisses. Les deux types de jetons les plus populaires dans les services web sont les <Ref slug="jwt" /> et les jetons opaques.
 
 ## Qu'est-ce qu'un jeton opaque ?
 
-Les jetons opaques sont des jetons dans un format propriétaire auquel vous ne pouvez pas accéder et contiennent généralement un identifiant pour des informations dans le stockage persistant d'un serveur.
+Un jeton opaque est une chaîne aléatoire et unique qui est dénuée de sens pour le client mais sert de clé de référence pour rechercher des données d'autorisation dans la base de données du serveur.
 
-Un jeton opaque est une forme que peut prendre un jeton, et les <Ref slug="access-token">jetons d'accès</Ref> et les <Ref slug="refresh-token">jetons de rafraîchissement</Ref> peuvent exister sous forme de jetons opaques. Le format d'un jeton opaque est déterminé par son issuer, et il s'agit généralement d'une chaîne de chiffres et/ou de caractères utilisée pour aider l'issuer à récupérer et identifier certaines informations dans une base de données. Voici un exemple de jeton opaque :
+Les jetons opaques sont généralement générés à l'aide d'un <Ref slug='csprng' /> pour garantir leur imprévisibilité et leur sécurité, et leur format est déterminé par leur issuer (émetteur).
+
+Voici un exemple de jeton opaque :
 
 ```
 M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
 ```
 
-D'autre part, le JWT est un autre format de jeton courant. C'est une chaîne JSON qui contient toutes les claims et informations, ainsi qu'une signature de l'issuer. Par défaut, il n'est pas chiffré, bien qu'il puisse être chiffré en utilisant la norme <Ref slug="jwe" />. Même si le JWT n'est généralement pas chiffré, cela ne compromet pas sa sécurité — la présence de la signature garantit l'intégrité du contenu du jeton, permettant une confiance totale dans les données à l'intérieur du JWT.
+## Quelle est la différence entre JWT (JSON Web Token) et jeton opaque ?
 
-Contrairement au JWT, qui contient toutes les informations nécessaires pour être validé directement à la ressource protégée, les jetons opaques ne peuvent pas être validés directement par la ressource. Au lieu de cela, ils nécessitent une validation par l'issuer du jeton opaque (généralement le <Ref slug="authorization-server" />). Ce processus de validation est généralement appelé <Ref slug="token-introspection" />.
+La principale différence réside dans la manière dont ces jetons gèrent et valident les informations d'autorisation :
 
-## Qu'est-ce qu'un JWT ?
+Un jeton opaque est une chaîne aléatoire qui ne contient aucune information en elle-même. Le serveur doit interroger sa base de données pour récupérer toutes les données d'autorisation associées à ce jeton. Cela rend les jetons opaques complètement dépendants de l'authorization server (serveur d'autorisation) pour la validation et l'interprétation.
 
-Contrairement aux jetons opaques, un JWT est un jeton autonome et sans état qui transporte des informations dans un format structuré et lisible.
+```mermaid
+sequenceDiagram
+    participant Client as Client
+    participant ResourceServer as Resource Server
+    participant AuthServer as Authorization Server
+    participant Database as Database
+    autonumber
 
-Un JWT est composé de trois parties : un `header`, un `payload` et une `signature`, chacun encodé en Base64URL.
+    Client->>ResourceServer: Demande avec jeton opaque
+    ResourceServer->>AuthServer: Valider le jeton
+    AuthServer->>Database: Requête des données du jeton
+    Database->>AuthServer: Retour des informations du jeton
+    AuthServer->>ResourceServer: Résultat de la validation du jeton
+    ResourceServer->>Client: Réponse
+```
 
-Voici un exemple de JWT :
+Le JWT est un jeton autonome qui contient toutes les informations nécessaires en lui-même.
 
-`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+Voici un exemple de JWT, c'est une chaîne encodée en base64 :
 
-- Le `header` contient des informations sur le type de jeton et l'algorithme utilisé pour la signature. Par exemple, `{"alg": "HS256", "typ": "JWT"}`.
-- La section `payload` contient des claims — des morceaux d'informations sur l'utilisateur ou l'autorisation — tels que l'ID utilisateur, le temps d'expiration et les scopes. Étant donné que ces données sont encodées mais non chiffrées, quiconque possède le jeton peut le décoder pour voir les claims, bien qu'il ne puisse pas les modifier sans invalider la signature. En fonction de la spécification et de la configuration du serveur d'autorisation, divers claims peuvent être inclus dans le payload. Cela donne au jeton sa nature autonome. Par exemple, `{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}`.
-- La `signature` est générée en combinant le header, le payload et une clé secrète en utilisant l'algorithme spécifié. Cette signature est utilisée pour vérifier l'intégrité du jeton et s'assurer qu'il n'a pas été altéré.
+```
+eyJhbGciOiJIUzI1NiIs.eyJzdWIiOiIxMjM0NTY3O.SflKxwRJSMeKKF2QT4f
+```
 
-Les JWT sont couramment utilisés car ils peuvent être vérifiés localement par le client ou tout service, sans avoir besoin d'interagir avec le serveur d'autorisation. Cela rend les JWT particulièrement efficaces pour les systèmes distribués, où plusieurs services pourraient avoir besoin de vérifier l'authenticité du jeton de manière indépendante.
+Et il contient trois parties séparées par des points :
 
-Cependant, cette commodité s'accompagne également de la responsabilité de s'assurer que les claims du jeton ne sont pas excessivement exposés, car ils sont visibles par quiconque a accès au jeton. De plus, les JWT sont généralement de courte durée, et le temps d'expiration est inclus dans les claims du jeton pour s'assurer que le jeton n'est pas valide indéfiniment.
+1. **Header** - Contient des informations sur le type de jeton et l'algorithme utilisé pour la signature. Par exemple, `{"alg": "HS256", "typ": "JWT"}`.
+2. **Payload** - Contient des claims (revendications) — des informations sur l'utilisateur ou l'autorisation, comme l'ID utilisateur, le temps d'expiration et les scopes (périmètres). Tout le monde peut le décoder pour voir les claims car il est encodé mais non chiffré.
+3. **Signature** - Générée en combinant le header, le payload et une clé secrète en utilisant l'algorithme spécifié. Cette signature est utilisée pour vérifier l'intégrité du jeton et s'assurer qu'il n'a pas été altéré.
 
-## Validation des jetons d'accès opaques
+Cette structure permet aux JWT d'être validés et utilisés sans interroger une base de données.
 
-Un jeton d'accès opaque est validé en le renvoyant au serveur d'autorisation pour vérification. Le serveur d'autorisation maintient l'état des jetons émis et peut déterminer la validité du jeton en fonction de son stockage interne.
+Pour plus d'informations détaillées sur les JWT, veuillez vous référer à <Ref slug='jwt' />.
+
+Et consultez [Jeton opaque vs JWT](https://blog.logto.io/opaque-token-vs-jwt) pour en savoir plus sur leurs différences en profondeur.
+
+## Comment valider un jeton opaque
+
+Dans les systèmes simples, la validation des jetons opaques est généralement gérée directement par le serveur, qui interroge la base de données en utilisant le jeton opaque comme clé pour récupérer les informations d'autorisation associées.
 
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant AS as Authorization Server
-    participant RP as Resource Provider
+    participant S as Server
+    participant D as Database
+    autonumber
 
-    C ->> AS: 1. post /oidc/token
-    AS ->> C: 2. jeton opaque
-    C ->> RP: 3. get /api/resource
-    RP ->> AS: 4. post /oidc/introspect
-    AS ->> RP: 5. infos du jeton
-
+    C->>S: Demande avec jeton opaque
+    S->>D: Requête des informations du jeton
+    D->>S: Retour des données du jeton
+    S->>C: Réponse
 ```
 
-1. Le client demande un jeton d'accès au serveur d'autorisation.
-2. Le serveur d'autorisation émet un jeton opaque.
-3. Le client envoie la demande d'accès à la ressource avec le jeton opaque dans l'en-tête.
-4. Le fournisseur de ressources envoie une demande d'introspection de jeton au serveur d'autorisation pour valider le jeton.
-5. Le serveur d'autorisation répond avec les informations du jeton.
-
-## Validation des jetons d'accès JWT (hors ligne)
-
-Un jeton d'accès JWT peut être validé hors ligne par le client ou tout service qui a accès à la clé publique du jeton.
+Dans les systèmes multipartites introduisant OAuth 2.0, plusieurs resource servers (serveurs de ressources) (voir : <Ref slug='resource-server' />) peuvent avoir besoin de valider le même jeton opaque. OAuth 2.0 fournit un mécanisme standardisé de token introspection (introspection de jeton) pour cette validation :
 
 ```mermaid
-
 sequenceDiagram
     participant C as Client
+    participant RS as Resource Server
     participant AS as Authorization Server
-    participant RP as Resource Provider
+    participant D as Database
+    autonumber
 
-    RP ->> AS: 0. get /oidc/.well-known/jwks.json
-
-    C ->> AS: 1. post /oidc/token
-    AS ->> C: 2. jeton JWT
-    C ->> RP: 3. get /api/resource
-    RP ->> RP: 4. valider le jeton JWT
-    RP ->> C: 5. réponse 200 OK
-
+    C->>RS: Demande avec jeton opaque
+    RS->>AS: POST /oauth/introspect
+    AS->>D: Valider le jeton
+    D->>AS: Informations du jeton
+    AS->>RS: Réponse de validation du jeton
+    RS->>C: Réponse
 ```
 
-1. Le fournisseur de ressources pré-récupère la clé publique du serveur d'autorisation à partir de l'<Ref slug="openid-connect-discovery" />. La clé publique est utilisée pour vérifier la signature du jeton et garantir son intégrité.
-2. Le client demande un jeton d'accès au serveur d'autorisation.
-3. Le serveur d'autorisation émet un jeton JWT.
-4. Le client envoie la demande d'accès à la ressource avec le jeton JWT dans l'en-tête.
-5. Le fournisseur de ressources décode et valide le jeton JWT en utilisant la clé publique obtenue du serveur d'autorisation.
-6. Le fournisseur de ressources accorde l'accès en fonction de la validité du jeton.
+Pour des informations détaillées sur l'introspection de jeton, veuillez vous référer à <Ref slug='token-introspection' />.
 
-## Cas d'utilisation dans OIDC
+## Comment les jetons opaques sont-ils utilisés dans OIDC ?
 
-Dans le contexte de l'OIDC (<Ref slug="openid-connect" />), les jetons opaques et les JWT servent à des fins différentes et sont utilisés dans des scénarios distincts.
+Dans le contexte de OIDC (<Ref slug='openid-connect' />), les jetons opaques servent des objectifs spécifiques dans différents scénarios :
 
-### Jetons opaques
+### Récupération de profil utilisateur
 
-1. Récupération du profil utilisateur :
+Par défaut, lorsqu'un client demande un access token (jeton d'accès) sans spécifier de ressource et inclut le scope `openid`, l'authorization server émet un jeton d'accès opaque. Ce jeton est principalement utilisé pour récupérer des informations de profil utilisateur à partir de l'endpoint `/oidc/userinfo` de OIDC (voir : <Ref slug='userinfo-endpoint' />).
 
-Par défaut, lorsqu'un client demande un jeton d'accès sans spécifier de ressource et inclut le scope `openid`, le serveur d'autorisation émet un jeton d'accès opaque. Ce jeton est principalement utilisé pour récupérer des informations de profil utilisateur à partir du point de terminaison `/oidc/userinfo` de l'OIDC. Lorsqu'il reçoit une demande avec le jeton d'accès opaque, le serveur d'autorisation vérifie son stockage interne pour récupérer les informations d'autorisation associées et vérifie la validité du jeton avant de répondre avec les détails du profil utilisateur.
+```mermaid
+sequenceDiagram
+    participant Client as Client
+    participant AuthServer as Authorization Server
+    participant Database as Database
+    autonumber
 
-2. Échange de jetons de rafraîchissement :
-
-Les jetons de rafraîchissement sont conçus pour être échangés uniquement entre le client et le serveur d'autorisation, sans avoir besoin d'être partagés avec les fournisseurs de ressources. En tant que tels, les jetons de rafraîchissement sont généralement émis sous forme de jetons opaques. Lorsque le jeton d'accès actuel expire, le client peut utiliser le jeton de rafraîchissement opaque pour obtenir un nouveau jeton d'accès, garantissant un accès continu sans ré-authentifier l'utilisateur.
-
-### JWTs
-
-1. Jeton ID :
-
-Dans l'OIDC, le jeton ID est un JWT qui contient des informations utilisateur et est utilisé pour authentifier l'utilisateur. Généralement émis en même temps que le jeton d'accès, le jeton ID permet au client de vérifier l'identité de l'utilisateur. Par exemple :
-
-```json
-// Payload décodé d'un jeton ID
-{
-  "iss": "<https://auth.wiki>",
-  "sub": "1234567890",
-  "aud": "client_id",
-  "exp": 1630368000,
-  "name": "John Doe",
-  "email": "john.doe@mail.com",
-  "picture": "<https://example.com/johndoe.jpg>"
-}
-
+    Client->>AuthServer: GET /oidc/userinfo avec jeton opaque
+    AuthServer->>Database: Requête des données du jeton
+    Database->>AuthServer: Retour des informations du jeton
+    AuthServer->>Client: Données de profil utilisateur
 ```
 
-Le client peut valider le jeton ID pour s'assurer de l'identité de l'utilisateur et extraire des informations utilisateur pour la personnalisation ou à des fins d'autorisation. Le jeton ID est à usage unique et ne doit pas être utilisé pour l'autorisation des ressources API.
+### Échange de refresh token
 
-2. Accès aux ressources API (en utilisant le jeton d'accès) :
+Les refresh tokens (jetons de rafraîchissement) (voir : <Ref slug='refresh-token' />) sont généralement émis sous forme de jetons opaques car ils ne sont échangés qu'entre le client et l'authorization server. Lorsque le jeton d'accès actuel expire, le client peut utiliser le refresh token opaque pour obtenir un nouveau jeton d'accès sans ré-authentifier l'utilisateur.
 
-Lorsqu'un client demande un jeton d'accès avec un <Ref slug="resource-indicator" /> spécifique, le serveur d'autorisation émet un jeton d'accès JWT destiné à accéder à cette ressource. Le JWT contient des claims que le fournisseur de ressources peut utiliser pour autoriser l'accès du client. Par exemple :
+```mermaid
+sequenceDiagram
+    participant Client as Client
+    participant RS as Resource Server
+    participant AS as Authorization Server
+    autonumber
 
-```json
-// Payload décodé d'un jeton d'accès JWT
-{
-  "iss": "<https://auth.wiki>",
-  "sub": "1234567890",
-  "aud": "<https://api.example.com>",
-  "scope": "read write",
-  "exp": 1630368000
-}
-
+    Client->>RS: Demande avec jeton d'accès expiré (JWT)
+    RS->>Client: 401 Jeton expiré
+    Client->>AS: POST /oidc/token avec refresh token
+    AS->>Client: Nouveau jeton d'accès
+    Client->>RS: Demande avec nouveau jeton d'accès
+    RS->>Client: Réponse réussie
 ```
 
-Le fournisseur de ressources peut valider la demande en vérifiant les claims :
+## Quels sont les avantages et les inconvénients des jetons opaques ?
 
-- `iss`: Confirme que le jeton a été émis par un serveur d'autorisation de confiance.
-- `sub`: Identifie l'utilisateur associé au jeton.
-- `aud`: S'assure que le jeton est destiné à la ressource spécifique.
-- `scope`: Vérifie les permissions accordées à l'utilisateur.
+### Avantages
 
-<SeeAlso slugs={['jwt']} />
+- **Sécurité** : Les jetons opaques sont parfaits pour gérer des données sensibles comme les refresh tokens. Étant donné que le contenu est complètement aléatoire et dénué de sens, même si quelqu'un intercepte le jeton, il ne peut extraire aucune information utile. Cela les rend particulièrement précieux dans des scénarios de haute sécurité comme les transactions bancaires ou la gestion de données utilisateur sensibles.
+
+- **Révocabilité** : Le serveur peut invalider immédiatement un jeton opaque à tout moment. Cela est particulièrement utile lorsque vous devez rapidement supprimer l'accès d'un utilisateur. Contrairement aux JWT qui restent valides jusqu'à leur expiration, les jetons opaques peuvent être révoqués instantanément (voir : [Limitations des JWT](https://blog.logto.io/why-jwt-in-most-oauth-2-services#hard-to-revoke)).
+
+- **Taille** : Les jetons opaques sont généralement beaucoup plus courts que les JWT. Cette taille réduite diminue l'utilisation de la bande passante réseau et les besoins de stockage. Le bénéfice devient particulièrement notable dans les systèmes qui transmettent fréquemment des jetons, tels que les applications mobiles ou les appareils IoT.
+
+- **Simplicité** : L'implémentation des jetons opaques est simple. Vous générez une chaîne aléatoire et la stockez avec ses données associées. Il n'est pas nécessaire de gérer un chiffrement complexe ou une vérification de signature comme avec les JWT. Cette simplicité les rend idéaux pour l'authentification des systèmes internes.
+
+### Inconvénients
+
+- **État** : Chaque jeton opaque nécessite un stockage côté serveur. Cela crée une complexité supplémentaire dans les systèmes distribués car les données des jetons doivent être synchronisées entre plusieurs serveurs. Par exemple, si vous avez plusieurs serveurs d'authentification, ils doivent tous avoir accès à la même base de données de jetons ou au système de cache pour valider correctement les jetons.
+
+- **Performance** : La validation des jetons nécessite toujours une requête à la base de données ou un appel API. Dans les systèmes à fort trafic, ces requêtes supplémentaires à la base de données peuvent créer des goulots d'étranglement de performance. Par exemple, si votre système gère des milliers de requêtes par seconde, chacune nécessitant une validation de jeton, la charge supplémentaire sur la base de données devient significative.
+
+- **Interopérabilité** : Différents systèmes peuvent implémenter les jetons opaques de différentes manières. Cela peut causer des défis d'intégration lors du travail avec des services tiers ou différents authorization servers. Bien que des standards comme l'introspection de jeton OAuth 2.0 aident, vous pouvez toujours rencontrer des problèmes de compatibilité lorsque les systèmes utilisent différents formats de jetons ou méthodes de validation.
+
+<SeeAlso slugs={[
+  'csprng',
+  'jwt',
+  'resource-server',
+  'token-introspection',
+  'openid-connect',
+  'refresh-token',
+  'userinfo-endpoint'
+]} />

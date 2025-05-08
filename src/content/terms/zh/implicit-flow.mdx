@@ -1,72 +1,82 @@
 ---
-title: 隐式流程 (Implicit flow)
+title: 隐式流 (Implicit flow)
 tags: [oauth 2.0, oidc]
-description: OIDC 隐式流程 (Implicit flow) 是一种用于 SPA 的认证 (Authentication) 方法，使其能够快速直接从授权服务器 (Authorization server) 接收 token。虽然它通过消除了对后端服务器的需求简化了流程，但由于 token 暴露在 URL 中，因此安全性较低。
+description: 隐式流 (Implicit flow) 是一种认证 (authentication) 方法，允许仅客户端应用程序（如 SPA 和本地应用）通过 URL 片段直接从授权服务器 (authorization server) 接收令牌，而无需提供客户端密钥。
 ---
 
-## 什么是隐式流程 (Implicit flow)
+## 什么是隐式流 (Implicit flow)？
 
-OIDC (OpenID Connect) 隐式流程 (Implicit flow) 是一种主要由使用脚本语言在浏览器中实现的客户端应用程序使用的认证 (Authentication) 过程，例如，单页应用程序 (SPAs)。它允许客户端应用程序直接从授权服务器 (Authorization server) 获取 ID token 和访问 token (Access token) ，而无需执行客户端认证 (Client authentication)。
+OAuth 2.0 隐式流 (implicit flow) 是一种认证 (authentication) 方法，允许仅客户端应用程序（如 SPA 和本地应用）通过 URL 片段直接从授权服务器 (authorization server) 接收令牌，而无需提供客户端密钥。
 
-## 隐式流程 (Implicit flow) 是如何工作的？
+隐式流 (Implicit flow) 设计用于仅客户端应用程序，因为它们完全在浏览器或用户设备上运行，无法安全地存储客户端密钥。
 
-隐式流程 (Implicit flow) 的主要步骤如下：
+由于安全原因（将在下文提到），隐式流 (implicit flow) 已在 <Ref slug="oauth-2.1" /> 中被正式弃用。仅客户端应用程序现在应使用带有 <Ref slug="pkce" /> 扩展的 <Ref slug="authorization-code-flow" />。
 
-1. **发送认证请求 (Authentication request)**：用户通常通过在应用程序中点击一个链接或按钮来启动流程。应用程序向授权服务器 (Authorization server) 的授权端点发送认证请求 (Authentication request)。授权服务器 (Authorization server) 验证参数并将用户重定向到授权服务器 (Authorization server) 的登录页面进行认证 (Authentication)。
-2. **用户认证 (Authentication)**：用户在授权服务器 (Authorization server) 上进行认证，例如，输入用户名和密码。
-3. **授权服务器 (Authorization server) 响应**：授权服务器 (Authorization server) 将 ID token 和（如果请求）访问 token (Access token) 作为 URL 片段返回给客户端应用程序。
-4. **客户端处理 token**：客户端应用程序从 URL 片段中提取 token。
+## 隐式流 (Implicit flow) 如何工作？
+
+隐式流 (implicit flow) 的主要步骤如下：
 
 ```mermaid
 sequenceDiagram
-participant 用户
-participant 应用程序
-participant 授权服务器
-用户->>应用程序: 发起登录流程
-应用程序->>授权服务器: 请求授权服务器，附带客户端 ID、范围 (Scope)、重定向 URI 和状态
-授权服务器->>用户: 重定向用户到登录页面请求认证
-用户->>授权服务器: 认证（例如，输入用户名和密码）
-授权服务器 -->>应用程序: 在 URL 片段中返回 ID token 和访问 token (Access token)
-应用程序->>应用程序: 从 URL 片段中提取 token
+  participant U as 用户
+  participant C as 客户端
+  participant AS as 授权服务器
+  participant RS as 资源服务器
+
+  U->>C: 点击登录
+  C->>AS: 授权请求<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: 显示登录页面
+  U->>AS: 输入凭据
+  AS-->>C: 在 URL 片段中返回令牌
+  C->>C: 从片段中提取令牌
+  C->>RS: 使用令牌进行 API 请求
+  RS-->>C: 受保护资源的响应
 ```
 
-### 认证请求 (Authentication request)
+注意：
 
-请求参数如下：
-- **client_id**: 必填。有效的 OAuth 2.0 客户端标识符，可以在 Logto 中作为应用程序 ID（或 app ID）获取。
-- **scope**: 必填。该值指定用户请求从授权服务器 (Authorization server) 获取的一组资源。例如，`openid profile email`
-- **response_type**: 必填。值可以是 `id_token` 或 `id_token token`。当值为 `id_token` 时，不返回访问 token (Access token)。
-- **redirect_uri**: 必填。认证响应将被发送到的 URI，应与客户端在 <Ref slug="openid-connect" headingId="openid-provider-op" /> 上预注册的重定向 URI 完全匹配。例如，Logto 管理控制台中的“登录重定向 URI”。
-- **nonce**: 必填。用于减轻重放攻击的随机字符串，它从认证请求 (Authentication request) 到 ID token 声明 (Claim) 中不变。
+- 客户端在授权请求中只需提供 `client_id`，无需提供 `client_secret`。  
+  这是因为这些客户端无法安全地存储密钥，因此此流不需要客户端密钥。
 
-### 认证请求 (Authentication request) 示例
+- `response_type` 参数设置为 `token`，指示授权服务器直接返回访问令牌而不是授权码。  
+  在 OIDC (<Ref slug="openid-connect" />) 中，`response_type` 可以是 `id_token` 或 `id_token token`，认证服务将根据不同的响应类型返回相应的令牌。
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- 令牌直接在 URL 片段中返回。这意味着令牌暴露在 URL 中，可以被其他应用程序或脚本轻松访问。
 
-## 限制
+## 隐式流 (Implicit flow) 安全吗？
 
-隐式流程 (Implicit flow) 是在浏览器尚未普遍采用跨域资源共享 (CORS) 的时代开发的。因此，禁止向托管在不同域上的授权服务器 (Authorization server) 发送 POST 请求。
+不，OAuth 2.0 中的隐式流 (implicit flow) 通常被认为比其他流（如授权码流 (authorization code flow)）安全性更低。
 
-由于这一限制，授权服务器 (Authorization server) 直接在 URL 片段中返回 token，可能会将其暴露给终端用户和可以访问终端用户用户代理的应用程序。
+由于以下几个漏洞，大多数情况下不推荐使用：
 
-此外，隐式流程 (Implicit flow) 中没有执行客户端认证 (Client authentication)，意味着任何应用程序都可以假装是请求认证的那个客户端，因为客户端 ID 总是在基于浏览器的应用程序中暴露。
+- **令牌暴露在 URL 中**
+   - 访问令牌直接出现在浏览器的 URL 中（# 符号之后）
+   - 这些令牌可能会：
+     - 被保存在浏览器历史记录中
+     - 通过引用头泄露
+     - 被同一页面上的恶意 JavaScript 代码捕获
 
-由于上述限制，隐式流程 (Implicit flow) 通常被认为不如授权码流程 (Authorization Code Flow) 安全。
+- **没有客户端认证 (client authentication)**
+   - 客户端应用程序不需要证明其身份
+   - 这意味着任何知道 `client_id` 的人都可以假装是合法客户端
 
-## 隐式流程 (Implicit flow) 的替代方案
+- **没有刷新令牌 (refresh tokens)**
+   - 此流不支持刷新令牌
+   - 当访问令牌过期时，用户必须重新登录
+   - 为了避免频繁登录，用户可能会以不安全的方式存储令牌
 
-鉴于隐式流程 (Implicit flow) 的安全限制，通常建议使用其他流程：
-- **授权码流程 (Authorization Code Flow)**：此流程涉及一个额外步骤，客户端将授权码兑换为 token，提供了额外的安全层。
-- **PKCE (Proof Key for Code Exchange)**：授权码流程 (Authorization Code Flow) 的扩展，通过使用代码验证器和代码挑战增加了一层安全性。
+- **易受 XSS 攻击**
+   - 所有令牌都在浏览器中处理
+   - 如果网站遭受 XSS 攻击（跨站脚本攻击）
+   - 攻击者的 JavaScript 代码可以轻松窃取这些令牌
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+由于这些安全问题，隐式流 (implicit flow) 已在 <Ref slug="oauth-2.1" /> 中被弃用。仅客户端应用程序现在应使用带有 <Ref slug="pkce" /> 扩展的 <Ref slug="authorization-code-flow" />。
+
+你可以查看 [什么是 PKCE：从基本概念到深入理解](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) 以了解 PKCE 如何保护仅客户端应用程序的授权码流 (authorization code flow)。
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ curl -X GET "https://authorization-server.com/auth" \
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript."
-      }
+        ogDescription:
+          "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript.",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />

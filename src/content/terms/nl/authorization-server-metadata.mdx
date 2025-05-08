@@ -1,0 +1,95 @@
+---
+title: Autorisatieservermetadata (Authorization Server Metadata)
+tags: [oauth 2.0, oidc]
+description: OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata) is een gestandaardiseerd formaat dat OAuth 2.0-clients in staat stelt om automatisch de benodigde informatie te ontdekken en verkrijgen om te communiceren met OAuth 2.0-autorisatieservers, inclusief eindpuntlocaties en servermogelijkheden.
+---
+
+## Wat is OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata)?
+
+OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata) is een gestandaardiseerd formaat gedefinieerd in [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) dat OAuth 2.0-clients in staat stelt om automatisch de benodigde informatie te ontdekken en verkrijgen om te communiceren met OAuth 2.0-autorisatieservers.
+
+Dit omvat essentiële informatie zoals eindpuntlocaties, ondersteunde functies en servermogelijkheden.
+
+Het metadataformaat biedt een machineleesbaar configuratiedocument dat helpt om het integratieproces tussen clients en autorisatieservers te stroomlijnen, waardoor de noodzaak voor handmatige configuratie wordt verminderd.
+
+## Hoe werkt OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata)?
+
+In het OAuth 2.0-ecosysteem zijn er verschillende sleutelrollen:
+- <Ref slug="authorization-server"/>: Geeft toegangstokens uit aan clients na succesvolle authenticatie van de resource-eigenaar
+- <Ref slug="client"/>: Applicatie die toegang vraagt tot beschermde resources
+- <Ref slug="resource-owner"/>: Entiteit die in staat is toegang te verlenen tot beschermde resources
+- <Ref slug="resource-server"/>: Server die beschermde resources host
+
+De autorisatieservermetadata (Authorization Server Metadata) biedt een gestandaardiseerde manier voor clients om te ontdekken en te begrijpen hoe ze met de autorisatieserver kunnen communiceren. Zo werkt het:
+
+1. De client kent of ontdekt de issuer-URL van de autorisatieserver
+2. De client construeert de metadata-URL door `/.well-known/oauth-authorization-server` toe te voegen aan de issuer-URL
+3. De client haalt het metadatadocument op dat de serverconfiguratie bevat
+4. De client gebruikt de opgehaalde metadata (eindpunten, ondersteunde functies, etc.) om zichzelf correct te configureren en te communiceren met de autorisatieserver
+
+Bijvoorbeeld, als de issuer-URL `https://auth.example.com` is, zou de metadata beschikbaar zijn op:
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+Het metadatadocument bevat belangrijke informatie zoals:
+- `issuer`: De identificatie van de autorisatieserver
+- `authorization_endpoint`: De URL van het autorisatie-eindpunt
+- `token_endpoint`: De URL van het token-eindpunt
+- `scopes_supported`: Beschikbare scopes
+- `response_types_supported`: Ondersteunde responstypen
+- `token_endpoint_auth_methods_supported`: Ondersteunde clientauthenticatiemethoden
+
+Voor een volledige lijst van metadata-velden, raadpleeg [RFC 8414 Sectie 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2).
+
+Met deze metadatagegevens kunnen clients automatisch de OAuth 2.0-flow configureren en uitvoeren:
+
+1. **Initiële setup**:
+   - Client valideert dat de `issuer` overeenkomt met de verwachte autorisatieserver
+   - Client controleert `response_types_supported` om ervoor te zorgen dat het flowtype (bijv. `code`) wordt ondersteund
+
+2. **Autorisatieverzoek (Authorization request)**:
+   - Client gebruikt `authorization_endpoint` om de autorisatie-URL te construeren
+   - Client selecteert geschikte scopes uit `scopes_supported` op basis van zijn behoeften
+   - Voorbeeld: `https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **Tokenuitwisseling (Token exchange)**:
+   - Na ontvangst van de autorisatiecode gebruikt de client `token_endpoint` voor tokenuitwisseling
+   - Client controleert `token_endpoint_auth_methods_supported` om te bepalen hoe te authenticeren (bijv. `client_secret_basic`)
+   - Voorbeeld: Stuur een POST-verzoek naar het token-eindpunt met clientreferenties en autorisatiecode
+
+Deze basisflow helpt clients om zichzelf automatisch te configureren en te communiceren met de autorisatieserver zonder handmatige eindpuntconfiguratie of trial-and-error scope-selectie.
+
+## Wat is het verschil tussen OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata) en OpenID Connect Discovery?
+
+De belangrijkste verschillen zijn:
+
+1. **Reikwijdte en Doel**:
+   - OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata) richt zich specifiek op de configuratie van het OAuth 2.0-protocol
+   - <Ref slug="openid-connect-discovery"/> omvat aanvullende parameters voor identiteitsgerelateerde functies, zoals:
+     - `userinfo_endpoint`: Eindpunt voor het ophalen van gebruikersinformatie
+     - `id_token_signing_alg_values_supported`: Ondersteunde ondertekeningsalgoritmen voor ID Tokens
+     - `claims_supported`: Beschikbare gebruikersclaims die kunnen worden geretourneerd in ID Token of van UserInfo Endpoint
+     - Ondersteunt `openid` scope voor authenticatie
+     - Omvat hybride flow-responstypen (bijv. `code id_token`, `code id_token token`)
+
+2. **Metadata-eindpunt**:
+   - OAuth 2.0 gebruikt `/.well-known/oauth-authorization-server`
+   - OpenID Connect gebruikt `/.well-known/openid-configuration`
+
+## Voldoet OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata) aan OpenID Connect Discovery?
+
+Ja, OAuth 2.0-autorisatieservermetadata (Authorization Server Metadata) is compatibel met <Ref slug="openid-connect-discovery"/>.
+
+De OAuth 2.0-metadataspecificatie (RFC 8414) is geïnspireerd door OpenID Connect Discovery 1.0, dat al op grote schaal in de praktijk werd toegepast.
+
+Belangrijke punten over naleving:
+1. Het metadataformaat volgt dezelfde JSON-structuur
+2. Autorisatieservers kunnen beide eindpunten tegelijkertijd ondersteunen
+3. OpenID-providers stellen doorgaans beide eindpunten bloot voor achterwaartse compatibiliteit
+4. De OAuth 2.0-metadata kan worden uitgebreid met OpenID Connect-specifieke velden indien nodig
+
+Deze compatibiliteit zorgt ervoor dat autorisatieservers zowel pure OAuth 2.0-clients als OpenID Connect relying parties kunnen bedienen zonder conflicten.
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

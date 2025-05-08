@@ -1,156 +1,166 @@
 ---
 title: 不透明令牌 (Opaque token)
 tags: [oauth 2.0, oidc]
-description: 不透明令牌是一種由發行者決定其格式的令牌，通常顯示為一串字符或數字，需要由發行者進行驗證，而不是包含所有必要信息以供直接驗證。
+description: 不透明令牌是一個隨機的、唯一的字串，對客戶端來說沒有意義，但作為參考鍵用於在伺服器的資料庫中查找授權數據。
 ---
 
-## 什麼是令牌？
+## 什麼是不透明令牌 (Opaque token)？
 
-在介紹不透明令牌之前，了解什麼是令牌很重要：
+不透明令牌是一個隨機的、唯一的字串，對客戶端來說沒有意義，但作為參考鍵用於在伺服器的資料庫中查找授權數據。
 
-令牌用於在各方之間表示和傳輸安全信息，它們支持互聯網上大多數在幕後發生的<Ref slug="authentication" />和<Ref slug="authorization" />過程。網絡服務中最流行的兩種類型的令牌是<Ref slug="jwt" />和不透明令牌。
+不透明令牌通常使用 <Ref slug='csprng' /> 生成，以確保其不可預測性和安全性，其格式由其 issuer 決定。
 
-## 什麼是不透明令牌？
-
-不透明令牌是你無法訪問的專有格式的令牌，通常包含一些標識符以指向服務器的持久存儲中的信息。
-
-不透明令牌是一種令牌的形式，<Ref slug="access-token">訪問令牌 (access tokens)</Ref>和<Ref slug="refresh-token">刷新令牌 (refresh tokens)</Ref>可以以不透明令牌的形式存在。不透明令牌的格式由其發行者決定，通常是一串數字和/或字符，用於幫助發行者在數據庫中檢索和識別某些信息。以下是一個不透明令牌的例子：
+以下是一個不透明令牌的例子：
 
 ```
 M-oxIny1RfaFbmjMX54L8Pl-KQEPeQvF6awzjWFA3iq
 ```
 
-另一方面，JWT 是另一種常見的令牌格式。它是一個包含所有聲明和信息的 JSON 字符串，並附有發行者的簽名。默認情況下，它不加密，但可以使用<Ref slug="jwe" />標準進行加密。即使 JWT 通常未加密，它的安全性也不會受到影響——簽名的存在確保了令牌內容的完整性，允許完全信任 JWT 中的數據。
+## JWT (JSON Web Token) 和不透明令牌的區別是什麼？
 
-與 JWT 不同，JWT 包含所有必要的信息，可以直接在受保護的資源處驗證，不透明令牌不能由資源直接驗證。相反，它們需要由不透明令牌的發行者（通常是<Ref slug="authorization-server" />）進行驗證。這個驗證過程通常被稱為<Ref slug="token-introspection" />。
+主要區別在於這些令牌如何處理和驗證授權信息：
 
-## 什麼是 JWT？
+不透明令牌是一個不包含任何信息的隨機字串。伺服器必須查詢其後端資料庫以檢索與此令牌相關的任何授權數據。這使得不透明令牌完全依賴於授權伺服器進行驗證和解釋。
 
-與不透明令牌相反，JWT 是一種自包含的、無狀態的令牌，以結構化和可讀的格式攜帶信息。
+```mermaid
+sequenceDiagram
+    participant Client as 客戶端
+    participant ResourceServer as 資源伺服器
+    participant AuthServer as 授權伺服器
+    participant Database as 資料庫
+    autonumber
 
-JWT 由三部分組成：`header`、`payload` 和 `signature`，每部分都以 Base64URL 編碼。
+    Client->>ResourceServer: 使用不透明令牌的請求
+    ResourceServer->>AuthServer: 驗證令牌
+    AuthServer->>Database: 查詢令牌數據
+    Database->>AuthServer: 返回令牌信息
+    AuthServer->>ResourceServer: 令牌驗證結果
+    ResourceServer->>Client: 回應
+```
 
-以下是一個 JWT 的例子：
+JWT 是一個自包含的令牌，內部攜帶所有必要的信息。
 
-`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+以下是一個 JWT 的例子，它是一個 base64 編碼的字串：
 
-- `header` 包含有關令牌類型和用於簽名的算法的信息。例如，`{"alg": "HS256", "typ": "JWT"}`。
-- `payload` 部分包含聲明——有關用戶或授權的信息片段——例如用戶 ID、過期時間和範圍。由於這些數據是編碼的但未加密，任何擁有令牌的人都可以解碼以查看聲明，但他們無法更改它而不使簽名無效。根據規範和授權服務器配置，可以在 payload 中包含各種聲明。這賦予了令牌自包含的特性。例如，`{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}`。
-- `signature` 是通過結合 header、payload 和一個秘密密鑰使用指定的算法生成的。這個簽名用於驗證令牌的完整性，確保它未被篡改。
+```
+eyJhbGciOiJIUzI1NiIs.eyJzdWIiOiIxMjM0NTY3O.SflKxwRJSMeKKF2QT4f
+```
 
-JWTs 被廣泛使用，因為它們可以由客戶端或任何服務在本地驗證，而無需與授權服務器交互。這使得 JWTs 對於分佈式系統特別有效，其中多個服務可能需要獨立驗證令牌的真實性。
+它包含三個由點分隔的部分：
 
-然而，這種便利也伴隨著確保令牌的聲明不被過度暴露的責任，因為它們對任何擁有令牌的人都是可見的。此外，JWTs 通常是短期有效的，過期時間包含在令牌的聲明中，以確保令牌不會無限期有效。
+1. **Header** - 包含有關令牌類型和用於簽名的算法的信息。例如，`{"alg": "HS256", "typ": "JWT"}`。
+2. **Payload** - 包含 claim（聲明）——有關用戶或授權的信息，如用戶 ID、過期時間和 scope。任何人都可以解碼它以查看 claim，因為它是編碼的但未加密。
+3. **Signature** - 通過結合 header、payload 和一個秘密密鑰使用指定的算法生成。此簽名用於驗證令牌的完整性並確保其未被篡改。
 
-## 不透明訪問令牌驗證
+這種結構允許 JWT 在不查詢資料庫的情況下進行驗證和使用。
 
-不透明訪問令牌通過將其發送回授權服務器進行驗證。授權服務器維護已發行令牌的狀態，並可以根據其內部存儲確定令牌的有效性。
+有關 JWT 的更多詳細信息，請參閱 <Ref slug='jwt' />。
+
+並查看 [Opaque token vs JWT](https://blog.logto.io/opaque-token-vs-jwt) 以更深入地了解它們的區別。
+
+## 如何驗證不透明令牌
+
+在簡單的系統中，不透明令牌驗證通常由伺服器直接處理，伺服器使用不透明令牌作為鍵查詢資料庫以檢索相關的授權信息。
 
 ```mermaid
 sequenceDiagram
     participant C as 客戶端
-    participant AS as 授權服務器 (Authorization Server)
-    participant RP as 資源提供者 (Resource Provider)
+    participant S as 伺服器
+    participant D as 資料庫
+    autonumber
 
-    C ->> AS: 1. post /oidc/token
-    AS ->> C: 2. 不透明令牌
-    C ->> RP: 3. get /api/resource
-    RP ->> AS: 4. post /oidc/introspect
-    AS ->> RP: 5. 令牌信息
-
+    C->>S: 使用不透明令牌的請求
+    S->>D: 查詢令牌信息
+    D->>S: 返回令牌數據
+    S->>C: 回應
 ```
 
-1. 客戶端向授權服務器請求訪問令牌。
-2. 授權服務器發行不透明令牌。
-3. 客戶端在標頭中發送帶有不透明令牌的資源訪問請求。
-4. 資源提供者向授權服務器發送令牌內省請求以驗證令牌。
-5. 授權服務器響應令牌信息。
-
-## JWT 訪問令牌驗證（離線）
-
-JWT 訪問令牌可以由擁有令牌公鑰的客戶端或任何服務離線驗證。
+在引入 OAuth 2.0 的多方系統中，多個資源伺服器（參見：<Ref slug='resource-server' />）可能需要驗證相同的不透明令牌。OAuth 2.0 提供了一個標準化的 token introspection 機制來進行此驗證：
 
 ```mermaid
-
 sequenceDiagram
     participant C as 客戶端
-    participant AS as 授權服務器 (Authorization Server)
-    participant RP as 資源提供者 (Resource Provider)
+    participant RS as 資源伺服器
+    participant AS as 授權伺服器
+    participant D as 資料庫
+    autonumber
 
-    RP ->> AS: 0. get /oidc/.well-known/jwks.json
-
-    C ->> AS: 1. post /oidc/token
-    AS ->> C: 2. JWT 令牌
-    C ->> RP: 3. get /api/resource
-    RP ->> RP: 4. 驗證 JWT 令牌
-    RP ->> C: 5. 響應 200 OK
-
+    C->>RS: 使用不透明令牌的請求
+    RS->>AS: POST /oauth/introspect
+    AS->>D: 驗證令牌
+    D->>AS: 令牌信息
+    AS->>RS: 令牌驗證回應
+    RS->>C: 回應
 ```
 
-1. 資源提供者預先從<Ref slug="openid-connect-discovery" />獲取授權服務器的公鑰。公鑰用於驗證令牌的簽名並確保其完整性。
-2. 客戶端向授權服務器請求訪問令牌。
-3. 授權服務器發行 JWT 令牌。
-4. 客戶端在標頭中發送帶有 JWT 令牌的資源訪問請求。
-5. 資源提供者使用從授權服務器獲得的公鑰解碼並驗證 JWT 令牌。
-6. 資源提供者根據令牌的有效性授予訪問權限。
+有關 token introspection 的詳細信息，請參閱 <Ref slug='token-introspection' />。
 
-## OIDC 中的使用案例
+## 不透明令牌在 OIDC 中如何使用？
 
-在 OIDC (<Ref slug="openid-connect" />) 的背景下，不透明令牌和 JWT 用於不同的目的並在不同的場景中使用。
+在 OIDC (<Ref slug='openid-connect' />) 的上下文中，不透明令牌在不同場景中具有特定用途：
 
-### 不透明令牌
+### 用戶資料檢索
 
-1. 用戶資料檢索：
+默認情況下，當客戶端請求一個不指定資源的 access token 並包含 `openid` scope 時，授權伺服器會發出一個不透明的 access token。此令牌主要用於從 OIDC `/oidc/userinfo` 端點（參見：<Ref slug='userinfo-endpoint' />）檢索用戶資料信息。
 
-默認情況下，當客戶端請求訪問令牌而未指定資源並包含 `openid` 範圍時，授權服務器發行不透明訪問令牌。此令牌主要用於從 OIDC `/oidc/userinfo` 端點檢索用戶資料信息。在收到帶有不透明訪問令牌的請求後，授權服務器檢查其內部存儲以檢索相關的授權信息並驗證令牌的有效性，然後響應用戶資料詳細信息。
+```mermaid
+sequenceDiagram
+    participant Client as 客戶端
+    participant AuthServer as 授權伺服器
+    participant Database as 資料庫
+    autonumber
 
-2. 刷新令牌交換：
-
-刷新令牌設計為僅在客戶端和授權服務器之間交換，無需與資源提供者共享。因此，刷新令牌通常以不透明令牌的形式發行。當當前訪問令牌過期時，客戶端可以使用不透明刷新令牌獲取新的訪問令牌，確保持續訪問而無需重新驗證用戶。
-
-### JWTs
-
-1. ID 令牌：
-
-在 OIDC 中，ID 令牌是一個包含用戶信息的 JWT，用於驗證用戶。通常與訪問令牌一起發行，ID 令牌允許客戶端驗證用戶的身份。例如：
-
-```json
-// 解碼的 ID 令牌 payload
-{
-  "iss": "<https://auth.wiki>",
-  "sub": "1234567890",
-  "aud": "client_id",
-  "exp": 1630368000,
-  "name": "John Doe",
-  "email": "john.doe@mail.com",
-  "picture": "<https://example.com/johndoe.jpg>"
-}
-
+    Client->>AuthServer: 使用不透明令牌的 GET /oidc/userinfo
+    AuthServer->>Database: 查詢令牌數據
+    Database->>AuthServer: 返回令牌信息
+    AuthServer->>Client: 用戶資料數據
 ```
 
-客戶端可以驗證 ID 令牌以確保用戶的身份，並提取用戶信息以進行個性化或授權目的。ID 令牌僅供一次性使用，不應用於 API 資源授權。
+### Refresh token 交換
 
-2. API 資源訪問（使用訪問令牌）：
+Refresh token（參見：<Ref slug='refresh-token' />）通常作為不透明令牌發行，因為它們僅在客戶端和授權伺服器之間交換。當當前的 access token 過期時，客戶端可以使用不透明的 refresh token 獲取新的 access token，而無需重新驗證用戶。
 
-當客戶端請求帶有特定<Ref slug="resource-indicator" />的訪問令牌時，授權服務器發行用於訪問該資源的 JWT 訪問令牌。JWT 包含資源提供者可用於授權客戶端訪問的聲明。例如：
+```mermaid
+sequenceDiagram
+    participant Client as 客戶端
+    participant RS as 資源伺服器
+    participant AS as 授權伺服器
+    autonumber
 
-```json
-// 解碼的 JWT 訪問令牌 payload
-{
-  "iss": "<https://auth.wiki>",
-  "sub": "1234567890",
-  "aud": "<https://api.example.com>",
-  "scope": "read write",
-  "exp": 1630368000
-}
-
+    Client->>RS: 使用過期的 access token (JWT) 的請求
+    RS->>Client: 401 Token 過期
+    Client->>AS: 使用 refresh token 的 POST /oidc/token
+    AS->>Client: 新的 access token
+    Client->>RS: 使用新的 access token 的請求
+    RS->>Client: 成功回應
 ```
 
-資源提供者可以通過檢查聲明來驗證請求：
+## 不透明令牌的優缺點是什麼？
 
-- `iss`：確認令牌是由受信任的授權服務器發行的。
-- `sub`：識別與令牌相關的用戶。
-- `aud`：確保令牌是針對特定資源的。
-- `scope`：驗證授予用戶的權限。
+### 優點
 
-<SeeAlso slugs={['jwt']} />
+- **安全性**：不透明令牌非常適合處理敏感數據，如 refresh token。由於內容完全隨機且無意義，即使有人攔截了令牌，他們也無法提取任何有用的信息。這使得它們在高安全性場景中尤其有價值，如銀行交易或處理敏感用戶數據。
+
+- **可撤銷性**：伺服器可以隨時立即使不透明令牌失效。這在需要快速移除用戶訪問時特別有用。與 JWT 在過期前保持有效不同，不透明令牌可以立即撤銷（參見：[JWT 的限制](https://blog.logto.io/why-jwt-in-most-oauth-2-services#hard-to-revoke)）。
+
+- **大小**：不透明令牌通常比 JWT 短得多。這種較小的大小減少了網絡帶寬使用和存儲需求。在頻繁傳輸令牌的系統中，如移動應用或物聯網設備，這一優勢尤為明顯。
+
+- **簡單性**：不透明令牌的實現非常簡單。你生成一個隨機字串並將其與相關數據一起存儲。無需像 JWT 那樣處理複雜的加密或簽名驗證。這種簡單性使它們非常適合內部系統認證。
+
+### 缺點
+
+- **有狀態**：每個不透明令牌都需要在伺服器端存儲。這在分佈式系統中增加了額外的複雜性，因為令牌數據必須在多個伺服器之間同步。例如，如果你有多個認證伺服器，它們都需要訪問相同的令牌資料庫或緩存系統以正確驗證令牌。
+
+- **性能**：令牌驗證總是需要資料庫查詢或 API 調用。在高流量系統中，這些額外的資料庫查詢可能會造成性能瓶頸。例如，如果你的系統每秒處理數千個請求，每個請求都需要令牌驗證，則額外的資料庫負載會變得顯著。
+
+- **互操作性**：不同系統可能以不同方式實現不透明令牌。這在與第三方服務或不同授權伺服器合作時可能會造成整合挑戰。雖然像 OAuth 2.0 token introspection 這樣的標準有幫助，但當系統使用不同的令牌格式或驗證方法時，你仍可能遇到兼容性問題。
+
+<SeeAlso slugs={[
+  'csprng',
+  'jwt',
+  'resource-server',
+  'token-introspection',
+  'openid-connect',
+  'refresh-token',
+  'userinfo-endpoint'
+]} />

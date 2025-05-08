@@ -1,0 +1,95 @@
+---
+title: Métadonnées du serveur d'autorisation OAuth 2.0
+tags: [oauth 2.0, oidc]
+description: Les métadonnées du serveur d'autorisation OAuth 2.0 sont un format standardisé qui permet aux clients OAuth 2.0 de découvrir et d'obtenir automatiquement les informations nécessaires pour interagir avec les serveurs d'autorisation OAuth 2.0, y compris les emplacements des points de terminaison et les capacités du serveur.
+---
+
+## Qu'est-ce que les métadonnées du serveur d'autorisation OAuth 2.0 ?
+
+Les métadonnées du serveur d'autorisation OAuth 2.0 sont un format standardisé défini dans [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) qui permet aux clients OAuth 2.0 de découvrir et d'obtenir automatiquement les informations nécessaires pour interagir avec les serveurs d'autorisation OAuth 2.0.
+
+Cela inclut des informations essentielles telles que les emplacements des points de terminaison, les fonctionnalités prises en charge et les capacités du serveur.
+
+Le format des métadonnées fournit un document de configuration lisible par machine qui aide à rationaliser le processus d'intégration entre les clients et les serveurs d'autorisation, réduisant ainsi le besoin de configuration manuelle.
+
+## Comment fonctionnent les métadonnées du serveur d'autorisation OAuth 2.0 ?
+
+Dans l'écosystème OAuth 2.0, il y a plusieurs rôles clés :
+- <Ref slug="authorization-server"/> : Émet des access tokens aux clients après avoir authentifié avec succès le resource owner
+- <Ref slug="client"/> : Application demandant l'accès à des ressources protégées
+- <Ref slug="resource-owner"/> : Entité capable d'accorder l'accès à des ressources protégées
+- <Ref slug="resource-server"/> : Serveur hébergeant des ressources protégées
+
+Les métadonnées du serveur d'autorisation fournissent un moyen standardisé pour les clients de découvrir et de comprendre comment interagir avec le serveur d'autorisation. Voici comment cela fonctionne :
+
+1. Le client connaît ou découvre l'URL de l'issuer du serveur d'autorisation
+2. Le client construit l'URL des métadonnées en ajoutant `/.well-known/oauth-authorization-server` à l'URL de l'issuer
+3. Le client récupère le document de métadonnées contenant la configuration du serveur
+4. Le client utilise les métadonnées récupérées (points de terminaison, fonctionnalités prises en charge, etc.) pour se configurer correctement et interagir avec le serveur d'autorisation
+
+Par exemple, si l'URL de l'issuer est `https://auth.example.com`, les métadonnées seraient disponibles à :
+
+`https://auth.example.com/.well-known/oauth-authorization-server`
+
+Le document de métadonnées inclut des informations importantes telles que :
+- `issuer` : L'identifiant du serveur d'autorisation
+- `authorization_endpoint` : L'URL du point de terminaison d'autorisation
+- `token_endpoint` : L'URL du point de terminaison de token
+- `scopes_supported` : Scopes disponibles
+- `response_types_supported` : Types de réponses pris en charge
+- `token_endpoint_auth_methods_supported` : Méthodes d'authentification du client prises en charge
+
+Pour une liste complète des champs de métadonnées, veuillez vous référer à [RFC 8414 Section 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2).
+
+Avec ces valeurs de métadonnées, les clients peuvent configurer et exécuter automatiquement le flux OAuth 2.0 :
+
+1. **Configuration initiale** :
+   - Le client valide que l'`issuer` correspond au serveur d'autorisation attendu
+   - Le client vérifie `response_types_supported` pour s'assurer que son type de flux (par exemple, `code`) est pris en charge
+
+2. **Demande d'autorisation** :
+   - Le client utilise `authorization_endpoint` pour construire l'URL d'autorisation
+   - Le client sélectionne les scopes appropriés à partir de `scopes_supported` en fonction de ses besoins
+   - Exemple : `https://auth.example.com/authorize?response_type=code&scope=profile email`
+
+3. **Échange de token** :
+   - Après avoir reçu le code d'autorisation, le client utilise `token_endpoint` pour l'échange de token
+   - Le client vérifie `token_endpoint_auth_methods_supported` pour déterminer comment s'authentifier (par exemple, `client_secret_basic`)
+   - Exemple : Envoyer une requête POST au point de terminaison de token avec les identifiants du client et le code d'autorisation
+
+Ce flux de base aide les clients à se configurer automatiquement et à interagir avec le serveur d'autorisation sans configuration manuelle des points de terminaison ou sélection de scopes par essais et erreurs.
+
+## Quelle est la différence entre les métadonnées du serveur d'autorisation OAuth 2.0 et la découverte OpenID Connect ?
+
+Les principales différences sont :
+
+1. **Portée et objectif** :
+   - Les métadonnées du serveur d'autorisation OAuth 2.0 se concentrent spécifiquement sur la configuration du protocole OAuth 2.0
+   - <Ref slug="openid-connect-discovery"/> inclut des paramètres supplémentaires pour les fonctionnalités liées à l'identité, telles que :
+     - `userinfo_endpoint` : Point de terminaison pour récupérer les informations utilisateur
+     - `id_token_signing_alg_values_supported` : Algorithmes de signature pris en charge pour les ID Tokens
+     - `claims_supported` : Claims utilisateur disponibles qui peuvent être retournés dans l'ID Token ou depuis le UserInfo Endpoint
+     - Prend en charge le scope `openid` pour l'authentification
+     - Inclut des types de réponses de flux hybride (par exemple, `code id_token`, `code id_token token`)
+
+2. **Point de terminaison des métadonnées** :
+   - OAuth 2.0 utilise `/.well-known/oauth-authorization-server`
+   - OpenID Connect utilise `/.well-known/openid-configuration`
+
+## Les métadonnées du serveur d'autorisation OAuth 2.0 sont-elles conformes à la découverte OpenID Connect ?
+
+Oui, les métadonnées du serveur d'autorisation OAuth 2.0 sont compatibles avec <Ref slug="openid-connect-discovery"/>.
+
+La spécification des métadonnées OAuth 2.0 (RFC 8414) a été inspirée par OpenID Connect Discovery 1.0, qui était déjà largement adoptée en pratique.
+
+Points clés concernant la conformité :
+1. Le format des métadonnées suit la même structure JSON
+2. Les serveurs d'autorisation peuvent prendre en charge les deux points de terminaison simultanément
+3. Les fournisseurs OpenID exposent généralement les deux points de terminaison pour la compatibilité ascendante
+4. Les métadonnées OAuth 2.0 peuvent être étendues avec des champs spécifiques à OpenID Connect lorsque nécessaire
+
+Cette compatibilité garantit que les serveurs d'autorisation peuvent servir à la fois des clients OAuth 2.0 purs et des parties de confiance OpenID Connect sans conflits.
+
+<SeeAlso slugs={["openid-connect-discovery", "authorization-server", "client", "resource-owner", "resource-server"]} />
+
+<Resources urls={["https://datatracker.ietf.org/doc/html/rfc8414"]}/>

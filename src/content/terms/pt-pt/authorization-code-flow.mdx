@@ -1,24 +1,26 @@
 ---
 title: Fluxo de código de autorização (Authorization code flow)
 tags: [oauth 2.0, oidc]
-description: O fluxo de código de autorização (authorization code flow) é um mecanismo seguro do OAuth 2.0 que permite que aplicações obtenham tokens de acesso em nome dos utilizadores. Envolve autenticação do utilizador, geração de código de autorização e troca de tokens.
+description: O fluxo de código de autorização (authorization code flow) é um mecanismo seguro do OAuth 2.0 que permite que aplicações obtenham access tokens em nome dos utilizadores. Envolve autenticação do utilizador, geração de código de autorização e troca de tokens.
 ---
 
 ## O que é o fluxo de código de autorização (authorization code flow)?
 
-O fluxo de código de autorização (authorization code flow) (também conhecido como concessão de código de autorização), definido na [OAuth 2.0 RFC 6749, seção 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), é um mecanismo de autorização OAuth 2.0 amplamente utilizado que permite que aplicações obtenham um access token em nome de um utilizador. Este fluxo é particularmente adequado para aplicações confidenciais (por exemplo, aplicações web tradicionais do lado do servidor) onde o segredo do cliente pode ser armazenado com segurança.
+O fluxo de código de autorização (authorization code flow) (também conhecido como concessão de código de autorização), definido em [OAuth 2.0 RFC 6749, seção 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), é um mecanismo de autorização OAuth 2.0 amplamente utilizado que permite que aplicações obtenham um access token em nome de um utilizador.
 
-O fluxo de código de autorização (authorization code flow) é um método robusto e seguro para obter access tokens no OAuth 2.0, tornando-o uma escolha preferida para muitas aplicações web. Compreender este fluxo é essencial para desenvolvedores que trabalham com OAuth 2.0 e integrações de API.
+Este fluxo é ideal para aplicações confidenciais, como aplicações web tradicionais do lado do servidor, que podem armazenar com segurança segredos de cliente.
+
+Também pode ser usado de forma segura para aplicações nativas e Aplicações de Página Única (SPAs) que não podem armazenar com segurança segredos de cliente quando combinadas com a extensão PKCE (<Ref slug="pkce" />).
 
 ## Como funciona o fluxo de código de autorização (authorization code flow)?
 
 O fluxo de código de autorização (authorization code flow) envolve os seguintes passos:
 
-1. **Iniciação do fluxo**: O utilizador inicia o fluxo, normalmente clicando num link ou botão na aplicação para iniciar sessão. A aplicação redireciona o utilizador para o endpoint de autorização do servidor de autorização, passando o ID do cliente, o scope solicitado, um redirect URI e um parâmetro de estado. O servidor de autorização valida os parâmetros e solicita que o utilizador se autentique na página de início de sessão do servidor de autorização.
+1. **Iniciação do fluxo**: O utilizador inicia o fluxo, normalmente clicando num link ou botão na aplicação para iniciar sessão. A aplicação redireciona o utilizador para o endpoint de autorização do servidor de autorização, passando o client ID, o scope solicitado, um redirect URI e um parâmetro de estado. O servidor de autorização valida os parâmetros e solicita que o utilizador se autentique na página de início de sessão do servidor de autorização.
 2. **Autenticação e autorização do utilizador**: O utilizador autentica-se com o servidor de autorização e concede à aplicação permissão para aceder aos recursos solicitados.
 3. **Geração de código e redirecionamento**: O servidor de autorização gera um código de autorização e redireciona o utilizador de volta para a aplicação usando o redirect URI fornecido anteriormente. O código de autorização é incluído na string de consulta do redirect URI.
-4. **Troca de código**: A aplicação extrai o código de autorização da string de consulta e faz uma solicitação POST para o endpoint de token do servidor de autorização para trocar o código de autorização por um access token. A aplicação também deve incluir o ID do cliente, o segredo do cliente, o redirect URI e o código de autorização na solicitação.
-5. **Recuperação do access token**: O servidor de autorização valida o código de autorização e emite um access token (e opcionalmente um refresh token) para a aplicação após validação bem-sucedida. A aplicação pode então usar o access token para fazer solicitações de API autorizadas em nome do utilizador.
+4. **Troca de código**: A aplicação extrai o código de autorização da string de consulta e faz um pedido POST para o endpoint de token do servidor de autorização para trocar o código de autorização por um access token. A aplicação também deve incluir o client ID, client secret, redirect URI e o código de autorização no pedido.
+5. **Recuperação do access token**: O servidor de autorização valida o código de autorização e emite um access token (e opcionalmente um refresh token) para a aplicação após validação bem-sucedida. A aplicação pode então usar o access token para fazer pedidos de API autorizados em nome do utilizador.
 
 Os passos podem ser ilustrados pelo seguinte diagrama de sequência:
 
@@ -29,7 +31,7 @@ sequenceDiagram
     participant Authorization Server
 
     User->>Application: Iniciar fluxo de início de sessão
-    Application->>Authorization Server: Solicitar servidor de autorização com ID do cliente, scope, redirect URI e estado
+    Application->>Authorization Server: Solicitar servidor de autorização com client ID, scope, redirect URI e estado
     Authorization Server->>User: Redirecionar utilizador para página de início de sessão e solicitar autenticação
     User->>Authorization Server: Autenticar e autorizar aplicação com permissões solicitadas
     Authorization Server->>Application: Redirecionar utilizador para redirect URI com código de autorização
@@ -37,87 +39,163 @@ sequenceDiagram
     Authorization Server->>Application: Emitir access token (e opcionalmente refresh token)
 ```
 
-## Pedido de autenticação (Authentication request)
+## Como implementar o fluxo de código de autorização (authorization code flow)?
 
-Os parâmetros do pedido são os seguintes:
+Aqui está um exemplo simples de implementação do fluxo de código de autorização (authorization code flow), seguindo as diretrizes descritas em [OAuth 2.0 RFC 6749, seção 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1):
 
-- **client_id**: OBRIGATÓRIO. Identificador de cliente OAuth 2.0 válido.
-- **scope**: OBRIGATÓRIO. Este valor especifica um conjunto de recursos que o utilizador está a solicitar ao servidor de autorização. Por exemplo, `openid profile email`.
-- **response_type**: OBRIGATÓRIO. O valor deve ser `code` para indicar que a aplicação espera um código de autorização.
-- **redirect_uri**: OBRIGATÓRIO. O URI para o qual a resposta de autenticação será enviada e deve corresponder exatamente ao redirect URI que o cliente pré-registrou no servidor de autorização.
-- **state**: RECOMENDADO. Um valor opaco usado para manter o estado entre o pedido e o retorno de chamada. Também é usado para prevenir ataques de <Ref slug="csrf" />.
-- **nonce**: OPCIONAL. Uma string aleatória usada para associar uma sessão de cliente com um ID token e para mitigar ataques de repetição.
-- **prompt**: OPCIONAL. Lista de valores de string delimitados por espaço e sensíveis a maiúsculas e minúsculas que especifica se o servidor de autorização solicita ao utilizador final uma nova autenticação e consentimento. Os valores definidos são:
-  - **none**: O servidor de autorização NÃO DEVE exibir quaisquer páginas de interface de utilizador de autenticação ou consentimento. Um erro é retornado se um utilizador final não estiver já autenticado ou se o cliente não tiver consentimento pré-configurado para os Claims solicitados ou não cumprir outras condições para processar o pedido. O código de erro será tipicamente `login_required`, `interaction_required`. Isto pode ser usado como um método para verificar a existência de autenticação e/ou consentimento.
-  - **login**: O servidor de autorização DEVE solicitar ao utilizador final uma nova autenticação. Se não puder reautenticar o utilizador final, DEVE retornar um erro, tipicamente `login_required`.
-  - **consent**: O servidor de autorização DEVE solicitar ao utilizador final consentimento antes de retornar informações ao cliente. Se não puder obter consentimento, DEVE retornar um erro, tipicamente `consent_required`.
-  - **select_account**: O servidor de autorização DEVE solicitar ao utilizador final que selecione uma conta de utilizador. Isto permite que um utilizador final que tenha múltiplas contas no servidor de autorização selecione entre as múltiplas contas para as quais possa ter sessões atuais. Se não puder obter uma escolha de seleção de conta feita pelo utilizador final, DEVE retornar um erro, tipicamente `account_selection_required`.
+### 1. Configuração inicial
 
-[Definição completa dos parâmetros do pedido](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)
+Certifica-te de que tens as seguintes informações do teu serviço de auth antes de começares:
 
-### Exemplo de pedido de autenticação (Authentication request)
-
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=code" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "state=RANDOM_STRING_FOR_STATE"
+```javascript
+const config = {
+  clientId: "YOUR_CLIENT_ID",
+  clientSecret: "YOUR_CLIENT_SECRET",
+  authorizationEndpoint: "https://authorization-server.com/auth",
+  tokenEndpoint: "https://authorization-server.com/token",
+  redirectUri: "http://localhost:3000/callback",
+};
 ```
 
-Uma resposta típica de sucesso:
+Client ID, client secret e redirect URI são a configuração da tua aplicação no serviço de auth.
 
-```http
-HTTP/1.1 302 Found
-Location: https://yourapp.com/callback?
-  code=YOUR_AUTHORIZATION_CODE
-  &state=RANDOM_STRING_FOR_STATE
+O `authorizationEndpoint` e `tokenEndpoint` são fornecidos pelo teu serviço de auth.
+
+Se o teu servidor de auth implementar OIDC (<Ref slug="openid-connect" />), podes obter esta informação através de <Ref slug="openid-connect-discovery" />.
+
+### 2. Iniciar pedido de autorização
+
+O fluxo começa quando um utilizador quer iniciar sessão (por exemplo, clicando num botão de login). A aplicação fará um pedido de login.
+
+Este pedido inclui parâmetros como `client ID`, `redirect URI` e `scope`. Depois, redireciona o utilizador para o endpoint de autorização do serviço de auth (a página de login do serviço de auth).
+
+O utilizador irá autenticar-se e autorizar nesta página de login.
+
+```javascript
+app.get("/login", (req, res) => {
+  const authUrl = new URL(config.authorizationEndpoint);
+  authUrl.searchParams.append("response_type", "code");
+  authUrl.searchParams.append("client_id", config.clientId);
+  authUrl.searchParams.append("redirect_uri", config.redirectUri);
+  authUrl.searchParams.append("scope", "openid profile email");
+  authUrl.searchParams.append("state", "random_state_string");
+
+  res.redirect(authUrl.toString());
+});
 ```
 
-## Pedido de troca de token (Token exchange request)
+Nota: Podes adicionar mais parâmetros além dos mostrados no exemplo de código. Vê [Definição completa dos parâmetros do pedido de autenticação](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
 
-Uma vez que o pedido de autenticação acima seja respondido com sucesso, o cliente será automaticamente redirecionado para o callback URI `https://yourapp.com/callback`, com o código como um parâmetro URI.
+### 3. Lidar com o callback do redirect URI e troca de token
 
-Espera-se que o cliente obtenha e processe o `code` com um pedido de troca de token subsequente, a fim de trocar pelo access token.
+Após o utilizador completar a autenticação e autorização na página de login do serviço de auth, o serviço de auth redireciona o utilizador de volta para o redirect URI da aplicação. Este redirect URI inclui os parâmetros de código de autorização e estado.
 
-### Exemplo de pedido de troca de token (Token exchange request)
+A aplicação extrai os parâmetros de código de autorização e estado do redirect URI e troca-os por access e refresh tokens (se houver) no endpoint de token do serviço de auth.
 
-```bash
-curl -X POST "https://authorization-server.com/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "code=YOUR_AUTHORIZATION_CODE" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "grant_type=authorization_code" \
+```javascript
+app.get("/callback", async (req, res) => {
+  const { code, state } = req.query;
+
+  try {
+    // Trocar o código de autorização por um access token e refresh token
+    const tokenResponse = await axios.post(config.tokenEndpoint, {
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: config.redirectUri,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+    });
+
+    const { access_token, refresh_token } = tokenResponse.data;
+    // Armazenar tokens para pedidos subsequentes
+    req.session.accessToken = access_token;
+
+    res.send("Autenticação bem-sucedida!");
+  } catch (error) {
+    res.status(500).send("Falha na troca de token");
+  }
+});
 ```
 
-## Benefícios
+### 4. Usar access token
 
-- **Segurança aprimorada**: O segredo do cliente nunca é exposto ao navegador do utilizador, reduzindo o risco de personificação do cliente.
-- **Código de autorização de uso único**: O código de autorização tem uma vida útil curta e só pode ser usado uma vez, reduzindo o risco de intercepção e ataques de repetição.
-- **Tokens de curta duração**: Access tokens emitidos neste fluxo são de curta duração (tipicamente 1 hora), reduzindo o risco de acesso não autorizado se o token for comprometido.
-- **Refresh token**: O servidor de autorização pode opcionalmente emitir um refresh token, permitindo que a aplicação obtenha um novo access token sem exigir interação do utilizador.
+Uma vez que tenhas o token, usa-o para aceder a recursos protegidos:
+
+```javascript
+async function fetchUserProfile(accessToken) {
+  const response = await axios.get("https://api.example.com/userinfo", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+```
+
+## Como usar o fluxo de código de autorização (authorization code flow) para clientes públicos (aplicações nativas e SPAs)?
+
+Clientes públicos (como aplicações nativas e SPAs) enfrentam desafios de segurança únicos ao usar o fluxo de código de autorização (authorization code flow). Estas aplicações não podem armazenar com segurança segredos de cliente. O client secret seria exposto no código JavaScript ou no armazenamento do dispositivo. Isso facilita que atacantes extraiam e usem indevidamente o segredo.
+
+Portanto, o principal desafio é como usar o fluxo de código de autorização (authorization code flow) de forma segura sem um client secret. A especificação OAuth 2.0 introduziu a extensão PKCE (<Ref slug="pkce" />) para resolver este problema.
+
+PKCE adiciona medidas de segurança adicionais para proteger o fluxo de código de autorização (authorization code flow) para clientes públicos. Ele previne ataques de interceptação de código de autorização mesmo sem usar um client secret. Confira este blog para saber mais sobre [Como o PKCE protege o fluxo de código de autorização (authorization code flow) para aplicações nativas](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps).
+
+## Como usar o fluxo de código de autorização (authorization code flow) de forma segura?
+
+### **Usar "state" para prevenir ataques CSRF**
+
+Ataques CSRF (<Ref slug="csrf" />) enganam utilizadores para realizar ações indesejadas numa aplicação web autenticada. O parâmetro de estado ajuda a prevenir isso.
+
+- Gera um valor único e aleatório. Armazena este valor no lado do servidor.
+- Inclui o parâmetro de estado. Anexa-o ao URL do pedido de autorização.
+- Verifica o estado ao retornar. Quando o servidor de autorização redireciona de volta para a tua aplicação, compara o estado retornado com o valor armazenado. Se não corresponderem, rejeita o pedido. Isso confirma que o pedido originou-se da tua aplicação.
+
+### **Configurar URIs de redirecionamento seguros**
+
+O redirect URI é onde o servidor de autorização envia o código de autorização após a autenticação do utilizador. A configuração segura é crucial.
+
+- Registra URIs de redirecionamento válidos. Durante o registro da aplicação com o servidor de autorização, especifica os URIs de redirecionamento permitidos.
+- Correspondência exata. O redirect URI no pedido de autorização deve corresponder exatamente a um URI registrado. Mesmo uma pequena diferença pode criar uma vulnerabilidade.
+- Evita URIs com caracteres curinga. Se possível, evita usar URIs com caracteres curinga em produção. Eles ampliam a superfície de ataque.
+- HTTPS para produção. Usa sempre HTTPS para URIs de redirecionamento em ambientes de produção.
+
+### **Usar PKCE para todos os clientes**
+
+Embora o PKCE tenha sido originalmente projetado para clientes públicos, a especificação <Ref slug="oauth-2.1" /> exige que o PKCE seja aplicado a todos os clientes, incluindo clientes confidenciais, para melhorar a segurança geral do fluxo de código de autorização (authorization code flow). (Veja [Aplicar PKCE para todos os clientes](https://auth.wiki/oauth-2.1#enforcing-pkce-for-all-clients))
 
 ## Qual é a diferença entre o fluxo de código de autorização (authorization code flow) e o fluxo implícito (implicit flow)?
 
 A principal diferença entre o fluxo de código de autorização (authorization code flow) e o fluxo implícito (implicit flow) é como o access token é obtido:
 
-- **Fluxo de código de autorização (authorization code flow)**: A aplicação cliente recebe primeiro um código de autorização do endpoint de autorização, depois troca-o por um access token numa solicitação POST subsequente para o endpoint de token.
-- **Fluxo implícito (implicit flow)**: A aplicação cliente recebe o access token diretamente do endpoint de autorização.
+- **Fluxo de código de autorização (authorization code flow)**: A aplicação cliente recebe primeiro um código de autorização do endpoint de autorização, depois troca-o por um access token num pedido POST subsequente para o endpoint de token.
+- **Fluxo implícito (implicit flow)**: A aplicação cliente recebe o access token diretamente no fragmento de URL do redirect URI após a autorização do utilizador.
+
+Saiba mais sobre <Ref slug="implicit-flow" />.
 
 ## Qual é a diferença entre o fluxo de código de autorização (authorization code flow) e o fluxo de credenciais do cliente (client credentials flow)?
 
 A principal diferença entre o fluxo de código de autorização (authorization code flow) e o fluxo de credenciais do cliente (client credentials flow) é o contexto em que o fluxo é usado:
 
 - **Fluxo de código de autorização (authorization code flow)**: Usado quando a aplicação cliente precisa acessar recursos em nome de um utilizador. O fluxo envolve autenticação e autorização do utilizador.
-- **Fluxo de credenciais do cliente (client credentials flow)**: Usado quando a aplicação cliente precisa acessar recursos em seu próprio nome. O fluxo envolve autenticação do cliente, mas não autenticação do utilizador, sendo mais adequado para comunicação machine-to-machine.
+- **Fluxo de credenciais do cliente (client credentials flow)**: Usado quando a aplicação cliente precisa acessar recursos em seu próprio nome. O fluxo envolve autenticação do cliente, mas não autenticação do utilizador, sendo mais adequado para comunicação máquina a máquina.
 
-## Quais são os casos de uso típicos para o fluxo de código de autorização (authorization code flow)?
+Saiba mais sobre <Ref slug="client-credentials-flow" />.
 
-- Aplicações web tradicionais que requerem autenticação do utilizador e acesso a APIs.
-- Aplicações que precisam acessar dados do utilizador de serviços de terceiros de forma segura.
+<SeeAlso
+  slugs={[
+    "device-flow",
+    "implicit-flow",
+    "client-credentials-flow",
+    "pkce",
+    "openid-connect",
+    "openid-connect-discovery",
+    "csrf",
+    "oauth-2.1",
+  ]}
+/>
 
-<SeeAlso slugs={['device-flow', 'implicit-flow', 'client-credentials-flow']} />
-
-<Resources urls={['https://datatracker.ietf.org/doc/html/rfc6749']} />
+<Resources urls={[
+  "https://datatracker.ietf.org/doc/html/rfc6749",
+  "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
+  "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps"
+]} />

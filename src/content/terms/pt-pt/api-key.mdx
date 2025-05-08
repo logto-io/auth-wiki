@@ -1,64 +1,93 @@
 ---
 title: Chave de API
 tags: [authentication, api]
-description: Uma chave de API é um identificador único usado para autenticar e autorizar um cliente ao acessar uma API. Ela serve como um token secreto incluído em solicitações de API para verificar a identidade do cliente e permitir o acesso a recursos ou serviços específicos. As chaves de API são tipicamente usadas em comunicações de servidor para servidor ou ao acessar dados públicos.
+description: Uma chave de API é um token secreto usado para autenticar clientes que acedem a uma API. Verifica a identidade e controla o acesso a recursos específicos, sendo comumente usada em comunicações de servidor para servidor ou acesso a dados públicos.
 ---
 
 ## O que é uma chave de API?
 
-As chaves de API são usadas para identificar e autorizar a aplicação ou serviço que faz a chamada. Elas são tipicamente de longa duração e estáticas até serem rotacionadas e geralmente têm um conjunto fixo de permissões. Elas são principalmente usadas para comunicações de servidor para servidor ou para acessar dados públicos, e esses tokens geralmente não representam um usuário específico.
+Uma chave de API é um token secreto usado para autenticar clientes que acedem a uma API. É como uma senha para a tua aplicação, permitindo o acesso a uma API específica. Pensa nela como um cartão de acesso para entrar num edifício. O cartão concede acesso, mas não identifica necessariamente quem és.
 
-## Como funciona uma chave de API?
+## Como funcionam as chaves de API?
 
-Uma chave de API é uma longa sequência de caracteres gerada pelo provedor da API e compartilhada com usuários autorizados. Esta chave deve ser incluída no cabeçalho da solicitação ao acessar a API. As chaves de API são simples e eficazes para necessidades básicas de segurança. Por exemplo, serviços populares como Google Maps API e AWS fornecem chaves de API para controlar o acesso e monitorar o uso.
+As chaves de API funcionam através de um processo simples de pedido e resposta.
 
-```java
-curl -GET https://api.example.com/endpoint -H "Authorization: api-key YOUR_API_KEY"
+1. **Pedido:** A tua aplicação envia um pedido para a API, incluindo a chave de API. A chave é frequentemente enviada no cabeçalho do pedido. Por exemplo, o cabeçalho pode parecer assim: `x-api-key: your_actual_api_key`. Não há um padrão único para nomes de cabeçalho ou formatos de valor.
+
+2. **Verificação:** O servidor da API verifica a chave fornecida em relação à sua base de dados.
+
+3. **Resposta:** Se a chave for válida, o servidor concede acesso e envia de volta os dados solicitados. Caso contrário, o acesso é negado.
+
+Aqui está um diagrama de sequência que ilustra o processo:
+
+```mermaid
+sequenceDiagram
+    participant A as Cliente
+    participant B as Servidor da API
+
+    A->>B: Pedido com Chave de API no Cabeçalho
+    activate B
+    B->>B: Verificar Chave de API
+    B-->>A: Resposta (Dados ou Erro)
+    deactivate B
 ```
 
-As chaves de API não são tão eficazes quanto outras formas de autenticação de API, como <Ref slug="oauth-2.0" /> e <Ref slug="jwt" />, mas ainda desempenham um papel importante em ajudar os produtores de API a monitorar o uso, já que é o método mais direto e amplamente usado para proteger APIs.
+## Quais são os prós e contras das chaves de API?
 
-## Quais são os seus prós e contras?
+Vamos ver o que torna as chaves de API úteis e onde elas falham:
 
 ### Prós
 
-- Simples de implementar: As chaves de API são fáceis de implementar e usar. Elas envolvem anexar uma chave ao cabeçalho da solicitação, tornando-se um método direto para desenvolvedores e clientes entenderem e utilizarem.
-- Fácil de monitorar: As chaves de API são fáceis de monitorar. Você pode rastrear o uso de cada chave e revogá-las se necessário.
-- Limitação de taxa eficaz: As chaves de API são eficazes para limitação de taxa. Você pode definir um limite no número de solicitações por chave para evitar abusos.
-- Adequado para dados não sensíveis: As chaves de API são adequadas para dados não sensíveis ou APIs publicamente disponíveis, onde os requisitos de segurança são menores.
+- **Super simples de usar**: Basta adicionar uma chave ao teu pedido e estás pronto para ir! É como usar uma chave de casa - sem passos complicados necessários.
+
+- **Fácil de rastrear**: Queres saber quem está a usar a tua API? As chaves de API tornam isso simples. Podes ver quais aplicações estão a fazer chamadas e com que frequência.
+
+- **Limitação de taxa rápida**: Impede que as pessoas usem excessivamente a tua API definindo limites por chave. É como ter um segurança num clube que conta quantas vezes alguém entra e sai.
+
+- **Perfeito para dados públicos**: Se estás a partilhar informações não sensíveis (como dados meteorológicos ou estatísticas públicas), as chaves de API são ideais.
 
 ### Contras
 
-- Segurança limitada: As chaves de API não são seguras o suficiente para dados sensíveis, especialmente para aplicações do lado do cliente. Elas são frequentemente usadas em comunicações de máquina para máquina.
-- Não adequado para autenticação de usuário: As chaves de API estão vinculadas a aplicações ou sistemas, não a usuários individuais, tornando desafiador identificar usuários específicos ou rastrear suas ações.
-- Sem expiração de token: As chaves de API são tipicamente estáticas e não expiram. Se uma chave for comprometida, ela pode ser usada indevidamente indefinidamente, a menos que seja regenerada manualmente.
+- **Menos seguras do que alternativas modernas**: As chaves de API não são tão eficazes quanto outras formas de autenticação de API, como <Ref slug="oauth-2.0" /> e <Ref slug="jwt" />. Pensa nelas como um cadeado básico em comparação com um sistema de segurança moderno. No entanto, continuam populares porque são a maneira mais simples de rastrear o uso da API e começar com a segurança da API.
+
+- **Riscos de segurança**: As chaves de API são como deixar a chave de casa debaixo do tapete. Se alguém a encontrar, pode usá-la para sempre. Eis porquê:
+  - Muitas vezes são visíveis no código
+  - Não expiram automaticamente
+  - Se vazadas (como em repositórios públicos do GitHub), qualquer pessoa pode usá-las
+
+- **Não conseguem distinguir utilizadores**: Embora algumas empresas usem "chaves de API" que podem identificar utilizadores (como a Stripe), as chaves de API tradicionais não conseguem dizer quem é quem. Apenas dizem qual aplicação está a fazer o pedido.
+
+- **Estáticas por natureza**: Ao contrário dos tokens de auth modernos que expiram, as chaves de API geralmente permanecem as mesmas para sempre. Isso significa:
+  - Sem atualizações automáticas de segurança
+  - Trabalho manual necessário para rodar chaves
+  - Maior risco se as chaves forem expostas
 
 ## Quais são os casos de uso para chaves de API?
 
-- Comunicação de serviço para serviço: As chaves de API são adequadas para cenários onde aplicações precisam se comunicar diretamente com APIs através de CLIs. Ex.: Chamadas de APIs do OpenAI.
-- APIs públicas: Ao expor APIs ao público, as chaves de API fornecem um método direto de controle de acesso.
-- Configuração simplificada: Para necessidades rápidas e simples de autenticação, especialmente na fase de desenvolvimento. Ao contrário da autenticação de máquina para máquina, as chaves de API não requerem registro prévio do cliente, e não precisam ser trocadas por um access token. Basta passar sua chave de API como um parâmetro na sua solicitação e ela simplesmente funciona.
+- Comunicação de serviço para serviço: As chaves de API são adequadas para cenários onde aplicações precisam comunicar com APIs diretamente através de CLIs. Ex.: Chamadas a APIs da OpenAI.
+- APIs públicas: Ao expor APIs ao público, as chaves de API fornecem um método direto de controlo de acesso.
+- Configuração simplificada: Para necessidades de autenticação rápidas e simples, especialmente na fase de desenvolvimento. Ao contrário da autenticação Machine-to-machine, as chaves de API não requerem registo prévio do cliente, nem precisam de ser trocadas por um access token. Basta passar a tua chave de API como um parâmetro no teu pedido e simplesmente funciona.
 
 Em cenários do mundo real, o propósito mais comum ao construir produtos é a integração de produtos. Aqui está um caso de uso típico:
 
-### Exemplo: Integração com Stripe
+### Exemplo: Integração com a Stripe
 
-O Stripe usa chaves de API para integração segura com diferentes plataformas e aplicações. Você pode criar, visualizar, excluir e gerenciar essas chaves através do Painel de Desenvolvedores. Usando chaves de API, você pode integrar os recursos de checkout e faturamento do Stripe em seu produto.
+A Stripe usa chaves de API para integração segura com diferentes plataformas e aplicações. Podes criar, visualizar, eliminar e gerir estas chaves através do Developers Dashboard. Usando chaves de API, podes integrar as funcionalidades de checkout e faturação da Stripe no teu produto.
 
 ![Stripe-integration-API keys.png](https://uploads.strapi.logto.io/Stripe_integration_API_keys_cb6a2bc679.png)
 
-## Qual é a diferença entre Tokens de Acesso Pessoal (PAT) e Máquina para Máquina (M2M)?
+## Qual é a diferença entre Tokens de Acesso Pessoal (PAT) e Machine-to-Machine (M2M)?
 
-Ao falar sobre chaves de API, tokens de acesso pessoal e <Ref slug="machine-to-machine" /> também podem ser mencionados juntos, já que todos podem acessar programaticamente recursos de API através de comandos CLI, ou estabelecer comunicação entre serviços de backend.
+Ao falar sobre chaves de API, tokens de acesso pessoal e <Ref slug="machine-to-machine" /> também podem ser mencionados juntos, uma vez que todos podem aceder programaticamente a recursos de API através de comandos CLI, ou estabelecer comunicação entre serviços de backend.
 
 ### Tokens de Acesso Pessoal (PATs)
 
-Um token de acesso pessoal também é uma sequência de caracteres, mas representa a identidade e permissões de ***um usuário específico***, é gerado dinamicamente após autenticação ou login bem-sucedido, e tipicamente tem uma vida útil limitada, mas pode ser renovado. Ele fornece controle de acesso detalhado a dados e capacidades específicas do usuário e é comumente usado para ferramentas CLI, scripts ou acesso pessoal à API. A principal diferença é que é mais específico e usado para ações específicas do usuário.
+Um token de acesso pessoal também é uma string, mas representa a identidade e permissões de ***um utilizador específico***, é gerado dinamicamente após autenticação ou login bem-sucedido, e geralmente tem uma vida útil limitada, mas pode ser renovado. Fornece controlo de acesso detalhado a dados e capacidades específicas do utilizador e são comumente usados para ferramentas CLI, scripts ou acesso pessoal à API. A principal diferença é que é mais específico e usado para ações específicas do utilizador.
 
-### Máquina para Máquina (M2M)
+### Machine-to-Machine (M2M)
 
-A comunicação M2M ocorre quando dispositivos trocam dados automaticamente sem envolvimento humano em um sentido mais amplo.
+A comunicação M2M é quando dispositivos trocam dados automaticamente sem envolvimento humano num sentido mais amplo.
 
-No contexto de <Ref slug="openid-connect" /> (ou <Ref slug="oauth-2.0" />), aplicações M2M usam o <Ref slug="client-credentials-flow" />, conforme definido no [protocolo OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749), que suporta protocolos padrão semelhantes. Geralmente envolve uma aplicação cliente (uma máquina ou serviço) acessando recursos por conta própria ou em nome de um usuário. É ideal para situações onde apenas clientes confiáveis podem acessar serviços de backend.
+No contexto de <Ref slug="openid-connect" /> (ou <Ref slug="oauth-2.0" />), aplicações M2M usam o <Ref slug="client-credentials-flow" />, conforme definido no [protocolo OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749), que suporta protocolos padrão semelhantes. Geralmente envolve uma aplicação cliente (uma máquina ou serviço) acedendo a recursos, seja por conta própria ou em nome de um utilizador. É ideal para situações onde apenas clientes confiáveis podem aceder a serviços de backend.
 
 <SeeAlso slugs={["machine-to-machine"]} />

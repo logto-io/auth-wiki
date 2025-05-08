@@ -6,69 +6,168 @@ description: Ein Magic Link ist eine einmalige URL, die verwendet werden kann, u
 
 ## Was sind Magic Links?
 
-Ein Magic Link ist ein einmalig verwendbarer Link, der dem Benutzer während des Authentifizierungsprozesses gesendet wird.
+Ein Magic Link ist eine sichere, zeitlich begrenzte URL, die eine passwortlose Authentifizierung sowohl für Registrierungs- als auch Anmeldeprozesse ermöglicht. Anstatt Passwörter zu erstellen und sich zu merken, erhalten Benutzer einen speziellen Link per E-Mail, der ihnen sofortigen Zugang gewährt. Man kann es sich wie einen digitalen Schlüssel vorstellen, der nur einmal funktioniert - wenn du darauf klickst, bist du authentifiziert, und dann wird dieser Schlüssel ungültig.
 
-Durch den Zugriff auf diesen Link schließt der Benutzer den erforderlichen Autorisierungsfluss (authorization flow) ab, um auf die gewünschte Ressource zuzugreifen, und erhält den entsprechenden Zugriff auf die Ressourcen. Danach wird der Magic Link ungültig.
+Zum Beispiel, wenn du dich bei Medium anmeldest oder versuchst, dich bei Slack einzuloggen, senden dir diese Plattformen anstelle der Einrichtung oder Eingabe eines Passworts eine E-Mail mit einem sicheren Link. Ein Klick, und du bist authentifiziert. Dieser Ansatz hat an Popularität gewonnen, weil er Sicherheit mit Einfachheit kombiniert.
 
-## Was ist der Unterschied zwischen Magic Link und Einmalpasswort (OTP)?
+## Wie funktionieren Magic Links?
 
-Nehmen wir an, der Benutzer verwendet E-Mail, um einen Magic Link oder <Ref slug='otp' /> zu erhalten.
-
-In vielen Fällen verwenden Benutzer E-Mail, um ein OTP zu erhalten, um sich anzumelden oder als zusätzlichen Verifizierungsfaktor für <Ref slug='mfa' />. Was ist der Unterschied zwischen der Verwendung eines E-Mail-Magic-Links und eines E-Mail-OTPs?
-
-Mit OTP muss der Benutzer seine E-Mail überprüfen, das OTP merken und es dann im Anmelde-/Verifizierungsprozess eingeben. Dies erfordert, dass der Benutzer wiederholt manuell zwischen verschiedenen Apps oder Seiten wechselt.
-
-Bei Verwendung eines E-Mail-Magic-Links muss der Benutzer nur die E-Mail-App öffnen, die den Magic Link enthält, und auf den Link klicken. Dies bietet eine einfachere Benutzererfahrung.
-
-Darüber hinaus ermöglicht die Verwendung eines Magic Links die Einbeziehung von Informationen über ein Einmaltoken hinaus im Link, wie z. B. sitzungsbezogene Informationen für die Anmeldung. Dies kann sowohl die Sicherheit als auch die Benutzererfahrung verbessern.
-
-## Wie funktioniert ein Magic Link?
-
-In diesem Sequenzdiagramm veranschaulichen wir, wie sich ein Benutzer anmeldet und Zugriff auf die entsprechenden Ressourcen erhält, indem er einen Magic Link verwendet.
-
-In diesem Sequenzdiagramm gehen wir davon aus, dass der Magic Link per E-Mail gesendet wird. Es gibt jedoch auch andere mögliche Methoden, um einen Magic Link zu senden, wie z. B. das Senden per SMS an ein Mobiltelefon. Diese Alternativen werden hier nicht behandelt, da die Abläufe fast gleich sind.
+Der Prozess ist aus der Sicht des Benutzers einfach, beinhaltet jedoch komplexe Sicherheitsmechanismen im Hintergrund. Hier ist, was während eines typischen Magic Link Authentication Flows passiert:
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant U as Benutzer
     participant B as Browser/Client
     participant S as Server
-    B->>U: 1. Anmeldeformular anzeigen
-    U->>B: 2. Anmeldeformular mit Benutzername/E-Mail ausfüllen
-    B->>S: 3. Anmeldeformular absenden
-    S-->>S: 4. Benutzer und E-Mail-Adresse des Benutzers finden
-    S-->>U: 5. E-Mail mit Magic Link senden
-    U->>B: 6. Auf den in der E-Mail enthaltenen Magic Link zugreifen
-    B->>S: 7. `GET ${magicLink}`-Anfrage senden
-    S-->>S: 8. Anfrage überprüfen
-    S-->>B: 9. Access Token generieren und ausstellen
-    B-->>U: 10. Zugriff gewährt
+    participant D as Datenbank
+    B->>U: Auth-Formular anzeigen
+    U->>B: E-Mail-Adresse eingeben
+    B->>S: Anfrage absenden
+    S->>D: Ausstehendes Token speichern
+    S-->>S: Magic Link generieren
+    S-->>U: E-Mail mit Link senden
+    U->>B: Magic Link klicken
+    B->>S: Token absenden
+    S->>D: Token verifizieren & ungültig machen
+    S-->>S: Benutzersitzung erstellen
+    S-->>B: Sitzungsinformationen zurückgeben
+    B-->>U: Zugang gewähren
 ```
 
-1. **Anmeldeformular anzeigen**  
-   Der Browser/Client initiiert den Authentifizierungsprozess, indem er dem Benutzer ein Anmeldeformular anzeigt.
-2. **Benutzer füllt das Anmeldeformular aus**  
-   Der Benutzer gibt seinen Identifikator, wie Benutzername, E-Mail-Adresse oder Telefonnummer, in das Anmeldeformular ein.  
-   Die bereitgestellten Informationen müssen ausreichen, um dem System zu helfen, einen eindeutigen Benutzer zu identifizieren. Zum Beispiel sind in den meisten Systemen Benutzernamen, die zur Anmeldung verwendet werden, eindeutig. In solchen Systemen müssen Benutzer nur ihren Benutzernamen angeben, um dem System zu helfen, das Konto, bei dem sie sich anmelden möchten, eindeutig zu identifizieren.
-3. **Anmeldeformular absenden**  
-   Der Browser/Client sendet das Formular an den Server, das die in Schritt 2 beschriebenen Informationen des Benutzers enthält.
-4. **Benutzer und E-Mail finden**  
-   Der Server verarbeitet die Anfrage, indem er den eindeutigen Benutzer in der Datenbank lokalisiert und die zugehörige E-Mail-Adresse des Benutzers abruft.
-5. **E-Mail mit Magic Link senden**  
-   Der Server sendet eine E-Mail an die E-Mail-Adresse des Benutzers. Diese E-Mail enthält einen Magic Link zur Authentifizierung.
-6. **Benutzer greift auf den Magic Link zu**  
-   Der Benutzer erhält die E-Mail und klickt auf den darin enthaltenen Magic Link.
-7. **GET-Anfrage mit Magic Link senden**  
-   Der Browser/Client sendet eine `GET`-Anfrage an den Server, indem er die URL des Magic Links verwendet.
-8. **Anfrage überprüfen**  
-   Der Server überprüft die Anfrage, um sicherzustellen, dass der Magic Link gültig, nicht verwendet und nicht abgelaufen ist.
-9. **Access Token generieren und ausstellen**  
-   Sobald die Anfrage überprüft ist, generiert der Server ein Access Token und stellt es dem Browser/Client aus.
-10. **Zugriff gewähren**  
-    Der Browser/Client erhält das Access Token und ermöglicht dem Benutzer den Zugriff auf die angeforderte Ressource.
+## Wie ist die Struktur eines Magic Links?
 
-## Was ist der Vorteil von Magic Links?
+Ein typischer Magic Link besteht aus mehreren Komponenten:
 
-Magic Links verbessern die Sicherheitsarchitektur von Authentifizierungssystemen, indem sie ein tokenbasiertes Interaktionsmodell verwenden. Jeder Link ist eindeutig verschlüsselt und enthält typischerweise einen Ablaufzeitstempel. Aufgrund ihrer flüchtigen Natur, selbst wenn ein Magic Link abgefangen oder geleakt wird, begrenzt sein kurzes Gültigkeitsfenster die Möglichkeit für böswillige Ausnutzung.
+- Basis-URL der Anwendung
+- Authentifizierungs-Endpunkt
+- Token-Parameter
+- Zusätzliche Parameter (optional)
 
-Darüber hinaus bietet die Verwendung von Magic Links eine zusätzliche Verifizierungsmethode über Benutzername und Passwort hinaus, da eine vom Benutzer kontrollierte Empfangsmethode erforderlich ist, wie z. B. eine vertrauenswürdige E-Mail-Adresse oder Telefonnummer, was zusätzliche Kontosicherheit bietet. Und da Magic Links die Eingabe von Anmeldeinformationen überflüssig machen, wird die Kontosicherheit der Benutzer besser geschützt und der Prozess ist bequemer.
+Zum Beispiel:
+
+```
+https://app.example.com/verify-auth?token=abc123...&redirect=/dashboard
+```
+
+## Wie wird das Token eines Magic Links generiert?
+
+Wenn ein Benutzer einen Magic Link anfordert (z. B. durch Klicken auf "Mit E-Mail anmelden"), müssen wir ein sicheres, unvorhersehbares Token generieren. Dieses Token ist entscheidend, da es im Wesentlichen zu einem temporären Passwort wird.
+
+Das Token muss mit einem <Ref slug='csprng' /> generiert werden. Ein CSPRNG verwendet Entropie von der Hardware deines Systems (wie Tastaturzeiten, Mausbewegungen, Lüftergeräusche usw.), um wirklich zufällige Zahlen zu erzeugen, die unmöglich vorherzusagen sind, selbst wenn ein Angreifer frühere Ausgaben kennt.
+
+Zum Beispiel in Node.js:
+
+```javascript
+import crypto from "node:crypto";
+
+// Sicheres zufälliges Token generieren
+const token = crypto.randomBytes(32).toString("base64url");
+// Ergebnis: etwas wie 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
+
+// Alternative mit Web Crypto API (verfügbar in Node.js und Browsern)
+const buffer = crypto.getRandomValues(new Uint8Array(32));
+const token2 = Buffer.from(buffer).toString("base64url");
+```
+
+Anforderungen für ein sicheres Token:
+
+- Generiert über CSPRNG, um Unvorhersehbarkeit zu gewährleisten
+- Mindestens 32 Bytes lang (256 Bit Entropie)
+- URL-sicher kodiert (base64url eliminiert problematische Zeichen)
+- Zeitlich begrenzt und einmalig verwendbar, um Replay-Angriffe zu verhindern
+- Sicher mit Metadaten gespeichert (Ablauf, Benutzerinformationen)
+
+## Wie sichert man die Magic Link Authentifizierung
+
+Die Sicherheit von Magic Links erfordert einen umfassenden Ansatz über mehrere Ebenen. Während die E-Mail-Zustellung und Zugriffsmuster entscheidend sind, bleibt die sichere Token-Verwaltung das Herzstück der Systemsicherheit.
+
+### Grundlagen der Token-Sicherheit
+
+Die Sicherheit von Magic Links hängt stark von der ordnungsgemäßen Token-Implementierung ab (siehe oben). Jedes Token muss kryptografisch sicher sein und während seines gesamten Lebenszyklus ordnungsgemäß verwaltet werden. Das System sollte ein striktes Token-Ablaufdatum durchsetzen (typischerweise 15-30 Minuten) und sofortige Ungültigmachung nach der Verwendung.
+
+Beim Speichern von Tokens sollten sie mit der gleichen Sicherheitsstufe wie Passwörter behandelt werden:
+
+- Tokens vor der Speicherung hashen, um eine Exposition zu verhindern
+- Automatische Bereinigung abgelaufener Tokens implementieren
+- Ein Audit-Trail der Token-Nutzung und Ungültigmachung führen
+- Zugehörige Metadaten speichern (Erstellungszeit, vorgesehener Benutzer, Geräteinformationen)
+
+### Sicherheit der E-Mail-Zustellung
+
+E-Mail dient als primärer Zustellungskanal für Magic Links und ist somit ein potenzielles Ziel für Angriffe. Die Implementierung von Ratenbegrenzung ist entscheidend, um Brute-Force-Versuche zu verhindern und gegen E-Mail-Bombenangriffe zu schützen. Zum Beispiel könntest du Benutzer auf 5 Magic Link-Anfragen pro Stunde von derselben IP-Adresse beschränken.
+
+Darüber hinaus hilft die Überwachung ungewöhnlicher Aktivitätsmuster, potenzielle Sicherheitsverletzungen zu erkennen. Dazu gehören:
+
+- Mehrere Anfragen von verschiedenen IPs für dieselbe E-Mail
+- Ungewöhnliche geografische Zugriffsmuster
+- Schnellfeuer-Anfragen, die auf automatisierte Angriffe hinweisen
+
+### Zugriffskontrolle und Überwachung
+
+Geräte-Fingerprinting fügt eine zusätzliche Sicherheitsebene hinzu, indem konsistente Muster des Benutzerverhaltens verfolgt werden. Wenn ein Anmeldeversuch von einem neuen Gerät oder Standort kommt, kannst du zusätzliche Verifizierungsschritte implementieren oder den Benutzer benachrichtigen.
+
+Für erhöhte Sicherheit in sensiblen Anwendungen:
+
+- Kombiniere Magic Links mit zusätzlichen Authentifizierungsfaktoren
+- Implementiere kontinuierliche Sitzungsüberwachung
+- Protokolliere alle Authentifizierungsereignisse für Audit-Trails
+- Füge gerätebasierte Verifizierung für neue Standorte hinzu
+
+```mermaid
+graph TD
+    A[Sicherheitsebenen] --> B[Token-Sicherheit]
+    A --> C[E-Mail-Schutz]
+    A --> D[Zugriffskontrolle]
+    B --> E[Sichere Speicherung]
+    B --> F[Lebenszyklus-Management]
+    C --> G[Ratenbegrenzung]
+    C --> H[Mustererkennung]
+    D --> I[Geräteverfolgung]
+    D --> J[Sitzungsüberwachung]
+```
+
+## Magic Links vs. SMS / E-Mail OTP
+
+Sowohl Magic Links als auch SMS / E-Mail OTP verlassen sich auf externe Kanäle zur Verifizierung.
+
+Magic Links senden eine einmalige URL an die E-Mail des Benutzers, während OTP einen Verifizierungscode an deren Telefon oder E-Mail sendet.
+
+Magic Links bieten eine überlegene Desktop-Erfahrung, da Benutzer einfach auf den Link klicken, um die Verifizierung abzuschließen, und nicht manuell Codes eingeben müssen. Sie können auch zusätzliche Kontextinformationen tragen, die komplexere Authentifizierungsabläufe ermöglichen.
+
+In mobilen Szenarien könnte jedoch SMS OTP eine bessere Benutzerfreundlichkeit bieten, da Benutzer schnell Verifizierungscodes anzeigen und eingeben können.
+
+## Magic Links vs. Authenticator Apps
+
+Im Vergleich zu OTP-Codes, die von Authenticator Apps generiert werden, erfordern Magic Links nicht, dass Benutzer zusätzliche Anwendungen installieren, und funktionieren nahtlos auf allen Geräten. Dies reduziert die Reibung, insbesondere für nicht-technische Benutzer. Authenticator Apps generieren jedoch OTP-Codes mit besserer Echtzeit-Zuverlässigkeit, unabhängig von der E-Mail-Server-Zustellungsgeschwindigkeit und Verfügbarkeit.
+
+Für Szenarien, die häufige Authentifizierung mit hohen Sicherheitsanforderungen erfordern, könnten Authenticator Apps die bevorzugte Wahl sein.
+
+## Wann sollte man Magic Links verwenden
+
+Magic Links sind besonders effektiv für Geschäfts- und Unternehmensanwendungen, bei denen Benutzer typischerweise seltener einloggen, wie z. B. Projektmanagement-Tools oder Berichtsdashboards. In diesen Szenarien ist die leichte Verzögerung bei der E-Mail-Zustellung im Vergleich zur Bequemlichkeit, keine Passwörter verwalten zu müssen, vernachlässigbar.
+
+### Ideale Szenarien
+
+Diese Authentifizierungsmethoden glänzen in Geschäftskontexten, in denen E-Mail bereits der primäre Kommunikationskanal ist. Zum Beispiel nutzen Kollaborationsplattformen wie Slack oder Notion Magic Links effektiv, weil:
+
+- Benutzer bereits aktiv ihre E-Mails überwachen
+- Anmeldesitzungen tendenziell langanhaltend sind
+- Der Fokus darauf liegt, die Reibung im Authentifizierungsprozess zu reduzieren
+
+Magic Links sind auch hervorragend für Benutzerregistrierungsabläufe in SaaS-Produkten geeignet, bei denen die Optimierung der Konvertierung entscheidend ist. Wenn Benutzer deinen Dienst nur mit einer E-Mail-Adresse nutzen können, reduziert dies die Abbruchraten während des Onboarding-Prozesses erheblich.
+
+### Wann man Alternativen in Betracht ziehen sollte
+
+Magic Links sind jedoch möglicherweise nicht die beste Wahl für Anwendungen, die häufige Authentifizierung erfordern. Mobile Banking-Apps benötigen beispielsweise schnelle und zuverlässige Authentifizierungsmethoden, da Benutzer möglicherweise mehrmals täglich ihren Kontostand überprüfen. In solchen Fällen bieten biometrische Authentifizierung oder PIN-Codes oft eine bessere Benutzererfahrung.
+
+Ziehe alternative Authentifizierungsmethoden in Betracht, wenn:
+
+- Deine Anwendung hauptsächlich mobilbasiert ist
+- Benutzer sofortigen Zugriff ohne E-Mail-Abhängigkeit benötigen
+- Die Umgebung eine Multi-Faktor-Authentifizierung erfordert
+- E-Mail-Zustellungsverzögerungen die Benutzererfahrung erheblich beeinträchtigen könnten
+
+Der Schlüssel ist, deine Authentifizierungsmethode mit den Verhaltensmustern und Sicherheitsanforderungen deiner Benutzer in Einklang zu bringen. Während Magic Links hervorragende Sicherheit mit minimaler Reibung bieten, sollten sie Teil einer umfassenderen Authentifizierungsstrategie sein und nicht die einzige Lösung.
+
+<SeeAlso slugs={["csprng", "passwordless", "otp", "totp"]} />

@@ -1,26 +1,28 @@
 ---
 title: Autorisatiecode stroom (Authorization code flow)
 tags: [oauth 2.0, oidc]
-description: De autorisatiecode stroom (authorization code flow) is een veilige OAuth 2.0-mechanisme waarmee applicaties toegangstokens kunnen verkrijgen namens gebruikers. Het omvat gebruikersauthenticatie, generatie van een autorisatiecode, en tokenuitwisseling.
+description: De autorisatiecode stroom (authorization code flow) is een veilige OAuth 2.0 mechanisme waarmee applicaties toegangstokens kunnen verkrijgen namens gebruikers. Het omvat gebruikersauthenticatie, autorisatiecode generatie en tokenuitwisseling.
 ---
 
 ## Wat is autorisatiecode stroom (authorization code flow)?
 
-De autorisatiecode stroom (authorization code flow) (ook bekend als authorization code grant), gedefinieerd in [OAuth 2.0 RFC 6749, sectie 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), is een veelgebruikte OAuth 2.0 autorisatie mechanisme die applicaties toestaat om een access token te verkrijgen namens een gebruiker. Deze stroom is bijzonder geschikt voor vertrouwelijke applicaties (bijv. traditionele server-side webapplicaties) waar het clientgeheim veilig kan worden opgeslagen.
+De autorisatiecode stroom (authorization code flow) (ook bekend als autorisatiecode toekenning), gedefinieerd in [OAuth 2.0 RFC 6749, sectie 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), is een veelgebruikt OAuth 2.0 autorisatiemechanisme dat applicaties in staat stelt een access token te verkrijgen namens een gebruiker.
 
-Autorisatiecode stroom (authorization code flow) is een robuuste en veilige methode voor het verkrijgen van access tokens in OAuth 2.0, waardoor het een voorkeur heeft voor veel webapplicaties. Het begrijpen van deze stroom is essentieel voor ontwikkelaars die werken met OAuth 2.0 en API-integraties.
+Deze stroom is ideaal voor vertrouwelijke applicaties zoals traditionele server-side webapps die clientgeheimen veilig kunnen opslaan.
 
-## Hoe werkt autorisatiecode stroom (authorization code flow)?
+Het kan ook veilig worden gebruikt voor native apps en Single Page Applications (SPAs) die clientgeheimen niet veilig kunnen opslaan wanneer gecombineerd met de PKCE (<Ref slug="pkce" />) extensie.
+
+## Hoe werkt de autorisatiecode stroom (authorization code flow)?
 
 De autorisatiecode stroom (authorization code flow) omvat de volgende stappen:
 
-1. **Start van de stroom**: De gebruiker start de stroom meestal door op een link of knop in de applicatie te klikken om in te loggen. De applicatie leidt de gebruiker door naar het autorisatieserver's autorisatie endpoint, waarbij de client ID, de gevraagde scope, een redirect URI en een statusparameter worden meegegeven. Het autorisatieserver valideert de parameters en verzoekt de gebruiker om zich te authenticeren op de sign-in pagina van het autorisatieserver.
-2. **Gebruikersauthenticatie en autorisatie**: De gebruiker authenticeert zich met het autorisatieserver en geeft de applicatie toestemming om toegang te krijgen tot de gevraagde bronnen.
-3. **Generatie van code en omleiding**: Het autorisatieserver genereert een autorisatiecode en leidt de gebruiker terug naar de applicatie met behulp van de eerder opgegeven redirect URI. De autorisatiecode is opgenomen in de querystring van de redirect URI.
-4. **Code-uitwisseling**: De applicatie haalt de autorisatiecode uit de querystring en maakt een POST-verzoek naar het autorisatieserver's token endpoint om de autorisatiecode in te wisselen voor een access token. De applicatie moet ook de client ID, het clientgeheim, de redirect URI en de autorisatiecode in het verzoek opnemen.
-5. **Haalt het access token op**: Het autorisatieserver valideert de autorisatiecode en geeft een access token (en optioneel een refresh token) aan de applicatie na succesvolle validatie. De applicatie kan vervolgens het access token gebruiken om geautoriseerde API-verzoeken namens de gebruiker te doen.
+1. **Start van de stroom**: De gebruiker start de stroom meestal door op een link of knop in de applicatie te klikken om in te loggen. De applicatie leidt de gebruiker om naar het autorisatieserver's autorisatie endpoint, waarbij de client ID, de gevraagde scope, een redirect URI en een state parameter worden meegegeven. De autorisatieserver valideert de parameters en vraagt de gebruiker om zich te authenticeren op de inlogpagina van de autorisatieserver.
+2. **Gebruikersauthenticatie en autorisatie**: De gebruiker authenticeert zich bij de autorisatieserver en geeft de applicatie toestemming om toegang te krijgen tot de gevraagde bronnen.
+3. **Code generatie en omleiding**: De autorisatieserver genereert een autorisatiecode en leidt de gebruiker terug naar de applicatie met behulp van de eerder verstrekte redirect URI. De autorisatiecode is opgenomen in de query string van de redirect URI.
+4. **Code uitwisseling**: De applicatie haalt de autorisatiecode uit de query string en doet een POST-verzoek naar het token endpoint van de autorisatieserver om de autorisatiecode in te wisselen voor een access token. De applicatie moet ook de client ID, client secret, redirect URI en de autorisatiecode in het verzoek opnemen.
+5. **Verkrijgen van access token**: De autorisatieserver valideert de autorisatiecode en geeft een access token (en optioneel een refresh token) aan de applicatie bij succesvolle validatie. De applicatie kan vervolgens het access token gebruiken om geautoriseerde API-verzoeken te doen namens de gebruiker.
 
-De stappen kunnen worden geïllustreerd met het volgende sequentiediagram:
+De stappen kunnen worden geïllustreerd door het volgende sequentiediagram:
 
 ```mermaid
 sequenceDiagram
@@ -29,95 +31,171 @@ sequenceDiagram
     participant Autorisatieserver
 
     Gebruiker->>Applicatie: Start inlogstroom
-    Applicatie->>Autorisatieserver: Verzoek autorisatieserver met client ID, scope, redirect URI en status
-    Autorisatieserver->>Gebruiker: Omleiding gebruiker naar inlogpagina en verzoek om authenticatie
-    Gebruiker->>Autorisatieserver: Authenticeer en machtig applicatie met gevraagde toestemming
-    Autorisatieserver->>Applicatie: Omleiding gebruiker naar redirect URI met autorisatiecode
+    Applicatie->>Autorisatieserver: Vraag autorisatieserver met client ID, scope, redirect URI en state
+    Autorisatieserver->>Gebruiker: Leid gebruiker om naar inlogpagina en vraag om authenticatie
+    Gebruiker->>Autorisatieserver: Authenticeer en autoriseer applicatie met gevraagde permissies
+    Autorisatieserver->>Applicatie: Leid gebruiker om naar redirect URI met autorisatiecode
     Applicatie->>Autorisatieserver: Wissel code in voor token
     Autorisatieserver->>Applicatie: Geef access token (en optioneel refresh token) uit
 ```
 
-## Authenticatie verzoek (Authentication request)
+## Hoe implementeer je de autorisatiecode stroom (authorization code flow)?
 
-Aanvraagparameters zijn als volgt:
+Hier is een eenvoudig voorbeeld van het implementeren van de autorisatiecode stroom (authorization code flow), volgens de richtlijnen uiteengezet in [OAuth 2.0 RFC 6749, sectie 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1):
 
-- **client_id**: VEREIST. Geldige OAuth 2.0 client id.
-- **scope**: VEREIST. Deze waarde specificeert een set van bronnen die de gebruiker aanvraagt van het autorisatieserver. Bijv., `openid profile email`.
-- **response_type**: VEREIST. De waarde moet `code` zijn om aan te geven dat de applicatie een autorisatiecode verwacht.
-- **redirect_uri**: VEREIST. De URI waar de authenticatierespons naar wordt verzonden en moet exact overeenkomen met de redirect URI die de client vooraf heeft geregistreerd bij het autorisatieserver.
-- **state**: AANBEVOLEN. Een ondoorzichtige waarde gebruikt om de status tussen het verzoek en de callback te behouden. Het wordt ook gebruikt om <Ref slug="csrf" /> aanvallen te voorkomen.
-- **nonce**: OPTIONEEL. Een willekeurige string gebruikt om een clientsessie te associëren met een id-token en om replay-aanvallen te verzachten.
-- **prompt**: OPTIONEEL. Spatie-gescheiden, hoofdlettergevoelige lijst van stringwaarden die specificeert of het autorisatieserver de eindgebruiker vraagt om opnieuw authenticatie en toestemming. De gedefinieerde waarden zijn:
-  - **none**: Het autorisatieserver MAG GEEN enkele authenticatie- of toestemmingsgebruikersinterfacepagina's weergeven. Er wordt een fout geretourneerd als een eindgebruiker nog niet geauthenticeerd is of als de client geen vooraf geconfigureerde toestemming voor de gevraagde Claims heeft of niet aan andere voorwaarden voldoet voor het verwerken van het verzoek. De foutcode zal doorgaans zijn `login_required`, `interaction_required`. Dit kan worden gebruikt als een methode om te controleren op bestaande authenticatie en/of toestemming.
-  - **login**: Het autorisatieserver MOET de eindgebruiker vragen om opnieuw authenticatie. Als het de eindgebruiker niet opnieuw kan authenticeren, MOET het een fout retourneren, doorgaans `login_required`.
-  - **consent**: Het autorisatieserver MOET de eindgebruiker vragen om toestemming voordat informatie naar de client wordt geretourneerd. Als het geen toestemming kan verkrijgen, MOET het een fout retourneren, doorgaans `consent_required`.
-  - **select_account**: Het autorisatieserver MOET de eindgebruiker vragen om een gebruikersaccount te selecteren. Dit stelt een eindgebruiker die meerdere accounts heeft bij het autorisatieserver in staat om te kiezen uit de meerdere accounts waarvoor ze wellicht huidige sessies hebben. Als het geen accountselectiekeuze kan verkrijgen die door de eindgebruiker is gemaakt, MOET het een fout retourneren, doorgaans `account_selection_required`.
+### 1. Initiële setup
 
-[Volledige definitie van aanvraagparameters](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)
+Zorg ervoor dat je de volgende informatie van je auth service hebt voordat je begint:
 
-### Voorbeeld van een authenticatie verzoek
-
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=code" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "state=RANDOM_STRING_FOR_STATE"
+```javascript
+const config = {
+  clientId: "YOUR_CLIENT_ID",
+  clientSecret: "YOUR_CLIENT_SECRET",
+  authorizationEndpoint: "https://authorization-server.com/auth",
+  tokenEndpoint: "https://authorization-server.com/token",
+  redirectUri: "http://localhost:3000/callback",
+};
 ```
 
-Een typisch succesvol antwoord:
+Client ID, client secret en redirect URI zijn de configuratie van je applicatie in de auth service.
 
-```http
-HTTP/1.1 302 Found
-Location: https://yourapp.com/callback?
-  code=YOUR_AUTHORIZATION_CODE
-  &state=RANDOM_STRING_FOR_STATE
+De `authorizationEndpoint` en `tokenEndpoint` worden verstrekt door je auth service.
+
+Als je auth server OIDC (<Ref slug="openid-connect" />) implementeert, kun je deze informatie verkrijgen via <Ref slug="openid-connect-discovery" />.
+
+### 2. Start autorisatieverzoek
+
+De stroom begint wanneer een gebruiker wil inloggen (bijvoorbeeld door op een inlogknop te klikken). De applicatie zal een inlogverzoek doen.
+
+Dit verzoek bevat parameters zoals `client ID`, `redirect URI` en `scope`. Vervolgens leidt het de gebruiker om naar het autorisatie endpoint van de auth service (de inlogpagina van de auth service).
+
+De gebruiker zal zich authenticeren en autoriseren op deze inlogpagina.
+
+```javascript
+app.get("/login", (req, res) => {
+  const authUrl = new URL(config.authorizationEndpoint);
+  authUrl.searchParams.append("response_type", "code");
+  authUrl.searchParams.append("client_id", config.clientId);
+  authUrl.searchParams.append("redirect_uri", config.redirectUri);
+  authUrl.searchParams.append("scope", "openid profile email");
+  authUrl.searchParams.append("state", "random_state_string");
+
+  res.redirect(authUrl.toString());
+});
 ```
 
-## Tokenuitwisseling verzoek (Token exchange request)
+Opmerking: Je kunt meer parameters toevoegen dan die in de voorbeeldcode worden getoond. Zie [Volledige definitie van authenticatieverzoekparameters](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
 
-Zodra op het bovenstaande authenticatie verzoek succesvol is gereageerd, zal de client automatisch worden doorgestuurd naar de callback URI `https://yourapp.com/callback`, met de code als een URI-parameter.
+### 3. Behandel redirect URI callback en tokenuitwisseling
 
-De client wordt verwacht de `code` te verkrijgen en te verwerken met een daaropvolgend tokenuitwisseling verzoek, om in te ruilen voor de toegangstoken.
+Nadat de gebruiker authenticatie en autorisatie heeft voltooid op de inlogpagina van de auth service, leidt de auth service de gebruiker terug naar de redirect URI van de applicatie. Deze redirect URI bevat de autorisatiecode en state parameters.
 
-### Voorbeeld van een tokenuitwisseling verzoek
+De applicatie haalt de autorisatiecode en state parameters uit de redirect URI en wisselt ze in voor access en refresh tokens (indien aanwezig) bij het token endpoint van de auth service.
 
-```bash
-curl -X POST "https://authorization-server.com/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "code=YOUR_AUTHORIZATION_CODE" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "grant_type=authorization_code" \
+```javascript
+app.get("/callback", async (req, res) => {
+  const { code, state } = req.query;
+
+  try {
+    // Wissel de autorisatiecode in voor een access token en refresh token
+    const tokenResponse = await axios.post(config.tokenEndpoint, {
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: config.redirectUri,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+    });
+
+    const { access_token, refresh_token } = tokenResponse.data;
+    // Sla tokens op voor volgende verzoeken
+    req.session.accessToken = access_token;
+
+    res.send("Authenticatie succesvol!");
+  } catch (error) {
+    res.status(500).send("Tokenuitwisseling mislukt");
+  }
+});
 ```
 
-## Voordelen
+### 4. Gebruik access token
 
-- **Verbeterde veiligheid**: Het clientgeheim wordt nooit blootgesteld aan de browser van de gebruiker, waardoor het risico op clientvervalsing wordt verminderd.
-- **Eenmalige autorisatiecode**: De autorisatiecode heeft een korte levensduur en kan slechts eenmaal worden gebruikt, waardoor het risico op onderschepping en replayaanvallen wordt verminderd.
-- **Kortlevende tokens**: Access tokens uitgegeven in deze stroom zijn kortlevend (meestal 1 uur), wat het risico op ongeautoriseerde toegang minimaliseert als de token wordt gecompromitteerd.
-- **Refresh token**: Het autorisatieserver kan optioneel een refresh token uitgeven, waarmee de applicatie een nieuwe access token kan verkrijgen zonder tussenkomst van de gebruiker.
+Zodra je het token hebt, gebruik het om toegang te krijgen tot beschermde bronnen:
+
+```javascript
+async function fetchUserProfile(accessToken) {
+  const response = await axios.get("https://api.example.com/userinfo", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+```
+
+## Hoe gebruik je de autorisatiecode stroom (authorization code flow) voor publieke clients (native apps en SPAs)?
+
+Publieke clients (zoals native apps en SPAs) staan voor unieke beveiligingsuitdagingen bij het gebruik van de autorisatiecode stroom (authorization code flow). Deze applicaties kunnen clientgeheimen niet veilig opslaan. Het clientgeheim zou worden blootgesteld in JavaScript-code of binnen de opslag van het apparaat. Dit maakt het gemakkelijk voor aanvallers om het geheim te extraheren en te misbruiken.
+
+Daarom is de belangrijkste uitdaging hoe de autorisatiecode stroom (authorization code flow) veilig te gebruiken zonder een clientgeheim. De OAuth 2.0 specificatie introduceerde de PKCE (<Ref slug="pkce" />) extensie om dit probleem op te lossen.
+
+PKCE voegt extra beveiligingsmaatregelen toe om de autorisatiecode stroom (authorization code flow) voor publieke clients te beschermen. Het voorkomt autorisatiecode onderscheppingsaanvallen zelfs zonder gebruik van een clientgeheim. Bekijk deze blog om meer te leren over [Hoe PKCE de OAuth 2.0 autorisatiecode stroom beschermt](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps).
+
+## Hoe gebruik je de autorisatiecode stroom (authorization code flow) veilig?
+
+### **Gebruik "state" om CSRF-aanvallen te voorkomen**
+
+CSRF (<Ref slug="csrf" />) aanvallen misleiden gebruikers om ongewenste acties uit te voeren in een geauthenticeerde webapplicatie. De state parameter helpt dit te voorkomen.
+
+- Genereer een unieke, willekeurige waarde. Sla deze waarde server-side op.
+- Voeg de state parameter toe. Voeg deze toe aan de autorisatieverzoek URL.
+- Verifieer de state bij terugkeer. Wanneer de autorisatieserver terugleidt naar je app, vergelijk de geretourneerde state met de opgeslagen waarde. Als ze niet overeenkomen, wijs het verzoek af. Dit bevestigt dat het verzoek afkomstig is van je applicatie.
+
+### **Configureer veilige redirect URIs**
+
+De redirect URI is waar de autorisatieserver de autorisatiecode naartoe stuurt na gebruikersauthenticatie. Veilige configuratie is cruciaal.
+
+- Registreer geldige redirect URIs. Tijdens app-registratie bij de autorisatieserver, specificeer de toegestane redirect URIs.
+- Exacte overeenstemming. De redirect URI in het autorisatieverzoek moet exact overeenkomen met een geregistreerde URI. Zelfs een klein verschil kan een kwetsbaarheid creëren.
+- Vermijd wildcard URIs. Vermijd indien mogelijk het gebruik van wildcard URIs in productie. Ze vergroten het aanvalsoppervlak.
+- HTTPS voor productie. Gebruik altijd HTTPS voor redirect URIs in productieomgevingen.
+
+### **Gebruik PKCE voor alle clients**
+
+Hoewel PKCE oorspronkelijk was ontworpen voor publieke clients, vereist de <Ref slug="oauth-2.1" /> specificatie dat PKCE wordt afgedwongen voor alle clients, inclusief vertrouwelijke clients, om de algehele beveiliging van de autorisatiecode stroom (authorization code flow) te verbeteren. (Zie [Dwing PKCE af voor alle clients](https://auth.wiki/oauth-2.1#enforcing-pkce-for-all-clients))
 
 ## Wat is het verschil tussen autorisatiecode stroom (authorization code flow) en impliciete stroom (implicit flow)?
 
-Het belangrijkste verschil tussen de autorisatiecode stroom (authorization code flow) en de impliciete stroom (implicit flow) is hoe de access token wordt verkregen:
+Het belangrijkste verschil tussen de autorisatiecode stroom (authorization code flow) en de impliciete stroom (implicit flow) is hoe het access token wordt verkregen:
 
-- **Autorisatiecode stroom (authorization code flow)**: De clientapplicatie ontvangt eerst een autorisatiecode van het autorisatie endpoint en wisselt deze vervolgens in voor een access token in een daaropvolgend POST-verzoek naar het token endpoint.
-- **Impliciete stroom (implicit flow)**: De clientapplicatie ontvangt de access token direct van het autorisatie endpoint.
+- **Autorisatiecode stroom (authorization code flow)**: De clientapplicatie ontvangt eerst een autorisatiecode van het autorisatie endpoint en wisselt deze vervolgens in voor een access token in een volgend POST-verzoek naar het token endpoint.
+- **Impliciete stroom (implicit flow)**: De clientapplicatie ontvangt het access token direct in de URL-fragment van de redirect URI na gebruikersautorisatie.
 
-## Wat is het verschil tussen autorisatiecode stroom (authorization code flow) en client-credentials stroom (client credentials flow)?
+Leer meer over <Ref slug="implicit-flow" />.
 
-Het belangrijkste verschil tussen de autorisatiecode stroom (authorization code flow) en de client-credentials stroom (client credentials flow) is de context waarin de stroom wordt gebruikt:
+## Wat is het verschil tussen autorisatiecode stroom (authorization code flow) en client credentials stroom (client credentials flow)?
 
-- **Autorisatiecode stroom (authorization code flow)**: Wordt gebruikt wanneer de clientapplicatie toegang nodig heeft tot bronnen namens een gebruiker. De stroom omvat gebruikersauthenticatie en autorisatie.
-- **Client-credentials stroom (client credentials flow)**: Wordt gebruikt wanneer de clientapplicatie toegang nodig heeft tot bronnen namens zichzelf. De stroom omvat clientauthenticatie maar niet gebruikersauthenticatie, en is het beste geschikt voor machine-to-machine communicatie.
+Het belangrijkste verschil tussen de autorisatiecode stroom (authorization code flow) en de client credentials stroom (client credentials flow) is de context waarin de stroom wordt gebruikt:
 
-## Wat zijn de typische gebruikssituaties voor autorisatiecode stroom (authorization code flow)?
+- **Autorisatiecode stroom (authorization code flow)**: Gebruikt wanneer de clientapplicatie toegang moet krijgen tot bronnen namens een gebruiker. De stroom omvat gebruikersauthenticatie en autorisatie.
+- **Client credentials stroom (client credentials flow)**: Gebruikt wanneer de clientapplicatie toegang moet krijgen tot bronnen namens zichzelf. De stroom omvat clientauthenticatie maar geen gebruikersauthenticatie, en is het meest geschikt voor machine-to-machine communicatie.
 
-- Traditionele webapplicaties die gebruikersauthenticatie en toegang tot API's vereisen.
-- Applicaties die veilig toegang nodig hebben tot gebruikersgegevens van externe diensten.
+Leer meer over <Ref slug="client-credentials-flow" />.
 
-<SeeAlso slugs={['device-flow', 'implicit-flow', 'client-credentials-flow']} />
+<SeeAlso
+  slugs={[
+    "device-flow",
+    "implicit-flow",
+    "client-credentials-flow",
+    "pkce",
+    "openid-connect",
+    "openid-connect-discovery",
+    "csrf",
+    "oauth-2.1",
+  ]}
+/>
 
-<Resources urls={['https://datatracker.ietf.org/doc/html/rfc6749']} />
+<Resources urls={[
+  "https://datatracker.ietf.org/doc/html/rfc6749",
+  "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
+  "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps"
+]} />

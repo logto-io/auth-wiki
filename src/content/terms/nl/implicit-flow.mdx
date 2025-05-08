@@ -1,72 +1,82 @@
 ---
-title: Implicit flow
+title: Impliciete flow (Implicit flow)
 tags: [oauth 2.0, oidc]
-description: De OIDC (OpenID Connect) implicit flow (impliciete flow) is een authenticatiemethode voor SPAs, waarmee ze snel tokens direct van de authorization server (autorisatieserver) kunnen ontvangen. Hoewel het het proces vereenvoudigt door de noodzaak van een backend-server te elimineren, gaat het gepaard met lagere beveiliging door blootstelling van tokens in de URL.
+description: Impliciete flow (Implicit flow) is een authenticatiemethode die client-only applicaties (zoals SPAs en native apps) toestaat om tokens direct via URL-fragmenten van de autorisatieserver te ontvangen zonder een client secret te verstrekken.
 ---
 
-## Wat is implicit flow
+## Wat is impliciete flow (implicit flow)?
 
-De OIDC (OpenID Connect) implicit flow (impliciete flow) is een authenticatieproces dat voornamelijk wordt gebruikt door clienttoepassingen die in een browser zijn geïmplementeerd met behulp van een scripttaal, bijvoorbeeld single-page applications (SPAs). Het stelt clienttoepassingen in staat om direct ID tokens (ID-token) en access tokens (toegangstokens) van de authorization server (autorisatieserver) te verkrijgen zonder de client authentication (clientauthenticatie) uit te voeren.
+De OAuth 2.0 impliciete flow (implicit flow) is een authenticatiemethode die client-only applicaties (zoals SPAs en native apps) toestaat om tokens direct via URL-fragmenten van de autorisatieserver te ontvangen zonder een client secret te verstrekken.
 
-## Hoe werkt de implicit flow?
+Impliciete flow (Implicit flow) is ontworpen voor client-only applicaties, omdat deze volledig in de browser of op het apparaat van de gebruiker draaien en geen client secrets veilig kunnen opslaan.
 
-De hoofdtappen van de implicit flow zijn als volgt:
+Impliciete flow (Implicit flow) is officieel afgeschaft in <Ref slug="oauth-2.1" /> om veiligheidsredenen (die hieronder zullen worden genoemd). Client-only applicaties moeten nu de <Ref slug="authorization-code-flow" /> met de <Ref slug="pkce" /> extensie gebruiken.
 
-1. **Verzenden van authentication request (authenticatieverzoek)**: De gebruiker start de flow meestal door op een link of knop in de applicatie te klikken om in te loggen. De applicatie stuurt een authentication request naar de authorization server's authorization endpoint (autorisatie-eindpunt). De authorization server valideert de parameters en leidt de gebruiker om om zich te authentiseren op de inlogpagina van de authorization server.
-2. **Gebruikersauthenticatie**: De gebruiker authentiseert zich op de authorization server (bijv. door gebruikersnaam en wachtwoord in te voeren).
-3. **Authorization server reageert**: De authorization server retourneert een ID token en, indien gevraagd, een access token aan de clienttoepassing als URL-fragment.
-4. **Client verwerkt tokens**: De clienttoepassing extraheert de tokens uit het URL-fragment.
+## Hoe werkt impliciete flow (implicit flow)?
+
+De belangrijkste stappen van de impliciete flow (implicit flow) zijn als volgt:
 
 ```mermaid
 sequenceDiagram
-participant User
-participant Application
-participant Authorization Server
-User->>Application: Start inlogflow
-Application->>Authorization Server: Verzoek authorization server met client ID, scope, redirect URI, en state
-Authorization Server->>User: Omleiden gebruiker naar inlogpagina en vragen om authenticatie
-User->>Authorization Server: Authenticeren (bijv. gebruikersnaam en wachtwoord invoeren)
-Authorization Server -->>Application: Retourneer ID token en access token in URL-fragment
-Application->>Application: Extraheer tokens uit URL-fragment
+  participant U as Gebruiker
+  participant C as Client
+  participant AS as Autorisatieserver
+  participant RS as Resource Server
+
+  U->>C: Klik op inloggen
+  C->>AS: Autorisatieverzoek<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: Toon inlogpagina
+  U->>AS: Voer inloggegevens in
+  AS-->>C: Retourneer token in URL-fragment
+  C->>C: Extraheer token uit fragment
+  C->>RS: API-verzoek met token
+  RS-->>C: Beveiligde resource-respons
 ```
 
-### Authentication request (Authenticatieverzoek)
+Opmerkingen:
 
-Verzoekparameters zijn als volgt:
-- **client_id**: VEREIST. Geldige OAuth 2.0-clientidentifier, die in Logto beschikbaar is als de application ID (applicatie-ID) (of app ID).
-- **scope**: VEREIST. Deze waarde specificeert een reeks resources die de gebruiker van de authorization server aanvraagt. Bijv. `openid profile email`
-- **response_type**: VEREIST. De waarde is ofwel `id_token` of `id_token token`. Er wordt geen access token geretourneerd wanneer de waarde `id_token` is.
-- **redirect_uri**: VEREIST. De URI waarnaar de authentication response (authenticatierespons) wordt verzonden en moet exact overeenkomen met de redirect URI die de client vooraf heeft geregistreerd bij de <Ref slug="openid-connect" headingId="openid-provider-op" />. Bijv. `Sign-in redirect URI` in Logto Admin Console.
-- **nonce**: VEREIST. Een willekeurige string die wordt gebruikt om replay-aanvallen te verminderen, die ongemodificeerd wordt doorgegeven van de authentication request naar de ID token claim.
+- De client hoeft alleen een `client_id` te verstrekken in het autorisatieverzoek, zonder een `client_secret` te vereisen.  
+  Dit komt omdat deze clients geen secrets veilig kunnen opslaan, dus deze flow vereist geen client secret.
 
-### Voorbeeld van een authentication request
+- De `response_type` parameter is ingesteld op `token`, wat de autorisatieserver instrueert om het access token direct te retourneren in plaats van een autorisatiecode.  
+  In OIDC (<Ref slug="openid-connect" />) is de `response_type` ofwel `id_token` of `id_token token`, en de auth service zal de overeenkomstige tokens retourneren op basis van verschillende response types.
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- Het token wordt direct in het URL-fragment geretourneerd. Dit betekent dat het token in de URL wordt blootgesteld en gemakkelijk toegankelijk is voor andere applicaties of scripts.
 
-## Beperkingen
+## Is impliciete flow (implicit flow) veilig?
 
-De implicit flow werd ontwikkeld in een tijd waarin browsers Cross-Origin Resource Sharing (CORS) niet wijdverspreid ondersteunden. Daarom is het verzenden van POST-verzoeken naar een authorization server die op een ander domein is gehost, verboden.
+Nee, de impliciete flow (implicit flow) in OAuth 2.0 wordt over het algemeen als minder veilig beschouwd dan andere flows zoals de authorization code flow.
 
-Vanwege deze beperking retourneert de authorization server direct de tokens in het URL-fragment, wat hen kan blootstellen aan de eindgebruiker en aan toepassingen die toegang hebben tot de User Agent van de eindgebruiker.
+Het wordt niet aanbevolen voor de meeste gebruikssituaties vanwege verschillende kwetsbaarheden:
 
-Bovendien wordt de client authentication niet uitgevoerd in de implicit flow, wat betekent dat elke applicatie kan doen alsof het die client is die om authentication vraagt, aangezien de client ID altijd is blootgesteld in browsergebaseerde toepassingen.
+- **Tokenblootstelling in URL**
+   - Access tokens verschijnen direct in de URL van de browser (na het # symbool)
+   - Deze tokens kunnen:
+     - In de browsergeschiedenis worden opgeslagen
+     - Via referrer headers worden gelekt
+     - Door kwaadaardige JavaScript-code op dezelfde pagina worden onderschept
 
-Vanwege bovenstaande beperkingen wordt implicit flow meestal als minder veilig beschouwd dan de Authorization Code Flow.
+- **Geen clientauthenticatie**
+   - De clientapplicatie hoeft zijn identiteit niet te bewijzen
+   - Dit betekent dat iedereen die de `client_id` kent zich kan voordoen als een legitieme client
 
-## Alternatieven voor implicit flow
+- **Geen refresh tokens**
+   - Deze flow ondersteunt geen refresh tokens
+   - Gebruikers moeten opnieuw inloggen wanneer access tokens verlopen
+   - Om frequente logins te vermijden, kunnen gebruikers tokens op onveilige manieren opslaan
 
-Gezien de beveiligingsbeperkingen van de implicit flow, worden vaak andere flows aanbevolen:
-- **Authorization Code Flow**: Deze flow omvat een extra stap waarbij de client een authorization code inwisselt voor tokens, wat een extra beveiligingslaag biedt.
-- **PKCE (Proof Key for Code Exchange)**: Een uitbreiding van de Authorization Code Flow die een extra beveiligingslaag toevoegt door gebruik te maken van een code verifier en code challenge.
+- **Kwetsbaar voor XSS-aanvallen**
+   - Alle tokens worden in de browser verwerkt
+   - Als de website lijdt aan een XSS-aanval (Cross-Site Scripting)
+   - Kan de JavaScript-code van aanvallers deze tokens gemakkelijk stelen
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+Vanwege deze beveiligingsproblemen is impliciete flow (implicit flow) afgeschaft in <Ref slug="oauth-2.1" />. Client-only applicaties moeten nu de <Ref slug="authorization-code-flow" /> met de <Ref slug="pkce" /> extensie gebruiken.
+
+Je kunt [Wat is PKCE: van basisconcepten tot diepgaand begrip](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) bekijken om te leren hoe PKCE de authorization code flow beschermt voor client-only applicaties.
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ Gezien de beveiligingsbeperkingen van de implicit flow, worden vaak andere flows
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript."
-      }
+        ogDescription:
+          "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript.",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />

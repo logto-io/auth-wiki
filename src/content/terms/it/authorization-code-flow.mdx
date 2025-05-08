@@ -6,19 +6,21 @@ description: Il flusso del codice di autorizzazione (authorization code flow) è
 
 ## Cos'è il flusso del codice di autorizzazione (authorization code flow)?
 
-Il flusso del codice di autorizzazione (authorization code flow) (noto anche come concessione del codice di autorizzazione), definito in [OAuth 2.0 RFC 6749, sezione 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), è un meccanismo di autorizzazione OAuth 2.0 ampiamente utilizzato che consente alle applicazioni di ottenere un access token per conto di un utente. Questo flusso è particolarmente adatto per applicazioni riservate (ad esempio, applicazioni web tradizionali lato server) dove il client secret può essere memorizzato in modo sicuro.
+Il flusso del codice di autorizzazione (authorization code flow) (noto anche come concessione del codice di autorizzazione), definito in [OAuth 2.0 RFC 6749, sezione 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1), è un meccanismo di autorizzazione OAuth 2.0 ampiamente utilizzato che consente alle applicazioni di ottenere un access token per conto di un utente.
 
-Il flusso del codice di autorizzazione (authorization code flow) è un metodo robusto e sicuro per ottenere access token in OAuth 2.0, rendendolo una scelta preferita per molte applicazioni web. Comprendere questo flusso è essenziale per gli sviluppatori che lavorano con OAuth 2.0 e integrazioni API.
+Questo flusso è ideale per applicazioni riservate come le tradizionali app web lato server che possono memorizzare in modo sicuro i segreti del client.
+
+Può anche essere utilizzato in modo sicuro per app native e Single Page Applications (SPAs) che non possono memorizzare in modo sicuro i segreti del client quando combinato con l'estensione PKCE (<Ref slug="pkce" />).
 
 ## Come funziona il flusso del codice di autorizzazione (authorization code flow)?
 
 Il flusso del codice di autorizzazione (authorization code flow) coinvolge i seguenti passaggi:
 
-1. **Inizio del flusso**: L'utente avvia il flusso facendo tipicamente clic su un link o un pulsante nell'applicazione per accedere. L'applicazione reindirizza l'utente all'endpoint di autorizzazione del authorization server, passando il client ID, lo scope richiesto, un redirect URI e un parametro di stato. Il authorization server convalida i parametri e invita l'utente ad autenticarsi sulla pagina di accesso del authorization server.
-2. **Autenticazione e autorizzazione dell'utente**: L'utente si autentica con il authorization server e concede all'applicazione il permesso di accedere alle risorse richieste.
-3. **Generazione del codice e reindirizzamento**: Il authorization server genera un authorization code e reindirizza l'utente all'applicazione utilizzando il redirect URI fornito in precedenza. Il authorization code è incluso nella stringa di query del redirect URI.
-4. **Scambio del codice**: L'applicazione estrae il authorization code dalla stringa di query e effettua una richiesta POST all'endpoint del token del authorization server per scambiare il authorization code con un access token. L'applicazione deve anche includere il client ID, il client secret, il redirect URI e il authorization code nella richiesta.
-5. **Recupero dell'access token**: Il authorization server convalida il authorization code e rilascia un access token (e facoltativamente un refresh token) all'applicazione al termine della convalida. L'applicazione può quindi utilizzare l'access token per effettuare richieste API autorizzate per conto dell'utente.
+1. **Inizio del flusso**: L'utente avvia il flusso tipicamente cliccando su un link o un pulsante nell'applicazione per accedere. L'applicazione reindirizza l'utente all'endpoint di autorizzazione del server di autorizzazione, passando l'ID del client, lo scope richiesto, un redirect URI e un parametro di stato. Il server di autorizzazione convalida i parametri e invita l'utente ad autenticarsi sulla pagina di accesso del server di autorizzazione.
+2. **Autenticazione e autorizzazione dell'utente**: L'utente si autentica con il server di autorizzazione e concede all'applicazione il permesso di accedere alle risorse richieste.
+3. **Generazione del codice e reindirizzamento**: Il server di autorizzazione genera un codice di autorizzazione e reindirizza l'utente all'applicazione utilizzando il redirect URI fornito in precedenza. Il codice di autorizzazione è incluso nella stringa di query del redirect URI.
+4. **Scambio del codice**: L'applicazione estrae il codice di autorizzazione dalla stringa di query e effettua una richiesta POST all'endpoint del token del server di autorizzazione per scambiare il codice di autorizzazione con un access token. L'applicazione deve anche includere l'ID del client, il segreto del client, il redirect URI e il codice di autorizzazione nella richiesta.
+5. **Recupero dell'access token**: Il server di autorizzazione convalida il codice di autorizzazione e rilascia un access token (e opzionalmente un refresh token) all'applicazione dopo una convalida riuscita. L'applicazione può quindi utilizzare l'access token per effettuare richieste API autorizzate per conto dell'utente.
 
 I passaggi possono essere illustrati dal seguente diagramma di sequenza:
 
@@ -29,95 +31,171 @@ sequenceDiagram
     participant Authorization Server
 
     User->>Application: Avvia il flusso di accesso
-    Application->>Authorization Server: Richiede al authorization server con client ID, scope, redirect URI e stato
+    Application->>Authorization Server: Richiede al server di autorizzazione con ID client, scope, redirect URI e stato
     Authorization Server->>User: Reindirizza l'utente alla pagina di accesso e richiede l'autenticazione
     User->>Authorization Server: Autentica e autorizza l'applicazione con i permessi richiesti
-    Authorization Server->>Application: Reindirizza l'utente al redirect URI con il authorization code
+    Authorization Server->>Application: Reindirizza l'utente al redirect URI con il codice di autorizzazione
     Application->>Authorization Server: Scambia il codice per il token
-    Authorization Server->>Application: Rilascia l'access token (e facoltativamente il refresh token)
+    Authorization Server->>Application: Rilascia l'access token (e opzionalmente il refresh token)
 ```
 
-## Richiesta di autenticazione (Authentication request)
+## Come implementare il flusso del codice di autorizzazione (authorization code flow)?
 
-I parametri della richiesta sono i seguenti:
+Ecco un semplice esempio di implementazione del flusso del codice di autorizzazione (authorization code flow), seguendo le linee guida delineate in [OAuth 2.0 RFC 6749, sezione 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1):
 
-- **client_id**: OBBLIGATORIO. Identificatore valido del client OAuth 2.0.
-- **scope**: OBBLIGATORIO. Questo valore specifica un insieme di risorse che l'utente richiede dal authorization server. Ad esempio, `openid profile email`.
-- **response_type**: OBBLIGATORIO. Il valore deve essere `code` per indicare che l'applicazione si aspetta un authorization code.
-- **redirect_uri**: OBBLIGATORIO. L'URI a cui verrà inviata la risposta di autenticazione e deve corrispondere esattamente al redirect URI che il client ha pre-registrato presso il authorization server.
-- **state**: RACCOMANDATO. Un valore opaco utilizzato per mantenere lo stato tra la richiesta e il callback. È anche usato per prevenire attacchi <Ref slug="csrf" />.
-- **nonce**: OPZIONALE. Una stringa casuale utilizzata per associare una sessione client con un ID token e per mitigare attacchi di replay.
-- **prompt**: OPZIONALE. Elenco di valori stringa delimitati da spazi e case-sensitive che specifica se il authorization server richiede all'utente finale di ri-autenticarsi e dare il consenso. I valori definiti sono:
-  - **none**: Il authorization server NON DEVE visualizzare alcuna pagina di interfaccia utente di autenticazione o consenso. Viene restituito un errore se un utente finale non è già autenticato o il client non ha un consenso pre-configurato per i Claims richiesti o non soddisfa altre condizioni per elaborare la richiesta. Il codice di errore sarà tipicamente `login_required`, `interaction_required`. Questo può essere utilizzato come metodo per verificare l'esistenza di autenticazione e/o consenso.
-  - **login**: Il authorization server DOVREBBE richiedere all'utente finale di ri-autenticarsi. Se non può ri-autenticare l'utente finale, DEVE restituire un errore, tipicamente `login_required`.
-  - **consent**: Il authorization server DOVREBBE richiedere all'utente finale di dare il consenso prima di restituire informazioni al client. Se non può ottenere il consenso, DEVE restituire un errore, tipicamente `consent_required`.
-  - **select_account**: Il authorization server DOVREBBE richiedere all'utente finale di selezionare un account utente. Questo consente a un utente finale che ha più account presso il authorization server di selezionare tra i vari account per cui potrebbe avere sessioni correnti. Se non può ottenere una scelta di selezione dell'account fatta dall'utente finale, DEVE restituire un errore, tipicamente `account_selection_required`.
+### 1. Configurazione iniziale
 
-[Definizione completa dei parametri della richiesta](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)
+Assicurati di avere le seguenti informazioni dal tuo servizio di auth prima di iniziare:
 
-### Esempio di richiesta di autenticazione (Authentication request)
-
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=code" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "state=RANDOM_STRING_FOR_STATE"
+```javascript
+const config = {
+  clientId: "YOUR_CLIENT_ID",
+  clientSecret: "YOUR_CLIENT_SECRET",
+  authorizationEndpoint: "https://authorization-server.com/auth",
+  tokenEndpoint: "https://authorization-server.com/token",
+  redirectUri: "http://localhost:3000/callback",
+};
 ```
 
-Una tipica risposta di successo:
+Client ID, client secret e redirect URI sono la configurazione della tua applicazione nel servizio di auth.
 
-```http
-HTTP/1.1 302 Found
-Location: https://yourapp.com/callback?
-  code=YOUR_AUTHORIZATION_CODE
-  &state=RANDOM_STRING_FOR_STATE
+L'`authorizationEndpoint` e il `tokenEndpoint` sono forniti dal tuo servizio di auth.
+
+Se il tuo server di auth implementa OIDC (<Ref slug="openid-connect" />), puoi ottenere queste informazioni tramite <Ref slug="openid-connect-discovery" />.
+
+### 2. Inizia la richiesta di autorizzazione
+
+Il flusso inizia quando un utente vuole accedere (ad esempio, cliccando un pulsante di login). L'applicazione effettuerà una richiesta di login.
+
+Questa richiesta include parametri come `client ID`, `redirect URI` e `scope`. Quindi reindirizza l'utente all'endpoint di autorizzazione del servizio di auth (la pagina di login del servizio di auth).
+
+L'utente si autenticherà e autorizzerà su questa pagina di login.
+
+```javascript
+app.get("/login", (req, res) => {
+  const authUrl = new URL(config.authorizationEndpoint);
+  authUrl.searchParams.append("response_type", "code");
+  authUrl.searchParams.append("client_id", config.clientId);
+  authUrl.searchParams.append("redirect_uri", config.redirectUri);
+  authUrl.searchParams.append("scope", "openid profile email");
+  authUrl.searchParams.append("state", "random_state_string");
+
+  res.redirect(authUrl.toString());
+});
 ```
 
-## Richiesta di scambio del token
+Nota: Puoi aggiungere più parametri oltre a quelli mostrati nel codice di esempio. Vedi [Definizione completa dei parametri della richiesta di autenticazione](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
 
-Una volta che la richiesta di autenticazione sopra è stata risolta con successo, il client verrà automaticamente reindirizzato al callback URI `https://yourapp.com/callback`, con il codice come parametro URI.
+### 3. Gestisci il callback del redirect URI e lo scambio di token
 
-Il client è tenuto a ottenere e elaborare il `code` con una successiva richiesta di scambio del token, al fine di scambiare per l'access token.
+Dopo che l'utente completa l'autenticazione e l'autorizzazione sulla pagina di login del servizio di auth, il servizio di auth reindirizza l'utente al redirect URI dell'applicazione. Questo redirect URI include il codice di autorizzazione e i parametri di stato.
 
-### Esempio di richiesta di scambio del token
+L'applicazione estrae il codice di autorizzazione e i parametri di stato dal redirect URI e li scambia per ottenere access e refresh token (se presenti) all'endpoint del token del servizio di auth.
 
-```bash
-curl -X POST "https://authorization-server.com/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "code=YOUR_AUTHORIZATION_CODE" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "grant_type=authorization_code" \
+```javascript
+app.get("/callback", async (req, res) => {
+  const { code, state } = req.query;
+
+  try {
+    // Scambia il codice di autorizzazione per un access token e un refresh token
+    const tokenResponse = await axios.post(config.tokenEndpoint, {
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: config.redirectUri,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+    });
+
+    const { access_token, refresh_token } = tokenResponse.data;
+    // Memorizza i token per richieste successive
+    req.session.accessToken = access_token;
+
+    res.send("Autenticazione riuscita!");
+  } catch (error) {
+    res.status(500).send("Scambio del token fallito");
+  }
+});
 ```
 
-## Vantaggi
+### 4. Usa l'access token
 
-- **Sicurezza migliorata**: Il client secret non è mai esposto al browser dell'utente, riducendo il rischio di impersonificazione del client.
-- **Codice di autorizzazione monouso**: Il authorization code ha una breve durata e può essere utilizzato solo una volta, riducendo il rischio di intercettazione e attacchi di replay.
-- **Token a breve durata**: Gli access token emessi in questo flusso hanno una breve durata (tipicamente 1 ora), riducendo il rischio di accesso non autorizzato se il token viene compromesso.
-- **Refresh token**: Il authorization server può facoltativamente emettere un refresh token, consentendo all'applicazione di ottenere un nuovo access token senza richiedere l'interazione dell'utente.
+Una volta ottenuto il token, usalo per accedere alle risorse protette:
+
+```javascript
+async function fetchUserProfile(accessToken) {
+  const response = await axios.get("https://api.example.com/userinfo", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+```
+
+## Come utilizzare il flusso del codice di autorizzazione (authorization code flow) per client pubblici (app native e SPAs)?
+
+I client pubblici (come app native e SPAs) affrontano sfide di sicurezza uniche quando utilizzano il flusso del codice di autorizzazione (authorization code flow). Queste applicazioni non possono memorizzare in modo sicuro i segreti del client. Il segreto del client sarebbe esposto nel codice JavaScript o all'interno della memoria del dispositivo. Questo rende facile per gli attaccanti estrarre e abusare del segreto.
+
+Pertanto, la sfida principale è come utilizzare il flusso del codice di autorizzazione (authorization code flow) in modo sicuro senza un segreto del client. La specifica OAuth 2.0 ha introdotto l'estensione PKCE (<Ref slug="pkce" />) per risolvere questo problema.
+
+PKCE aggiunge misure di sicurezza aggiuntive per proteggere il flusso del codice di autorizzazione (authorization code flow) per i client pubblici. Previene gli attacchi di intercettazione del codice di autorizzazione anche senza utilizzare un segreto del client. Dai un'occhiata a questo blog per saperne di più su [Come PKCE protegge il flusso del codice di autorizzazione (authorization code flow) per le app native](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps).
+
+## Come utilizzare il flusso del codice di autorizzazione (authorization code flow) in modo sicuro?
+
+### **Utilizzo di "state" per prevenire attacchi CSRF**
+
+Gli attacchi CSRF (<Ref slug="csrf" />) inducono gli utenti a eseguire azioni indesiderate in un'applicazione web autenticata. Il parametro state aiuta a prevenire questo.
+
+- Genera un valore unico e casuale. Memorizza questo valore lato server.
+- Includi il parametro state. Aggiungilo all'URL della richiesta di autorizzazione.
+- Verifica lo state al ritorno. Quando il server di autorizzazione reindirizza alla tua app, confronta lo state restituito con il valore memorizzato. Se non corrispondono, rifiuta la richiesta. Questo conferma che la richiesta è originata dalla tua applicazione.
+
+### **Configurazione di redirect URI sicuri**
+
+Il redirect URI è dove il server di autorizzazione invia il codice di autorizzazione dopo l'autenticazione dell'utente. La configurazione sicura è cruciale.
+
+- Registra redirect URI validi. Durante la registrazione dell'app con il server di autorizzazione, specifica i redirect URI consentiti.
+- Corrispondenza esatta. Il redirect URI nella richiesta di autorizzazione deve corrispondere esattamente a un URI registrato. Anche una piccola differenza può creare una vulnerabilità.
+- Evita URI con caratteri jolly. Se possibile, evita di utilizzare URI con caratteri jolly in produzione. Ampliano la superficie di attacco.
+- HTTPS per la produzione. Usa sempre HTTPS per i redirect URI negli ambienti di produzione.
+
+### **Utilizzo di PKCE per tutti i client**
+
+Sebbene PKCE fosse originariamente progettato per i client pubblici, la specifica <Ref slug="oauth-2.1" /> richiede che PKCE sia applicato a tutti i client, inclusi i client riservati, per migliorare la sicurezza complessiva del flusso del codice di autorizzazione (authorization code flow). (Vedi [Applicare PKCE per tutti i client](https://auth.wiki/oauth-2.1#enforcing-pkce-for-all-clients))
 
 ## Qual è la differenza tra il flusso del codice di autorizzazione (authorization code flow) e il flusso implicito (implicit flow)?
 
 La principale differenza tra il flusso del codice di autorizzazione (authorization code flow) e il flusso implicito (implicit flow) è come viene ottenuto l'access token:
 
-- **Flusso del codice di autorizzazione (authorization code flow)**: L'applicazione client riceve prima un authorization code dall'endpoint di autorizzazione, quindi lo scambia per un access token in una successiva richiesta POST all'endpoint del token.
-- **Flusso implicito (implicit flow)**: L'applicazione client riceve direttamente l'access token dall'endpoint di autorizzazione.
+- **Flusso del codice di autorizzazione (authorization code flow)**: L'applicazione client riceve prima un codice di autorizzazione dall'endpoint di autorizzazione, quindi lo scambia per un access token in una successiva richiesta POST all'endpoint del token.
+- **Flusso implicito (implicit flow)**: L'applicazione client riceve direttamente l'access token nel frammento dell'URL del redirect URI dopo l'autorizzazione dell'utente.
+
+Scopri di più su <Ref slug="implicit-flow" />.
 
 ## Qual è la differenza tra il flusso del codice di autorizzazione (authorization code flow) e il flusso delle credenziali del client (client credentials flow)?
 
 La principale differenza tra il flusso del codice di autorizzazione (authorization code flow) e il flusso delle credenziali del client (client credentials flow) è il contesto in cui viene utilizzato il flusso:
 
-- **Flusso del codice di autorizzazione (authorization code flow)**: Utilizzato quando l'applicazione client deve accedere a risorse per conto di un utente. Il flusso coinvolge l'autenticazione e l'autorizzazione dell'utente.
-- **Flusso delle credenziali del client (client credentials flow)**: Utilizzato quando l'applicazione client deve accedere a risorse per conto proprio. Il flusso coinvolge l'autenticazione del client ma non l'autenticazione dell'utente, ed è più adatto per la comunicazione machine-to-machine.
+- **Flusso del codice di autorizzazione (authorization code flow)**: Utilizzato quando l'applicazione client deve accedere alle risorse per conto di un utente. Il flusso coinvolge l'autenticazione e l'autorizzazione dell'utente.
+- **Flusso delle credenziali del client (client credentials flow)**: Utilizzato quando l'applicazione client deve accedere alle risorse per conto proprio. Il flusso coinvolge l'autenticazione del client ma non l'autenticazione dell'utente, ed è più adatto per la comunicazione machine-to-machine.
 
-## Quali sono i casi d'uso tipici per il flusso del codice di autorizzazione (authorization code flow)?
+Scopri di più su <Ref slug="client-credentials-flow" />.
 
-- Applicazioni web tradizionali che richiedono l'autenticazione dell'utente e l'accesso alle API.
-- Applicazioni che necessitano di accedere in modo sicuro ai dati degli utenti da servizi di terze parti.
+<SeeAlso
+  slugs={[
+    "device-flow",
+    "implicit-flow",
+    "client-credentials-flow",
+    "pkce",
+    "openid-connect",
+    "openid-connect-discovery",
+    "csrf",
+    "oauth-2.1",
+  ]}
+/>
 
-<SeeAlso slugs={['device-flow', 'implicit-flow', 'client-credentials-flow']} />
-
-<Resources urls={['https://datatracker.ietf.org/doc/html/rfc6749']} />
+<Resources urls={[
+  "https://datatracker.ietf.org/doc/html/rfc6749",
+  "https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest",
+  "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps"
+]} />

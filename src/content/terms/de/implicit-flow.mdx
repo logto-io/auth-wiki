@@ -1,72 +1,82 @@
 ---
-title: Impliziter Flow (Implicit flow)
+title: Impliziter Flow (Implicit Flow)
 tags: [oauth 2.0, oidc]
-description: Der OIDC (OpenID Connect) implizite Flow (Implicit flow) ist eine Authentifizierungsmethode für SPAs, die es ihnen ermöglicht, schnell Tokens direkt vom Authorization Server (Autorisierungsserver) zu erhalten. Während es den Prozess vereinfacht, da kein Backend-Server erforderlich ist, geht dies mit geringerer Sicherheit aufgrund der Token-Exposition in der URL einher.
+description: Der implizite Flow (Implicit Flow) ist eine Authentifizierungsmethode, die es clientseitigen Anwendungen (wie SPAs und nativen Apps) ermöglicht, Tokens direkt über URL-Fragmente vom Autorisierungsserver zu erhalten, ohne ein Client-Geheimnis bereitzustellen.
 ---
 
-## Was ist der implizite Flow (Implicit flow)
+## Was ist der implizite Flow (Implicit Flow)?
 
-Der OIDC (OpenID Connect) implizite Flow (Implicit flow) ist ein Authentifizierungsprozess, der hauptsächlich von Client-Anwendungen verwendet wird, die in einem Browser mit einer Skriptsprache implementiert sind, z.B. Single-Page-Applications (SPAs). Er ermöglicht es Client-Anwendungen, direkte ID-Tokens und Access Tokens vom Authorization Server (Autorisierungsserver) zu erhalten, ohne eine Client-Authentifizierung durchzuführen.
+Der OAuth 2.0 implizite Flow (Implicit Flow) ist eine Authentifizierungsmethode, die es clientseitigen Anwendungen (wie SPAs und nativen Apps) ermöglicht, Tokens direkt über URL-Fragmente vom Autorisierungsserver zu erhalten, ohne ein Client-Geheimnis bereitzustellen.
 
-## Wie funktioniert der implizite Flow (Implicit flow)?
+Der implizite Flow (Implicit Flow) ist für clientseitige Anwendungen konzipiert, da sie vollständig im Browser oder auf dem Gerät des Benutzers ausgeführt werden und Client-Geheimnisse nicht sicher speichern können.
 
-Die Hauptschritte des impliziten Flows (Implicit flow) sind wie folgt:
+Der implizite Flow (Implicit Flow) wurde aus Sicherheitsgründen (die unten erwähnt werden) offiziell in <Ref slug="oauth-2.1" /> als veraltet erklärt. Clientseitige Anwendungen sollten jetzt den <Ref slug="authorization-code-flow" /> mit der <Ref slug="pkce" />-Erweiterung verwenden.
 
-1. **Senden der Authentication Request (Authentifizierungsanforderung)**: Der Benutzer initiiert den Flow typischerweise, indem er auf einen Link oder Button in der Anwendung klickt, um sich anzumelden. Die Anwendung sendet eine Authentication Request (Authentifizierungsanforderung) an den Authorization Server (Autorisierungsserver) Endpoint. Der Authorization Server (Autorisierungsserver) validiert die Parameter und leitet den Benutzer zur Authentifizierung auf die Anmeldeseite des Authorization Servers (Autorisierungsservers) weiter.
-2. **User Authentication (Benutzerauthentifizierung)**: Der Benutzer authentifiziert sich auf dem Authorization Server (Autorisierungsserver) (z.B. durch Eingabe von Benutzername und Passwort).
-3. **Antwort des Authorization Servers (Autorisierungsservers)**: Der Authorization Server (Autorisierungsserver) gibt ein ID-Token und, falls angefordert, ein Access Token als URL-Fragment an die Client-Anwendung zurück.
-4. **Client verarbeitet Tokens**: Die Client-Anwendung extrahiert die Tokens aus dem URL-Fragment.
+## Wie funktioniert der implizite Flow (Implicit Flow)?
+
+Die Hauptschritte des impliziten Flows (Implicit Flow) sind wie folgt:
 
 ```mermaid
 sequenceDiagram
-participant Benutzer
-participant Anwendung
-participant Authorisierungsserver
-Benutzer->>Anwendung: Anmeldeablauf initiieren
-Anwendung->>Authorisierungsserver: Anfragen mit Client ID, Scope, Redirect URI und Status
-Authorisierungsserver->>Benutzer: Leitet Benutzer zur Anmeldeseite weiter und fordert zur Authentifizierung auf
-Benutzer->>Authorisierungsserver: Authentifizieren (z.B. Benutzername und Passwort eingeben)
-Authorisierungsserver -->>Anwendung: Rückgabe von ID-Token und Access Token im URL-Fragment
-Anwendung->>Anwendung: Extrahieren von Tokens aus URL-Fragment
+  participant U as Benutzer
+  participant C as Client
+  participant AS as Autorisierungsserver
+  participant RS as Ressourcenserver
+
+  U->>C: Klick auf Anmelden
+  C->>AS: Autorisierungsanfrage<br/>(response_type=token,<br/>client_id, redirect_uri)
+  AS->>U: Anmeldeseite anzeigen
+  U->>AS: Anmeldedaten eingeben
+  AS-->>C: Token im URL-Fragment zurückgeben
+  C->>C: Token aus Fragment extrahieren
+  C->>RS: API-Anfrage mit Token
+  RS-->>C: Antwort der geschützten Ressource
 ```
 
-### Authentication Request (Authentifizierungsanforderung)
+Beachten:
 
-Die Anforderungsparameter sind wie folgt:
-- **client_id**: ERFORDERLICH. Gültige OAuth 2.0 Client-Kennung, die in Logto als Anwendungs-ID (oder App-ID) verfügbar ist.
-- **scope**: ERFORDERLICH. Dieser Wert spezifiziert eine Reihe von Ressourcen, die der Benutzer vom Authorization Server (Autorisierungsserver) anfordert. Z.B. `openid profile email`
-- **response_type**: ERFORDERLICH. Der Wert ist entweder `id_token` oder `id_token token`. Es wird kein Access Token zurückgegeben, wenn der Wert `id_token` ist.
-- **redirect_uri**: ERFORDERLICH. Die URI, an die die Authentication Response (Authentifizierungsantwort) gesendet wird und sollte genau mit der Redirect URI übereinstimmen, die der Client beim <Ref slug="openid-connect" headingId="openid-provider-op" /> vorregistriert hat. Z.B. `Sign-in redirect URI` in Logto Admin Console.
-- **nonce**: ERFORDERLICH. Ein Zufallsstring, der verwendet wird, um Replay-Angriffe zu verhindern, welcher unverändert von der Authentication Request (Authentifizierungsanforderung) zum ID-Token-Claim übergeben wird.
+- Der Client muss in der Autorisierungsanfrage nur eine `client_id` angeben, ohne ein `client_secret` zu benötigen.  
+  Dies liegt daran, dass diese Clients Geheimnisse nicht sicher speichern können, sodass dieser Flow kein Client-Geheimnis erfordert.
 
-### Beispiel einer Authentication Request (Authentifizierungsanforderung)
+- Der `response_type`-Parameter ist auf `token` gesetzt, was den Autorisierungsserver anweist, das access token direkt anstelle eines Autorisierungscodes zurückzugeben.  
+  In OIDC (<Ref slug="openid-connect" />) ist der `response_type` entweder `id_token` oder `id_token token`, und der Auth-Dienst gibt die entsprechenden Tokens basierend auf verschiedenen Antworttypen zurück.
 
-```bash
-curl -X GET "https://authorization-server.com/auth" \
-  -d "response_type=id_token token" \
-  -d "client_id=YOUR_APPLICATION_ID" \
-  -d "redirect_uri=https://yourapp.com/callback" \
-  -d "scope=openid profile email" \
-  -d "nonce=RANDOM_STRING"
-```
+- Das Token wird direkt im URL-Fragment zurückgegeben. Das bedeutet, dass das Token in der URL exponiert ist und leicht von anderen Anwendungen oder Skripten abgerufen werden kann.
 
-## Einschränkungen
+## Ist der implizite Flow (Implicit Flow) sicher?
 
-Der implizite Flow (Implicit flow) wurde in einer Zeit entwickelt, als Browser noch nicht weit verbreitet Cross-Origin Resource Sharing (CORS) unterstützten. Daher ist das Senden von POST-Anfragen an einen Authorization Server (Autorisierungsserver), der auf einer anderen Domain gehostet wird, untersagt.
+Nein, der implizite Flow (Implicit Flow) in OAuth 2.0 wird im Allgemeinen als weniger sicher angesehen als andere Flows wie der authorization code flow.
 
-Aufgrund dieser Einschränkung gibt der Authorization Server (Autorisierungsserver) die Tokens direkt im URL-Fragment zurück, was sie dem Endbenutzer und Anwendungen, die Zugriff auf den User Agent des Endbenutzers haben, aussetzen kann.
+Er wird für die meisten Anwendungsfälle aufgrund mehrerer Schwachstellen nicht empfohlen:
 
-Darüber hinaus wird die Client-Authentifizierung im impliziten Flow (Implicit flow) nicht durchgeführt, was bedeutet, dass jede Anwendung vorgeben kann, der Client zu sein, der die Authentifizierung anfordert, da die Client-ID immer in browserbasierten Anwendungen sichtbar ist.
+- **Token-Exposition in der URL**
+   - Access tokens erscheinen direkt in der URL des Browsers (nach dem # Symbol)
+   - Diese Tokens können:
+     - Im Browserverlauf gespeichert werden
+     - Durch Referrer-Header geleakt werden
+     - Von bösartigem JavaScript-Code auf derselben Seite erfasst werden
 
-Aufgrund der oben genannten Einschränkungen wird der implizite Flow (Implicit flow) häufig als weniger sicher als der Authorization Code Flow betrachtet.
+- **Keine Client-Authentifizierung**
+   - Die Client-Anwendung muss ihre Identität nicht nachweisen
+   - Das bedeutet, dass jeder, der die `client_id` kennt, sich als legitimer Client ausgeben kann
 
-## Alternativen zum impliziten Flow (Implicit flow)
+- **Keine Refresh Tokens**
+   - Dieser Flow unterstützt keine refresh tokens
+   - Benutzer müssen sich erneut anmelden, wenn access tokens ablaufen
+   - Um häufige Anmeldungen zu vermeiden, könnten Benutzer Tokens auf unsichere Weise speichern
 
-Angesichts der Sicherheitseinschränkungen des impliziten Flows (Implicit flow) werden häufig andere Flows empfohlen:
-- **Authorization Code Flow**: Dieser Flow beinhaltet einen zusätzlichen Schritt, bei dem der Client einen Authorization Code gegen Tokens eintauscht, wodurch eine zusätzliche Sicherheitsebene geboten wird.
-- **PKCE (Proof Key for Code Exchange)**: Eine Erweiterung des Authorization Code Flow, die eine zusätzliche Sicherheitsebene durch die Verwendung eines Code-Verifikators und einer Code-Challenge hinzufügt.
+- **Anfällig für XSS-Angriffe**
+   - Alle Tokens werden im Browser verarbeitet
+   - Wenn die Website von einem XSS-Angriff (Cross-Site Scripting) betroffen ist
+   - Kann der JavaScript-Code von Angreifern diese Tokens leicht stehlen
 
-<SeeAlso slugs={['device-flow', 'authorization-code-flow', 'client-credentials-flow']} />
+Aufgrund dieser Sicherheitsbedenken wurde der implizite Flow (Implicit Flow) in <Ref slug="oauth-2.1" /> als veraltet erklärt. Clientseitige Anwendungen sollten jetzt den <Ref slug="authorization-code-flow" /> mit der <Ref slug="pkce" />-Erweiterung verwenden.
+
+Du kannst [Was ist PKCE: von grundlegenden Konzepten bis zum tiefen Verständnis](https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps) lesen, um zu erfahren, wie PKCE den authorization code flow für clientseitige Anwendungen schützt.
+
+<SeeAlso
+  slugs={["oauth-2.1", "authorization-code-flow", "pkce", "openid-connect"]}
+/>
 
 <Resources
   urls={[
@@ -75,9 +85,11 @@ Angesichts der Sicherheitseinschränkungen des impliziten Flows (Implicit flow) 
       url: "https://tools.ietf.org/html/rfc6749#section-4.2",
       result: {
         ogTitle: "The OAuth 2.0 Authorization Framework: Implicit Grant",
-        ogDescription: "The implicit grant type is used to obtain access tokens (it does not support the issuance of refresh tokens) and is optimized for public clients known to operate a particular redirection URI. These clients are typically implemented in a browser using a scripting language such as JavaScript."
-      }
+        ogDescription:
+          "Der implizite Grant-Typ wird verwendet, um access tokens zu erhalten (er unterstützt nicht die Ausgabe von refresh tokens) und ist für öffentliche Clients optimiert, die eine bestimmte Umleitungs-URI betreiben. Diese Clients werden typischerweise in einem Browser mit einer Skriptsprache wie JavaScript implementiert.",
+      },
     },
     "https://openid.net/specs/openid-connect-core-1_0.html",
+    "https://blog.logto.io/how-pkce-protects-the-authorization-code-flow-for-native-apps",
   ]}
 />
