@@ -13,21 +13,21 @@ import Resources from "../mdx-components/Resources.astro";
 import TextLink from "../mdx-components/TextLink.astro";
 import Share from "../components/Share.astro";
 import { Icon } from "astro-icon/components";
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import { getEntry } from "astro:content";
 import { defaultLocale } from "astro-i18n-aut";
 import { getPhrases } from "../phrases";
 import { getLocaleFromUrl } from "../utils/locale";
-import { trimEnd } from "../utils/string";
+import { getSlugFromId, trimEnd } from "../utils/string";
 
 export async function getStaticPaths() {
   // Only the default locale is needed for generating paths. Other locales will be handled by
   // `astro-i18n-aut`.
   const terms = await getCollection("terms", (entry) =>
-    entry.slug.startsWith(`${defaultLocale}/`),
+    entry.id.startsWith(`${defaultLocale}/`),
   );
-  return terms.map(({ slug }) => {
-    const [_, ...rest] = slug.split("/");
+  return terms.map(({ id }) => {
+    const [_, ...rest] = getSlugFromId(id).split("/");
     return {
       params: { slug: rest.join("/") },
     };
@@ -56,7 +56,7 @@ const coverUrl = new URL(
   Astro.url,
 ).href;
 const { title, description, tags } = entry.data;
-const { headings, Content } = await entry.render();
+const { headings, Content } = await render(entry);
 
 if (headings.some(({ depth }) => depth === 1)) {
   throw new Error("The article must not contain a top-level heading.");
@@ -79,7 +79,7 @@ const seoTitle = phrases.content.what_is.replace("{{title}}", title);
             <Tags data={tags} />
             <a
               class="button"
-              href={`https://github.com/logto-io/auth-wiki/edit/master/src/content/${entry.collection}/${entry.slug}.mdx`}
+              href={`https://github.com/logto-io/auth-wiki/edit/master/src/content/${entry.collection}/${entry.id}.mdx`}
               target="_blank"
               rel="noopener"
             >
