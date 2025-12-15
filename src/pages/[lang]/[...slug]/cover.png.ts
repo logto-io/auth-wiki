@@ -5,6 +5,7 @@ import { chromium } from "playwright";
 import pc from "picocolors"
 import pMap from "p-map";
 import { buildCover } from '../../../utils/cover';
+import { getSlugFromId } from '../../../utils/string';
 
 const getTimeString = () => {
   const now = new Date();
@@ -23,8 +24,8 @@ export async function getStaticPaths() {
 
   return pMap(
     terms,
-    async ({ slug, data }) => {
-      const [locale, ...rest] = slug.split("/");
+    async ({ id, data }) => {
+      const [locale, ...rest] = getSlugFromId(id).split("/");
       const buffer = await buildCover(browser, data.title, locale ?? defaultLocale);
       const isDefaultLocale = locale === defaultLocale;
 
@@ -32,7 +33,7 @@ export async function getStaticPaths() {
         pc.dim(getTimeString()),
         ' ',
         pc.green('✓'),
-        pc.dim((isDefaultLocale ? `/${rest.join('/')}` : `/${slug}`) + '/cover.png'),
+        pc.dim((isDefaultLocale ? `/${rest.join('/')}` : `/${id}`) + '/cover.png'),
       );
       return {
         params: isDefaultLocale ? { lang: rest.join('/') } : { lang: locale, slug: rest.join('/') },

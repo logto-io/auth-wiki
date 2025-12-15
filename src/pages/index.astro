@@ -11,20 +11,21 @@ import { defaultLocale } from "astro-i18n-aut";
 import { getLocaleFromUrl } from "../utils/locale";
 import anyAscii from "any-ascii";
 import cover from "../assets/cover.png";
+import { getSlugFromId } from "../utils/string";
 
 const locale = getLocaleFromUrl(Astro.url);
 const defaultEntries = await getCollection("terms", (entry) =>
-  entry.slug.startsWith(`${defaultLocale}/`),
+  entry.id.startsWith(`${defaultLocale}/`),
 );
 const localizedEntries = await getCollection("terms", (entry) =>
-  entry.slug.startsWith(`${locale}/`),
+  entry.id.startsWith(`${locale}/`),
 );
 
 const entries = defaultEntries.map((entry) => {
-  const [_, ...rest] = entry.slug.split("/");
+  const [_, ...rest] = getSlugFromId(entry.id).split("/");
   const entrySlug = rest.join("/");
   const localizedEntry = localizedEntries.find(
-    ({ slug }) => slug === `${locale}/${entrySlug}`,
+    ({ id }) => id.startsWith(`${locale}/${entrySlug}`),
   );
   return localizedEntry ?? entry;
 });

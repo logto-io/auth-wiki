@@ -1,8 +1,9 @@
 ---
-import { getEntry } from "astro:content";
+import { getEntry, render } from "astro:content";
 import { Icon } from "astro-icon/components";
 import { defaultLocale } from "astro-i18n-aut";
 import { getLocaleFromUrl } from "../utils/locale";
+import { getSlugFromId } from "../utils/string";
 
 type Props = {
   /**
@@ -40,15 +41,22 @@ const getEntryWithFallback = async () => {
   );
 };
 const entry = await getEntryWithFallback();
-const headings = await entry.render().then(({ headings }) => headings);
-const heading = headings.find((heading) => heading.slug === headingId);
-const slug = entry.slug.startsWith(`${defaultLocale}/`)
-  ? entry.slug.slice(defaultLocale.length + 1)
-  : entry.slug;
+
+// Only render the target entry when we need to resolve a specific heading to avoid
+// triggering circular imports between interlinked MDX pages during dev SSR.
+const heading = headingId
+  ? await render(entry)
+      .then(({ headings }) => headings.find((heading) => heading.slug === headingId))
+  : undefined;
+
+const idWithoutExtension = getSlugFromId(entry.id);
+const slug = entry.id.startsWith(`${defaultLocale}/`)
+  ? idWithoutExtension.slice(defaultLocale.length + 1)
+  : idWithoutExtension;
 
 if (headingId && !heading) {
   throw new Error(
-    `The heading with ID "${headingId}" was not found in the article with slug "${entry.slug}".`,
+    `The heading with ID "${headingId}" was not found in the article with slug "${idWithoutExtension}".`,
   );
 }
 ---
