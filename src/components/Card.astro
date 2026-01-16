@@ -3,15 +3,17 @@ import { defaultLocale } from "astro-i18n-aut";
 import type { CollectionEntry } from "astro:content";
 import { getLocaleFromUrl } from "../utils/locale";
 import { getPhrases } from "../phrases";
+import { getSlugFromId } from "../utils/string";
 
 type Props = {
   entry: CollectionEntry<"terms">;
 };
 
 const {
-  slug: rawSlug,
+  id,
   data: { title, description },
 } = Astro.props.entry;
+const rawSlug = getSlugFromId(id);
 const slug = rawSlug.startsWith(`${defaultLocale}/`)
   ? rawSlug.slice(defaultLocale.length + 1)
   : rawSlug;
