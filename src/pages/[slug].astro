@@ -1,5 +1,6 @@
 ---
 import path from "node:path";
+import pMap from "p-map";
 import Layout from "../layouts/Layout.astro";
 import Tags from "../components/Tags.astro";
 import Topbar from "../components/Topbar.astro";
@@ -26,12 +27,12 @@ export async function getStaticPaths() {
   const terms = await getCollection("terms", (entry) =>
     entry.id.startsWith(`${defaultLocale}/`),
   );
-  return terms.map(({ id }) => {
+  return pMap(terms, ({ id }) => {
     const [_, ...rest] = getSlugFromId(id).split("/");
     return {
       params: { slug: rest.join("/") },
     };
-  });
+  }, { concurrency: 5 });
 }
 
 const locale = getLocaleFromUrl(Astro.url);

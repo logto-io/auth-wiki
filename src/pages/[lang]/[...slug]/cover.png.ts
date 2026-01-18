@@ -41,7 +41,7 @@ export async function getStaticPaths() {
       }
     },
     // Limit concurrency to avoid overwhelming the system
-    { concurrency: 10 }
+    { concurrency: 5 }
   );
 }
 
