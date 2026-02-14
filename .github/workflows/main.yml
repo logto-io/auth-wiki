@@ -11,18 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4.2.0
+      - name: Setup Node and pnpm
+        uses: silverhand-io/actions-node-pnpm-run-steps@v5
         with:
-          version: 10
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22.14.0
-          registry-url: https://registry.npmjs.org/
-          cache: 'pnpm'
+          node-version: ^22.14.0
+          pnpm-version: 10
 
       - name: Build
-        run: pnpm i && pnpm build
+        run: pnpm build
 
       - name: Test
         run: pnpm test
