@@ -28,22 +28,6 @@ export const locales = Object.freeze({
   'zh-hant': 'zh-Hant',
 });
 
-const getMermaidErrorMessage = (error) => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  try {
-    return JSON.stringify(error);
-  } catch {
-    return String(error);
-  }
-};
-
 // https://astro.build/config
 export default defineConfig({
   site: 'https://auth.wiki',
@@ -53,19 +37,7 @@ export default defineConfig({
   trailingSlash: 'never',
   markdown: {
     rehypePlugins: [
-      [rehypeMermaid, {
-        dark: true,
-        strategy: 'img-svg',
-        launchOptions: {
-          args: ['--disable-dev-shm-usage'],
-        },
-        errorFallback: (element, _diagram, error, file) => {
-          console.warn(
-            `[rehype-mermaid] Fallback for ${file.path ?? 'unknown file'}: ${getMermaidErrorMessage(error)}`
-          );
-          return element;
-        },
-      }],
+      [rehypeMermaid, { dark: true, strategy: 'img-svg' }],
       [rehypeShiki, { themes: { light: 'one-light', dark: 'one-dark-pro' } }]
     ],
     remarkPlugins: [remarkCustomHeaderId],

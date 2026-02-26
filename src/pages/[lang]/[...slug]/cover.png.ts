@@ -5,7 +5,6 @@ import { chromium } from "playwright";
 import pc from "picocolors"
 import pMap from "p-map";
 import { buildCover } from '../../../utils/cover';
-import { resolveCoverGenerationConcurrency } from '../../../utils/cover-generation-concurrency';
 import { getSlugFromId } from '../../../utils/string';
 
 const getTimeString = () => {
@@ -22,7 +21,6 @@ const getTimeString = () => {
 export async function getStaticPaths() {
   const browser = await chromium.launch();
   const terms = await getCollection("terms");
-  const concurrency = resolveCoverGenerationConcurrency();
 
   return pMap(
     terms,
@@ -42,8 +40,8 @@ export async function getStaticPaths() {
         props: { buffer },
       }
     },
-    // Keep CI memory usage stable while still allowing faster local builds.
-    { concurrency }
+    // Limit concurrency to avoid overwhelming the system
+    { concurrency: 10 }
   );
 }
 
