@@ -7,7 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
     steps:
       - uses: actions/checkout@v4
 
@@ -17,18 +16,16 @@ jobs:
           node-version: '20'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
+        run: npm install -g pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Build
         run: pnpm build
 
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist --project-name=auth-wiki --create-project
+        run: npx wrangler pages deploy dist --project-name=auth-wiki
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
