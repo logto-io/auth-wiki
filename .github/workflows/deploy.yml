@@ -1,22 +1,35 @@
 name: Deploy to Cloudflare Pages
+
 on:
   push:
     branches: [ master, main ]
-    paths-ignore:
-      - '**.md'
-      - '**.paper'
-      - '**.patch'
-      - '**.diff'
-      - '.github/workflows/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Verify Structure
+    name: Deploy
     steps:
       - uses: actions/checkout@v4
 
-      - name: Skip Heavy Build
-        run: |
-          echo "Bypassing Pnpm/Build to prevent timeout."
-          echo "Project structure verified. Dashboard status: Green."
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=auth-wiki
