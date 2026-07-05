@@ -33,8 +33,8 @@ const buildCoverWithRetry = async (...args: Parameters<typeof buildCover>) => {
 };
 
 export async function getStaticPaths() {
-  const browser = await chromium.launch();
   const terms = await getCollection("terms");
+  const browser = await chromium.launch();
 
   try {
     // Share one context so covers reuse its HTTP cache for the Google Fonts assets.
