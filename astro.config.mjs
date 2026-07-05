@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import rehypeMermaid from 'rehype-mermaid';
-import { rehypeShiki } from '@astrojs/markdown-remark';
+import { rehypeShiki, unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import icon from "astro-icon";
@@ -28,6 +28,41 @@ export const locales = Object.freeze({
   'zh-hant': 'zh-Hant',
 });
 
+// Vite compiles MDX files in parallel, and rehype-mermaid opens a browser tab per
+// file being rendered. Without a cap, hundreds of tabs open at once and exhaust
+// system memory, so gate Mermaid rendering behind a small global concurrency limit.
+const mermaidRenderLimit = 2;
+let activeMermaidRenders = 0;
+const pendingMermaidRenders = [];
+const acquireMermaidSlot = () =>
+  new Promise((resolve) => {
+    if (activeMermaidRenders < mermaidRenderLimit) {
+      activeMermaidRenders += 1;
+      resolve();
+    } else {
+      pendingMermaidRenders.push(resolve);
+    }
+  });
+const releaseMermaidSlot = () => {
+  const next = pendingMermaidRenders.shift();
+  if (next) {
+    next();
+  } else {
+    activeMermaidRenders -= 1;
+  }
+};
+const rehypeMermaidThrottled = (options) => {
+  const transform = rehypeMermaid(options);
+  return async (...args) => {
+    await acquireMermaidSlot();
+    try {
+      return await transform(...args);
+    } finally {
+      releaseMermaidSlot();
+    }
+  };
+};
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://auth.wiki',
@@ -35,15 +70,25 @@ export default defineConfig({
     format: 'file',
   },
   trailingSlash: 'never',
+  // Keep the pre-v7 HTML-aware whitespace handling; the v7 'jsx' default strips
+  // spaces between inline elements.
+  compressHTML: true,
   markdown: {
-    rehypePlugins: [
-      [rehypeMermaid, { dark: true, strategy: 'img-svg' }],
-      [rehypeShiki, { themes: { light: 'one-light', dark: 'one-dark-pro' } }]
-    ],
-    remarkPlugins: [remarkCustomHeaderId],
-    remarkRehype: {
-      footnoteLabelTagName: 'span',
-    },
+    // Astro 7 renders Markdown with its native Sätteri pipeline by default; keep
+    // using the unified (remark/rehype) pipeline since our plugins depend on it.
+    processor: unified({
+      remarkPlugins: [remarkCustomHeaderId],
+      rehypePlugins: [
+        [
+          rehypeMermaidThrottled,
+          { dark: true, strategy: 'img-svg', launchOptions: { headless: true } },
+        ],
+        [rehypeShiki, { themes: { light: 'one-light', dark: 'one-dark-pro' } }]
+      ],
+      remarkRehype: {
+        footnoteLabelTagName: 'span',
+      },
+    }),
     syntaxHighlight: false
   },
   integrations: [

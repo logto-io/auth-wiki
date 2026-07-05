@@ -18,15 +18,31 @@ const getTimeString = () => {
   }`;
 };
 
+const buildCoverWithRetry = async (...args: Parameters<typeof buildCover>) => {
+  const maxAttempts = 3;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await buildCover(...args);
+    } catch (error) {
+      if (attempt >= maxAttempts) {
+        throw error;
+      }
+      console.warn(pc.yellow(`Retrying cover build (attempt ${attempt + 1}/${maxAttempts}):`), error);
+    }
+  }
+};
+
 export async function getStaticPaths() {
   const browser = await chromium.launch();
+  // Share one context so covers reuse its HTTP cache for the Google Fonts assets.
+  const context = await browser.newContext();
   const terms = await getCollection("terms");
 
   return pMap(
     terms,
     async ({ id, data }) => {
       const [locale, ...rest] = getSlugFromId(id).split("/");
-      const buffer = await buildCover(browser, data.title, locale ?? defaultLocale);
+      const buffer = await buildCoverWithRetry(context, data.title, locale ?? defaultLocale);
       const isDefaultLocale = locale === defaultLocale;
 
       console.log(
