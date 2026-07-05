@@ -16,7 +16,7 @@ const run = (tree) => {
 describe('rehypeCallouts', () => {
   it('should transform a marker blockquote into a callout with a title', () => {
     const blockquote = element('blockquote', [
-      element('p', [text('[!Note]\nThe term "scopes" are interchangeable with "permissions".')]),
+      element('p', [text('[!Note]\nThe term "scopes" is interchangeable with "permissions".')]),
     ]);
     run({ type: 'root', children: [blockquote] });
 
@@ -26,7 +26,7 @@ describe('rehypeCallouts', () => {
       element('p', [text('Note')], { className: ['callout-title'] }),
     );
     expect(blockquote.children[1].children[0].value).toBe(
-      'The term "scopes" are interchangeable with "permissions".',
+      'The term "scopes" is interchangeable with "permissions".',
     );
   });
 
