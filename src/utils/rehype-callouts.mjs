@@ -35,12 +35,15 @@ const rehypeCallouts = () => (tree) => {
     }
 
     blockquote.tagName = 'div';
-    blockquote.properties = { ...blockquote.properties, className: ['callout'] };
+    blockquote.properties = {
+      ...blockquote.properties,
+      className: [...(blockquote.properties?.className ?? []), 'callout'],
+    };
     blockquote.children.unshift({
       type: 'element',
       tagName: 'p',
       properties: { className: ['callout-title'] },
-      children: [{ type: 'text', value: match[1] }],
+      children: [{ type: 'text', value: match[1].trim() }],
     });
   });
 };

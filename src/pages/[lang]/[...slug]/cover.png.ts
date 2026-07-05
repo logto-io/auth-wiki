@@ -34,31 +34,36 @@ const buildCoverWithRetry = async (...args: Parameters<typeof buildCover>) => {
 
 export async function getStaticPaths() {
   const browser = await chromium.launch();
-  // Share one context so covers reuse its HTTP cache for the Google Fonts assets.
-  const context = await browser.newContext();
   const terms = await getCollection("terms");
 
-  return pMap(
-    terms,
-    async ({ id, data }) => {
-      const [locale, ...rest] = getSlugFromId(id).split("/");
-      const buffer = await buildCoverWithRetry(context, data.title, locale ?? defaultLocale);
-      const isDefaultLocale = locale === defaultLocale;
+  try {
+    // Share one context so covers reuse its HTTP cache for the Google Fonts assets.
+    const context = await browser.newContext();
 
-      console.log(
-        pc.dim(getTimeString()),
-        ' ',
-        pc.green('✓'),
-        pc.dim((isDefaultLocale ? `/${rest.join('/')}` : `/${id}`) + '/cover.png'),
-      );
-      return {
-        params: isDefaultLocale ? { lang: rest.join('/') } : { lang: locale, slug: rest.join('/') },
-        props: { buffer },
-      }
-    },
-    // Limit concurrency to avoid overwhelming the system
-    { concurrency: 10 }
-  );
+    return await pMap(
+      terms,
+      async ({ id, data }) => {
+        const [locale, ...rest] = getSlugFromId(id).split("/");
+        const buffer = await buildCoverWithRetry(context, data.title, locale ?? defaultLocale);
+        const isDefaultLocale = locale === defaultLocale;
+
+        console.log(
+          pc.dim(getTimeString()),
+          ' ',
+          pc.green('✓'),
+          pc.dim((isDefaultLocale ? `/${rest.join('/')}` : `/${id}`) + '/cover.png'),
+        );
+        return {
+          params: isDefaultLocale ? { lang: rest.join('/') } : { lang: locale, slug: rest.join('/') },
+          props: { buffer },
+        }
+      },
+      // Limit concurrency to avoid overwhelming the system
+      { concurrency: 10 }
+    );
+  } finally {
+    await browser.close();
+  }
 }
 
 export const GET: APIRoute = async ({ props: { buffer } }) => {
