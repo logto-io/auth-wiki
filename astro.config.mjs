@@ -6,6 +6,7 @@ import mdx from '@astrojs/mdx';
 import icon from "astro-icon";
 import remarkCustomHeaderId from 'remark-custom-header-id';
 import { i18n, filterSitemapByDefaultLocale } from "astro-i18n-aut/integration";
+import rehypeCallouts from './src/utils/rehype-callouts.mjs';
 
 export const defaultLocale = 'en';
 export const locales = Object.freeze({
@@ -79,6 +80,7 @@ export default defineConfig({
     processor: unified({
       remarkPlugins: [remarkCustomHeaderId],
       rehypePlugins: [
+        rehypeCallouts,
         [
           rehypeMermaidThrottled,
           { dark: true, strategy: 'img-svg', launchOptions: { headless: true } },
