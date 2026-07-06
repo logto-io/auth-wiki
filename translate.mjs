@@ -8,7 +8,7 @@ import { defaultLocale, locales } from './astro.config.mjs';
 import { OpenAiTranslate, log } from './translate.openai.mjs';
 import { exit } from 'node:process';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const args = arg({
   '--slug': [String],
