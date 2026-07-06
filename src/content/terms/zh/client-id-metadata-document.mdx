@@ -22,12 +22,12 @@ sequenceDiagram
     participant Client as 客户端
     participant AS as 授权服务器 (Authorization Server)
 
-    客户端->>授权服务器 (Authorization Server): 认证请求 (authentication request)<br/>`client_id=https://client.example.com/metadata`
-    授权服务器 (Authorization Server)->>客户端: 从 client_id URL 获取元数据
-    客户端-->>授权服务器 (Authorization Server): 返回 JSON 元数据文档
-    授权服务器 (Authorization Server)->>用户: 显示带有元数据中客户端信息的同意界面
-    用户->>授权服务器 (Authorization Server): 授予授权
-    授权服务器 (Authorization Server)->>客户端: 重定向并携带授权码
+    Client->>AS: 授权请求 (authorization request)<br/>`client_id=https://client.example.com/metadata`
+    AS->>Client: 从 client_id URL 获取元数据
+    Client-->>AS: 返回 JSON 元数据文档
+    AS->>User: 显示带有元数据中客户端信息的同意界面
+    User->>AS: 授予授权
+    AS->>Client: 重定向并携带授权码
 ```
 
 具体步骤如下：

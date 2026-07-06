@@ -22,12 +22,12 @@ sequenceDiagram
     participant Client as Cliente
     participant AS as Authorization Server
 
-    Cliente->>AS: Solicitud de autorización con<br/>`client_id=https://client.example.com/metadata`
-    AS->>Cliente: Obtiene metadatos desde la URL de client_id
-    Cliente-->>AS: Devuelve documento JSON de metadatos
-    AS->>Usuario: Muestra pantalla de consentimiento<br/>con información del client desde los metadatos
-    Usuario->>AS: Otorga autorización
-    AS->>Cliente: Redirige con authorization code
+    Client->>AS: Solicitud de autorización con<br/>`client_id=https://client.example.com/metadata`
+    AS->>Client: Obtiene metadatos desde la URL de client_id
+    Client-->>AS: Devuelve documento JSON de metadatos
+    AS->>User: Muestra pantalla de consentimiento<br/>con información del client desde los metadatos
+    User->>AS: Otorga autorización
+    AS->>Client: Redirige con authorization code
 ```
 
 Esto es lo que ocurre paso a paso:
