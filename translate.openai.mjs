@@ -1,5 +1,5 @@
 import { OpenAI } from 'openai';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { ProxyAgent } from 'undici';
 import picocolors from 'picocolors';
 
 const model = 'gpt-4o';
@@ -28,7 +28,7 @@ const buildInstructions = (terms) => [
 export class OpenAiTranslate {
   httpProxy = process.env.HTTP_PROXY;
   openai = new OpenAI({
-    httpAgent: this.httpProxy ? new HttpsProxyAgent(this.httpProxy) : undefined,
+    fetchOptions: this.httpProxy ? { dispatcher: new ProxyAgent(this.httpProxy) } : undefined,
   });
   /** @type {string} */
   instructions;
