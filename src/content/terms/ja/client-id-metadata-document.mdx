@@ -1,12 +1,12 @@
 ---
-title: クライアント ID メタデータドキュメント (Client ID Metadata Document)
+title: クライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD)
 tags: [oauth 2.0]
-description: クライアント ID メタデータドキュメント (Client ID Metadata Document) は、OAuth 2.0 のクライアント識別子として機能する HTTPS URL でホストされる JSON ドキュメントです。これにより、クライアントは事前登録なしで URL を client_id として使用し、authorization server に自身を識別できます。
+description: クライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD) は、OAuth 2.0 のクライアント識別子として機能する HTTPS URL でホストされる JSON ドキュメントです。これにより、クライアントは事前登録なしで URL を client_id として使用し、authorization server に自身を識別できます。
 ---
 
-## クライアント ID メタデータドキュメント (Client ID Metadata Document) とは？
+## クライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD) とは？
 
-クライアント ID メタデータドキュメント (Client ID Metadata Document) は、[OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) 仕様で定義された仕組みであり、OAuth 2.0 <Ref slug="client" /> が事前登録なしで <Ref slug="authorization-server" /> に自身を識別できるようにします。
+クライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD) は、[OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) 仕様で定義された仕組みであり、OAuth 2.0 <Ref slug="client" /> が事前登録なしで <Ref slug="authorization-server" /> に自身を識別できるようにします。
 
 コアとなるアイデアは、authorization server から `client_id` を受け取る（手動登録や [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591) を通じて）代わりに、クライアントが **HTTPS URL を `client_id` として使用する** ことです。その URL はクライアントのメタデータ（名前、redirect URI、サポートする grant type など）を含む JSON ドキュメントを指します。authorization server は URL ベースの `client_id` を受け取った際にこのドキュメントを取得します。
 
@@ -14,7 +14,7 @@ description: クライアント ID メタデータドキュメント (Client ID 
 
 ## どのように動作するのか？
 
-クライアントがクライアント ID メタデータドキュメント (Client ID Metadata Document) を使用する場合、OAuth フローに 1 ステップ追加されます：authorization server が `client_id` の URL を解決し、クライアントのメタデータを取得します。
+クライアントがクライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD) を使用する場合、OAuth フローに 1 ステップ追加されます：authorization server が `client_id` の URL を解決し、クライアントのメタデータを取得します。
 
 ```mermaid
 sequenceDiagram
@@ -91,9 +91,9 @@ sequenceDiagram
 
 また、DCR にはクライアントが主張する身元を検証する仕組みが組み込まれていません。どんなクライアントでも任意の名前やロゴで登録できます。
 
-### クライアント ID メタデータドキュメント (Client ID Metadata Document) の利点
+### クライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD) の利点
 
-クライアント ID メタデータドキュメント (Client ID Metadata Document) アプローチはこれらの課題を解決します：
+クライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD) アプローチはこれらの課題を解決します：
 
 | 項目 | 静的登録 | DCR | クライアント ID メタデータドキュメント |
 |--------|-------------------|-----|----------------------------|
@@ -120,7 +120,7 @@ sequenceDiagram
 
 ## authorization server はどうやってサポートを発見するか？
 
-authorization server は、<Ref slug="authorization-server-metadata" /> に以下のプロパティを含めることでクライアント ID メタデータドキュメント (Client ID Metadata Document) のサポートを示します：
+authorization server は、<Ref slug="authorization-server-metadata" /> に以下のプロパティを含めることでクライアント ID メタデータドキュメント (Client ID Metadata Document, CIMD) のサポートを示します：
 
 ```json
 {

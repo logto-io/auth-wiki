@@ -1,12 +1,12 @@
 ---
-title: وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document)
+title: وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document, CIMD)
 tags: [oauth 2.0]
-description: وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document) هي مستند JSON مستضاف على عنوان URL عبر HTTPS ويعمل كمعرف عميل OAuth 2.0. تتيح للعملاء التعريف بأنفسهم أمام خوادم التفويض (authorization servers) دون تسجيل مسبق باستخدام عنوان URL كـ client_id.
+description: وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document, CIMD) هي مستند JSON مستضاف على عنوان URL عبر HTTPS ويعمل كمعرف عميل OAuth 2.0. تتيح للعملاء التعريف بأنفسهم أمام خوادم التفويض (authorization servers) دون تسجيل مسبق باستخدام عنوان URL كـ client_id.
 ---
 
-## ما هي وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document)؟
+## ما هي وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document, CIMD)؟
 
-وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document) هي آلية تم تعريفها في [مواصفة OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) وتسمح لـ <Ref slug="client" /> في OAuth 2.0 بالتعريف بنفسه أمام <Ref slug="authorization-server" /> دون الحاجة إلى تسجيل مسبق.
+وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document, CIMD) هي آلية تم تعريفها في [مواصفة OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) وتسمح لـ <Ref slug="client" /> في OAuth 2.0 بالتعريف بنفسه أمام <Ref slug="authorization-server" /> دون الحاجة إلى تسجيل مسبق.
 
 الفكرة الأساسية: بدلاً من استلام `client_id` من خادم التفويض (authorization server) (عبر التسجيل اليدوي أو [التسجيل الديناميكي للعميل (Dynamic Client Registration)](https://datatracker.ietf.org/doc/html/rfc7591))، يقوم العميل **باستخدام عنوان URL عبر HTTPS كـ `client_id`**. يشير هذا العنوان إلى مستند JSON يحتوي على بيانات تعريف العميل — مثل الاسم، عناوين إعادة التوجيه (redirect URIs)، أنواع منح الصلاحيات المدعومة، وغيرها. يقوم خادم التفويض بجلب هذا المستند عند مواجهة `client_id` مبني على عنوان URL.
 
@@ -14,7 +14,7 @@ description: وثيقة بيانات تعريف معرف العميل (Client ID
 
 ## كيف تعمل؟
 
-عند استخدام العميل لوثيقة بيانات تعريف معرف العميل (Client ID Metadata Document)، يضيف تدفق OAuth خطوة إضافية: يقوم خادم التفويض بجلب بيانات تعريف العميل من عنوان URL الخاص بـ `client_id`.
+عند استخدام العميل لوثيقة بيانات تعريف معرف العميل (Client ID Metadata Document, CIMD)، يضيف تدفق OAuth خطوة إضافية: يقوم خادم التفويض بجلب بيانات تعريف العميل من عنوان URL الخاص بـ `client_id`.
 
 ```mermaid
 sequenceDiagram
@@ -91,9 +91,9 @@ sequenceDiagram
 
 ولا يوجد في DCR آلية مدمجة للتحقق من هوية العميل. يمكن لأي عميل التسجيل بأي اسم أو شعار.
 
-### مزايا وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document)
+### مزايا وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document, CIMD)
 
-نهج وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document) يعالج هذه المشكلات:
+نهج وثيقة بيانات تعريف معرف العميل (Client ID Metadata Document, CIMD) يعالج هذه المشكلات:
 
 | الجانب | التسجيل الثابت | DCR | وثيقة بيانات تعريف معرف العميل |
 |--------|-------------------|-----|----------------------------|

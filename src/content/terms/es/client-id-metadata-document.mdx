@@ -1,12 +1,12 @@
 ---
-title: Documento de Metadatos de Client ID (Client ID Metadata Document)
+title: Documento de Metadatos de Client ID (Client ID Metadata Document, CIMD)
 tags: [oauth 2.0]
-description: Un Documento de Metadatos de Client ID (Client ID Metadata Document) es un documento JSON alojado en una URL HTTPS que sirve como identificador de cliente de OAuth 2.0. Permite que los clientes se identifiquen ante los authorization servers sin registro previo utilizando la URL como el client_id.
+description: Un Documento de Metadatos de Client ID (Client ID Metadata Document, CIMD) es un documento JSON alojado en una URL HTTPS que sirve como identificador de cliente de OAuth 2.0. Permite que los clientes se identifiquen ante los authorization servers sin registro previo utilizando la URL como el client_id.
 ---
 
-## ¿Qué es un Documento de Metadatos de Client ID (Client ID Metadata Document)?
+## ¿Qué es un Documento de Metadatos de Client ID (Client ID Metadata Document, CIMD)?
 
-Un Documento de Metadatos de Client ID (Client ID Metadata Document) es un mecanismo definido en la especificación [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) que permite que un <Ref slug="client" /> de OAuth 2.0 se identifique ante un <Ref slug="authorization-server" /> sin registro previo.
+Un Documento de Metadatos de Client ID (Client ID Metadata Document, CIMD) es un mecanismo definido en la especificación [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) que permite que un <Ref slug="client" /> de OAuth 2.0 se identifique ante un <Ref slug="authorization-server" /> sin registro previo.
 
 La idea principal: en lugar de recibir un `client_id` del authorization server (mediante registro manual o [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591)), el client **utiliza una URL HTTPS como su `client_id`**. Esa URL apunta a un documento JSON que contiene los metadatos del client — nombre, redirect URIs, grant types soportados y más. El authorization server obtiene este documento cuando encuentra el `client_id` basado en URL.
 
@@ -14,7 +14,7 @@ Este enfoque a veces se abrevia como **CIMD** (Client ID Metadata Document) en l
 
 ## ¿Cómo funciona?
 
-Cuando un client utiliza un Documento de Metadatos de Client ID (Client ID Metadata Document), el flujo de OAuth agrega un paso: el authorization server resuelve la URL de `client_id` para recuperar los metadatos del client.
+Cuando un client utiliza un Documento de Metadatos de Client ID (Client ID Metadata Document, CIMD), el flujo de OAuth agrega un paso: el authorization server resuelve la URL de `client_id` para recuperar los metadatos del client.
 
 ```mermaid
 sequenceDiagram
@@ -91,9 +91,9 @@ Esto funciona, pero crea estado del lado del servidor: cada registro produce un 
 
 DCR tampoco tiene un mecanismo incorporado para verificar que un client es quien dice ser. Cualquier client puede registrarse con cualquier nombre o logo.
 
-### Ventajas del Documento de Metadatos de Client ID (Client ID Metadata Document)
+### Ventajas del Documento de Metadatos de Client ID (Client ID Metadata Document, CIMD)
 
-El enfoque de Documento de Metadatos de Client ID (Client ID Metadata Document) aborda estos problemas:
+El enfoque de Documento de Metadatos de Client ID (Client ID Metadata Document, CIMD) aborda estos problemas:
 
 | Aspecto | Registro estático | DCR | Client ID Metadata Document |
 |--------|-------------------|-----|----------------------------|

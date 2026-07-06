@@ -1,12 +1,12 @@
 ---
-title: 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document)
+title: 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD)
 tags: [oauth 2.0]
-description: 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document)는 OAuth 2.0 클라이언트 식별자로 사용되는 HTTPS URL에 호스팅된 JSON 문서입니다. 이 문서를 통해 클라이언트는 URL을 client_id로 사용하여 사전 등록 없이 authorization server(인가 서버)에 자신을 식별할 수 있습니다.
+description: 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD)는 OAuth 2.0 클라이언트 식별자로 사용되는 HTTPS URL에 호스팅된 JSON 문서입니다. 이 문서를 통해 클라이언트는 URL을 client_id로 사용하여 사전 등록 없이 authorization server(인가 서버)에 자신을 식별할 수 있습니다.
 ---
 
-## 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document)란?
+## 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD)란?
 
-클라이언트 ID 메타데이터 문서 (Client ID Metadata Document)는 [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) 명세에서 정의된 메커니즘으로, OAuth 2.0 <Ref slug="client" />가 사전 등록 없이 <Ref slug="authorization-server" />에 자신을 식별할 수 있도록 해줍니다.
+클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD)는 [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) 명세에서 정의된 메커니즘으로, OAuth 2.0 <Ref slug="client" />가 사전 등록 없이 <Ref slug="authorization-server" />에 자신을 식별할 수 있도록 해줍니다.
 
 핵심 아이디어는 다음과 같습니다: authorization server(인가 서버)로부터 `client_id`를 (수동 등록 또는 [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591)을 통해) 받는 대신, 클라이언트는 **HTTPS URL을 `client_id`로 사용**합니다. 이 URL은 클라이언트의 메타데이터(이름, redirect URI, 지원하는 grant type 등)를 담고 있는 JSON 문서를 가리킵니다. authorization server(인가 서버)는 URL 기반 `client_id`를 받으면 이 문서를 가져옵니다.
 
@@ -14,7 +14,7 @@ description: 클라이언트 ID 메타데이터 문서 (Client ID Metadata Docum
 
 ## 어떻게 동작하나요?
 
-클라이언트가 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document)를 사용할 때, OAuth 플로우에 한 단계가 추가됩니다: authorization server(인가 서버)가 `client_id` URL을 해석하여 클라이언트의 메타데이터를 가져옵니다.
+클라이언트가 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD)를 사용할 때, OAuth 플로우에 한 단계가 추가됩니다: authorization server(인가 서버)가 `client_id` URL을 해석하여 클라이언트의 메타데이터를 가져옵니다.
 
 ```mermaid
 sequenceDiagram
@@ -91,9 +91,9 @@ sequenceDiagram
 
 또한 DCR에는 클라이언트가 주장하는 신원을 검증하는 내장 메커니즘이 없습니다. 어떤 클라이언트든 임의의 이름이나 로고로 등록할 수 있습니다.
 
-### 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document)의 장점
+### 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD)의 장점
 
-클라이언트 ID 메타데이터 문서 (Client ID Metadata Document) 방식은 다음과 같은 문제를 해결합니다:
+클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD) 방식은 다음과 같은 문제를 해결합니다:
 
 | 측면 | Static registration | DCR | Client ID Metadata Document |
 |--------|-------------------|-----|----------------------------|
@@ -120,7 +120,7 @@ sequenceDiagram
 
 ## authorization server(인가 서버)는 어떻게 지원 여부를 알리나요?
 
-authorization server(인가 서버)는 <Ref slug="authorization-server-metadata" />에 다음 속성을 포함하여 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document) 지원 여부를 표시합니다:
+authorization server(인가 서버)는 <Ref slug="authorization-server-metadata" />에 다음 속성을 포함하여 클라이언트 ID 메타데이터 문서 (Client ID Metadata Document, CIMD) 지원 여부를 표시합니다:
 
 ```json
 {

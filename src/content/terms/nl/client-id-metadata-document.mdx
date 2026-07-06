@@ -1,12 +1,12 @@
 ---
-title: Client ID Metadata Document (Client ID Metadata Document)
+title: Client ID Metadata Document (CIMD)
 tags: [oauth 2.0]
-description: Een Client ID Metadata Document (Client ID Metadata Document) is een JSON-document dat wordt gehost op een HTTPS-URL en dient als de OAuth 2.0 client identifier. Hiermee kunnen clients zichzelf identificeren bij authorization servers (authorization servers) zonder voorafgaande registratie door de URL als client_id te gebruiken.
+description: Een Client ID Metadata Document (CIMD) is een JSON-document dat wordt gehost op een HTTPS-URL en dient als de OAuth 2.0 client identifier. Hiermee kunnen clients zichzelf identificeren bij authorization servers (authorization servers) zonder voorafgaande registratie door de URL als client_id te gebruiken.
 ---
 
-## Wat is een Client ID Metadata Document (Client ID Metadata Document)?
+## Wat is een Client ID Metadata Document (CIMD)?
 
-Een Client ID Metadata Document (Client ID Metadata Document) is een mechanisme gedefinieerd in de [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) specificatie waarmee een OAuth 2.0 <Ref slug="client" /> zichzelf kan identificeren bij een <Ref slug="authorization-server" /> zonder voorafgaande registratie.
+Een Client ID Metadata Document (CIMD) is een mechanisme gedefinieerd in de [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) specificatie waarmee een OAuth 2.0 <Ref slug="client" /> zichzelf kan identificeren bij een <Ref slug="authorization-server" /> zonder voorafgaande registratie.
 
 Het kernidee: in plaats van een `client_id` te ontvangen van de authorization server (authorization server) (via handmatige registratie of [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591)), **gebruikt de client een HTTPS-URL als zijn `client_id`**. Die URL verwijst naar een JSON-document met de metadata van de client — naam, redirect URIs (redirect URIs), ondersteunde grant types, en meer. De authorization server haalt dit document op wanneer hij een URL-gebaseerde `client_id` tegenkomt.
 
@@ -14,7 +14,7 @@ Deze aanpak wordt soms afgekort als **CIMD** (Client ID Metadata Document) in de
 
 ## Hoe werkt het?
 
-Wanneer een client een Client ID Metadata Document (Client ID Metadata Document) gebruikt, voegt de OAuth-flow één stap toe: de authorization server resolveert de `client_id` URL om de metadata van de client op te halen.
+Wanneer een client een Client ID Metadata Document (CIMD) gebruikt, voegt de OAuth-flow één stap toe: de authorization server resolveert de `client_id` URL om de metadata van de client op te halen.
 
 ```mermaid
 sequenceDiagram
@@ -91,11 +91,11 @@ Dit werkt, maar creëert server-side state: elke registratie levert een record o
 
 DCR heeft ook geen ingebouwd mechanisme om te verifiëren dat een client is wie hij beweert te zijn. Elke client kan zich registreren met elke naam of logo.
 
-### Voordelen van Client ID Metadata Document (Client ID Metadata Document)
+### Voordelen van Client ID Metadata Document (CIMD)
 
-De Client ID Metadata Document (Client ID Metadata Document) aanpak pakt deze problemen aan:
+De Client ID Metadata Document (CIMD) aanpak pakt deze problemen aan:
 
-| Aspect | Statische registratie | DCR | Client ID Metadata Document (Client ID Metadata Document) |
+| Aspect | Statische registratie | DCR | Client ID Metadata Document (CIMD) |
 |--------|----------------------|-----|----------------------------|
 | Server-side state | Ja (opgeslagen records) | Ja (opgeslagen records) | Nee (op aanvraag opgehaald) |
 | Vooraf registreren vereist | Ja | Nee | Nee |
@@ -120,7 +120,7 @@ Als de client zichzelf verder moet authenticeren dan alleen als public client, k
 
 ## Hoe ontdekt de authorization server ondersteuning?
 
-Authorization servers geven aan dat ze Client ID Metadata Documents (Client ID Metadata Documents) ondersteunen door de volgende property op te nemen in hun <Ref slug="authorization-server-metadata" />:
+Authorization servers geven aan dat ze Client ID Metadata Documents ondersteunen door de volgende property op te nemen in hun <Ref slug="authorization-server-metadata" />:
 
 ```json
 {
@@ -159,11 +159,11 @@ Een kwaadwillende client kan `client_name` instellen op een vertrouwde merknaam 
 
 Een beveiligingsvoordeel ten opzichte van DCR: de <Ref slug="redirect-uri">redirect URIs</Ref> in het metadata document worden gehost op het domein van de client, via HTTPS. Dit zorgt voor een sterkere binding tussen de client identity en zijn redirect URIs dan zelfverklaarde waarden in een registratieverzoek.
 
-## Client ID Metadata Document Services (Client ID Metadata Document Services)
+## Client ID Metadata Document Services
 
-De specificatie definieert ook **Client ID Metadata Document Services (Client ID Metadata Document Services)** — externe webdiensten die metadata documenten hosten namens ontwikkelaars.
+De specificatie definieert ook **Client ID Metadata Document Services** — externe webdiensten die metadata documenten hosten namens ontwikkelaars.
 
-Dit vult een praktische leemte: tijdens lokale ontwikkeling hebben ontwikkelaars geen publiek toegankelijke URL om hun metadata te hosten. Een Client ID Metadata Document Service (Client ID Metadata Document Service) biedt een stabiele publieke URL die authorization servers kunnen ophalen, terwijl de ontwikkelaar lokaal werkt. Dit voorkomt dat lokale machines aan het internet moeten worden blootgesteld of tunnels moeten worden opgezet om OAuth-flows te testen.
+Dit vult een praktische leemte: tijdens lokale ontwikkeling hebben ontwikkelaars geen publiek toegankelijke URL om hun metadata te hosten. Een Client ID Metadata Document Service biedt een stabiele publieke URL die authorization servers kunnen ophalen, terwijl de ontwikkelaar lokaal werkt. Dit voorkomt dat lokale machines aan het internet moeten worden blootgesteld of tunnels moeten worden opgezet om OAuth-flows te testen.
 
 <SeeAlso slugs={["client", "authorization-server-metadata", "redirect-uri", "jwk"]} />
 

@@ -1,12 +1,12 @@
 ---
-title: Documento dei metadati del Client ID (Client ID Metadata Document)
+title: Documento dei metadati del Client ID (Client ID Metadata Document, CIMD)
 tags: [oauth 2.0]
-description: Un Documento dei metadati del Client ID (Client ID Metadata Document) è un documento JSON ospitato a un URL HTTPS che funge da identificatore del client OAuth 2.0. Permette ai client di identificarsi ai authorization server senza registrazione preventiva, utilizzando l'URL come client_id.
+description: Un Documento dei metadati del Client ID (Client ID Metadata Document, CIMD) è un documento JSON ospitato a un URL HTTPS che funge da identificatore del client OAuth 2.0. Permette ai client di identificarsi ai authorization server senza registrazione preventiva, utilizzando l'URL come client_id.
 ---
 
-## Che cos'è un Documento dei metadati del Client ID (Client ID Metadata Document)?
+## Che cos'è un Documento dei metadati del Client ID (Client ID Metadata Document, CIMD)?
 
-Un Documento dei metadati del Client ID (Client ID Metadata Document) è un meccanismo definito nella specifica [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) che consente a un <Ref slug="client" /> OAuth 2.0 di identificarsi presso un <Ref slug="authorization-server" /> senza registrazione preventiva.
+Un Documento dei metadati del Client ID (Client ID Metadata Document, CIMD) è un meccanismo definito nella specifica [OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) che consente a un <Ref slug="client" /> OAuth 2.0 di identificarsi presso un <Ref slug="authorization-server" /> senza registrazione preventiva.
 
 L'idea centrale: invece di ricevere un `client_id` dal authorization server (tramite registrazione manuale o [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591)), il client **usa un URL HTTPS come proprio `client_id`**. Questo URL punta a un documento JSON contenente i metadati del client — nome, redirect URI, grant type supportati e altro. Il authorization server recupera questo documento quando incontra un `client_id` basato su URL.
 
@@ -14,7 +14,7 @@ Questo approccio è talvolta abbreviato come **CIMD** (Client ID Metadata Docume
 
 ## Come funziona?
 
-Quando un client utilizza un Documento dei metadati del Client ID (Client ID Metadata Document), il flusso OAuth aggiunge un passaggio: il authorization server risolve l'URL `client_id` per recuperare i metadati del client.
+Quando un client utilizza un Documento dei metadati del Client ID (Client ID Metadata Document, CIMD), il flusso OAuth aggiunge un passaggio: il authorization server risolve l'URL `client_id` per recuperare i metadati del client.
 
 ```mermaid
 sequenceDiagram
@@ -91,9 +91,9 @@ Questo funziona, ma crea stato lato server: ogni registrazione produce un record
 
 DCR inoltre non ha un meccanismo integrato per verificare che un client sia chi dichiara di essere. Qualsiasi client può registrarsi con qualsiasi nome o logo.
 
-### Vantaggi del Documento dei metadati del Client ID (Client ID Metadata Document)
+### Vantaggi del Documento dei metadati del Client ID (Client ID Metadata Document, CIMD)
 
-L'approccio del Documento dei metadati del Client ID (Client ID Metadata Document) affronta questi problemi:
+L'approccio del Documento dei metadati del Client ID (Client ID Metadata Document, CIMD) affronta questi problemi:
 
 | Aspetto | Registrazione statica | DCR | Documento dei metadati del Client ID |
 |--------|-------------------|-----|----------------------------|
@@ -120,7 +120,7 @@ Se il client deve autenticarsi oltre ad essere un public client, può usare la c
 
 ## Come scopre il supporto il authorization server?
 
-I authorization server indicano il supporto per i Documenti dei metadati del Client ID (Client ID Metadata Document) includendo la seguente proprietà nei loro <Ref slug="authorization-server-metadata" />:
+I authorization server indicano il supporto per i Documenti dei metadati del Client ID (Client ID Metadata Document, CIMD) includendo la seguente proprietà nei loro <Ref slug="authorization-server-metadata" />:
 
 ```json
 {
