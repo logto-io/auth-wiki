@@ -1,4 +1,4 @@
-import type { Browser } from "playwright";
+import type { BrowserContext } from "playwright";
 import logoDark from "../../public/logo-dark.svg?raw";
 
 /** Locales that require a specific font. The value is the font suffix for Noto Sans. */
@@ -9,12 +9,16 @@ const localeFonts: Readonly<Record<string, string>> = Object.freeze({
   'zh-hant': 'TC',
 })
 
-export const buildCover = async (browser: Browser, title: string, locale: string) => {
-  const page = await browser.newPage();
-  const fontWeight = 600;
-  const additionalFont = localeFonts[locale] ? `&family=Noto+Sans+${localeFonts[locale]}:wght@${fontWeight}` : '';
+// Takes a shared `BrowserContext` (not a `Browser`) so all covers reuse the
+// context's in-memory HTTP cache — `browser.newPage()` would create an isolated
+// context per page and re-download the Google Fonts assets for every cover.
+export const buildCover = async (context: BrowserContext, title: string, locale: string) => {
+  const page = await context.newPage();
+  try {
+    const fontWeight = 600;
+    const additionalFont = localeFonts[locale] ? `&family=Noto+Sans+${localeFonts[locale]}:wght@${fontWeight}` : '';
 
-  await page.setContent(`
+    await page.setContent(`
     <!DOCTYPE html>
     <html lang="${locale}" dir="${locale === "ar" ? "rtl" : "ltr"}">
       <head>
@@ -87,10 +91,11 @@ export const buildCover = async (browser: Browser, title: string, locale: string
         </style>
       </body>
     </html>
-  `);
-  await page.evaluate(() => document.fonts.ready);
-  
-  const buffer = await page.locator("#cover").screenshot();
-  await page.close();
-  return buffer;
+  `, { timeout: 60_000 });
+    await page.evaluate(() => document.fonts.ready);
+
+    return await page.locator("#cover").screenshot();
+  } finally {
+    await page.close();
+  }
 }

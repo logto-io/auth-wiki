@@ -51,6 +51,6 @@ describe('getLocaleUrl', () => {
   });
 
   it('should throw an error if the pathname does not start with a slash', () => {
-    expect(() => getLocaleUrl('en/foo/bar', 'zh-hant')).toThrowError('Pathname must start with a slash');
+    expect(() => getLocaleUrl('en/foo/bar', 'zh-hant')).toThrow('Pathname must start with a slash');
   });
 });
