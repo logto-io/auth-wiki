@@ -3,7 +3,7 @@
     <picture>
       <source height="48" media="(prefers-color-scheme: dark)" srcset="https://github.com/logto-io/auth-wiki/raw/master/public/logo-dark.svg">
       <source height="48" media="(prefers-color-scheme: light)" srcset="https://github.com/logto-io/auth-wiki/raw/master/public/logo-light.svg">
-      <img height="48" src="https://github.com/logto-io/logto/raw/master/public/logo.svg" alt="Auth Wiki">
+      <img height="48" src="https://github.com/logto-io/auth-wiki/raw/master/public/logo-light.svg" alt="Auth Wiki">
     </picture>
   </a>
 </p>
