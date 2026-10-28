@@ -1,5 +1,6 @@
 ---
 import ogs from "open-graph-scraper";
+import type { ErrorResult } from "open-graph-scraper/types";
 import { getPhrases } from "../phrases";
 import fs from "node:fs/promises";
 import { getLocaleFromUrl } from "../utils/locale";
@@ -9,7 +10,7 @@ type UrlMetadata = {
   url: string;
   result: {
     ogTitle?: string;
-    ogDescription?: string;
+    ogDescription?: string | undefined;
   };
 };
 
@@ -26,6 +27,7 @@ if (urls.length === 0) {
   throw new Error('The "urls" prop must contain at least one URL.');
 }
 
+// Committed so builds don't depend on external sites; delete an entry to refetch it.
 const cachePath = ".og-cache.json";
 const getCacheFromFile = async (): Promise<Map<string, UrlMetadata>> => {
   try {
@@ -36,6 +38,7 @@ const getCacheFromFile = async (): Promise<Map<string, UrlMetadata>> => {
   }
 };
 const cache = await getCacheFromFile();
+const cachedCount = cache.size;
 
 const results = await Promise.all(
   urls.map(async (url) => {
@@ -52,9 +55,15 @@ const results = await Promise.all(
       return cached;
     }
 
-    const { result, error } = await ogs({ url });
+    // `ogs` rejects with its error result instead of resolving with it.
+    const { result, error } = await ogs({ url }).catch(
+      (error: ErrorResult) => error,
+    );
     if (error) {
-      throw new Error(`Failed to fetch Open Graph data for ${url}: ${error}`);
+      console.warn(
+        `Failed to fetch Open Graph data for ${url}, rendering a plain link: ${result.error}`,
+      );
+      return { url, result: {} };
     }
 
     if (!result.ogTitle) {
@@ -63,12 +72,21 @@ const results = await Promise.all(
       );
     }
 
-    cache.set(url, { url, result });
-    return { url, result };
+    const metadata = {
+      url,
+      result: { ogTitle: result.ogTitle, ogDescription: result.ogDescription },
+    };
+    cache.set(url, metadata);
+    return metadata;
   }),
 );
 
-void fs.writeFile(cachePath, JSON.stringify([...cache.entries()]));
+if (cache.size > cachedCount) {
+  await fs.writeFile(
+    cachePath,
+    `${JSON.stringify([...cache.entries()], undefined, 2)}\n`,
+  );
+}
 
 const locale = getLocaleFromUrl(Astro.url);
 const phrases = getPhrases(locale);
