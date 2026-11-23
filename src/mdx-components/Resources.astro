@@ -1,8 +1,7 @@
 ---
-import ogs from "open-graph-scraper";
 import { getPhrases } from "../phrases";
-import fs from "node:fs/promises";
 import { getLocaleFromUrl } from "../utils/locale";
+import { getOpenGraphMetadata } from "../utils/open-graph";
 
 /** Type to override the default metadata for the page. */
 type UrlMetadata = {
@@ -26,17 +25,6 @@ if (urls.length === 0) {
   throw new Error('The "urls" prop must contain at least one URL.');
 }
 
-const cachePath = ".og-cache.json";
-const getCacheFromFile = async (): Promise<Map<string, UrlMetadata>> => {
-  try {
-    const data = await fs.readFile(cachePath, "utf-8");
-    return new Map(JSON.parse(data));
-  } catch {
-    return new Map();
-  }
-};
-const cache = await getCacheFromFile();
-
 const results = await Promise.all(
   urls.map(async (url) => {
     if (typeof url === "object") {
@@ -47,28 +35,9 @@ const results = await Promise.all(
       return { url, result: { ogTitle: url } };
     }
 
-    const cached = cache.get(url);
-    if (cached) {
-      return cached;
-    }
-
-    const { result, error } = await ogs({ url });
-    if (error) {
-      throw new Error(`Failed to fetch Open Graph data for ${url}: ${error}`);
-    }
-
-    if (!result.ogTitle) {
-      throw new Error(
-        `The Open Graph data for ${url} does not contain a title.`,
-      );
-    }
-
-    cache.set(url, { url, result });
-    return { url, result };
+    return getOpenGraphMetadata(url);
   }),
 );
-
-void fs.writeFile(cachePath, JSON.stringify([...cache.entries()]));
 
 const locale = getLocaleFromUrl(Astro.url);
 const phrases = getPhrases(locale);
