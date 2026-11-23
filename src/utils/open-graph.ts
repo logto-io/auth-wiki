@@ -12,6 +12,9 @@ const cachePath = ".og-cache.json";
 // Retries wait 2s, 4s, ..., 64s (about 2 minutes in total) to outlast a typical rate-limit window.
 const maxRetries = 6;
 const baseRetryDelayMs = 2000;
+// Wikimedia throttles generic user agents (undici's default is "undici") from shared CI IPs, and
+// asks clients to identify themselves: https://foundation.wikimedia.org/wiki/Policy:User-Agent_policy
+const userAgent = "auth-wiki-build/1.0 (https://github.com/logto-io/auth-wiki)";
 
 const readCache = async (): Promise<Map<string, OpenGraphMetadata>> => {
   try {
@@ -43,9 +46,10 @@ const scrape = async (
   attempt = 0,
 ): Promise<OgsResult["result"]> => {
   // `ogs` rejects with an error result object rather than an `Error`.
-  const { error, result } = await ogs({ url }).catch(
-    (rejection: OgsResult) => rejection,
-  );
+  const { error, result } = await ogs({
+    url,
+    fetchOptions: { headers: { "user-agent": userAgent } },
+  }).catch((rejection: OgsResult) => rejection);
   if (!error) {
     return result;
   }
